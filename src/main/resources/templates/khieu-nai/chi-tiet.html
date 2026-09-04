@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Khiếu Nại - FlexShop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .navbar-brand-custom {
+            font-weight: 700;
+            color: #ee4d2d !important;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .evidence-thumbnail {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .evidence-thumbnail:hover {
+            transform: scale(1.02);
+        }
+        .video-player {
+            width: 100%;
+            height: 220px;
+            border-radius: 8px;
+            background: #000;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand navbar-brand-custom" href="/khieu-nai/danh-sach">
+            <i class="bi bi-shield-check"></i> FlexShop CSKH
+        </a>
+        <div class="ms-auto">
+            <a href="/khieu-nai/danh-sach" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Danh sách khiếu nại
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    <!-- Thông báo -->
+    <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span th:text="${thongBaoThanhCong}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${thongBaoLoi}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Header Thông tin phiếu -->
+    <div class="card card-custom mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h3 class="fw-bold mb-0 text-dark">
+                            Phiếu Khiếu Nại: <span class="text-primary" th:text="${phieu.maCodePhieu}">KN-001</span>
+                        </h3>
+                        <span class="badge fs-6" th:classappend="${phieu.getBadgeClass()}" 
+                              th:text="${phieu.getTrangThaiDisplay()}">
+                            Mở mới
+                        </span>
+                    </div>
+                    <div class="text-muted small">
+                        <i class="bi bi-clock me-1"></i> Ngày gửi: 
+                        <span th:text="${#temporals.format(phieu.ngayTao, 'dd/MM/yyyy HH:mm:ss')}"></span>
+                        <span class="mx-2">|</span>
+                        <i class="bi bi-person me-1"></i> Người gửi: 
+                        <b th:text="${phieu.khachHang.hoVaTen}">Nguyễn Văn A</b>
+                    </div>
+                </div>
+
+                <!-- Nút thao tác -->
+                <div class="d-flex gap-2">
+                    <form th:if="${phieu.trangThai == 'MO_MOI'}" action="/khieu-nai/huy" method="post" 
+                          onsubmit="return confirm('Bạn có chắc chắn muốn hủy yêu cầu khiếu nại này?')">
+                        <input type="hidden" name="id" th:value="${phieu.maPhieu}">
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="bi bi-x-circle me-1"></i> Hủy Yêu Cầu
+                        </button>
+                    </form>
+                    <a href="/khieu-nai/tao-phieu" class="btn btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i> Khiếu nại đơn khác
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Cột trái: Chi tiết nội dung khiếu nại & Bằng chứng hình ảnh / video -->
+        <div class="col-lg-8">
+            <!-- Nội dung khiếu nại -->
+            <div class="card card-custom mb-4">
+                <div class="card-header bg-white py-3 border-0 border-bottom">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-file-earmark-text text-primary me-2"></i> Nội Dung & Yêu Cầu Khiếu Nại
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Lý do khiếu nại:</div>
+                        <div class="col-sm-8 fw-semibold text-danger" th:text="${phieu.getTenLoaiKhieuNaiDisplay()}">
+                            Hàng bị hỏng vỡ
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Giải pháp yêu cầu:</div>
+                        <div class="col-sm-8 fw-semibold" th:text="${phieu.getTenGiaiPhapDisplay()}">
+                            Trả hàng & Hoàn tiền
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Mức độ ưu tiên:</div>
+                        <div class="col-sm-8">
+                            <span class="badge bg-secondary" th:text="${phieu.mucDoUuTien}">TRUNG_BINH</span>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Số tiền đề xuất hoàn:</div>
+                        <div class="col-sm-8 fw-bold fs-5 text-danger">
+                            <span th:text="${#numbers.formatDecimal(phieu.soTienHoanTra, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 text-muted">Mô tả sự việc:</div>
+                        <div class="col-sm-8">
+                            <div class="p-3 bg-light rounded text-break" style="white-space: pre-line;" 
+                                 th:text="${phieu.noiDungMoTa}">
+                                Mô tả nội dung...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bằng chứng Ảnh / Video (Acceptance Criteria US-45) -->
+            <div class="card card-custom mb-4">
+                <div class="card-header bg-white py-3 border-0 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-camera-video text-danger me-2"></i> Bằng Chứng Hình Ảnh & Video Lỗi
+                    </h5>
+                    <span class="badge bg-light text-dark border">
+                        <span th:text="${#lists.size(danhSachBangChung)}">0</span> tệp đính kèm
+                    </span>
+                </div>
+                <div class="card-body p-4">
+                    <div th:if="${#lists.isEmpty(danhSachBangChung)}" class="text-center py-4 text-muted">
+                        <i class="bi bi-image fs-1 d-block mb-1"></i>
+                        Không có tệp bằng chứng nào được tải lên.
+                    </div>
+
+                    <div class="row g-3" th:unless="${#lists.isEmpty(danhSachBangChung)}">
+                        <div class="col-md-6" th:each="bc : ${danhSachBangChung}">
+                            <div class="card h-100 border p-2 shadow-sm">
+                                <!-- Ảnh -->
+                                <div th:if="${bc.loaiTepTin == 'HINH_ANH' || bc.loaiTepTin == null}">
+                                    <a th:href="${bc.linkTepTin}" target="_blank">
+                                        <img th:src="${bc.linkTepTin}" class="evidence-thumbnail" alt="Bằng chứng ảnh">
+                                    </a>
+                                    <div class="d-flex justify-content-between align-items-center mt-2 small text-muted">
+                                        <span><i class="bi bi-image"></i> Hình ảnh</span>
+                                        <span th:text="${#temporals.format(bc.ngayTao, 'dd/MM HH:mm')}"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Video -->
+                                <div th:if="${bc.loaiTepTin == 'VIDEO'}">
+                                    <video class="video-player" controls>
+                                        <source th:src="${bc.linkTepTin}" type="video/mp4">
+                                        Trình duyệt của bạn không hỗ trợ phát video HTML5.
+                                    </video>
+                                    <div class="d-flex justify-content-between align-items-center mt-2 small text-muted">
+                                        <span class="text-danger fw-bold"><i class="bi bi-camera-video-fill"></i> Video lỗi</span>
+                                        <span th:text="${#temporals.format(bc.ngayTao, 'dd/MM HH:mm')}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Khu vực Tiến độ Xử lý Tranh chấp (Liên kết US-46 & US-47) -->
+            <div class="card card-custom">
+                <div class="card-header bg-white py-3 border-0 border-bottom">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-person-check text-success me-2"></i> Kết Quả Xử Lý & Phán Quyết (CSKH / Admin)
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div th:if="${phieu.cskhXuLy == null && phieu.nguoiPhanQuyet == null}" class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Phiếu khiếu nại đang chờ nhân viên CSKH tiếp nhận thẩm định và đối chiếu bằng chứng với Shop và Đơn vị vận chuyển (US-46 & US-47).
+                    </div>
+
+                    <div th:if="${phieu.cskhXuLy != null}" class="mb-3">
+                        <span class="text-muted">Nhân viên CSKH thụ lý:</span> 
+                        <b class="text-primary" th:text="${phieu.cskhXuLy.hoVaTen}">CSKH Support</b>
+                    </div>
+
+                    <div th:if="${phieu.nguoiPhanQuyet != null}" class="mb-3">
+                        <span class="text-muted">Người ra phán quyết tranh chấp:</span> 
+                        <b class="text-success" th:text="${phieu.nguoiPhanQuyet.hoVaTen}">Admin Ban Quản Trị</b>
+                    </div>
+
+                    <div th:if="${phieu.ghiChuPhanQuyet != null}" class="p-3 bg-light rounded border">
+                        <span class="text-muted d-block small mb-1">Ghi chú kết luận phán quyết:</span>
+                        <div th:text="${phieu.ghiChuPhanQuyet}">Chấp thuận bồi hoàn cho khách hàng...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột phải: Thông tin đơn hàng shop liên kết (US-27, US-41) -->
+        <div class="col-lg-4">
+            <div class="card card-custom mb-4">
+                <div class="card-header bg-white py-3 border-0 border-bottom">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-shop text-primary me-2"></i> Thông Tin Gian Hàng
+                    </h5>
+                </div>
+                <div class="card-body p-3">
+                    <div class="fw-bold fs-6 text-dark" th:text="${phieu.gianHang.tenGianHang}">TechZone</div>
+                    <div class="text-muted small mt-1">
+                        <i class="bi bi-geo-alt"></i> Kho: <span th:text="${phieu.gianHang.diaChiKho}">Hà Nội</span>
+                    </div>
+                    <div class="text-muted small">
+                        <i class="bi bi-telephone"></i> Hotline: <span th:text="${phieu.gianHang.sdtKho}">024...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card card-custom">
+                <div class="card-header bg-white py-3 border-0 border-bottom">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-box-seam text-danger me-2"></i> Đơn Hàng Liên Quan
+                    </h5>
+                </div>
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Mã đơn shop:</span>
+                        <code class="fw-bold" th:text="${donHangShop.maCodeDonShop}">SHOP-001</code>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Mã vận đơn:</span>
+                        <span class="fw-semibold" th:text="${donHangShop.maVanDon != null ? donHangShop.maVanDon : 'N/A'}">VNP123</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted small">Tổng tiền đơn:</span>
+                        <b class="text-danger" th:text="${#numbers.formatDecimal(donHangShop.tongTienShopNhan, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</b>
+                    </div>
+
+                    <hr>
+                    <div class="fw-semibold small mb-2 text-secondary">Danh sách sản phẩm trong đơn:</div>
+                    <div th:each="sp : ${danhSachSanPham}" class="border rounded p-2 mb-2 bg-light">
+                        <div class="fw-semibold small text-dark" th:text="${sp.tenSanPham}">Tên SP</div>
+                        <div class="text-muted small" th:text="${sp.tenBienThe}">Phân loại</div>
+                        <div class="d-flex justify-content-between mt-1 small">
+                            <span>SL: <b th:text="${sp.soLuong}">1</b></span>
+                            <span class="text-danger fw-bold" th:text="${#numbers.formatDecimal(sp.tongTien, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

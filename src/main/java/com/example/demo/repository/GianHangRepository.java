@@ -1,0 +1,13 @@
+package com.example.demo.repository;
+
+import com.example.demo.entity.GianHang;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface GianHangRepository extends JpaRepository<GianHang, Long> {
+    Optional<GianHang> findByTenGianHang(String tenGianHang);
+    Optional<GianHang> findByDuongDanSlug(String duongDanSlug);
+}

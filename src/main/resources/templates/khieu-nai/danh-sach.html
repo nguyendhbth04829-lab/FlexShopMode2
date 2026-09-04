@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Khiếu Nại & Đổi Trả - FlexShop CSKH</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .navbar-brand-custom {
+            font-weight: 700;
+            color: #ee4d2d !important;
+            letter-spacing: 0.5px;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .kpi-card {
+            border-radius: 12px;
+            border: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        .badge-status {
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+        .btn-primary-custom {
+            background-color: #ee4d2d;
+            border-color: #ee4d2d;
+            color: white;
+            font-weight: 600;
+        }
+        .btn-primary-custom:hover {
+            background-color: #d73211;
+            border-color: #d73211;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand navbar-brand-custom" href="/khieu-nai/danh-sach">
+            <i class="bi bi-shield-check"></i> FlexShop CSKH
+        </a>
+        <span class="navbar-text text-white-50 d-none d-md-inline">
+            Trung tâm Khiếu nại, Đổi trả & Giải quyết Tranh chấp Sàn
+        </span>
+        <div class="ms-auto">
+            <a href="/khieu-nai/tao-phieu" class="btn btn-primary-custom btn-sm">
+                <i class="bi bi-plus-circle me-1"></i> Gửi Yêu Cầu Khiếu Nại Mới
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    <!-- Thông báo Flash Alert -->
+    <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span th:text="${thongBaoThanhCong}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${thongBaoLoi}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- KHU VỰC THỐNG KÊ DASHBOARD (ĐỒNG BỘ TRỰC TIẾP TỪ DATABASE) -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card kpi-card bg-white p-3 shadow-sm border-start border-4 border-primary">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold">Tổng số phiếu</div>
+                        <h3 class="fw-bold mb-0 text-dark" th:text="${thongKe.tongSoPhieu}">0</h3>
+                    </div>
+                    <div class="fs-1 text-primary"><i class="bi bi-folder-check"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card kpi-card bg-white p-3 shadow-sm border-start border-4 border-warning">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold">Chờ tiếp nhận</div>
+                        <h3 class="fw-bold mb-0 text-warning" th:text="${thongKe.soPhieuMoMoi}">0</h3>
+                    </div>
+                    <div class="fs-1 text-warning"><i class="bi bi-hourglass-split"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card kpi-card bg-white p-3 shadow-sm border-start border-4 border-info">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold">Đang thẩm định</div>
+                        <h3 class="fw-bold mb-0 text-info" th:text="${thongKe.soPhieuDangXuLy}">0</h3>
+                    </div>
+                    <div class="fs-1 text-info"><i class="bi bi-tools"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card kpi-card bg-white p-3 shadow-sm border-start border-4 border-success">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold">Đã hoàn tiền</div>
+                        <h4 class="fw-bold mb-0 text-success">
+                            <span th:text="${#numbers.formatDecimal(thongKe.tongTienDaHoan, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                        </h4>
+                        <small class="text-muted" th:text="${thongKe.soPhieuDaHoanTien} + ' phiếu thành công'">0 phiếu</small>
+                    </div>
+                    <div class="fs-1 text-success"><i class="bi bi-cash-stack"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BỘ LỌC TÌM KIẾM NÂNG CAO ĐA TIÊU CHÍ -->
+    <div class="card card-custom mb-4">
+        <div class="card-header bg-white py-3 border-0 border-bottom d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-sliders2-vertical text-primary me-2"></i> Bộ Lọc & Tìm Kiếm Nâng Cao
+            </h6>
+            <a href="/khieu-nai/danh-sach" class="text-decoration-none small text-secondary">
+                <i class="bi bi-arrow-counterclockwise"></i> Đặt lại bộ lọc
+            </a>
+        </div>
+        <div class="card-body p-3">
+            <form action="/khieu-nai/danh-sach" method="get" class="row g-3">
+                <!-- Từ khóa -->
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold text-secondary">Từ khóa tìm kiếm</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                        <input type="text" name="tuKhoa" class="form-control form-control-sm" th:value="${tuKhoa}" 
+                               placeholder="Mã phiếu, Mã đơn shop, Tên shop...">
+                    </div>
+                </div>
+
+                <!-- Trạng thái -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold text-secondary">Trạng thái</label>
+                    <select name="trangThai" class="form-select form-select-sm">
+                        <option value="" th:selected="${trangThai == null || trangThai == ''}">Tất cả</option>
+                        <option value="MO_MOI" th:selected="${trangThai == 'MO_MOI'}">Mở mới</option>
+                        <option value="DANG_XU_LY" th:selected="${trangThai == 'DANG_XU_LY'}">Đang xử lý</option>
+                        <option value="CHO_SHOP_PHAN_HOI" th:selected="${trangThai == 'CHO_SHOP_PHAN_HOI'}">Chờ shop phản hồi</option>
+                        <option value="CHAP_NHAN_HOAN_TIEN" th:selected="${trangThai == 'CHAP_NHAN_HOAN_TIEN'}">Chấp thuận hoàn tiền</option>
+                        <option value="TU_CHOI_KHIEU_NAI" th:selected="${trangThai == 'TU_CHOI_KHIEU_NAI'}">Từ chối</option>
+                        <option value="DA_HUY" th:selected="${trangThai == 'DA_HUY'}">Đã hủy</option>
+                    </select>
+                </div>
+
+                <!-- Lý do khiếu nại -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold text-secondary">Lý do lỗi</label>
+                    <select name="loaiKhieuNai" class="form-select form-select-sm">
+                        <option value="" th:selected="${loaiKhieuNai == null || loaiKhieuNai == ''}">Tất cả lý do</option>
+                        <option value="HONG_VO" th:selected="${loaiKhieuNai == 'HONG_VO'}">Hỏng vỡ / Móp méo</option>
+                        <option value="GIAO_SAI" th:selected="${loaiKhieuNai == 'GIAO_SAI'}">Giao sai hàng</option>
+                        <option value="HANG_GIA" th:selected="${loaiKhieuNai == 'HANG_GIA'}">Hàng giả / Nhái</option>
+                        <option value="THIEU_HANG" th:selected="${loaiKhieuNai == 'THIEU_HANG'}">Thiếu sản phẩm</option>
+                        <option value="HET_HAN" th:selected="${loaiKhieuNai == 'HET_HAN'}">Hết hạn sử dụng</option>
+                        <option value="KHAC" th:selected="${loaiKhieuNai == 'KHAC'}">Lý do khác</option>
+                    </select>
+                </div>
+
+                <!-- Mức ưu tiên -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold text-secondary">Mức ưu tiên</label>
+                    <select name="mucDoUuTien" class="form-select form-select-sm">
+                        <option value="" th:selected="${mucDoUuTien == null || mucDoUuTien == ''}">Tất cả mức</option>
+                        <option value="THAP" th:selected="${mucDoUuTien == 'THAP'}">Thấp</option>
+                        <option value="TRUNG_BINH" th:selected="${mucDoUuTien == 'TRUNG_BINH'}">Trung bình</option>
+                        <option value="CAO" th:selected="${mucDoUuTien == 'CAO'}">Cao</option>
+                        <option value="KHAN_CAP" th:selected="${mucDoUuTien == 'KHAN_CAP'}">Khẩn cấp</option>
+                    </select>
+                </div>
+
+                <!-- Số dòng hiển thị -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold text-secondary">Số dòng / trang</label>
+                    <select name="size" class="form-select form-select-sm">
+                        <option value="5" th:selected="${pageSize == 5}">5 dòng</option>
+                        <option value="10" th:selected="${pageSize == 10}">10 dòng</option>
+                        <option value="20" th:selected="${pageSize == 20}">20 dòng</option>
+                    </select>
+                </div>
+
+                <!-- Từ ngày -->
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold text-secondary">Từ ngày gửi</label>
+                    <input type="date" name="tuNgay" class="form-control form-control-sm" th:value="${tuNgay}">
+                </div>
+
+                <!-- Đến ngày -->
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold text-secondary">Đến ngày gửi</label>
+                    <input type="date" name="denNgay" class="form-control form-control-sm" th:value="${denNgay}">
+                </div>
+
+                <!-- Nút bấm tìm kiếm -->
+                <div class="col-md-6 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-dark btn-sm px-4">
+                        <i class="bi bi-funnel me-1"></i> Áp Dụng Lọc
+                    </button>
+                    <a href="/khieu-nai/danh-sach" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-clockwise"></i> Làm mới
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- BẢNG DANH SÁCH PHIẾU KHIẾU NẠI -->
+    <div class="card card-custom">
+        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-card-checklist text-primary me-2"></i> Lịch Sử Yêu Cầu Khiếu Nại / Đổi Trả
+            </h5>
+            <span class="text-muted small">
+                Tìm thấy: <b class="text-danger" th:text="${totalElements}">0</b> phiếu
+            </span>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Mã Phiếu</th>
+                        <th>Đơn Hàng Shop</th>
+                        <th>Gian Hàng</th>
+                        <th>Lý Do Khiếu Nại</th>
+                        <th>Giải Pháp Yêu Cầu</th>
+                        <th>Tiền Hoàn Đề Xuất</th>
+                        <th>Ngày Tạo</th>
+                        <th>Trạng Thái</th>
+                        <th class="text-center pe-4">Thao Tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(danhSachPhieu)}">
+                        <td colspan="9" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                            Không có yêu cầu khiếu nại nào thỏa mãn điều kiện lọc.
+                        </td>
+                    </tr>
+                    <tr th:each="phieu : ${danhSachPhieu}">
+                        <td class="ps-4">
+                            <span class="fw-bold text-primary" th:text="${phieu.maCodePhieu}">KN-001</span>
+                            <div th:if="${phieu.mucDoUuTien == 'CAO' || phieu.mucDoUuTien == 'KHAN_CAP'}" 
+                                 class="badge bg-danger-subtle text-danger small d-inline-block mt-1">
+                                <i class="bi bi-lightning-fill"></i> <span th:text="${phieu.mucDoUuTien}">CAO</span>
+                            </div>
+                        </td>
+                        <td>
+                            <code class="fw-bold text-dark" th:text="${phieu.donHangShop.maCodeDonShop}">SHOP-001</code>
+                        </td>
+                        <td>
+                            <div class="fw-semibold" th:text="${phieu.gianHang.tenGianHang}">TechZone</div>
+                        </td>
+                        <td>
+                            <span th:text="${phieu.getTenLoaiKhieuNaiDisplay()}">Hỏng vỡ</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border" th:text="${phieu.getTenGiaiPhapDisplay()}">Hoàn tiền</span>
+                        </td>
+                        <td class="fw-bold text-danger">
+                            <span th:text="${#numbers.formatDecimal(phieu.soTienHoanTra, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                        </td>
+                        <td class="text-muted small" th:text="${#temporals.format(phieu.ngayTao, 'dd/MM/yyyy HH:mm')}">
+                            01/01/2026
+                        </td>
+                        <td>
+                            <span class="badge badge-status" th:classappend="${phieu.getBadgeClass()}" 
+                                  th:text="${phieu.getTrangThaiDisplay()}">
+                                Mở mới
+                            </span>
+                        </td>
+                        <td class="text-center pe-4">
+                            <a th:href="@{/khieu-nai/chi-tiet(id=${phieu.maPhieu})}" class="btn btn-sm btn-outline-primary shadow-sm">
+                                <i class="bi bi-eye me-1"></i> Chi tiết
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PHÂN TRANG LINH HOẠT -->
+        <div class="card-footer bg-white py-3 border-0" th:if="${totalPages > 1}">
+            <nav>
+                <ul class="pagination justify-content-center mb-0">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/khieu-nai/danh-sach(page=${currentPage - 1}, size=${pageSize}, tuKhoa=${tuKhoa}, trangThai=${trangThai}, loaiKhieuNai=${loaiKhieuNai}, mucDoUuTien=${mucDoUuTien}, tuNgay=${tuNgay}, denNgay=${denNgay})}">
+                            <i class="bi bi-chevron-left"></i> Trước
+                        </a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
+                        th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:href="@{/khieu-nai/danh-sach(page=${i}, size=${pageSize}, tuKhoa=${tuKhoa}, trangThai=${trangThai}, loaiKhieuNai=${loaiKhieuNai}, mucDoUuTien=${mucDoUuTien}, tuNgay=${tuNgay}, denNgay=${denNgay})}" 
+                           th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                        <a class="page-link" th:href="@{/khieu-nai/danh-sach(page=${currentPage + 1}, size=${pageSize}, tuKhoa=${tuKhoa}, trangThai=${trangThai}, loaiKhieuNai=${loaiKhieuNai}, mucDoUuTien=${mucDoUuTien}, tuNgay=${tuNgay}, denNgay=${denNgay})}">
+                            Sau <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

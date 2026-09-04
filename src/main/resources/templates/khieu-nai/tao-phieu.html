@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gửi Yêu Cầu Khiếu Nại / Đổi Trả - FlexShop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .navbar-brand-custom {
+            font-weight: 700;
+            color: #ee4d2d !important;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+        .btn-primary-custom {
+            background-color: #ee4d2d;
+            border-color: #ee4d2d;
+            color: white;
+            font-weight: 600;
+        }
+        .btn-primary-custom:hover {
+            background-color: #d73211;
+            border-color: #d73211;
+            color: white;
+        }
+        .upload-dropzone {
+            border: 2px dashed #ced4da;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            background-color: #fafbfc;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .upload-dropzone:hover {
+            border-color: #ee4d2d;
+            background-color: #fff9f8;
+        }
+        .preview-item {
+            position: relative;
+            display: inline-block;
+            margin: 8px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+            background: #000;
+        }
+        .preview-item img, .preview-item video {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand navbar-brand-custom" href="/khieu-nai/danh-sach">
+            <i class="bi bi-shield-check"></i> FlexShop CSKH
+        </a>
+        <div class="ms-auto">
+            <a href="/khieu-nai/danh-sach" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5" style="max-width: 900px;">
+
+    <!-- Thông báo lỗi chung nghiệp vụ nếu có -->
+    <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${thongBaoLoi}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="card card-custom">
+        <div class="card-header bg-white py-3 border-0 border-bottom">
+            <h4 class="mb-1 fw-bold text-dark">
+                <i class="bi bi-patch-question text-danger me-2"></i> Gửi Yêu Cầu Khiếu Nại / Đổi Trả / Hoàn Tiền (US-45)
+            </h4>
+            <p class="text-muted small mb-0">
+                Chính sách Shopee Guarantee bảo vệ quyền lợi người mua. Vui lòng cung cấp thông tin và tải lên ảnh/video bằng chứng chi tiết.
+            </p>
+        </div>
+
+        <div class="card-body p-4">
+            <form th:action="@{/khieu-nai/tao-phieu}" th:object="${formKhieuNai}" method="post" enctype="multipart/form-data" id="formKhieuNai">
+
+                <!-- 1. Chọn đơn hàng cần khiếu nại -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-secondary">
+                        <i class="bi bi-receipt-cutoff me-1"></i> 1. Chọn Đơn Hàng Shop Cần Khiếu Nại <span class="text-danger">*</span>
+                    </label>
+                    <select th:field="*{maDonHangShop}" id="selectDonHang" class="form-select form-select-lg" 
+                            th:classappend="${#fields.hasErrors('maDonHangShop')} ? 'is-invalid' : ''"
+                            onchange="capNhatThongTinDon()">
+                        <option value="">-- Vui lòng chọn đơn hàng cần khiếu nại --</option>
+                        <option th:each="don : ${listDonHang}" 
+                                th:value="${don.maDonHangShop}"
+                                th:data-shop="${don.gianHang.tenGianHang}"
+                                th:data-tien="${don.tongTienShopNhan}"
+                                th:data-mavandon="${don.maVanDon != null ? don.maVanDon : 'Chưa có'}"
+                                th:data-trangthai="${don.trangThai}"
+                                th:text="${don.maCodeDonShop + ' - Gian hàng: ' + don.gianHang.tenGianHang + ' (' + #numbers.formatDecimal(don.tongTienShopNhan, 0, 'COMMA', 0, 'POINT') + ' đ) - Trạng thái: ' + don.trangThai}">
+                        </option>
+                    </select>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('maDonHangShop')}" th:errors="*{maDonHangShop}"></div>
+
+                    <div id="donHangInfoBox" class="mt-2 p-3 bg-light rounded border d-none">
+                        <div class="row small">
+                            <div class="col-md-4">Gian hàng: <b id="infoShopName" class="text-primary">-</b></div>
+                            <div class="col-md-4">Mã vận đơn: <b id="infoMaVanDon">-</b></div>
+                            <div class="col-md-4">Tổng tiền đơn: <b id="infoTongTien" class="text-danger">-</b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- 2. Lý do khiếu nại -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-secondary">
+                            <i class="bi bi-exclamation-octagon me-1"></i> 2. Lý Do Khiếu Nại <span class="text-danger">*</span>
+                        </label>
+                        <select th:field="*{loaiKhieuNai}" class="form-select"
+                                th:classappend="${#fields.hasErrors('loaiKhieuNai')} ? 'is-invalid' : ''">
+                            <option value="">-- Chọn lý do sự cố --</option>
+                            <option value="HONG_VO">Hàng bị hỏng vỡ, móp méo khi vận chuyển</option>
+                            <option value="GIAO_SAI">Giao sai hàng, sai màu sắc / kích thước</option>
+                            <option value="HANG_GIA">Nghi ngờ hàng giả, hàng nhái, kém chất lượng</option>
+                            <option value="THIEU_HANG">Giao thiếu sản phẩm hoặc phụ kiện</option>
+                            <option value="HET_HAN">Sản phẩm bị quá hạn sử dụng</option>
+                            <option value="KHAC">Lý do khác</option>
+                        </select>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('loaiKhieuNai')}" th:errors="*{loaiKhieuNai}"></div>
+                    </div>
+
+                    <!-- 3. Giải pháp yêu cầu -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-secondary">
+                            <i class="bi bi-arrow-repeat me-1"></i> 3. Yêu Cầu Giải Quyết <span class="text-danger">*</span>
+                        </label>
+                        <select th:field="*{giaiPhapYeuCau}" class="form-select"
+                                th:classappend="${#fields.hasErrors('giaiPhapYeuCau')} ? 'is-invalid' : ''">
+                            <option value="">-- Chọn giải pháp mong muốn --</option>
+                            <option value="HOAN_TIEN_TRA_HANG">Trả hàng & Hoàn tiền (Thu hồi hàng)</option>
+                            <option value="HOAN_TIEN_KHONG_TRA">Hoàn tiền (Không cần trả hàng)</option>
+                            <option value="DOI_HANG">Đổi sản phẩm mới (Hàng lỗi gửi lại Shop)</option>
+                        </select>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('giaiPhapYeuCau')}" th:errors="*{giaiPhapYeuCau}"></div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- 4. Số tiền yêu cầu hoàn -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-secondary">
+                            <i class="bi bi-cash-coin me-1"></i> 4. Số Tiền Yêu Cầu Hoàn (VNĐ)
+                        </label>
+                        <input type="number" th:field="*{soTienHoanTra}" id="inputSoTienHoan" class="form-control" 
+                               th:classappend="${#fields.hasErrors('soTienHoanTra')} ? 'is-invalid' : ''"
+                               placeholder="Để trống sẽ mặc định 100% giá trị đơn hàng" min="1000" step="1000">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('soTienHoanTra')}" th:errors="*{soTienHoanTra}"></div>
+                        <small class="text-muted">Mặc định hoàn toàn bộ số tiền thanh toán của đơn shop.</small>
+                    </div>
+
+                    <!-- 5. Mức độ ưu tiên -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-secondary">
+                            <i class="bi bi-flag me-1"></i> 5. Mức Độ Ưu Tiên Xử Lý
+                        </label>
+                        <select th:field="*{mucDoUuTien}" class="form-select">
+                            <option value="TRUNG_BINH">Trung bình (Xử lý thông thường trong 24h)</option>
+                            <option value="CAO">Cao (Xử lý gấp)</option>
+                            <option value="KHAN_CAP">Khẩn cấp (Hàng giá trị cao / Hư hại nặng)</option>
+                            <option value="THAP">Thấp</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 6. Mô tả chi tiết -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-secondary">
+                        <i class="bi bi-card-text me-1"></i> 6. Mô Tả Chi Tiết Sự Cố <span class="text-danger">*</span>
+                    </label>
+                    <textarea th:field="*{noiDungMoTa}" class="form-control" rows="4"
+                              th:classappend="${#fields.hasErrors('noiDungMoTa')} ? 'is-invalid' : ''"
+                              placeholder="Mô tả cụ thể tình trạng hàng nhận được, tình trạng bao bì bọc hàng, sự khác biệt so với mô tả, hoặc thời điểm phát hiện lỗi... (Tối thiểu 10 ký tự)"></textarea>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('noiDungMoTa')}" th:errors="*{noiDungMoTa}"></div>
+                </div>
+
+                <!-- 7. Tải lên Bằng chứng Ảnh / Video (Acceptance Criteria US-45) -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-secondary">
+                        <i class="bi bi-camera-video me-1"></i> 7. Đính Kèm Ảnh / Video Bằng Chứng Lỗi
+                    </label>
+                    
+                    <div class="upload-dropzone" onclick="document.getElementById('inputFiles').click()">
+                        <i class="bi bi-cloud-arrow-up fs-1 text-danger d-block mb-2"></i>
+                        <span class="fw-bold text-dark">Bấm vào đây để chọn tệp tin từ máy tính</span>
+                        <p class="text-muted small mb-0 mt-1">
+                            Hỗ trợ tải lên tối đa 5 tệp: Ảnh lỗi (JPG, PNG, WEBP) hoặc Video mở hộp / lỗi (MP4, MOV, WEBM). Tối đa 50MB/tệp.
+                        </p>
+                    </div>
+
+                    <input type="file" name="filesBangChung" id="inputFiles" class="d-none" multiple 
+                           accept="image/*,video/*" onchange="hienThiPreview(this)">
+
+                    <!-- Preview container -->
+                    <div id="previewContainer" class="mt-3 d-flex flex-wrap"></div>
+                </div>
+
+                <!-- Nút Submit -->
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                    <a href="/khieu-nai/danh-sach" class="btn btn-light px-4">Hủy bỏ</a>
+                    <button type="submit" class="btn btn-primary-custom px-5 py-2">
+                        <i class="bi bi-send-fill me-1"></i> Gửi Yêu Cầu Khiếu Nại
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function capNhatThongTinDon() {
+        const select = document.getElementById('selectDonHang');
+        const infoBox = document.getElementById('donHangInfoBox');
+        const selectedOption = select.options[select.selectedIndex];
+
+        if (selectedOption && selectedOption.value) {
+            const shop = selectedOption.getAttribute('data-shop');
+            const tien = selectedOption.getAttribute('data-tien');
+            const maVanDon = selectedOption.getAttribute('data-mavandon');
+
+            document.getElementById('infoShopName').innerText = shop;
+            document.getElementById('infoMaVanDon').innerText = maVanDon;
+            document.getElementById('infoTongTien').innerText = Number(tien).toLocaleString('vi-VN') + ' đ';
+
+            const inputTien = document.getElementById('inputSoTienHoan');
+            if (!inputTien.value || Number(inputTien.value) === 0) {
+                inputTien.value = tien;
+            }
+
+            infoBox.classList.remove('d-none');
+        } else {
+            infoBox.classList.add('d-none');
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        capNhatThongTinDon();
+    });
+
+    function hienThiPreview(input) {
+        const container = document.getElementById('previewContainer');
+        container.innerHTML = '';
+
+        if (input.files && input.files.length > 0) {
+            if (input.files.length > 5) {
+                alert('Bạn chỉ được chọn tối đa 5 tệp tin!');
+                input.value = '';
+                return;
+            }
+
+            Array.from(input.files).forEach(file => {
+                if (file.size > 50 * 1024 * 1024) {
+                    alert('Tệp ' + file.name + ' vượt quá 50MB!');
+                    return;
+                }
+
+                const item = document.createElement('div');
+                item.className = 'preview-item shadow-sm';
+
+                const url = URL.createObjectURL(file);
+
+                if (file.type.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.title = file.name;
+                    item.appendChild(img);
+                } else if (file.type.startsWith('video/')) {
+                    const video = document.createElement('video');
+                    video.src = url;
+                    video.autoplay = false;
+                    video.controls = true;
+                    video.title = file.name;
+                    item.appendChild(video);
+                }
+
+                container.appendChild(item);
+            });
+        }
+    }
+</script>
+</body>
+</html>
