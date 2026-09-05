@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface GianHangRepository extends JpaRepository<GianHang, Long> {
     Optional<GianHang> findByTenGianHang(String tenGianHang);
     Optional<GianHang> findByDuongDanSlug(String duongDanSlug);
+    Optional<GianHang> findByChuSoHuu_MaNguoiDung(Long maNguoiDung);
 }
