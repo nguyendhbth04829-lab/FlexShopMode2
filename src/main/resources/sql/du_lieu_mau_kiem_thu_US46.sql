@@ -37,11 +37,25 @@ BEGIN
 END
 SELECT @maTaiXe = ma_tai_xe FROM tai_xe_giao_hang WHERE ma_nguoi_dung = @maShipperUser;
 
--- 3. NHIỆM VỤ GIAO HÀNG & ẢNH BẰNG CHỨNG POD (nhiem_vu_giao_hang)
--- Đơn hàng 1: SHOP-TECH-20260901-88
+-- 3. CHI TIẾT SẢN PHẨM SHOP ĐÓNG GÓI (chi_tiet_don_hang)
 DECLARE @maDonTech BIGINT;
 SELECT @maDonTech = ma_don_hang_shop FROM don_hang_shop WHERE ma_code_don_shop = N'SHOP-TECH-20260901-88';
+IF @maDonTech IS NOT NULL AND NOT EXISTS (SELECT 1 FROM chi_tiet_don_hang WHERE ma_don_hang_shop = @maDonTech)
+BEGIN
+    INSERT INTO chi_tiet_don_hang (ma_don_hang_shop, ma_bien_the, ten_san_pham, ten_bien_the, ma_sku, don_gia, so_luong, tong_tien)
+    VALUES (@maDonTech, 1, N'Tai nghe Bluetooth Sony WH-1000XM5 Chống Ồn Cao Cấp', N'Màu Đen Nhám - Bluetooth 5.3', N'SKU-SONY-WH5-BLK', 1250000.00, 1, 1250000.00);
+END
 
+DECLARE @maDonFashion62 BIGINT;
+SELECT @maDonFashion62 = ma_don_hang_shop FROM don_hang_shop WHERE ma_code_don_shop = N'SHOP-FASHION-READY-US45';
+IF @maDonFashion62 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM chi_tiet_don_hang WHERE ma_don_hang_shop = @maDonFashion62)
+BEGIN
+    INSERT INTO chi_tiet_don_hang (ma_don_hang_shop, ma_bien_the, ten_san_pham, ten_bien_the, ma_sku, don_gia, so_luong, tong_tien)
+    VALUES (@maDonFashion62, 2, N'Áo Polo Nam Thể Thao Co Giãn Thoáng Khí Cao Cấp', N'Màu Trắng Phối Sọc - Size L', N'SKU-POLO-WHT-L', 450000.00, 1, 450000.00);
+END
+
+-- 4. NHIỆM VỤ GIAO HÀNG & ẢNH BẰNG CHỨNG POD (nhiem_vu_giao_hang)
+-- Đơn hàng 1: SHOP-TECH-20260901-88
 IF @maDonTech IS NOT NULL AND NOT EXISTS (SELECT 1 FROM nhiem_vu_giao_hang WHERE ma_don_hang_shop = @maDonTech)
 BEGIN
     INSERT INTO nhiem_vu_giao_hang (
@@ -53,6 +67,21 @@ BEGIN
         N'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800',
         21.028511, 105.854444, N'8899', 1,
         DATEADD(HOUR, -6, GETDATE()), DATEADD(HOUR, -2, GETDATE()), DATEADD(DAY, -1, GETDATE())
+    );
+END
+
+-- Đơn hàng Order 62 (SHOP-FASHION-READY-US45)
+IF @maDonFashion62 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM nhiem_vu_giao_hang WHERE ma_don_hang_shop = @maDonFashion62)
+BEGIN
+    INSERT INTO nhiem_vu_giao_hang (
+        ma_don_hang_shop, ma_tai_xe, loai_nhiem_vu, trang_thai, tien_cod_can_thu, da_thu_cod,
+        link_anh_bang_chung_pod, vi_do_giao_hang, kinh_do_giao_hang, ma_otp_xac_nhan, so_lan_giao,
+        thoi_gian_lay_hang, thoi_gian_giao_thanh_cong, ngay_tao
+    ) VALUES (
+        @maDonFashion62, @maTaiXe, N'GIAO_HANG', N'THANH_CONG', 0, 1,
+        N'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800',
+        21.028511, 105.854444, N'6688', 1,
+        DATEADD(HOUR, -5, GETDATE()), DATEADD(HOUR, -1, GETDATE()), DATEADD(DAY, -1, GETDATE())
     );
 END
 

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Hỏi & Đáp - ' + ${sanPham.tenSanPham} + ' - FlexShop'">Hỏi & Đáp Sản Phẩm - FlexShop</title>
+    <!-- Google Fonts: Be Vietnam Pro (Chuẩn phông chữ Tiếng Việt không lỗi) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f8f9fa;
+            color: #2b2f38;
+            -webkit-font-smoothing: antialiased;
+        }
+        .navbar-brand-custom {
+            font-weight: 700;
+            color: #ee4d2d !important;
+            letter-spacing: 0.5px;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .filter-btn {
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-size: 0.9rem;
+            border: 1px solid #dee2e6;
+            background-color: white;
+            color: #495057;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover {
+            border-color: #ee4d2d;
+            color: #ee4d2d;
+        }
+        .filter-btn.active {
+            border-color: #ee4d2d;
+            background-color: #fff5f2;
+            color: #ee4d2d;
+            font-weight: 600;
+        }
+        .q-badge {
+            width: 28px;
+            height: 28px;
+            background-color: #ee4d2d;
+            color: white;
+            font-weight: 700;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        .a-badge {
+            width: 28px;
+            height: 28px;
+            background-color: #198754;
+            color: white;
+            font-weight: 700;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        .answer-box-seller {
+            background-color: #fffaf7;
+            border-left: 3px solid #ee4d2d;
+            border-radius: 8px;
+            padding: 14px 18px;
+        }
+        .answer-box-user {
+            background-color: #f8f9fa;
+            border-left: 3px solid #6c757d;
+            border-radius: 8px;
+            padding: 14px 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-white shadow-sm sticky-top py-2">
+        <div class="container">
+            <a class="navbar-brand navbar-brand-custom d-flex align-items-center fs-4" th:href="@{'/san-pham/' + ${sanPham.maSanPham} + '/hoi-dap'}">
+                <i class="bi bi-question-diamond-fill text-danger me-2"></i>FlexShop <span class="badge bg-danger ms-2 fs-6 fw-normal">Hỏi & Đáp Cộng Đồng</span>
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <a th:href="@{/khach-hang/yeu-thich}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-heart me-1"></i> Wishlist
+                </a>
+                <a th:href="@{/khach-hang/gian-hang-theo-doi}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-shop me-1"></i> Shop Theo Dõi
+                </a>
+                <a th:href="@{'/san-pham/' + ${sanPham.maSanPham} + '/danh-gia'}" class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-star-fill text-warning me-1"></i> Đánh Giá Sản Phẩm
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+
+        <!-- Flash messages -->
+        <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show card-custom" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span th:text="${thongBaoThanhCong}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show card-custom" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span th:text="${thongBaoLoi}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Product Header Bar with Interactive Wishlist & Follow Shop Buttons -->
+        <div class="card card-custom p-4 mb-4 bg-white">
+            <div class="row align-items-center g-3">
+                <div class="col-auto">
+                    <img th:src="${sanPham.linkAnh}" alt="Ảnh sản phẩm" 
+                         class="rounded border" style="width: 100px; height: 100px; object-fit: cover;">
+                </div>
+                <div class="col">
+                    <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
+                        <span class="text-muted small">
+                            <i class="bi bi-shop text-danger me-1"></i> Gian hàng: 
+                            <strong class="text-dark" th:text="${sanPham.gianHang != null ? sanPham.gianHang.tenGianHang : 'FlexShop'}">Shop Name</strong>
+                        </span>
+                        
+                        <!-- Follow Shop Toggle Button -->
+                        <button type="button" class="btn btn-sm py-0 px-2 rounded-pill border" id="btnFollowShop"
+                                th:classappend="${daTheoDoiShop} ? 'btn-success text-white' : 'btn-outline-danger'"
+                                th:onclick="'toggleTheoDoiShop(' + ${sanPham.gianHang != null ? sanPham.gianHang.maGianHang : 1} + ')'">
+                            <i class="bi" th:classappend="${daTheoDoiShop} ? 'bi-check-circle-fill me-1' : 'bi-plus me-1'"></i>
+                            <span id="textFollowShop" th:text="${daTheoDoiShop} ? 'Đang theo dõi' : 'Theo dõi Shop'">Theo dõi Shop</span>
+                            (<span id="countFollowShop" th:text="${tongFollowShop}">0</span>)
+                        </button>
+                    </div>
+
+                    <h4 class="fw-bold mb-1" th:text="${sanPham.tenSanPham}">Tên Sản Phẩm</h4>
+                    
+                    <div class="d-flex align-items-center gap-3 mt-2 flex-wrap">
+                        <span class="fs-5 fw-bold text-danger" th:if="${sanPham.giaCoBan != null}" 
+                              th:text="${#numbers.formatDecimal(sanPham.giaCoBan, 0, 'COMMA', 0, 'POINT')} + ' đ'">150.000 đ</span>
+                        <span class="badge bg-light text-muted border">
+                            <i class="bi bi-tag-fill me-1"></i> <span th:text="${sanPham.danhMuc != null ? sanPham.danhMuc.tenDanhMuc : 'Sản phẩm nổi bật'}">Công nghệ</span>
+                        </span>
+                        
+                        <!-- Wishlist Toggle Button -->
+                        <button type="button" class="btn btn-sm rounded-pill px-3 ms-auto" id="btnWishlist"
+                                th:classappend="${daYeuThich} ? 'btn-danger text-white' : 'btn-outline-danger'"
+                                th:onclick="'toggleWishlist(' + ${sanPham.maSanPham} + ')'">
+                            <i class="bi" th:classappend="${daYeuThich} ? 'bi-heart-fill me-1' : 'bi-heart me-1'"></i>
+                            <span id="textWishlist" th:text="${daYeuThich} ? 'Đã yêu thích' : 'Thêm vào yêu thích'">Yêu thích</span>
+                            (<span id="countWishlist" th:text="${tongLuotThich}">0</span>)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nav Tabs between Reviews and Q&A -->
+            <div class="d-flex gap-2 mt-4 pt-3 border-top">
+                <a th:href="@{'/san-pham/' + ${sanPham.maSanPham} + '/danh-gia'}" class="btn btn-light text-muted px-4 py-2">
+                    <i class="bi bi-star-fill text-warning me-1"></i> Đánh Giá Của Khách Hàng
+                </a>
+                <a th:href="@{'/san-pham/' + ${sanPham.maSanPham} + '/hoi-dap'}" class="btn btn-danger px-4 py-2 fw-semibold">
+                    <i class="bi bi-chat-dots-fill me-1"></i> Hỏi & Đáp Cộng Đồng (Q&A)
+                </a>
+            </div>
+        </div>
+
+        <!-- Q&A KPI Metrics -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3 col-6">
+                <div class="card card-custom p-3 bg-white text-center">
+                    <div class="text-muted small">Tổng câu hỏi</div>
+                    <h3 class="fw-bold mb-0 text-dark" th:text="${thongKeHoiDap.tongSoCauHoi}">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card card-custom p-3 bg-white text-center">
+                    <div class="text-muted small">Đã có câu trả lời</div>
+                    <h3 class="fw-bold mb-0 text-success" th:text="${thongKeHoiDap.soCauHoiDaTraLoi}">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card card-custom p-3 bg-white text-center">
+                    <div class="text-muted small">Chờ Shop giải đáp</div>
+                    <h3 class="fw-bold mb-0 text-warning" th:text="${thongKeHoiDap.soCauHoiChoTraLoi}">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card card-custom p-3 bg-white text-center">
+                    <div class="text-muted small">Tỷ lệ giải đáp</div>
+                    <h3 class="fw-bold mb-0 text-danger" th:text="${thongKeHoiDap.tyLeDaTraLoi} + '%'">0%</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column: Ask a Question Form -->
+            <div class="col-12 col-lg-5">
+                <div class="card card-custom p-4 bg-white sticky-top" style="top: 80px; z-index: 10;">
+                    <h5 class="fw-bold mb-3 d-flex align-items-center text-dark">
+                        <i class="bi bi-pencil-square text-danger me-2"></i> Đặt Câu Hỏi Cho Sản Phẩm
+                    </h5>
+                    <p class="text-muted small mb-3">
+                        Bạn có thắc mắc về tính năng, bảo hành hay kích thước? Hãy gửi câu hỏi để Người bán và cộng đồng cùng giải đáp nhé!
+                    </p>
+
+                    <form th:action="@{'/san-pham/' + ${sanPham.maSanPham} + '/hoi-dap/dat-cau-hoi'}" 
+                          th:object="${datCauHoiForm}" method="post" id="formDatCauHoi">
+                        <input type="hidden" th:field="*{maSanPham}">
+                        
+                        <div class="mb-3">
+                            <label for="cauHoi" class="form-label fw-semibold small">Nội dung câu hỏi <span class="text-danger">*</span></label>
+                            <textarea id="cauHoi" th:field="*{cauHoi}" class="form-control" rows="4" 
+                                      placeholder="Ví dụ: Tai nghe này có dùng được cho iPhone không shop? Pin nghe liên tục được bao nhiêu tiếng ạ?..."
+                                      minlength="10" maxlength="1000" required
+                                      oninput="updateCharCount(this)"></textarea>
+                            <div class="d-flex justify-content-between small text-muted mt-1">
+                                <span>Tối thiểu 10 ký tự</span>
+                                <span id="charCount">0/1.000 ký tự</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-light rounded small text-secondary mb-3">
+                            <div class="fw-bold mb-1 text-dark"><i class="bi bi-shield-check text-success me-1"></i> Tiêu chuẩn cộng đồng FlexShop:</div>
+                            <ul class="mb-0 ps-3">
+                                <li>Đặt câu hỏi lịch sự, tôn trọng người bán và cộng đồng.</li>
+                                <li>Không cung cấp thông tin số điện thoại cá nhân hoặc địa chỉ nhạy cảm.</li>
+                                <li>Nghiêm cấm ngôn từ thô tục, quảng cáo ngoài sàn.</li>
+                            </ul>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger w-100 py-2 fw-semibold">
+                            <i class="bi bi-send-fill me-1"></i> Gửi Câu Hỏi Ngay
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Column: Questions & Answers List -->
+            <div class="col-12 col-lg-7">
+                <!-- Filter Toolbar -->
+                <div class="card card-custom p-3 mb-4 bg-white">
+                    <form th:action="@{'/san-pham/' + ${sanPham.maSanPham} + '/hoi-dap'}" method="get" class="row g-2 align-items-center">
+                        <div class="col-md-7">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" name="tuKhoa" th:value="${tuKhoa}" class="form-control border-start-0" 
+                                       placeholder="Tìm câu hỏi hoặc câu trả lời...">
+                            </div>
+                        </div>
+                        <div class="col-md-5 d-flex gap-2">
+                            <input type="hidden" name="trangThai" th:value="${trangThaiHienTai}">
+                            <button type="submit" class="btn btn-danger flex-grow-1">
+                                <i class="bi bi-search me-1"></i> Tìm
+                            </button>
+                            <a th:href="@{'/san-pham/' + ${sanPham.maSanPham} + '/hoi-dap'}" class="btn btn-outline-secondary" title="Đặt lại">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                            </a>
+                        </div>
+                    </form>
+
+                    <!-- Filter pills -->
+                    <div class="d-flex flex-wrap gap-2 mt-3 pt-2 border-top">
+                        <a th:href="@{'/san-pham/' + ${sanPham.maSanPham} + '/hoi-dap'(trangThai='TAT_CA', tuKhoa=${tuKhoa})}" 
+                           class="filter-btn" th:classappend="${trangThaiHienTai == 'TAT_CA' or trangThaiHienTai == null} ? 'active'">
+                            Tất cả (<span th:text="${thongKeHoiDap.tongSoCauHoi}">0</span>)
+                        </a>
+                        <a th:href="@{'/san-pham/' + ${sanPham.maSanPham} + '/hoi-dap'(trangThai='DA_TRA_LOI', tuKhoa=${tuKhoa})}" 
+                           class="filter-btn" th:classappend="${trangThaiHienTai == 'DA_TRA_LOI'} ? 'active'">
+                            Đã trả lời (<span th:text="${thongKeHoiDap.soCauHoiDaTraLoi}">0</span>)
+                        </a>
+                        <a th:href="@{'/san-pham/' + ${sanPham.maSanPham} + '/hoi-dap'(trangThai='CHUA_TRA_LOI', tuKhoa=${tuKhoa})}" 
+                           class="filter-btn" th:classappend="${trangThaiHienTai == 'CHUA_TRA_LOI'} ? 'active'">
+                            Chưa trả lời (<span th:text="${thongKeHoiDap.soCauHoiChoTraLoi}">0</span>)
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div th:if="${#lists.isEmpty(danhSachHoiDap)}" class="card card-custom p-5 text-center bg-white my-3">
+                    <div class="display-3 text-muted mb-3"><i class="bi bi-chat-square-dots"></i></div>
+                    <h5 class="fw-bold">Chưa có câu hỏi nào cho sản phẩm này</h5>
+                    <p class="text-muted">Hãy là người đầu tiên đặt câu hỏi về sản phẩm ở khung bên cạnh nhé!</p>
+                </div>
+
+                <!-- Questions List -->
+                <div th:each="hd : ${danhSachHoiDap}" class="card card-custom p-4 mb-3 bg-white">
+                    <!-- Question Block -->
+                    <div class="d-flex gap-3 mb-3">
+                        <div class="q-badge">H</div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <span class="fw-bold text-dark" th:text="${hd.tenNguoiHoiDisplay}">Khách hàng</span>
+                                <span class="text-muted small" th:text="${#temporals.format(hd.ngayHoi, 'dd/MM/yyyy HH:mm')}">Thời gian</span>
+                            </div>
+                            <p class="mb-0 text-dark fw-medium" th:text="${hd.cauHoi}">Nội dung câu hỏi của khách hàng...</p>
+                        </div>
+                    </div>
+
+                    <!-- Answer Block (If answered) -->
+                    <div th:if="${hd.daTraLoi}" class="ms-4 mt-2" 
+                         th:classappend="${hd.nguoiBanTraLoi} ? 'answer-box-seller' : 'answer-box-user'">
+                        <div class="d-flex gap-3">
+                            <div class="a-badge">Đ</div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <strong th:if="${hd.nguoiBanTraLoi}" class="text-danger">
+                                            <i class="bi bi-shop me-1"></i> Phản hồi từ Người Bán
+                                        </strong>
+                                        <strong th:unless="${hd.nguoiBanTraLoi}" class="text-secondary" th:text="${hd.nguoiTraLoi != null ? hd.nguoiTraLoi.hoVaTen : 'Thành viên FlexShop'}">Người giải đáp</strong>
+                                        
+                                        <span th:if="${hd.nguoiBanTraLoi}" class="badge bg-danger-subtle text-danger small">
+                                            Chủ Shop
+                                        </span>
+                                    </div>
+                                    <span class="text-muted small" th:text="${#temporals.format(hd.ngayTraLoi, 'dd/MM/yyyy HH:mm')}">Thời gian trả lời</span>
+                                </div>
+                                <p class="mb-0 text-secondary" th:text="${hd.cauTraLoi}">Nội dung câu trả lời giải đáp thắc mắc...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Unanswered Notice & Quick Reply Form Toggle -->
+                    <div th:unless="${hd.daTraLoi}" class="ms-4 mt-2 p-3 bg-light rounded">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span class="text-muted small">
+                                <i class="bi bi-clock-history me-1 text-warning"></i> Câu hỏi đang chờ Shop hoặc cộng đồng giải đáp.
+                            </span>
+                            <button type="button" class="btn btn-outline-primary btn-sm py-1" 
+                                    th:onclick="'toggleReplyForm(' + ${hd.maHoiDap} + ')'">
+                                <i class="bi bi-reply me-1"></i> Trả lời
+                            </button>
+                        </div>
+
+                        <!-- Inline Reply Form -->
+                        <div th:id="'replyFormBox-' + ${hd.maHoiDap}" class="mt-3 pt-3 border-top" style="display: none;">
+                            <form th:action="@{/san-pham/hoi-dap/tra-loi}" method="post">
+                                <input type="hidden" name="maHoiDap" th:value="${hd.maHoiDap}">
+                                <input type="hidden" name="maSanPham" th:value="${sanPham.maSanPham}">
+                                <div class="mb-2">
+                                    <textarea name="cauTraLoi" class="form-control form-control-sm" rows="2" 
+                                              placeholder="Nhập câu trả lời giải đáp câu hỏi này (tối thiểu 5 ký tự)..." minlength="5" maxlength="1000" required></textarea>
+                                </div>
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button type="button" class="btn btn-light btn-sm" th:onclick="'toggleReplyForm(' + ${hd.maHoiDap} + ')'">Hủy</button>
+                                    <button type="submit" class="btn btn-danger btn-sm">Gửi Trả Lời</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div th:if="${totalPages > 1}" class="d-flex justify-content-center my-4">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                <a class="page-link" th:href="@{'/san-pham/' + ${sanPham.maSanPham} + '/hoi-dap'(page=${currentPage - 1}, trangThai=${trangThaiHienTai}, tuKhoa=${tuKhoa})}">Trước</a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
+                                th:classappend="${currentPage == i} ? 'active'">
+                                <a class="page-link" th:href="@{'/san-pham/' + ${sanPham.maSanPham} + '/hoi-dap'(page=${i}, trangThai=${trangThaiHienTai}, tuKhoa=${tuKhoa})}" th:text="${i + 1}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                <a class="page-link" th:href="@{'/san-pham/' + ${sanPham.maSanPham} + '/hoi-dap'(page=${currentPage + 1}, trangThai=${trangThaiHienTai}, tuKhoa=${tuKhoa})}">Sau</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- AJAX Script for Wishlist, Follow Shop, and Char counter -->
+    <script>
+        function updateCharCount(textarea) {
+            const count = textarea.value.length;
+            document.getElementById('charCount').innerText = count + '/1.000 ký tự';
+        }
+
+        function toggleReplyForm(id) {
+            const box = document.getElementById('replyFormBox-' + id);
+            if (box) {
+                box.style.display = (box.style.display === 'none' || box.style.display === '') ? 'block' : 'none';
+            }
+        }
+
+        function toggleWishlist(maSanPham) {
+            const formData = new FormData();
+            formData.append('maSanPham', maSanPham);
+
+            fetch('/khach-hang/yeu-thich/toggle', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const btn = document.getElementById('btnWishlist');
+                    const text = document.getElementById('textWishlist');
+                    const count = document.getElementById('countWishlist');
+
+                    if (data.daYeuThich) {
+                        btn.className = 'btn btn-sm rounded-pill px-3 ms-auto btn-danger text-white';
+                        btn.innerHTML = '<i class="bi bi-heart-fill me-1"></i> <span id="textWishlist">Đã yêu thích</span> (<span id="countWishlist">' + data.tongLuotThich + '</span>)';
+                    } else {
+                        btn.className = 'btn btn-sm rounded-pill px-3 ms-auto btn-outline-danger';
+                        btn.innerHTML = '<i class="bi bi-heart me-1"></i> <span id="textWishlist">Thêm vào yêu thích</span> (<span id="countWishlist">' + data.tongLuotThich + '</span>)';
+                    }
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra.');
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+        function toggleTheoDoiShop(maGianHang) {
+            const formData = new FormData();
+            formData.append('maGianHang', maGianHang);
+
+            fetch('/khach-hang/theo-doi/toggle', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const btn = document.getElementById('btnFollowShop');
+                    if (data.daTheoDoi) {
+                        btn.className = 'btn btn-sm py-0 px-2 rounded-pill border btn-success text-white';
+                        btn.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> <span id="textFollowShop">Đang theo dõi</span> (<span id="countFollowShop">' + data.tongLuotTheoDoi + '</span>)';
+                    } else {
+                        btn.className = 'btn btn-sm py-0 px-2 rounded-pill border btn-outline-danger';
+                        btn.innerHTML = '<i class="bi bi-plus me-1"></i> <span id="textFollowShop">Theo dõi Shop</span> (<span id="countFollowShop">' + data.tongLuotTheoDoi + '</span>)';
+                    }
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra.');
+                }
+            })
+            .catch(err => console.error(err));
+        }
+    </script>
+</body>
+</html>
