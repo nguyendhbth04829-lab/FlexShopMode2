@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Áp Dụng Voucher 3 Tầng & Thanh Toán - FlexShop</title>
+    <!-- Google Fonts: Be Vietnam Pro (Chuẩn phông chữ Tiếng Việt không lỗi) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f6f7fb;
+            color: #2b2f38;
+            -webkit-font-smoothing: antialiased;
+        }
+        .navbar-brand-custom {
+            font-weight: 700;
+            color: #ee4d2d !important;
+            letter-spacing: 0.5px;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            background: #ffffff;
+        }
+        .tier-badge {
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 6px;
+            padding: 4px 8px;
+        }
+        .tier-shop {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+        .tier-san {
+            background-color: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fde68a;
+        }
+        .tier-ship {
+            background-color: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+        .voucher-input-group {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 14px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 15px;
+        }
+        .table-custom th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+        }
+        .badge-voucher-pill {
+            background: #fff;
+            border: 1px dashed #cbd5e1;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-block;
+            font-size: 0.85rem;
+            margin: 2px;
+        }
+        .badge-voucher-pill:hover {
+            border-color: #ee4d2d;
+            color: #ee4d2d;
+            background: #fff5f5;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 0.95rem;
+        }
+        .summary-total {
+            border-top: 2px dashed #e2e8f0;
+            padding-top: 12px;
+            margin-top: 8px;
+        }
+        .btn-flexshop {
+            background: #ee4d2d;
+            color: white;
+            border: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-flexshop:hover {
+            background: #d73211;
+            color: white;
+            box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-white shadow-sm sticky-top py-2">
+        <div class="container">
+            <a class="navbar-brand navbar-brand-custom d-flex align-items-center fs-4" th:href="@{/khach-hang/thanh-toan/voucher}">
+                <i class="bi bi-ticket-perforated-fill text-danger me-2"></i>FlexShop <span class="badge bg-danger ms-2 fs-6 fw-normal">Áp Dụng Voucher 3 Tầng</span>
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <a th:href="@{/khach-hang/thanh-toan/voucher}" class="btn btn-danger btn-sm">
+                    <i class="bi bi-cart-check me-1"></i> Thanh Toán (US-52)
+                </a>
+                <a th:href="@{/khach-hang/kho-voucher}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-wallet2 me-1"></i> Kho Voucher
+                </a>
+                <a th:href="@{/khach-hang/voucher/lich-su}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-clock-history me-1"></i> Lịch Sử Áp Mã
+                </a>
+                <a th:href="@{/khach-hang/yeu-thich}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-heart me-1"></i> Wishlist
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+
+        <!-- Flash alerts -->
+        <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show card-custom mb-3" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+            <span th:text="${thongBaoThanhCong}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show card-custom mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+            <span th:text="${thongBaoLoi}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Bộ chọn đơn hàng kiểm thử -->
+        <div class="card card-custom p-3 mb-4">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-box-seam fs-4 text-primary"></i>
+                    <div>
+                        <div class="fw-bold">Chọn Đơn Hàng Cần Áp Dụng Voucher</div>
+                        <small class="text-muted">Đang đăng nhập: <strong class="text-dark" th:text="${khachHang != null ? khachHang.hoTen + ' (' + khachHang.email + ')' : 'Khách Hàng'}"></strong></small>
+                    </div>
+                </div>
+                <form th:action="@{/khach-hang/thanh-toan/voucher}" method="get" class="d-flex align-items-center gap-2">
+                    <select name="maDonHangTong" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width: 320px;">
+                        <option th:each="dh : ${danhSachDonHang}"
+                                th:value="${dh.maDonHangTong}"
+                                th:text="'Đơn #' + ${dh.maCodeDonTong} + ' - Tiền hàng: ' + ${#numbers.formatDecimal(dh.tongTienHang, 0, 'POINT', 0, 'COMMA')} + ' đ (' + ${dh.trangThaiDonHang} + ')'"
+                                th:selected="${donHangHienTai != null and donHangHienTai.maDonHangTong == dh.maDonHangTong}">
+                        </option>
+                    </select>
+                </form>
+            </div>
+        </div>
+
+        <!-- Gợi ý mã giảm giá nhanh để kiểm thử -->
+        <div class="card card-custom p-3 mb-4 bg-light">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold text-dark"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Bấm để nhập nhanh mã kiểm thử US-52:</span>
+                <span class="badge bg-secondary">Test Data Mẫu</span>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <span class="badge-voucher-pill" onclick="dienMaNhanh('FREESHIP30K', 'FLEXSAN100K', 'TECHZONE50K')">
+                    <strong class="text-success">Tổ hợp chuẩn 3 Tầng:</strong> Freeship 30K + Sàn 100K + Shop 50K
+                </span>
+                <span class="badge-voucher-pill" onclick="dienMaNhanh('FREESHIP50K', 'FLEXSAN10PCT', 'FASHION20K')">
+                    <strong class="text-primary">Tổ hợp 2:</strong> Freeship 50K + Sàn 10% + Fashion 20K
+                </span>
+                <span class="badge-voucher-pill" onclick="dienMaNhanh('FREESHIP30K', 'HETHAN100K', '')">
+                    <strong class="text-danger">Test Validate:</strong> Mã hết hạn (HETHAN100K)
+                </span>
+                <span class="badge-voucher-pill" onclick="dienMaNhanh('', 'DONCAO2TR', '')">
+                    <strong class="text-danger">Test Validate:</strong> Thiếu đơn tối thiểu (DONCAO2TR)
+                </span>
+            </div>
+        </div>
+
+        <div class="row g-4" th:if="${donHangHienTai != null}">
+            <!-- CỘT TRÁI: FORM NHẬP 3 TẦNG VOUCHER & DANH SÁCH HÀNG -->
+            <div class="col-lg-7">
+                <form id="formVoucher" th:action="@{/khach-hang/thanh-toan/voucher/tinh-toan}" method="post">
+                    <input type="hidden" name="maDonHangTong" th:value="${donHangHienTai.maDonHangTong}">
+
+                    <!-- TẦNG 1: VOUCHER GIAN HÀNG -->
+                    <div class="card card-custom p-4 mb-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="tier-badge tier-shop"><i class="bi bi-shop me-1"></i> TẦNG 1</span>
+                                <h5 class="mb-0 fw-bold">Voucher Của Từng Gian Hàng (Shop Voucher)</h5>
+                            </div>
+                            <small class="text-muted"><i class="bi bi-info-circle me-1"></i>100% Shop tự tài trợ</small>
+                        </div>
+
+                        <div th:each="donShop : ${danhSachDonShop}" class="voucher-input-group">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="fw-bold text-primary">
+                                    <i class="bi bi-building me-1"></i>
+                                    <span th:text="${donShop.gianHang != null ? donShop.gianHang.tenGianHang : 'Gian hàng #' + donShop.maGianHang}"></span>
+                                </div>
+                                <div class="badge bg-light text-dark border">
+                                    Tiền hàng shop: <strong th:text="${#numbers.formatDecimal(donShop.tienHangShop, 0, 'POINT', 0, 'COMMA')} + ' đ'"></strong>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-tag text-muted"></i></span>
+                                <input type="text"
+                                       th:name="'maVoucherShop_' + ${donShop.gianHang != null ? donShop.gianHang.maGianHang : donShop.maDonHangShop}"
+                                       th:id="'shopInput_' + ${donShop.gianHang != null ? donShop.gianHang.maGianHang : donShop.maDonHangShop}"
+                                       class="form-control"
+                                       placeholder="Nhập mã voucher của gian hàng này (Ví dụ: TECHZONE50K, FASHION20K)..."
+                                       th:value="${requestVoucher != null and requestVoucher.maVoucherShopMap != null ? requestVoucher.maVoucherShopMap.get(donShop.gianHang != null ? donShop.gianHang.maGianHang : donShop.maDonHangShop) : ''}">
+                            </div>
+                            <!-- Gợi ý mã voucher của Shop -->
+                            <div class="mt-2 small text-muted" th:if="${voucherGoiY != null and voucherGoiY.get('SHOP') != null}">
+                                Gợi ý mã shop:
+                                <span th:each="v : ${voucherGoiY.get('SHOP')}"
+                                      th:if="${donShop.gianHang != null and v.gianHang != null and v.gianHang.maGianHang == donShop.gianHang.maGianHang}"
+                                      class="badge-voucher-pill py-1"
+                                      th:onclick="'chonMaShop(' + ${donShop.gianHang.maGianHang} + ', \'' + ${v.maCodeVoucher} + '\')'"
+                                      th:text="${v.maCodeVoucher} + ' (-' + ${#numbers.formatDecimal(v.giaTriGiam, 0, 'POINT', 0, 'COMMA')} + 'đ)'">
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TẦNG 2: VOUCHER SÀN FLEXSHOP -->
+                    <div class="card card-custom p-4 mb-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="tier-badge tier-san"><i class="bi bi-stars me-1"></i> TẦNG 2</span>
+                                <h5 class="mb-0 fw-bold">Voucher Sàn FlexShop (Platform Voucher)</h5>
+                            </div>
+                            <small class="text-muted"><i class="bi bi-info-circle me-1"></i>100% Sàn FlexShop tài trợ</small>
+                        </div>
+                        <div class="voucher-input-group mb-0">
+                            <label class="form-label small text-muted">Áp dụng giảm trực tiếp vào tổng tiền hàng toàn đơn:</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-ticket-detailed text-warning"></i></span>
+                                <input type="text" name="maVoucherSan" id="maVoucherSanInput" class="form-control"
+                                       placeholder="Nhập mã voucher Sàn (Ví dụ: FLEXSAN100K, FLEXSAN10PCT)..."
+                                       th:value="${requestVoucher != null ? requestVoucher.maVoucherSan : ''}">
+                            </div>
+                            <!-- Gợi ý voucher Sàn -->
+                            <div class="mt-2 small text-muted" th:if="${voucherGoiY != null and voucherGoiY.get('SAN') != null}">
+                                Gợi ý mã Sàn:
+                                <span th:each="v : ${voucherGoiY.get('SAN')}"
+                                      class="badge-voucher-pill py-1"
+                                      th:onclick="'document.getElementById(\'maVoucherSanInput\').value=\'' + ${v.maCodeVoucher} + '\''"
+                                      th:text="${v.maCodeVoucher} + ' (' + ${v.tenVoucher} + ')'">
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TẦNG 3: MÃ FREESHIP SÀN -->
+                    <div class="card card-custom p-4 mb-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="tier-badge tier-ship"><i class="bi bi-truck me-1"></i> TẦNG 3</span>
+                                <h5 class="mb-0 fw-bold">Mã Freeship Sàn (Shipping Voucher)</h5>
+                            </div>
+                            <small class="text-muted"><i class="bi bi-info-circle me-1"></i>100% Sàn FlexShop miễn giảm</small>
+                        </div>
+                        <div class="voucher-input-group mb-0">
+                            <label class="form-label small text-muted">Áp dụng miễn giảm phí vận chuyển toàn đơn hàng:</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-box2-heart text-success"></i></span>
+                                <input type="text" name="maFreeshipSan" id="maFreeshipSanInput" class="form-control"
+                                       placeholder="Nhập mã Freeship Sàn (Ví dụ: FREESHIP30K, FREESHIP50K)..."
+                                       th:value="${requestVoucher != null ? requestVoucher.maFreeshipSan : ''}">
+                            </div>
+                            <!-- Gợi ý voucher Freeship -->
+                            <div class="mt-2 small text-muted" th:if="${voucherGoiY != null and voucherGoiY.get('FREESHIP') != null}">
+                                Gợi ý mã Freeship:
+                                <span th:each="v : ${voucherGoiY.get('FREESHIP')}"
+                                      class="badge-voucher-pill py-1"
+                                      th:onclick="'document.getElementById(\'maFreeshipSanInput\').value=\'' + ${v.maCodeVoucher} + '\''"
+                                      th:text="${v.maCodeVoucher} + ' (-' + ${#numbers.formatDecimal(v.giaTriGiam, 0, 'POINT', 0, 'COMMA')} + 'đ ship)'">
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NÚT KIỂM TRA & TÍNH TOÁN -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4 py-2 fw-bold">
+                            <i class="bi bi-calculator me-1"></i> Kiểm Tra & Tính Toán Phân Bổ
+                        </button>
+                        <a th:href="@{/khach-hang/thanh-toan/voucher(maDonHangTong=${donHangHienTai.maDonHangTong})}" class="btn btn-outline-secondary px-3">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Nhập Lại
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- CỘT PHẢI: BẢNG ĐỐI SOÁT PHÂN BỔ TÀI TRỢ & XÁC NHẬN CHỐT ĐƠN -->
+            <div class="col-lg-5">
+                <div class="card card-custom p-4 sticky-top" style="top: 80px;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <h5 class="fw-bold mb-0 text-dark">
+                            <i class="bi bi-receipt-cutoff text-danger me-2"></i>Bảng Đối Soát Tài Chính
+                        </h5>
+                        <span class="badge bg-success" th:if="${ketQuaVoucher != null and ketQuaVoucher.hopLe and ketQuaVoucher.tongTietKiem > 0}">
+                            <i class="bi bi-check-all"></i> Hợp Lệ 100%
+                        </span>
+                    </div>
+
+                    <!-- Thông báo lỗi hoặc thành công từ thuật toán tính toán -->
+                    <div th:if="${ketQuaVoucher != null}">
+                        <!-- Danh sách lỗi nếu có -->
+                        <div th:if="${!ketQuaVoucher.hopLe}" class="alert alert-danger p-3 mb-3">
+                            <div class="fw-bold mb-1"><i class="bi bi-x-circle-fill me-1"></i> Không thể áp dụng mã:</div>
+                            <ul class="mb-0 ps-3 small">
+                                <li th:each="err : ${ketQuaVoucher.danhSachLoi}" th:text="${err}"></li>
+                            </ul>
+                        </div>
+
+                        <!-- Danh sách thông báo thành công -->
+                        <div th:if="${ketQuaVoucher.hopLe and not #lists.isEmpty(ketQuaVoucher.danhSachThongBao)}" class="alert alert-success p-3 mb-3">
+                            <div class="fw-bold mb-1"><i class="bi bi-check2-circle me-1"></i> Mã áp dụng thành công:</div>
+                            <ul class="mb-0 ps-3 small">
+                                <li th:each="tb : ${ketQuaVoucher.danhSachThongBao}" th:text="${tb}"></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Chi tiết dòng tiền tổng quát -->
+                    <div class="summary-row">
+                        <span class="text-muted">Tổng tiền hàng gốc:</span>
+                        <span class="fw-bold" th:text="${ketQuaVoucher != null ? #numbers.formatDecimal(ketQuaVoucher.tongTienHangGoc, 0, 'POINT', 0, 'COMMA') + ' đ' : '0 đ'}"></span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="text-muted">Tổng phí vận chuyển gốc:</span>
+                        <span class="fw-bold" th:text="${ketQuaVoucher != null ? #numbers.formatDecimal(ketQuaVoucher.tongPhiVanChuyenGoc, 0, 'POINT', 0, 'COMMA') + ' đ' : '0 đ'}"></span>
+                    </div>
+
+                    <hr class="my-2 text-muted">
+
+                    <!-- Nguồn tài trợ 1: Shop tài trợ -->
+                    <div class="summary-row text-primary">
+                        <span><i class="bi bi-shop me-1"></i> Giảm giá Voucher Shop:</span>
+                        <span class="fw-bold" th:text="${ketQuaVoucher != null ? '-' + #numbers.formatDecimal(ketQuaVoucher.tongGiamGiaShop, 0, 'POINT', 0, 'COMMA') + ' đ' : '-0 đ'}"></span>
+                    </div>
+
+                    <!-- Nguồn tài trợ 2: Sàn FlexShop tài trợ -->
+                    <div class="summary-row text-warning-emphasis">
+                        <span><i class="bi bi-stars me-1"></i> Giảm giá Voucher Sàn:</span>
+                        <span class="fw-bold" th:text="${ketQuaVoucher != null ? '-' + #numbers.formatDecimal(ketQuaVoucher.giamGiaVoucherSan, 0, 'POINT', 0, 'COMMA') + ' đ' : '-0 đ'}"></span>
+                    </div>
+
+                    <!-- Nguồn tài trợ 3: Sàn miễn giảm ship -->
+                    <div class="summary-row text-success">
+                        <span><i class="bi bi-truck me-1"></i> Mã Freeship Sàn tài trợ:</span>
+                        <span class="fw-bold" th:text="${ketQuaVoucher != null ? '-' + #numbers.formatDecimal(ketQuaVoucher.giamGiaFreeshipSan, 0, 'POINT', 0, 'COMMA') + ' đ' : '-0 đ'}"></span>
+                    </div>
+
+                    <div class="summary-row text-muted small ps-2">
+                        <span>Phí giao hàng khách trả:</span>
+                        <span th:text="${ketQuaVoucher != null ? #numbers.formatDecimal(ketQuaVoucher.phiVanChuyenKhachTra, 0, 'POINT', 0, 'COMMA') + ' đ' : '0 đ'}"></span>
+                    </div>
+
+                    <div class="p-2 my-2 rounded bg-light border">
+                        <div class="d-flex justify-content-between text-success fw-bold">
+                            <span><i class="bi bi-piggy-bank-fill me-1"></i> Tổng Bạn Tiết Kiệm:</span>
+                            <span th:text="${ketQuaVoucher != null ? #numbers.formatDecimal(ketQuaVoucher.tongTietKiem, 0, 'POINT', 0, 'COMMA') + ' đ' : '0 đ'}"></span>
+                        </div>
+                        <div class="d-flex justify-content-between text-muted" style="font-size: 0.8rem;">
+                            <span>(Sàn tài trợ: <span th:text="${ketQuaVoucher != null ? #numbers.formatDecimal(ketQuaVoucher.tongTaiTroSan, 0, 'POINT', 0, 'COMMA') + ' đ' : '0 đ'}"></span> | Shop tài trợ: <span th:text="${ketQuaVoucher != null ? #numbers.formatDecimal(ketQuaVoucher.tongTaiTroShop, 0, 'POINT', 0, 'COMMA') + ' đ' : '0 đ'}"></span>)</span>
+                        </div>
+                    </div>
+
+                    <!-- Tổng thanh toán cuối cùng -->
+                    <div class="summary-row summary-total align-items-center">
+                        <div>
+                            <div class="fw-bold fs-6">TỔNG THANH TOÁN:</div>
+                            <small class="text-muted">(Đã bao gồm VAT & áp dụng voucher)</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="fs-4 fw-bold text-danger"
+                                  th:text="${ketQuaVoucher != null ? #numbers.formatDecimal(ketQuaVoucher.tongThanhToanCuoi, 0, 'POINT', 0, 'COMMA') + ' đ' : '0 đ'}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Bảng chi tiết phân bổ cho từng Shop trong đơn -->
+                    <div class="mt-4" th:if="${ketQuaVoucher != null and not #lists.isEmpty(ketQuaVoucher.danhSachPhanBoShop)}">
+                        <h6 class="fw-bold text-dark mb-2 small"><i class="bi bi-pie-chart-fill text-info me-1"></i> Phân Bổ Nguồn Tiền Từng Shop:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered table-custom small mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Gian Hàng</th>
+                                        <th class="text-end">Tiền Hàng</th>
+                                        <th class="text-end">Shop Tự Giảm</th>
+                                        <th class="text-end">Sàn Bù Cho Shop</th>
+                                        <th class="text-end">Shop Nhận</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="pb : ${ketQuaVoucher.danhSachPhanBoShop}">
+                                        <td class="fw-bold" th:text="${pb.tenGianHang}"></td>
+                                        <td class="text-end" th:text="${#numbers.formatDecimal(pb.tienHangGoc, 0, 'POINT', 0, 'COMMA')}"></td>
+                                        <td class="text-end text-primary" th:text="'-' + ${#numbers.formatDecimal(pb.giamGiaVoucherShop, 0, 'POINT', 0, 'COMMA')}"></td>
+                                        <td class="text-end text-warning-emphasis" th:text="'+' + ${#numbers.formatDecimal(pb.giamGiaVoucherSan, 0, 'POINT', 0, 'COMMA')}"></td>
+                                        <td class="text-end fw-bold text-success" th:text="${#numbers.formatDecimal(pb.tongTienShopNhan, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-1 text-muted" style="font-size: 0.75rem;">
+                            <i class="bi bi-shield-check text-success"></i> Doanh thu của Shop không bị trừ bởi Voucher Sàn (Sàn FlexShop tài trợ thanh toán bù 100%).
+                        </div>
+                    </div>
+
+                    <!-- Form xác nhận chốt đơn -->
+                    <form th:action="@{/khach-hang/thanh-toan/voucher/xac-nhan}" method="post" class="mt-4">
+                        <input type="hidden" name="maDonHangTong" th:value="${donHangHienTai.maDonHangTong}">
+                        <input type="hidden" name="maFreeshipSan" th:value="${requestVoucher != null ? requestVoucher.maFreeshipSan : ''}">
+                        <input type="hidden" name="maVoucherSan" th:value="${requestVoucher != null ? requestVoucher.maVoucherSan : ''}">
+                        <th:block th:if="${requestVoucher != null and requestVoucher.maVoucherShopMap != null}">
+                            <input type="hidden" th:each="item : ${requestVoucher.maVoucherShopMap}"
+                                   th:name="'maVoucherShop_' + ${item.key}" th:value="${item.value}">
+                        </th:block>
+
+                        <button type="submit" class="btn btn-flexshop w-100 py-3 rounded-3 fs-6 d-flex align-items-center justify-content-center gap-2 shadow-sm"
+                                th:disabled="${ketQuaVoucher == null or !ketQuaVoucher.hopLe}">
+                            <i class="bi bi-shield-lock-fill"></i>
+                            <span>XÁC NHẬN ĐẶT HÀNG & ÁP DỤNG VOUCHER</span>
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-3 small text-muted">
+                        <i class="bi bi-shield-shaded text-success"></i> Cam kết bảo toàn 100% dòng tiền giữa Khách Hàng, Gian Hàng và Sàn FlexShop.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${donHangHienTai == null}" class="text-center py-5">
+            <i class="bi bi-inbox fs-1 text-muted"></i>
+            <p class="mt-2 text-muted">Chưa có đơn hàng nào để thanh toán. Vui lòng tạo đơn hàng trước!</p>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function dienMaNhanh(freeship, san, shop) {
+            if (document.getElementById('maFreeshipSanInput')) {
+                document.getElementById('maFreeshipSanInput').value = freeship;
+            }
+            if (document.getElementById('maVoucherSanInput')) {
+                document.getElementById('maVoucherSanInput').value = san;
+            }
+            // Điền mã shop đầu tiên tìm thấy nếu có
+            if (shop) {
+                const shopInputs = document.querySelectorAll('input[id^="shopInput_"]');
+                if (shopInputs.length > 0) {
+                    shopInputs[0].value = shop;
+                }
+            }
+            document.getElementById('formVoucher').submit();
+        }
+
+        function chonMaShop(maGianHang, code) {
+            const input = document.getElementById('shopInput_' + maGianHang);
+            if (input) {
+                input.value = code;
+            }
+        }
+    </script>
+</body>
+</html>

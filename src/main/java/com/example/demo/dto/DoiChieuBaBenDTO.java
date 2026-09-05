@@ -24,6 +24,9 @@ public class DoiChieuBaBenDTO {
     private TaiXeGiaoHang taiXe;
 
     @Builder.Default
+    private List<ChiTietDonHang> danhSachChiTietDonHang = new ArrayList<>();
+
+    @Builder.Default
     private List<LichSuTrangThaiDon> danhSachLichSuTrangThai = new ArrayList<>();
 
     @Builder.Default

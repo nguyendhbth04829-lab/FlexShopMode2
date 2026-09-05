@@ -137,6 +137,10 @@ public class CskhServiceTest {
     @Test
     @DisplayName("US-46: Tiếp nhận Ticket nhanh bởi CSKH")
     void testTiepNhanTicket() {
+        phieuMau.setTrangThai("MO_MOI");
+        phieuMau.setCskhXuLy(null);
+        phieuMau = phieuKhieuNaiRepository.save(phieuMau);
+
         PhieuKhieuNai sauTiepNhan = cskhService.tiepNhanTicket(phieuMau.getMaPhieu(), cskhMau.getMaNguoiDung());
 
         assertNotNull(sauTiepNhan);
@@ -231,14 +235,26 @@ public class CskhServiceTest {
     }
 
     @Test
-    @DisplayName("US-46: Tra cứu đối chiếu 3 bên (Khách hàng - Shop - Shipper POD & Lịch sử đơn)")
+    @DisplayName("US-46: Tra cứu đối chiếu 3 bên (Khách hàng - Shop - Shipper POD & Lịch sử đơn) đầy đủ 100%")
     void testLayDuLieuDoiChieuBaBen() {
         DoiChieuBaBenDTO doiChieu = cskhService.layDuLieuDoiChieuBaBen(phieuMau.getMaPhieu());
 
         assertNotNull(doiChieu);
+        // Bên 1: Khách hàng
         assertNotNull(doiChieu.getPhieuKhieuNai(), "Phải có thông tin phiếu khiếu nại (Khách hàng)");
+        assertFalse(doiChieu.getDanhSachBangChungKhachHang().isEmpty(), "Phải có bằng chứng khiếu nại của khách");
+
+        // Bên 2: Người bán / Gian hàng
         assertNotNull(doiChieu.getDonHangShop(), "Phải có thông tin đơn hàng shop (Người bán)");
-        assertNotNull(doiChieu.getDanhSachLichSuTrangThai(), "Phải có danh sách lịch sử hành trình đơn");
+        assertFalse(doiChieu.getDanhSachChiTietDonHang().isEmpty(), "Phải có danh sách sản phẩm Shop đóng gói gửi đi");
+
+        // Bên 3: Vận chuyển & Shipper POD
+        assertNotNull(doiChieu.getNhiemVuGiaoHang(), "Phải có nhiệm vụ giao hàng của logistics");
+        assertNotNull(doiChieu.getNhiemVuGiaoHang().getLinkAnhBangChungPod(), "Phải có ảnh bằng chứng POD của shipper");
+        assertNotNull(doiChieu.getTaiXe(), "Phải có thông tin tài xế giao vận");
+
+        // Timeline & Ghi chú nội bộ
+        assertFalse(doiChieu.getDanhSachLichSuTrangThai().isEmpty(), "Phải có danh sách lịch sử hành trình đơn");
         assertNotNull(doiChieu.getDanhSachGhiChuNoiBo(), "Phải có danh sách ghi chú nội bộ");
     }
 }

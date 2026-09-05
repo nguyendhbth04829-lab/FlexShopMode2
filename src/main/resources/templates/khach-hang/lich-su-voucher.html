@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch Sử Sử Dụng Voucher - FlexShop</title>
+    <!-- Google Fonts: Be Vietnam Pro (Chuẩn phông chữ Tiếng Việt không lỗi) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f6f7fb;
+            color: #2b2f38;
+            -webkit-font-smoothing: antialiased;
+        }
+        .navbar-brand-custom {
+            font-weight: 700;
+            color: #ee4d2d !important;
+            letter-spacing: 0.5px;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            background: #ffffff;
+        }
+        .table-custom th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+        }
+        .code-tag {
+            font-family: monospace;
+            background: #f1f5f9;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-weight: 700;
+            border: 1px dashed #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-white shadow-sm sticky-top py-2">
+        <div class="container">
+            <a class="navbar-brand navbar-brand-custom d-flex align-items-center fs-4" th:href="@{/khach-hang/voucher/lich-su}">
+                <i class="bi bi-clock-history text-danger me-2"></i>FlexShop <span class="badge bg-danger ms-2 fs-6 fw-normal">Lịch Sử Sử Dụng Voucher</span>
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <a th:href="@{/khach-hang/thanh-toan/voucher}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-cart-check me-1"></i> Thanh Toán (US-52)
+                </a>
+                <a th:href="@{/khach-hang/kho-voucher}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-wallet2 me-1"></i> Kho Voucher
+                </a>
+                <a th:href="@{/khach-hang/voucher/lich-su}" class="btn btn-danger btn-sm">
+                    <i class="bi bi-clock-history me-1"></i> Lịch Sử Áp Mã
+                </a>
+                <a th:href="@{/khach-hang/yeu-thich}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-heart me-1"></i> Wishlist
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+
+        <!-- Thống kê tiết kiệm -->
+        <div class="card card-custom p-4 mb-4 bg-primary text-white" th:if="${thongKe != null}">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h5 class="fw-bold mb-1"><i class="bi bi-award me-2"></i>Tổng Kết Tiết Kiệm Của Bạn</h5>
+                    <p class="mb-0 opacity-75">Tất cả các khoản giảm giá tài trợ bởi Sàn FlexShop và các Gian hàng</p>
+                </div>
+                <div class="text-end">
+                    <small class="opacity-75">Tổng tiền bạn đã tiết kiệm:</small>
+                    <div class="fs-3 fw-bold" th:text="${#numbers.formatDecimal(thongKe.tongTienTietKiemDuoc, 0, 'POINT', 0, 'COMMA')} + ' đ'">0 đ</div>
+                    <small class="badge bg-white text-primary fw-bold" th:text="'Đã dùng ' + ${thongKe.tongSoLanSuDung} + ' lượt'"></small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bảng danh sách lịch sử -->
+        <div class="card card-custom p-4">
+            <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-list-check me-2 text-danger"></i>Chi Tiết Các Lượt Sử Dụng Voucher</h5>
+
+            <div class="table-responsive" th:if="${not #lists.isEmpty(danhSachLichSu)}">
+                <table class="table table-hover table-custom align-middle">
+                    <thead>
+                        <tr>
+                            <th># Mã</th>
+                            <th>Mã Code & Tên Voucher</th>
+                            <th>Nguồn Tài Trợ</th>
+                            <th>Mã Đơn Hàng</th>
+                            <th class="text-end">Số Tiền Giảm</th>
+                            <th>Thời Gian Áp Dụng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="ls : ${danhSachLichSu}">
+                            <td class="fw-bold text-muted" th:text="'#' + ${ls.maLichSuDung}"></td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="code-tag" th:text="${ls.voucher != null ? ls.voucher.maCodeVoucher : 'N/A'}"></span>
+                                    <span class="small fw-semibold" th:text="${ls.voucher != null ? ls.voucher.tenVoucher : ''}"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <span th:if="${ls.voucher != null and ls.voucher.laVoucherFreeship()}" class="badge bg-success">
+                                    <i class="bi bi-truck me-1"></i> Freeship Sàn
+                                </span>
+                                <span th:if="${ls.voucher != null and ls.voucher.laVoucherSan() and not ls.voucher.laVoucherFreeship()}" class="badge bg-warning text-dark">
+                                    <i class="bi bi-stars me-1"></i> Sàn FlexShop
+                                </span>
+                                <span th:if="${ls.voucher != null and ls.voucher.laVoucherShop()}" class="badge bg-info text-dark">
+                                    <i class="bi bi-shop me-1"></i>
+                                    <span th:text="${ls.voucher.gianHang != null ? ls.voucher.gianHang.tenGianHang : 'Gian Hàng'}"></span>
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border"
+                                      th:text="${ls.donHangTong != null ? ls.donHangTong.maCodeDonTong : 'N/A'}">
+                                </span>
+                                <div th:if="${ls.donHangShop != null}" class="small text-muted"
+                                     th:text="'Đơn shop: ' + ${ls.donHangShop.maCodeDonShop}">
+                                </div>
+                            </td>
+                            <td class="text-end fw-bold text-success"
+                                th:text="'-' + ${#numbers.formatDecimal(ls.soTienDaGiam, 0, 'POINT', 0, 'COMMA')} + ' đ'">
+                            </td>
+                            <td class="small text-muted"
+                                th:text="${#temporals.format(ls.ngaySuDung, 'dd/MM/yyyy HH:mm')}">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Trống -->
+            <div th:if="${#lists.isEmpty(danhSachLichSu)}" class="text-center py-5">
+                <i class="bi bi-clock-history fs-1 text-muted"></i>
+                <p class="mt-2 text-muted">Bạn chưa từng sử dụng mã giảm giá nào.</p>
+                <a th:href="@{/khach-hang/kho-voucher}" class="btn btn-outline-danger btn-sm">Khám phá Kho Voucher ngay</a>
+            </div>
+
+            <!-- Phân trang -->
+            <div class="d-flex justify-content-center mt-4" th:if="${totalPages > 1}">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/khach-hang/voucher/lich-su(page=${currentPage - 1})}">&laquo;</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${currentPage == i ? 'active' : ''}">
+                            <a class="page-link" th:href="@{/khach-hang/voucher/lich-su(page=${i})}" th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/khach-hang/voucher/lich-su(page=${currentPage + 1})}">&raquo;</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

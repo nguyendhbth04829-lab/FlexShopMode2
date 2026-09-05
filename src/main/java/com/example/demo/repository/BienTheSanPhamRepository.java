@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface BienTheSanPhamRepository extends JpaRepository<BienTheSanPham, Long> {
     Optional<BienTheSanPham> findByMaSku(String maSku);
+    java.util.List<BienTheSanPham> findBySanPham_MaSanPham(Long maSanPham);
 }

@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface DonHangTongRepository extends JpaRepository<DonHangTong, Long> {
     Optional<DonHangTong> findByMaCodeDonTong(String maCodeDonTong);
+
+    java.util.List<DonHangTong> findByKhachHangMaNguoiDungOrderByNgayTaoDesc(Long maKhachHang);
 }

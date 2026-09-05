@@ -78,4 +78,29 @@ public class SanPham {
 
     @Column(name = "ngay_cap_nhat")
     private LocalDateTime ngayCapNhat = LocalDateTime.now();
+
+    @Transient
+    private String linkAnh;
+
+    public String getLinkAnh() {
+        if (linkAnh != null && !linkAnh.isBlank()) {
+            return linkAnh;
+        }
+        return "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200";
+    }
+
+    public void setLinkAnh(String linkAnh) {
+        this.linkAnh = linkAnh;
+    }
+
+    @Transient
+    private BigDecimal giaNiemYet;
+
+    public BigDecimal getGiaNiemYet() {
+        return giaNiemYet != null ? giaNiemYet : (giaCoBan != null ? giaCoBan : BigDecimal.ZERO);
+    }
+
+    public void setGiaNiemYet(BigDecimal giaNiemYet) {
+        this.giaNiemYet = giaNiemYet;
+    }
 }
