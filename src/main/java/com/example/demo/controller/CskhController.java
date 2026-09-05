@@ -1,12 +1,12 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.DoiChieuBaBenDTO;
-import com.example.demo.dto.GhiChuNoiBoForm;
-import com.example.demo.dto.PhanLoaiTicketForm;
-import com.example.demo.dto.ThongKeDashboardCskhDTO;
+import com.example.demo.dto.*;
+import com.example.demo.entity.LenhHoanTienBoiThuong;
 import com.example.demo.entity.NguoiDung;
 import com.example.demo.entity.PhieuKhieuNai;
+import com.example.demo.repository.LenhHoanTienBoiThuongRepository;
 import com.example.demo.service.CskhService;
+import com.example.demo.service.PhanQuyetTranhChapService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,7 +16,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/cskh")
@@ -27,6 +29,12 @@ public class CskhController {
 
     @Autowired
     private CskhService cskhService;
+
+    @Autowired
+    private PhanQuyetTranhChapService phanQuyetTranhChapService;
+
+    @Autowired
+    private LenhHoanTienBoiThuongRepository lenhHoanTienBoiThuongRepository;
 
     /**
      * Dashboard tiếp nhận & phân loại ticket CSKH (US-46)
@@ -94,6 +102,24 @@ public class CskhController {
             formPhanLoai.setMaCskhPhuTrach(doiChieu.getPhieuKhieuNai().getCskhXuLy().getMaNguoiDung());
         }
         model.addAttribute("formPhanLoai", formPhanLoai);
+
+        // US-47: Lấy lệnh hoàn tiền / bồi thường (nếu đã có phán quyết)
+        Optional<LenhHoanTienBoiThuong> optLenh = lenhHoanTienBoiThuongRepository.findByPhieuKhieuNai_MaPhieu(maPhieu);
+        model.addAttribute("lenhHoanTien", optLenh.orElse(null));
+
+        // Form Phán quyết tranh chấp (nếu chưa có trong model từ flash attribute)
+        if (!model.containsAttribute("formPhanQuyet")) {
+            PhanQuyetTranhChapForm formPhanQuyet = new PhanQuyetTranhChapForm();
+            formPhanQuyet.setMaPhieu(maPhieu);
+            formPhanQuyet.setQuyetDinh("DUYET_HOAN_TIEN_KHACH");
+            formPhanQuyet.setBenChiuPhi("NGUOI_BAN");
+            BigDecimal tienMacDinh = (doiChieu.getPhieuKhieuNai().getSoTienHoanTra() != null &&
+                    doiChieu.getPhieuKhieuNai().getSoTienHoanTra().compareTo(BigDecimal.ZERO) > 0)
+                    ? doiChieu.getPhieuKhieuNai().getSoTienHoanTra()
+                    : doiChieu.getPhieuKhieuNai().getDonHangShop().getTongTienShopNhan();
+            formPhanQuyet.setSoTien(tienMacDinh);
+            model.addAttribute("formPhanQuyet", formPhanQuyet);
+        }
 
         return "cskh/doi-chieu-ba-ben";
     }
@@ -173,5 +199,75 @@ public class CskhController {
             redirectAttributes.addFlashAttribute("thongBaoLoi", "Lỗi thêm ghi chú: " + e.getMessage());
         }
         return "redirect:/cskh/doi-chieu/" + maPhieu;
+    }
+
+    /**
+     * Ra phán quyết tranh chấp (US-47)
+     */
+    @PostMapping("/phan-quyet/{maPhieu}")
+    public String raPhanQuyet(
+            @PathVariable("maPhieu") Long maPhieu,
+            @Valid @ModelAttribute("formPhanQuyet") PhanQuyetTranhChapForm form,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (bindingResult.hasErrors()) {
+            String loiChiTiet = bindingResult.getFieldErrors().stream()
+                    .map(fe -> fe.getDefaultMessage())
+                    .reduce((m1, m2) -> m1 + "; " + m2)
+                    .orElse("Dữ liệu phán quyết không hợp lệ, vui lòng kiểm tra lại.");
+            redirectAttributes.addFlashAttribute("thongBaoLoi", loiChiTiet);
+            return "redirect:/cskh/doi-chieu/" + maPhieu;
+        }
+
+        try {
+            form.setMaPhieu(maPhieu);
+            LenhHoanTienBoiThuong lenh = phanQuyetTranhChapService.raPhanQuyet(form, MA_CSKH_MAC_DINH);
+            String tb = "Đã ban hành phán quyết chính thức thành công cho Ticket ID: " + maPhieu + ". ";
+            if (lenh != null) {
+                tb += "Đã tự động khởi tạo Chứng từ bồi hoàn #" + lenh.getMaLenh() + " với số tiền " +
+                        String.format("%,.0f", lenh.getSoTien()) + " VNĐ (" + lenh.getBenChiuPhiDisplay() + ").";
+            } else {
+                tb += "Đã bác bỏ khiếu nại của khách hàng và giải phóng tiền bán hàng cho Gian hàng.";
+            }
+            redirectAttributes.addFlashAttribute("thongBaoThanhCong", tb);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("thongBaoLoi", "Lỗi ban hành phán quyết: " + e.getMessage());
+        }
+        return "redirect:/cskh/doi-chieu/" + maPhieu;
+    }
+
+    /**
+     * Quản lý danh sách phán quyết tranh chấp & lệnh hoàn tiền / bồi thường toàn sàn (US-47)
+     */
+    @GetMapping("/phan-quyet")
+    public String danhSachPhanQuyet(
+            @RequestParam(name = "tuKhoa", required = false) String tuKhoa,
+            @RequestParam(name = "benChiuPhi", required = false) String benChiuPhi,
+            @RequestParam(name = "trangThai", required = false) String trangThai,
+            @RequestParam(name = "tuNgay", required = false) String tuNgay,
+            @RequestParam(name = "denNgay", required = false) String denNgay,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            Model model
+    ) {
+        ThongKePhanQuyetDTO thongKe = phanQuyetTranhChapService.layThongKePhanQuyet();
+        Page<LenhHoanTienBoiThuong> pageLenh = phanQuyetTranhChapService.layDanhSachLenhHoanTien(
+                tuKhoa, benChiuPhi, trangThai, tuNgay, denNgay, page, size
+        );
+
+        model.addAttribute("thongKe", thongKe);
+        model.addAttribute("pageLenh", pageLenh);
+        model.addAttribute("maCskhHienTai", MA_CSKH_MAC_DINH);
+
+        // Giữ lại tham số tìm kiếm trên giao diện
+        model.addAttribute("tuKhoa", tuKhoa);
+        model.addAttribute("benChiuPhi", benChiuPhi);
+        model.addAttribute("trangThai", trangThai);
+        model.addAttribute("tuNgay", tuNgay);
+        model.addAttribute("denNgay", denNgay);
+        model.addAttribute("size", size);
+
+        return "cskh/danh-sach-phan-quyet";
     }
 }

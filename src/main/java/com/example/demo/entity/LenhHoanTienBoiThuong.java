@@ -39,4 +39,46 @@ public class LenhHoanTienBoiThuong {
 
     @Column(name = "ngay_thuc_hien")
     private LocalDateTime ngayThucHien = LocalDateTime.now();
+
+    public String getBenChiuPhiDisplay() {
+        if (benChiuPhi == null) return "Chưa xác định";
+        switch (benChiuPhi) {
+            case "NGUOI_BAN": return "Người bán (Shop chịu phí)";
+            case "SAN_FLEXSHOP": return "Sàn FlexShop (Trợ cấp/Bảo hiểm)";
+            case "DON_VI_VAN_CHUYEN": return "Đơn vị vận chuyển (Làm hỏng/mất)";
+            default: return benChiuPhi;
+        }
+    }
+
+    public String getBenChiuPhiBadgeClass() {
+        if (benChiuPhi == null) return "bg-secondary";
+        switch (benChiuPhi) {
+            case "NGUOI_BAN": return "bg-danger text-white";
+            case "SAN_FLEXSHOP": return "bg-primary text-white";
+            case "DON_VI_VAN_CHUYEN": return "bg-warning text-dark";
+            default: return "bg-secondary text-white";
+        }
+    }
+
+    public String getTrangThaiDisplay() {
+        if (trangThai == null) return "Chưa xử lý";
+        switch (trangThai) {
+            case "DA_CHUYEN_TIEN":
+            case "HOAN_TAT": return "Đã giải ngân thành công";
+            case "DANG_XU_LY": return "Đang giải ngân";
+            case "THAT_BAI": return "Giải ngân thất bại";
+            default: return trangThai;
+        }
+    }
+
+    public String getTrangThaiBadgeClass() {
+        if (trangThai == null) return "bg-secondary";
+        switch (trangThai) {
+            case "DA_CHUYEN_TIEN":
+            case "HOAN_TAT": return "bg-success text-white";
+            case "DANG_XU_LY": return "bg-warning text-dark";
+            case "THAT_BAI": return "bg-danger text-white";
+            default: return "bg-secondary text-white";
+        }
+    }
 }

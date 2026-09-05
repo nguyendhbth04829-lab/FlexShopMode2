@@ -78,6 +78,10 @@ public class PhieuKhieuNai {
     @OneToMany(mappedBy = "phieuKhieuNai", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<GhiChuNoiBoKhieuNai> danhSachGhiChuNoiBo = new ArrayList<>();
 
+    @ToString.Exclude
+    @OneToOne(mappedBy = "phieuKhieuNai", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private LenhHoanTienBoiThuong lenhHoanTien;
+
     // Tiện ích hiển thị giao diện (View Helpers)
     public String getMucDoUuTienDisplay() {
         if (mucDoUuTien == null) return "Trung bình";
@@ -131,6 +135,7 @@ public class PhieuKhieuNai {
             case "DANG_XU_LY": return "CSKH đang xử lý";
             case "CHO_SHOP_PHAN_HOI": return "Chờ Shop phản hồi";
             case "CHAP_NHAN_HOAN_TIEN": return "Đã chấp thuận hoàn tiền";
+            case "BOI_THUONG_SHOP": return "Đã bồi thường Shop";
             case "TU_CHOI_KHIEU_NAI": return "Từ chối khiếu nại";
             case "DA_HUY": return "Khách đã hủy";
             case "DONG_PHIEU": return "Đã đóng";
@@ -145,6 +150,7 @@ public class PhieuKhieuNai {
             case "DANG_XU_LY": return "bg-warning text-dark";
             case "CHO_SHOP_PHAN_HOI": return "bg-info text-dark";
             case "CHAP_NHAN_HOAN_TIEN": return "bg-success";
+            case "BOI_THUONG_SHOP": return "bg-purple text-white";
             case "TU_CHOI_KHIEU_NAI": return "bg-danger";
             case "DA_HUY": return "bg-secondary";
             case "DONG_PHIEU": return "bg-dark";

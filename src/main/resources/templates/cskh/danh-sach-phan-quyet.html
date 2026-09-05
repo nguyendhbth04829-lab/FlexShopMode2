@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sổ Lệnh Bồi Hoàn & Phán Quyết Tranh Chấp - FlexShop CSKH</title>
+    <!-- Google Fonts: Be Vietnam Pro -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f0f2f5;
+            color: #2b2f38;
+            -webkit-font-smoothing: antialiased;
+        }
+        .navbar-brand-custom {
+            font-weight: 700;
+            color: #ee4d2d !important;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+        .kpi-card {
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-left: 5px solid transparent;
+        }
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+        .kpi-refund { border-left-color: #198754; background: white; }
+        .kpi-compensation { border-left-color: #0d6efd; background: white; }
+        .kpi-rejected { border-left-color: #dc3545; background: white; }
+        .kpi-total { border-left-color: #6f42c1; background: white; }
+
+        .table-custom th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+            padding: 12px 16px;
+        }
+        .table-custom td {
+            padding: 14px 16px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .btn-primary-custom {
+            background-color: #ee4d2d;
+            border-color: #ee4d2d;
+            color: white;
+            font-weight: 600;
+        }
+        .btn-primary-custom:hover {
+            background-color: #d73211;
+            border-color: #d73211;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar CSKH -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm sticky-top">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand navbar-brand-custom" href="/cskh/dashboard">
+            <i class="bi bi-headset"></i> FlexShop CSKH & Phán Quyết
+        </a>
+        <div class="d-flex align-items-center gap-3">
+            <a href="/cskh/dashboard" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-speedometer2"></i> Dashboard Triage
+            </a>
+            <a href="/cskh/phan-quyet" class="btn btn-warning btn-sm fw-bold">
+                <i class="bi bi-journal-bookmark-fill"></i> Sổ Lệnh Bồi Hoàn (US-47)
+            </a>
+            <span class="badge bg-secondary-subtle text-white border border-secondary px-3 py-2">
+                <i class="bi bi-person-check-fill text-success"></i> CSKH: <b>Ngô Thị CSKH Hỗ Trợ</b>
+            </span>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid px-4 pb-5">
+
+    <!-- Flash Alert -->
+    <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2 fs-5"></i> <span th:text="${thongBaoThanhCong}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i> <span th:text="${thongBaoLoi}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- TIÊU ĐỀ TRANG -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-hammer text-danger"></i> Sổ Lệnh Bồi Hoàn & Phán Quyết Tranh Chấp (US-47)
+            </h3>
+            <p class="text-muted small mb-0">
+                Trung tâm quản lý, giám sát và giải ngân tự động các phán quyết tranh chấp 3 bên toàn sàn FlexShop.
+            </p>
+        </div>
+        <div>
+            <a href="/cskh/dashboard" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-search"></i> Tra cứu Ticket cần xử lý
+            </a>
+        </div>
+    </div>
+
+    <!-- 4 THẺ KPI THỐNG KÊ TÀI CHÍNH PHÁN QUYẾT -->
+    <div class="row g-3 mb-4">
+        <!-- KPI 1: Tổng tiền hoàn khách -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-custom kpi-card kpi-refund h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold">Tổng Tiền Đã Hoàn Khách</div>
+                        <h4 class="fw-bold text-success mb-0 mt-1">
+                            <span th:text="${#numbers.formatDecimal(thongKe.tongTienHoanKhach, 0, 'POINT', 0, 'COMMA')}">0</span> đ
+                        </h4>
+                        <div class="small text-muted mt-2">
+                            <i class="bi bi-check-circle text-success"></i> Đã giải ngân thành công
+                        </div>
+                    </div>
+                    <div class="bg-success-subtle text-success p-3 rounded-circle fs-3">
+                        <i class="bi bi-person-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI 2: Tổng tiền bồi thường shop -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-custom kpi-card kpi-compensation h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold">Tổng Tiền Bồi Thường Shop</div>
+                        <h4 class="fw-bold text-primary mb-0 mt-1">
+                            <span th:text="${#numbers.formatDecimal(thongKe.tongTienBoiThuongShop, 0, 'POINT', 0, 'COMMA')}">0</span> đ
+                        </h4>
+                        <div class="small text-muted mt-2">
+                            <i class="bi bi-shield-check text-primary"></i> Bảo vệ gian hàng
+                        </div>
+                    </div>
+                    <div class="bg-primary-subtle text-primary p-3 rounded-circle fs-3">
+                        <i class="bi bi-shop"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI 3: Số khiếu nại đã bác bỏ -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-custom kpi-card kpi-rejected h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold">Khiếu Nại Bị Bác Bỏ</div>
+                        <h4 class="fw-bold text-danger mb-0 mt-1" th:text="${thongKe.soKhieuNaiBacBo}">0</h4>
+                        <div class="small text-muted mt-2">
+                            <i class="bi bi-unlock text-danger"></i> Đã giải phóng Escrow cho Shop
+                        </div>
+                    </div>
+                    <div class="bg-danger-subtle text-danger p-3 rounded-circle fs-3">
+                        <i class="bi bi-x-octagon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI 4: Tổng số lệnh đã ban hành -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-custom kpi-card kpi-total h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold">Tổng Lệnh Bồi Hoàn</div>
+                        <h4 class="fw-bold text-purple mb-0 mt-1" th:text="${thongKe.tongSoLenh}">0</h4>
+                        <div class="small text-muted mt-2">
+                            Shop chịu: <b th:text="${thongKe.soLenhNguoiBanChiu}">0</b> | 
+                            Sàn: <b th:text="${thongKe.soLenhSanChiu}">0</b> | 
+                            VC: <b th:text="${thongKe.soLenhVanChuyenChiu}">0</b>
+                        </div>
+                    </div>
+                    <div class="bg-purple-subtle text-purple p-3 rounded-circle fs-3">
+                        <i class="bi bi-journal-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BỘ LỌC TÌM KIẾM NÂNG CAO -->
+    <div class="card card-custom bg-white p-4 mb-4">
+        <form th:action="@{/cskh/phan-quyet}" method="get" class="row g-3 align-items-end">
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label small fw-semibold text-secondary">Từ khóa tìm kiếm</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                    <input type="text" name="tuKhoa" th:value="${tuKhoa}" class="form-control" 
+                           placeholder="Mã lệnh, mã ticket, tên, SĐT...">
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-3">
+                <label class="form-label small fw-semibold text-secondary">Bên chịu chi phí</label>
+                <select name="benChiuPhi" class="form-select form-select-sm">
+                    <option value="">-- Tất cả bên chịu phí --</option>
+                    <option value="NGUOI_BAN" th:selected="${benChiuPhi == 'NGUOI_BAN'}">Shop chịu phí</option>
+                    <option value="SAN_FLEXSHOP" th:selected="${benChiuPhi == 'SAN_FLEXSHOP'}">Sàn FlexShop trợ cấp</option>
+                    <option value="DON_VI_VAN_CHUYEN" th:selected="${benChiuPhi == 'DON_VI_VAN_CHUYEN'}">Đơn vị vận chuyển</option>
+                </select>
+            </div>
+
+            <div class="col-lg-2 col-md-3">
+                <label class="form-label small fw-semibold text-secondary">Trạng thái giải ngân</label>
+                <select name="trangThai" class="form-select form-select-sm">
+                    <option value="">-- Tất cả trạng thái --</option>
+                    <option value="DA_CHUYEN_TIEN" th:selected="${trangThai == 'DA_CHUYEN_TIEN'}">Đã chuyển tiền</option>
+                    <option value="DANG_XU_LY" th:selected="${trangThai == 'DANG_XU_LY'}">Đang giải ngân</option>
+                    <option value="THAT_BAI" th:selected="${trangThai == 'THAT_BAI'}">Thất bại</option>
+                </select>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label small fw-semibold text-secondary">Khoảng ngày thực hiện</label>
+                <div class="input-group input-group-sm">
+                    <input type="date" name="tuNgay" th:value="${tuNgay}" class="form-control" title="Từ ngày">
+                    <span class="input-group-text">-</span>
+                    <input type="date" name="denNgay" th:value="${denNgay}" class="form-control" title="Đến ngày">
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-6 d-flex gap-2">
+                <button type="submit" class="btn btn-primary-custom btn-sm flex-grow-1">
+                    <i class="bi bi-funnel"></i> Lọc
+                </button>
+                <a href="/cskh/phan-quyet" class="btn btn-light border btn-sm" title="Đặt lại bộ lọc">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- BẢNG DANH SÁCH LỆNH HOÀN TIỀN & BỒI THƯỜNG -->
+    <div class="card card-custom bg-white overflow-hidden mb-4">
+        <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center">
+            <h6 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-receipt-cutoff text-primary me-2"></i> Danh Sách Lệnh Bồi Hoàn Tài Chính Tự Động
+            </h6>
+            <span class="badge bg-light text-dark border">
+                Tìm thấy: <b th:text="${pageLenh.totalElements}">0</b> chứng từ
+            </span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-custom table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Mã Lệnh</th>
+                        <th>Ticket Khiếu Nại</th>
+                        <th>Đơn Hàng Shop</th>
+                        <th>Người Thụ Hưởng</th>
+                        <th class="text-end">Số Tiền (VNĐ)</th>
+                        <th>Bên Chịu Phí</th>
+                        <th>Trạng Thái</th>
+                        <th>Ngày Giải Ngân</th>
+                        <th class="text-center">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="lenh : ${pageLenh.content}">
+                        <td>
+                            <b class="text-primary fs-6">#<span th:text="${lenh.maLenh}">1001</span></b>
+                        </td>
+                        <td>
+                            <div>
+                                <a th:href="@{/cskh/doi-chieu/{id}(id=${lenh.phieuKhieuNai.maPhieu})}" 
+                                   class="fw-bold text-dark text-decoration-none" 
+                                   th:text="${lenh.phieuKhieuNai.maCodePhieu}">KN-1001</a>
+                            </div>
+                            <span class="badge fs-7" th:classappend="${lenh.phieuKhieuNai.badgeClass}" 
+                                  th:text="${lenh.phieuKhieuNai.trangThaiDisplay}">Trạng thái</span>
+                        </td>
+                        <td>
+                            <div class="fw-semibold small" th:text="${lenh.phieuKhieuNai.donHangShop.maCodeDonShop}">SHOP-88</div>
+                            <div class="small text-muted" th:text="${lenh.phieuKhieuNai.gianHang.tenGianHang}">TechZone</div>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-dark small" th:text="${lenh.nguoiNhanTien.hoVaTen}">Nguyễn Văn An</div>
+                            <div class="small text-muted">
+                                <span th:if="${lenh.nguoiNhanTien.maNguoiDung == lenh.phieuKhieuNai.khachHang.maNguoiDung}" class="badge bg-primary-subtle text-primary">Khách hàng</span>
+                                <span th:if="${lenh.nguoiNhanTien.maNguoiDung != lenh.phieuKhieuNai.khachHang.maNguoiDung}" class="badge bg-success-subtle text-success">Chủ Gian Hàng</span>
+                                <span th:text="${lenh.nguoiNhanTien.soDienThoai}">0901234567</span>
+                            </div>
+                        </td>
+                        <td class="text-end">
+                            <span class="fs-6 fw-bold text-danger">
+                                <span th:text="${#numbers.formatDecimal(lenh.soTien, 0, 'POINT', 0, 'COMMA')}">0</span> đ
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge fs-7 px-2 py-1" th:classappend="${lenh.benChiuPhiBadgeClass}" 
+                                  th:text="${lenh.benChiuPhiDisplay}">Người bán</span>
+                        </td>
+                        <td>
+                            <span class="badge fs-7 px-2 py-1" th:classappend="${lenh.trangThaiBadgeClass}" 
+                                  th:text="${lenh.trangThaiDisplay}">Thành công</span>
+                        </td>
+                        <td class="small text-muted">
+                            <span th:text="${#temporals.format(lenh.ngayThucHien, 'dd/MM/yyyy HH:mm')}">01/09/2026 10:00</span>
+                        </td>
+                        <td class="text-center">
+                            <a th:href="@{/cskh/doi-chieu/{id}(id=${lenh.phieuKhieuNai.maPhieu})}" 
+                               class="btn btn-sm btn-outline-primary shadow-sm" title="Xem hồ sơ đối chiếu 3 bên">
+                                <i class="bi bi-eye"></i> Đối chiếu
+                            </a>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${pageLenh.empty}">
+                        <td colspan="9" class="text-center py-5">
+                            <i class="bi bi-journal-x text-muted fs-1 d-block mb-2"></i>
+                            <div class="text-muted fw-semibold">Chưa có chứng từ bồi hoàn nào phù hợp với bộ lọc.</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PHÂN TRANG -->
+        <div class="card-footer bg-white py-3 px-4 d-flex flex-wrap justify-content-between align-items-center"
+             th:if="${pageLenh.totalPages > 1}">
+            <div class="small text-muted">
+                Hiển thị trang <b th:text="${pageLenh.number + 1}">1</b> / <b th:text="${pageLenh.totalPages}">1</b> 
+                (Tổng số <b th:text="${pageLenh.totalElements}">0</b> lệnh)
+            </div>
+
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item" th:classappend="${pageLenh.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{/cskh/phan-quyet(page=${pageLenh.number - 1}, size=${size}, tuKhoa=${tuKhoa}, benChiuPhi=${benChiuPhi}, trangThai=${trangThai}, tuNgay=${tuNgay}, denNgay=${denNgay})}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, pageLenh.totalPages - 1)}"
+                        th:classappend="${pageLenh.number == i} ? 'active'">
+                        <a class="page-link" th:href="@{/cskh/phan-quyet(page=${i}, size=${size}, tuKhoa=${tuKhoa}, benChiuPhi=${benChiuPhi}, trangThai=${trangThai}, tuNgay=${tuNgay}, denNgay=${denNgay})}"
+                           th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${pageLenh.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{/cskh/phan-quyet(page=${pageLenh.number + 1}, size=${size}, tuKhoa=${tuKhoa}, benChiuPhi=${benChiuPhi}, trangThai=${trangThai}, tuNgay=${tuNgay}, denNgay=${denNgay})}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
