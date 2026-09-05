@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Đánh Giá ' + ${sanPham.tenSanPham} + ' - FlexShop'">Đánh Giá Sản Phẩm - FlexShop</title>
+    <!-- Google Fonts: Be Vietnam Pro (Chuẩn phông chữ Tiếng Việt không lỗi) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f8f9fa;
+            color: #2b2f38;
+            -webkit-font-smoothing: antialiased;
+        }
+        .navbar-brand-custom {
+            font-weight: 700;
+            color: #ee4d2d !important;
+            letter-spacing: 0.5px;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .star-gold {
+            color: #ffb703;
+        }
+        .star-empty {
+            color: #dee2e6;
+        }
+        .filter-btn {
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-size: 0.9rem;
+            border: 1px solid #dee2e6;
+            background-color: white;
+            color: #495057;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover {
+            border-color: #ee4d2d;
+            color: #ee4d2d;
+        }
+        .filter-btn.active {
+            border-color: #ee4d2d;
+            background-color: #fff5f2;
+            color: #ee4d2d;
+            font-weight: 600;
+        }
+        .rating-score-large {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #ee4d2d;
+            line-height: 1;
+        }
+        .review-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #6c757d;
+        }
+        .review-img-thumb {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid #dee2e6;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .review-img-thumb:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .shop-reply-box {
+            background-color: #f8f9fa;
+            border-left: 3px solid #ee4d2d;
+            border-radius: 4px;
+            padding: 12px 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-white shadow-sm sticky-top py-2">
+        <div class="container">
+            <a class="navbar-brand navbar-brand-custom d-flex align-items-center fs-4" th:href="@{'/san-pham/' + ${sanPham.maSanPham} + '/danh-gia'}">
+                <i class="bi bi-bag-heart-fill text-danger me-2"></i>FlexShop <span class="badge bg-danger ms-2 fs-6 fw-normal">Đánh Giá Sản Phẩm</span>
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <a th:href="@{/khach-hang/yeu-thich}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-heart me-1"></i> Wishlist
+                </a>
+                <a th:href="@{/khach-hang/gian-hang-theo-doi}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-shop me-1"></i> Shop Theo Dõi
+                </a>
+                <a th:href="@{/khach-hang/danh-gia/cua-toi}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-person-check me-1"></i> Đánh Giá Của Tôi
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+
+        <!-- Flash messages -->
+        <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show card-custom" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span th:text="${thongBaoThanhCong}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Product Header Bar -->
+        <div class="card card-custom p-4 mb-4 bg-white">
+            <div class="row align-items-center g-3">
+                <div class="col-auto">
+                    <img th:src="${sanPham.linkAnh}" alt="Ảnh sản phẩm" 
+                         class="rounded border" style="width: 100px; height: 100px; object-fit: cover;">
+                </div>
+                <div class="col">
+                    <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
+                        <span class="text-muted small">
+                            <i class="bi bi-shop text-danger me-1"></i> Gian hàng: 
+                            <strong class="text-dark" th:text="${sanPham.gianHang != null ? sanPham.gianHang.tenGianHang : 'FlexShop'}">Shop Name</strong>
+                        </span>
+
+                        <!-- Follow Shop Toggle Button -->
+                        <button type="button" class="btn btn-sm py-0 px-2 rounded-pill border" id="btnFollowShop"
+                                th:classappend="${daTheoDoiShop} ? 'btn-success text-white' : 'btn-outline-danger'"
+                                th:onclick="'toggleTheoDoiShop(' + ${sanPham.gianHang != null ? sanPham.gianHang.maGianHang : 1} + ')'">
+                            <i class="bi" th:classappend="${daTheoDoiShop} ? 'bi-check-circle-fill me-1' : 'bi-plus me-1'"></i>
+                            <span id="textFollowShop" th:text="${daTheoDoiShop} ? 'Đang theo dõi' : 'Theo dõi Shop'">Theo dõi Shop</span>
+                            (<span id="countFollowShop" th:text="${tongFollowShop}">0</span>)
+                        </button>
+                    </div>
+
+                    <h4 class="fw-bold mb-1" th:text="${sanPham.tenSanPham}">Tên Sản Phẩm</h4>
+
+                    <div class="d-flex align-items-center gap-3 mt-2 flex-wrap">
+                        <span class="fs-5 fw-bold text-danger" th:if="${sanPham.giaCoBan != null}" 
+                              th:text="${#numbers.formatDecimal(sanPham.giaCoBan, 0, 'COMMA', 0, 'POINT')} + ' đ'">150.000 đ</span>
+                        <span class="badge bg-light text-muted border">
+                            <i class="bi bi-tag-fill me-1"></i> <span th:text="${sanPham.danhMuc != null ? sanPham.danhMuc.tenDanhMuc : 'Sản phẩm nổi bật'}">Thời trang</span>
+                        </span>
+
+                        <!-- Wishlist Toggle Button -->
+                        <button type="button" class="btn btn-sm rounded-pill px-3 ms-auto" id="btnWishlist"
+                                th:classappend="${daYeuThich} ? 'btn-danger text-white' : 'btn-outline-danger'"
+                                th:onclick="'toggleWishlist(' + ${sanPham.maSanPham} + ')'">
+                            <i class="bi" th:classappend="${daYeuThich} ? 'bi-heart-fill me-1' : 'bi-heart me-1'"></i>
+                            <span id="textWishlist" th:text="${daYeuThich} ? 'Đã yêu thích' : 'Thêm vào yêu thích'">Yêu thích</span>
+                            (<span id="countWishlist" th:text="${tongLuotThich}">0</span>)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nav Tabs between Reviews and Q&A -->
+            <div class="d-flex gap-2 mt-4 pt-3 border-top">
+                <a th:href="@{'/san-pham/' + ${sanPham.maSanPham} + '/danh-gia'}" class="btn btn-danger px-4 py-2 fw-semibold">
+                    <i class="bi bi-star-fill me-1"></i> Đánh Giá Của Khách Hàng
+                </a>
+                <a th:href="@{'/san-pham/' + ${sanPham.maSanPham} + '/hoi-dap'}" class="btn btn-light text-muted px-4 py-2">
+                    <i class="bi bi-chat-dots-fill me-1"></i> Hỏi & Đáp Cộng Đồng (Q&A) 
+                    <span class="badge bg-secondary ms-1" th:text="${tongHoiDap}">0</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Rating Summary Dashboard (Thống Kê Đánh Giá) -->
+        <div class="card card-custom p-4 mb-4 bg-white">
+            <h5 class="fw-bold mb-3 d-flex align-items-center">
+                <i class="bi bi-bar-chart-fill text-danger me-2"></i> Tổng Quan Đánh Giá Của Khách Hàng
+            </h5>
+
+            <div class="row align-items-center g-4">
+                <!-- Score Block -->
+                <div class="col-12 col-md-3 text-center border-end">
+                    <div class="rating-score-large" th:text="${#numbers.formatDecimal(thongKe.diemTrungBinh, 1, 1)}">5.0</div>
+                    <div class="star-gold fs-5 my-2">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <div class="text-muted small">
+                        Dựa trên <strong class="text-dark" th:text="${thongKe.tongSoDanhGia}">0</strong> đánh giá thực tế
+                    </div>
+                </div>
+
+                <!-- Star Distribution Progress Bars -->
+                <div class="col-12 col-md-5 border-end">
+                    <!-- 5 Stars -->
+                    <div class="d-flex align-items-center mb-2 small">
+                        <span class="me-2" style="width: 45px;">5 <i class="bi bi-star-fill star-gold"></i></span>
+                        <div class="progress flex-grow-1" style="height: 8px;">
+                            <div class="progress-bar bg-warning" th:style="'width: ' + ${thongKe.tyLe5Sao} + '%;'"></div>
+                        </div>
+                        <span class="ms-2 text-muted text-end" style="width: 70px;" th:text="${thongKe.soLuong5Sao} + ' (' + ${thongKe.tyLe5Sao} + '%)'">0 (0%)</span>
+                    </div>
+                    <!-- 4 Stars -->
+                    <div class="d-flex align-items-center mb-2 small">
+                        <span class="me-2" style="width: 45px;">4 <i class="bi bi-star-fill star-gold"></i></span>
+                        <div class="progress flex-grow-1" style="height: 8px;">
+                            <div class="progress-bar bg-warning" th:style="'width: ' + ${thongKe.tyLe4Sao} + '%;'"></div>
+                        </div>
+                        <span class="ms-2 text-muted text-end" style="width: 70px;" th:text="${thongKe.soLuong4Sao} + ' (' + ${thongKe.tyLe4Sao} + '%)'">0 (0%)</span>
+                    </div>
+                    <!-- 3 Stars -->
+                    <div class="d-flex align-items-center mb-2 small">
+                        <span class="me-2" style="width: 45px;">3 <i class="bi bi-star-fill star-gold"></i></span>
+                        <div class="progress flex-grow-1" style="height: 8px;">
+                            <div class="progress-bar bg-warning" th:style="'width: ' + ${thongKe.tyLe3Sao} + '%;'"></div>
+                        </div>
+                        <span class="ms-2 text-muted text-end" style="width: 70px;" th:text="${thongKe.soLuong3Sao} + ' (' + ${thongKe.tyLe3Sao} + '%)'">0 (0%)</span>
+                    </div>
+                    <!-- 2 Stars -->
+                    <div class="d-flex align-items-center mb-2 small">
+                        <span class="me-2" style="width: 45px;">2 <i class="bi bi-star-fill star-gold"></i></span>
+                        <div class="progress flex-grow-1" style="height: 8px;">
+                            <div class="progress-bar bg-warning" th:style="'width: ' + ${thongKe.tyLe2Sao} + '%;'"></div>
+                        </div>
+                        <span class="ms-2 text-muted text-end" style="width: 70px;" th:text="${thongKe.soLuong2Sao} + ' (' + ${thongKe.tyLe2Sao} + '%)'">0 (0%)</span>
+                    </div>
+                    <!-- 1 Star -->
+                    <div class="d-flex align-items-center small">
+                        <span class="me-2" style="width: 45px;">1 <i class="bi bi-star-fill star-gold"></i></span>
+                        <div class="progress flex-grow-1" style="height: 8px;">
+                            <div class="progress-bar bg-warning" th:style="'width: ' + ${thongKe.tyLe1Sao} + '%;'"></div>
+                        </div>
+                        <span class="ms-2 text-muted text-end" style="width: 70px;" th:text="${thongKe.soLuong1Sao} + ' (' + ${thongKe.tyLe1Sao} + '%)'">0 (0%)</span>
+                    </div>
+                </div>
+
+                <!-- Filter Quick Buttons -->
+                <div class="col-12 col-md-4">
+                    <div class="fw-semibold small text-muted mb-2">Lọc theo tiêu chí:</div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a th:href="@{/san-pham/{id}/danh-gia(id=${sanPham.maSanPham})}" 
+                           th:classappend="${soSao == null and coHinhAnh == null} ? 'active' : ''" class="filter-btn">
+                            Tất cả (<span th:text="${thongKe.tongSoDanhGia}">0</span>)
+                        </a>
+                        <a th:href="@{/san-pham/{id}/danh-gia(id=${sanPham.maSanPham}, soSao=5)}" 
+                           th:classappend="${soSao == 5} ? 'active' : ''" class="filter-btn">
+                            5 Sao (<span th:text="${thongKe.soLuong5Sao}">0</span>)
+                        </a>
+                        <a th:href="@{/san-pham/{id}/danh-gia(id=${sanPham.maSanPham}, soSao=4)}" 
+                           th:classappend="${soSao == 4} ? 'active' : ''" class="filter-btn">
+                            4 Sao (<span th:text="${thongKe.soLuong4Sao}">0</span>)
+                        </a>
+                        <a th:href="@{/san-pham/{id}/danh-gia(id=${sanPham.maSanPham}, soSao=3)}" 
+                           th:classappend="${soSao == 3} ? 'active' : ''" class="filter-btn">
+                            3 Sao (<span th:text="${thongKe.soLuong3Sao}">0</span>)
+                        </a>
+                        <a th:href="@{/san-pham/{id}/danh-gia(id=${sanPham.maSanPham}, soSao=2)}" 
+                           th:classappend="${soSao == 2} ? 'active' : ''" class="filter-btn">
+                            2 Sao (<span th:text="${thongKe.soLuong2Sao}">0</span>)
+                        </a>
+                        <a th:href="@{/san-pham/{id}/danh-gia(id=${sanPham.maSanPham}, soSao=1)}" 
+                           th:classappend="${soSao == 1} ? 'active' : ''" class="filter-btn">
+                            1 Sao (<span th:text="${thongKe.soLuong1Sao}">0</span>)
+                        </a>
+                        <a th:href="@{/san-pham/{id}/danh-gia(id=${sanPham.maSanPham}, coHinhAnh=true)}" 
+                           th:classappend="${coHinhAnh == true} ? 'active' : ''" class="filter-btn">
+                            <i class="bi bi-camera-fill me-1"></i> Có Hình Ảnh (<span th:text="${thongKe.soLuongCoHinhAnh}">0</span>)
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviews List Card -->
+        <div class="card card-custom p-4 bg-white">
+            <h5 class="fw-bold mb-4 border-bottom pb-2">
+                <i class="bi bi-chat-heart text-danger me-2"></i> Nhận Xét Từ Người Mua (<span th:text="${totalElements}">0</span>)
+            </h5>
+
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(danhSachDanhGia)}" class="text-center py-5 text-muted">
+                <i class="bi bi-chat-square-dots fs-1 d-block mb-2"></i>
+                Chưa có đánh giá nào phù hợp với bộ lọc hiện tại.
+            </div>
+
+            <!-- List of Reviews -->
+            <div class="list-group list-group-flush" th:unless="${#lists.isEmpty(danhSachDanhGia)}">
+                <div class="list-group-item px-0 py-4 border-bottom" th:each="dg : ${danhSachDanhGia}">
+                    <div class="d-flex align-items-start gap-3">
+                        <!-- User Avatar -->
+                        <div class="review-avatar">
+                            <i class="bi bi-person-fill fs-5"></i>
+                        </div>
+
+                        <!-- Review Detail -->
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <strong class="text-dark" th:text="${dg.tenNguoiDanhGiaDisplay}">Nguyễn Văn An</strong>
+                                <span class="badge bg-secondary-subtle text-secondary small" th:if="${dg.anDanh}">Đánh giá ẩn danh</span>
+                                <span class="badge bg-success-subtle text-success small border border-success-subtle">
+                                    <i class="bi bi-patch-check-fill me-1"></i> Đã mua hàng
+                                </span>
+                            </div>
+
+                            <!-- Star Rating -->
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="star-gold">
+                                    <i class="bi" th:each="i : ${#numbers.sequence(1, 5)}" 
+                                       th:classappend="${i <= dg.soSao} ? 'bi-star-fill' : 'bi-star star-empty'"></i>
+                                </span>
+                                <span class="badge bg-light text-dark border small" th:text="${dg.mucDoHaiLongDisplay}">Tuyệt vời</span>
+                                <span class="text-muted small">&bull;</span>
+                                <span class="text-muted small" th:text="${#temporals.format(dg.ngayTao, 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</span>
+                            </div>
+
+                            <!-- Variant if available -->
+                            <div class="small text-muted mb-2" th:if="${dg.chiTietDonHang != null and dg.chiTietDonHang.tenBienThe != null}">
+                                Phân loại: <span class="text-dark" th:text="${dg.chiTietDonHang.tenBienThe}">Màu Đen</span>
+                            </div>
+
+                            <!-- Content Text -->
+                            <div class="text-dark mb-3" style="line-height: 1.6; white-space: pre-wrap;" th:text="${dg.noiDung}">
+                                Sản phẩm rất đẹp, đóng gói cẩn thận và giao hàng nhanh.
+                            </div>
+
+                            <!-- Photo Gallery -->
+                            <div class="d-flex flex-wrap gap-2 mb-3" th:if="${dg.danhSachHinhAnh != null and !dg.danhSachHinhAnh.isEmpty()}">
+                                <img th:each="anh : ${dg.danhSachHinhAnh}" th:src="${anh.linkAnh}" 
+                                     alt="Ảnh feedback" class="review-img-thumb" 
+                                     onclick="moModalAnh(this.src)">
+                            </div>
+
+                            <!-- Shop Response Box -->
+                            <div class="shop-reply-box mt-3" th:if="${dg.phanHoiCuaShop != null and !#strings.isEmpty(dg.phanHoiCuaShop)}">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <i class="bi bi-reply-fill text-danger"></i>
+                                    <strong class="text-danger" th:text="'Phản hồi của ' + (${dg.gianHang != null} ? ${dg.gianHang.tenGianHang} : 'Shop')">Shop phản hồi</strong>
+                                    <span class="text-muted small" th:if="${dg.ngayShopPhanHoi != null}" 
+                                          th:text="'&bull; ' + ${#temporals.format(dg.ngayShopPhanHoi, 'dd/MM/yyyy HH:mm')}">02/01/2026</span>
+                                </div>
+                                <div class="small text-secondary" th:text="${dg.phanHoiCuaShop}">Cảm ơn bạn đã tin tưởng ủng hộ shop ạ!</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <nav aria-label="Page navigation" class="mt-4" th:if="${totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/san-pham/{id}/danh-gia(id=${sanPham.maSanPham}, soSao=${soSao}, coHinhAnh=${coHinhAnh}, page=${currentPage - 1})}">Trước</a>
+                    </li>
+                    <li class="page-item" th:each="p : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${p == currentPage} ? 'active' : ''">
+                        <a class="page-link" th:href="@{/san-pham/{id}/danh-gia(id=${sanPham.maSanPham}, soSao=${soSao}, coHinhAnh=${coHinhAnh}, page=${p})}" th:text="${p + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/san-pham/{id}/danh-gia(id=${sanPham.maSanPham}, soSao=${soSao}, coHinhAnh=${coHinhAnh}, page=${currentPage + 1})}">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Image Lightbox Modal -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-transparent border-0 text-center">
+                <div class="modal-body p-0 position-relative">
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <img id="modalImg" src="" class="img-fluid rounded shadow-lg" style="max-height: 85vh; object-fit: contain;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function moModalAnh(src) {
+            document.getElementById('modalImg').src = src;
+            const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+            modal.show();
+        }
+
+        function toggleWishlist(maSanPham) {
+            const formData = new FormData();
+            formData.append('maSanPham', maSanPham);
+
+            fetch('/khach-hang/yeu-thich/toggle', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const btn = document.getElementById('btnWishlist');
+                    if (data.daYeuThich) {
+                        btn.className = 'btn btn-sm rounded-pill px-3 ms-auto btn-danger text-white';
+                        btn.innerHTML = '<i class="bi bi-heart-fill me-1"></i> <span id="textWishlist">Đã yêu thích</span> (<span id="countWishlist">' + data.tongLuotThich + '</span>)';
+                    } else {
+                        btn.className = 'btn btn-sm rounded-pill px-3 ms-auto btn-outline-danger';
+                        btn.innerHTML = '<i class="bi bi-heart me-1"></i> <span id="textWishlist">Thêm vào yêu thích</span> (<span id="countWishlist">' + data.tongLuotThich + '</span>)';
+                    }
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra.');
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+        function toggleTheoDoiShop(maGianHang) {
+            const formData = new FormData();
+            formData.append('maGianHang', maGianHang);
+
+            fetch('/khach-hang/theo-doi/toggle', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const btn = document.getElementById('btnFollowShop');
+                    if (data.daTheoDoi) {
+                        btn.className = 'btn btn-sm py-0 px-2 rounded-pill border btn-success text-white';
+                        btn.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> <span id="textFollowShop">Đang theo dõi</span> (<span id="countFollowShop">' + data.tongLuotTheoDoi + '</span>)';
+                    } else {
+                        btn.className = 'btn btn-sm py-0 px-2 rounded-pill border btn-outline-danger';
+                        btn.innerHTML = '<i class="bi bi-plus me-1"></i> <span id="textFollowShop">Theo dõi Shop</span> (<span id="countFollowShop">' + data.tongLuotTheoDoi + '</span>)';
+                    }
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra.');
+                }
+            })
+            .catch(err => console.error(err));
+        }
+    </script>
+</body>
+</html>

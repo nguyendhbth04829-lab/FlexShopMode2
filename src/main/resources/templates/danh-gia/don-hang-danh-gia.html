@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đánh Giá Sản Phẩm Đơn Hàng - FlexShop</title>
+    <!-- Google Fonts: Be Vietnam Pro (Chuẩn phông chữ Tiếng Việt không lỗi) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f8f9fa;
+            color: #2b2f38;
+            -webkit-font-smoothing: antialiased;
+        }
+        .navbar-brand-custom {
+            font-weight: 700;
+            color: #ee4d2d !important;
+            letter-spacing: 0.5px;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .btn-primary-custom {
+            background-color: #ee4d2d;
+            border-color: #ee4d2d;
+            color: white;
+            font-weight: 600;
+        }
+        .btn-primary-custom:hover {
+            background-color: #d73211;
+            border-color: #d73211;
+            color: white;
+        }
+        .star-gold {
+            color: #ffb703;
+        }
+        .product-thumb {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-white shadow-sm sticky-top py-2">
+        <div class="container">
+            <a class="navbar-brand navbar-brand-custom d-flex align-items-center fs-4" th:href="@{/khach-hang/danh-gia/cua-toi}">
+                <i class="bi bi-stars text-danger me-2"></i>FlexShop <span class="badge bg-danger ms-2 fs-6 fw-normal">Đánh Giá Sản Phẩm</span>
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <a th:href="@{/khach-hang/danh-gia/cua-toi}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-clock-history me-1"></i> Lịch Sử Đánh Giá
+                </a>
+                <a th:href="@{/khieu-nai}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-shield-exclamation me-1"></i> Khiếu Nại
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        <!-- Thông báo lỗi hoặc thành công -->
+        <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show card-custom" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span th:text="${thongBaoThanhCong}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show card-custom" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span th:text="${thongBaoLoi}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Order Header Card -->
+        <div class="card card-custom p-4 mb-4 bg-white">
+            <div class="d-flex flex-wrap justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small mb-1">Chi tiết đơn hàng đánh giá</div>
+                    <h4 class="fw-bold mb-1">
+                        Mã đơn: <span class="text-danger" th:text="${donHang.maCodeDonShop}">FLEX-SHOP-01</span>
+                    </h4>
+                    <div class="d-flex align-items-center gap-3 text-muted small mt-2">
+                        <span><i class="bi bi-shop me-1"></i> Gian hàng: <strong class="text-dark" th:text="${donHang.gianHang != null ? donHang.gianHang.tenGianHang : 'FlexShop Official'}">Shop</strong></span>
+                        <span>&bull;</span>
+                        <span><i class="bi bi-calendar-check me-1"></i> Trạng thái: 
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" th:if="${donHang.trangThai == 'DA_GIAO'}">
+                                <i class="bi bi-check-circle me-1"></i> Đã Giao Hàng Thành Công
+                            </span>
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1" th:unless="${donHang.trangThai == 'DA_GIAO'}" th:text="${donHang.trangThai}">
+                                Đang xử lý
+                            </span>
+                        </span>
+                    </div>
+                </div>
+                <div class="mt-3 mt-md-0">
+                    <span class="badge bg-light text-dark border p-2">
+                        <i class="bi bi-info-circle text-primary me-1"></i> Đánh giá sau khi nhận hàng giúp tăng uy tín cộng đồng
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products List Card -->
+        <div class="card card-custom bg-white p-4">
+            <h5 class="fw-bold mb-3 d-flex align-items-center">
+                <i class="bi bi-box-seam me-2 text-danger"></i> Danh Sách Sản Phẩm Cần Đánh Giá (<span th:text="${danhSachItem != null ? danhSachItem.size() : 0}">0</span>)
+            </h5>
+
+            <div th:if="${#lists.isEmpty(danhSachItem)}" class="text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                Không tìm thấy sản phẩm nào trong đơn hàng này.
+            </div>
+
+            <div class="list-group list-group-flush" th:unless="${#lists.isEmpty(danhSachItem)}">
+                <div class="list-group-item px-0 py-3 border-bottom" th:each="item : ${danhSachItem}">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <img th:src="${item.linkAnhSanPham}" alt="Ảnh sản phẩm" class="product-thumb">
+                        </div>
+                        <div class="col">
+                            <h6 class="fw-semibold mb-1" th:text="${item.chiTietDonHang.tenSanPham}">Tên Sản Phẩm</h6>
+                            <div class="small text-muted mb-1" th:if="${item.chiTietDonHang.tenBienThe != null}">
+                                Phân loại hàng: <span class="badge bg-light text-secondary border" th:text="${item.chiTietDonHang.tenBienThe}">Màu Đen</span>
+                            </div>
+                            <div class="small text-muted">
+                                Số lượng: <strong th:text="${item.chiTietDonHang.soLuong}">1</strong> &bull; Đơn giá: 
+                                <span class="text-danger fw-semibold" th:text="${#numbers.formatDecimal(item.chiTietDonHang.donGia, 0, 'COMMA', 0, 'POINT')} + ' đ'">100.000 đ</span>
+                            </div>
+                        </div>
+
+                        <!-- Action Column -->
+                        <div class="col-12 col-md-4 text-md-end mt-3 mt-md-0">
+                            <!-- Case 1: Chưa đánh giá -->
+                            <div th:if="${!item.daDanhGia}">
+                                <a th:href="@{/khach-hang/danh-gia/viet/{id}(id=${item.chiTietDonHang.maChiTietDon})}" class="btn btn-primary-custom btn-sm px-3 py-2 shadow-sm">
+                                    <i class="bi bi-star-fill text-warning me-1"></i> Viết Đánh Giá Ngay
+                                </a>
+                            </div>
+
+                            <!-- Case 2: Đã đánh giá -->
+                            <div th:if="${item.daDanhGia}">
+                                <div class="mb-1">
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                        <i class="bi bi-check2-circle me-1"></i> Đã Đánh Giá
+                                    </span>
+                                    <span class="ms-1 star-gold fw-bold" th:if="${item.danhGia != null}">
+                                        <span th:text="${item.danhGia.soSao}">5</span> <i class="bi bi-star-fill"></i>
+                                    </span>
+                                </div>
+                                <div class="mt-2" th:if="${item.maSanPham != null}">
+                                    <a th:href="@{/san-pham/{id}/danh-gia(id=${item.maSanPham})}" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-eye me-1"></i> Xem Trên Sản Phẩm
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Review Snippet Preview if already reviewed -->
+                    <div class="mt-3 p-3 bg-light rounded" th:if="${item.daDanhGia and item.danhGia != null}">
+                        <div class="d-flex align-items-center gap-2 mb-1 small">
+                            <strong class="text-dark"><i class="bi bi-chat-quote-fill text-secondary me-1"></i> Đánh giá của bạn:</strong>
+                            <span class="text-muted" th:text="${#temporals.format(item.danhGia.ngayTao, 'dd/MM/yyyy HH:mm')}">01/01/2026</span>
+                            <span class="badge bg-secondary-subtle text-secondary" th:if="${item.danhGia.anDanh}">Ẩn danh</span>
+                        </div>
+                        <p class="mb-2 small text-secondary" th:text="${item.danhGia.noiDung}">Chất lượng sản phẩm rất tuyệt vời!</p>
+
+                        <!-- Attached thumbnails preview -->
+                        <div class="d-flex gap-2" th:if="${item.danhGia.danhSachHinhAnh != null and !item.danhGia.danhSachHinhAnh.isEmpty()}">
+                            <img th:each="anh : ${item.danhGia.danhSachHinhAnh}" th:src="${anh.linkAnh}" 
+                                 class="rounded border" style="width: 50px; height: 50px; object-fit: cover;" alt="Ảnh đính kèm">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
