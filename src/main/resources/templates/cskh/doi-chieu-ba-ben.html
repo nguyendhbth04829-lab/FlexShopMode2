@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tra Cứu Đối Chiếu 3 Bên - CSKH FlexShop</title>
+    <!-- Google Fonts: Be Vietnam Pro (Chuẩn phông chữ Tiếng Việt) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f0f2f5;
+            color: #2b2f38;
+            -webkit-font-smoothing: antialiased;
+        }
+        .navbar-brand-custom {
+            font-weight: 700;
+            color: #ee4d2d !important;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+        .party-card {
+            border-radius: 12px;
+            border-top: 4px solid transparent;
+            transition: box-shadow 0.2s;
+        }
+        .party-card:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+        .party-buyer { border-top-color: #0d6efd; }
+        .party-seller { border-top-color: #198754; }
+        .party-shipper { border-top-color: #fd7e14; }
+
+        .evidence-thumb {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .evidence-thumb:hover {
+            transform: scale(1.03);
+        }
+        .pod-image-box {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 2px dashed #fd7e14;
+            background: #fff;
+        }
+        .pod-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(253, 126, 20, 0.9);
+            color: white;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .timeline-item {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 20px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 6px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #0d6efd;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px #0d6efd;
+        }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 13px;
+            top: 22px;
+            bottom: -20px;
+            width: 2px;
+            background-color: #dee2e6;
+        }
+        .timeline-item:last-child::after {
+            display: none;
+        }
+        .note-bubble {
+            background-color: #f8fafc;
+            border-left: 3px solid #64748b;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+        }
+        .btn-primary-custom {
+            background-color: #ee4d2d;
+            border-color: #ee4d2d;
+            color: white;
+            font-weight: 600;
+        }
+        .btn-primary-custom:hover {
+            background-color: #d73211;
+            border-color: #d73211;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar CSKH -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm sticky-top">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand navbar-brand-custom" href="/cskh/dashboard">
+            <i class="bi bi-headset"></i> FlexShop CSKH Triage
+        </a>
+        <div class="d-flex align-items-center gap-3">
+            <a href="/cskh/dashboard" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-arrow-left"></i> Quay lại Dashboard
+            </a>
+            <span class="badge bg-secondary-subtle text-white border border-secondary px-3 py-2">
+                <i class="bi bi-person-check-fill text-success"></i> CSKH: <b>Ngô Thị CSKH Hỗ Trợ</b>
+            </span>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid px-4 pb-5">
+
+    <!-- Flash Alert -->
+    <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2 fs-5"></i> <span th:text="${thongBaoThanhCong}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i> <span th:text="${thongBaoLoi}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- HEADER HỒ SƠ ĐIỀU TRA TICKET -->
+    <div class="card card-custom bg-white p-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge bg-dark fs-6 px-3 py-2" th:text="${doiChieu.phieuKhieuNai.maCodePhieu}">KN-1001</span>
+                    <span class="badge fs-6 px-3 py-2" th:classappend="${doiChieu.phieuKhieuNai.badgeClass}" th:text="${doiChieu.phieuKhieuNai.trangThaiDisplay}">Đang xử lý</span>
+                    <span class="badge fs-6 px-3 py-2" th:classappend="${doiChieu.phieuKhieuNai.mucDoUuTienBadgeClass}">
+                        Ưu tiên: <span th:text="${doiChieu.phieuKhieuNai.mucDoUuTienDisplay}"></span>
+                    </span>
+                </div>
+                <div class="text-muted small">
+                    Đơn hàng: <b class="text-dark" th:text="${doiChieu.donHangShop.maCodeDonShop}">SHOP-TECH-88</b> | 
+                    Mã vận đơn: <b class="text-primary" th:text="${doiChieu.donHangShop.maVanDon != null ? doiChieu.donHangShop.maVanDon : 'Chưa có'}">VNPOST-88</b> | 
+                    Khởi tạo lúc: <span th:text="${#temporals.format(doiChieu.phieuKhieuNai.ngayTao, 'dd/MM/yyyy HH:mm:ss')}"></span>
+                </div>
+            </div>
+
+            <!-- Thao tác phân loại & tiếp nhận nhanh -->
+            <div class="d-flex gap-2">
+                <form th:if="${doiChieu.phieuKhieuNai.cskhXuLy == null}" 
+                      th:action="@{/cskh/tiep-nhan/{id}(id=${doiChieu.phieuKhieuNai.maPhieu})}" method="post">
+                    <input type="hidden" name="redirectUrl" th:value="'/cskh/doi-chieu/' + ${doiChieu.phieuKhieuNai.maPhieu}">
+                    <button type="submit" class="btn btn-warning fw-bold shadow-sm">
+                        <i class="bi bi-hand-index-thumb"></i> Tiếp nhận Ticket ngay
+                    </button>
+                </form>
+
+                <button type="button" class="btn btn-navy shadow-sm" data-bs-toggle="modal" data-bs-target="#modalPhanLoaiChiTiet">
+                    <i class="bi bi-tags"></i> Phân loại & Chuyển trạng thái
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KHU VỰC TRA CỨU ĐỐI CHIẾU 3 BÊN (3-WAY RECONCILIATION) -->
+    <div class="row g-4 mb-4">
+
+        <!-- BÊN 1: KHÁCH HÀNG (BUYER) -->
+        <div class="col-lg-4">
+            <div class="card card-custom party-card party-buyer bg-white h-100 p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                    <h5 class="fw-bold text-primary mb-0">
+                        <i class="bi bi-person-circle me-1"></i> Bên 1: Khách Hàng
+                    </h5>
+                    <span class="badge bg-primary-subtle text-primary">Người Mua Hàng</span>
+                </div>
+
+                <div class="mb-3">
+                    <div class="small text-muted">Họ và tên người nhận:</div>
+                    <div class="fw-bold fs-6" th:text="${doiChieu.phieuKhieuNai.khachHang.hoVaTen}">Nguyễn Văn An</div>
+                    <div class="small text-muted">
+                        <i class="bi bi-telephone"></i> SĐT: <b th:text="${doiChieu.phieuKhieuNai.khachHang.soDienThoai}">0901234567</b> | 
+                        <i class="bi bi-envelope"></i> <span th:text="${doiChieu.phieuKhieuNai.khachHang.email}">khachhang@flexshop.vn</span>
+                    </div>
+                </div>
+
+                <div class="mb-3 bg-light p-3 rounded">
+                    <div class="small text-muted">Địa chỉ nhận hàng thực tế:</div>
+                    <div class="small fw-semibold" th:if="${doiChieu.donHangShop.donHangTong.diaChiGiao != null}">
+                        <span th:text="${doiChieu.donHangShop.donHangTong.diaChiGiao.diaChiChiTiet}"></span>, 
+                        <span th:text="${doiChieu.donHangShop.donHangTong.diaChiGiao.xaPhuong}"></span>, 
+                        <span th:text="${doiChieu.donHangShop.donHangTong.diaChiGiao.quanHuyen}"></span>, 
+                        <span th:text="${doiChieu.donHangShop.donHangTong.diaChiGiao.tinhThanh}"></span>
+                    </div>
+                    <div class="small text-muted fst-italic" th:if="${doiChieu.donHangShop.donHangTong.diaChiGiao == null}">
+                        Theo thông tin mặc định của tài khoản
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="small text-muted">Lý do khiếu nại của khách:</div>
+                    <div class="badge bg-danger-subtle text-danger border border-danger-subtle fs-6 py-2 px-3 mt-1" 
+                         th:text="${doiChieu.phieuKhieuNai.tenLoaiKhieuNaiDisplay}">
+                        Hàng bị hỏng vỡ / Móp méo
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="small text-muted">Giải pháp yêu cầu:</div>
+                    <div class="fw-semibold text-dark" th:text="${doiChieu.phieuKhieuNai.tenGiaiPhapDisplay}">Trả hàng & Hoàn tiền</div>
+                    <div class="text-danger fw-bold fs-5 mt-1">
+                        Yêu cầu hoàn: <span th:text="${#numbers.formatDecimal(doiChieu.phieuKhieuNai.soTienHoanTra, 0, 'POINT', 0, 'COMMA')}">0</span> VNĐ
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="small text-muted">Nội dung phản ánh sự cố:</div>
+                    <div class="p-3 bg-light rounded text-dark small border" style="max-height: 120px; overflow-y: auto;">
+                        <i class="bi bi-chat-quote-fill text-muted me-1"></i>
+                        <span th:text="${doiChieu.phieuKhieuNai.noiDungMoTa}">Nội dung mô tả sự cố từ khách hàng...</span>
+                    </div>
+                </div>
+
+                <!-- Bằng chứng khách gửi -->
+                <div>
+                    <div class="small fw-bold text-secondary mb-2">
+                        <i class="bi bi-camera-fill text-primary"></i> Bằng chứng khách tải lên (<span th:text="${#lists.size(doiChieu.danhSachBangChungKhachHang)}"></span> tệp):
+                    </div>
+                    <div th:if="${#lists.isEmpty(doiChieu.danhSachBangChungKhachHang)}" class="text-muted small fst-italic">
+                        Khách không đính kèm tệp tin.
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-6" th:each="bc : ${doiChieu.danhSachBangChungKhachHang}">
+                            <div th:if="${bc.loaiTepTin == 'HINH_ANH'}" class="border rounded p-1 bg-white">
+                                <a th:href="${bc.linkTepTin}" target="_blank">
+                                    <img th:src="${bc.linkTepTin}" class="evidence-thumb" alt="Ảnh bằng chứng khách">
+                                </a>
+                                <div class="text-center small text-muted mt-1">Ảnh bóc hàng</div>
+                            </div>
+                            <div th:if="${bc.loaiTepTin == 'VIDEO'}" class="border rounded p-1 bg-white">
+                                <video th:src="${bc.linkTepTin}" controls class="w-100 rounded" style="height: 160px; background: #000;"></video>
+                                <div class="text-center small text-muted mt-1">Video mở hộp</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BÊN 2: NGƯỜI BÁN / SHOP (SELLER) -->
+        <div class="col-lg-4">
+            <div class="card card-custom party-card party-seller bg-white h-100 p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                    <h5 class="fw-bold text-success mb-0">
+                        <i class="bi bi-shop me-1"></i> Bên 2: Người Bán / Shop
+                    </h5>
+                    <span class="badge bg-success-subtle text-success">Gian Hàng Đối Tác</span>
+                </div>
+
+                <div class="mb-3">
+                    <div class="small text-muted">Tên gian hàng xuất bán:</div>
+                    <div class="fw-bold fs-6 text-dark">
+                        <span th:text="${doiChieu.donHangShop.gianHang.tenGianHang}">TechZone Flagship Store</span>
+                        <span class="badge bg-danger ms-1" th:if="${doiChieu.donHangShop.gianHang.hangGianHang == 'MALL'}">MALL</span>
+                    </div>
+                    <div class="small text-muted">
+                        Chủ shop: <b th:text="${doiChieu.donHangShop.gianHang.chuSoHuu.hoVaTen}">Trần Minh Đức</b> | 
+                        Đánh giá: ⭐ <b th:text="${doiChieu.donHangShop.gianHang.diemDanhGiaTb}">4.9</b>/5.0
+                    </div>
+                </div>
+
+                <div class="mb-3 bg-light p-3 rounded">
+                    <div class="small text-muted">Kho hàng đóng gói xuất hàng:</div>
+                    <div class="small fw-semibold" th:text="${doiChieu.donHangShop.gianHang.diaChiKho}">
+                        Kho Tổng Flex Logistics, Cụm CN vừa và nhỏ Từ Liêm, Hà Nội
+                    </div>
+                    <div class="small text-muted mt-1">
+                        Hotline kho: <span th:text="${doiChieu.donHangShop.gianHang.sdtKho}">0988889999</span>
+                    </div>
+                </div>
+
+                <!-- Chi tiết đơn hàng xuất bán -->
+                <div class="mb-3">
+                    <div class="small fw-bold text-secondary mb-2">Sản phẩm Shop đã đóng gói gửi đi:</div>
+                    <div class="border rounded p-2 bg-white" style="max-height: 240px; overflow-y: auto;">
+                        <table class="table table-sm table-borderless align-middle mb-0 small">
+                            <tbody>
+                                <tr th:each="ct : ${doiChieu.donHangShop.danhSachChiTiet}" class="border-bottom">
+                                    <td style="width: 50px;">
+                                        <img th:src="${ct.bienThe.sanPham.linkAnhChinh != null ? ct.bienThe.sanPham.linkAnhChinh : 'https://placehold.co/80x80/ee4d2d/white?text=SP'}" 
+                                             class="rounded" width="45" height="45" style="object-fit: cover;">
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold text-truncate" style="max-width: 170px;" th:text="${ct.bienThe.sanPham.tenSanPham}">Tên sản phẩm</div>
+                                        <div class="text-muted small">
+                                            Phân loại: <span th:text="${ct.bienThe.tenBienThe}">Màu đen</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="fw-semibold" th:text="${#numbers.formatDecimal(ct.donGiaBan, 0, 'POINT', 0, 'COMMA')} + 'đ'">1.280.000đ</div>
+                                        <div class="text-muted small">x<span th:text="${ct.soLuong}">1</span></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tài chính đơn hàng -->
+                <div class="p-3 bg-light rounded">
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Tiền hàng shop:</span>
+                        <span class="fw-semibold text-dark" th:text="${#numbers.formatDecimal(doiChieu.donHangShop.tienHangShop, 0, 'POINT', 0, 'COMMA')} + ' VNĐ'"></span>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Phí vận chuyển:</span>
+                        <span class="fw-semibold text-dark" th:text="${#numbers.formatDecimal(doiChieu.donHangShop.phiVanChuyen, 0, 'POINT', 0, 'COMMA')} + ' VNĐ'"></span>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted border-top pt-2 mt-1">
+                        <span class="fw-bold text-dark">Tổng thu đơn hàng:</span>
+                        <span class="fw-bold text-danger fs-6" th:text="${#numbers.formatDecimal(doiChieu.donHangShop.tongTienShopNhan, 0, 'POINT', 0, 'COMMA')} + ' VNĐ'"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BÊN 3: VẬN CHUYỂN & SHIPPER (LOGISTICS & POD) -->
+        <div class="col-lg-4">
+            <div class="card card-custom party-card party-shipper bg-white h-100 p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                    <h5 class="fw-bold text-warning-emphasis mb-0">
+                        <i class="bi bi-truck me-1 text-warning"></i> Bên 3: Vận Chuyển & Shipper
+                    </h5>
+                    <span class="badge bg-warning-subtle text-warning-emphasis">Bằng Chứng POD</span>
+                </div>
+
+                <!-- Thông tin Tài xế giao hàng -->
+                <div class="mb-3" th:if="${doiChieu.taiXe != null}">
+                    <div class="small text-muted">Tài xế phụ trách giao kiện hàng:</div>
+                    <div class="fw-bold fs-6 text-dark" th:text="${doiChieu.taiXe.nguoiDung.hoVaTen}">Phạm Văn Giao Vận</div>
+                    <div class="small text-muted">
+                        <i class="bi bi-telephone"></i> SĐT: <b th:text="${doiChieu.taiXe.nguoiDung.soDienThoai}">0987654321</b> | 
+                        Đánh giá: ⭐ <b th:text="${doiChieu.taiXe.diemDanhGiaTb}">4.9</b>
+                    </div>
+                    <div class="small text-muted mt-1">
+                        Phương tiện: <span th:text="${doiChieu.taiXe.loaiPhuongTien}">Xe máy</span> | 
+                        Biển số xe: <span class="badge bg-dark text-white font-monospace" th:text="${doiChieu.taiXe.bienSoXe}">29-G1 888.99</span>
+                    </div>
+                </div>
+                <div class="mb-3" th:if="${doiChieu.taiXe == null}">
+                    <div class="alert alert-warning small mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> Chưa có hồ sơ tài xế chi tiết cho vận đơn này.
+                    </div>
+                </div>
+
+                <!-- Thông tin nhiệm vụ giao hàng -->
+                <div class="mb-3 bg-light p-3 rounded" th:if="${doiChieu.nhiemVuGiaoHang != null}">
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Mã vận đơn:</span>
+                        <span class="fw-bold text-primary font-monospace" th:text="${doiChieu.donHangShop.maVanDon}">VNPOST-88</span>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Trạng thái giao:</span>
+                        <span class="badge bg-success" th:text="${doiChieu.nhiemVuGiaoHang.trangThaiDisplay}">Giao thành công</span>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Thời gian giao:</span>
+                        <span class="fw-semibold text-dark" th:text="${#temporals.format(doiChieu.nhiemVuGiaoHang.thoiGianGiaoThanhCong, 'dd/MM/yyyy HH:mm:ss')}"></span>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted mb-1" th:if="${doiChieu.nhiemVuGiaoHang.viDoGiaoHang != null}">
+                        <span>Tọa độ GPS giao:</span>
+                        <a th:href="'https://www.google.com/maps?q=' + ${doiChieu.nhiemVuGiaoHang.viDoGiaoHang} + ',' + ${doiChieu.nhiemVuGiaoHang.kinhDoGiaoHang}" 
+                           target="_blank" class="fw-semibold text-decoration-none">
+                            <i class="bi bi-geo-alt-fill text-danger"></i> <span th:text="${doiChieu.nhiemVuGiaoHang.viDoGiaoHang} + ', ' + ${doiChieu.nhiemVuGiaoHang.kinhDoGiaoHang}"></span>
+                        </a>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted border-top pt-2 mt-1">
+                        <span>Thu tiền COD:</span>
+                        <span class="fw-bold text-success" th:text="${doiChieu.nhiemVuGiaoHang.daThuCod ? 'ĐÃ THU XONG' : 'ĐÃ THANH TOÁN TRƯỚC'}"></span>
+                    </div>
+                </div>
+
+                <!-- ẢNH POD (PROOF OF DELIVERY) CỦA SHIPPER -->
+                <div>
+                    <div class="small fw-bold text-secondary mb-2">
+                        <i class="bi bi-shield-check text-warning"></i> Ảnh bằng chứng giao hàng (POD - Proof of Delivery):
+                    </div>
+
+                    <div th:if="${doiChieu.nhiemVuGiaoHang != null && doiChieu.nhiemVuGiaoHang.linkAnhBangChungPod != null}" class="pod-image-box p-2 text-center">
+                        <span class="pod-badge"><i class="bi bi-patch-check-fill"></i> POD XÁC THỰC</span>
+                        <a th:href="${doiChieu.nhiemVuGiaoHang.linkAnhBangChungPod}" target="_blank">
+                            <img th:src="${doiChieu.nhiemVuGiaoHang.linkAnhBangChungPod}" class="evidence-thumb" alt="Ảnh POD của shipper">
+                        </a>
+                        <div class="small text-muted mt-2">
+                            <i class="bi bi-info-circle"></i> Bấm vào ảnh để phóng to kiểm tra tình trạng hộp lúc bàn giao.
+                        </div>
+                    </div>
+
+                    <div th:if="${doiChieu.nhiemVuGiaoHang == null || doiChieu.nhiemVuGiaoHang.linkAnhBangChungPod == null}" class="alert alert-secondary small text-center p-3 mb-0">
+                        <i class="bi bi-image-alt fs-3 d-block text-secondary mb-1"></i>
+                        Chưa có ảnh chụp POD được cập nhật từ phía đơn vị vận chuyển.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HÀNH TRÌNH ĐƠN HÀNG & GHI CHÚ NỘI BỘ ĐIỀU TRA CSKH -->
+    <div class="row g-4">
+
+        <!-- DÒNG THỜI GIAN LỊCH SỬ ĐƠN HÀNG (TIMELINE) -->
+        <div class="col-lg-6">
+            <div class="card card-custom bg-white p-4 h-100">
+                <h5 class="fw-bold text-dark mb-4 border-bottom pb-2">
+                    <i class="bi bi-clock-history text-primary me-2"></i> Lịch Sử Hành Trình & Trạng Thái Đơn Hàng
+                </h5>
+
+                <div th:if="${#lists.isEmpty(doiChieu.danhSachLichSuTrangThai)}" class="text-center py-4 text-muted">
+                    Chưa có nhật ký trạng thái đơn hàng.
+                </div>
+
+                <div class="timeline ps-2" th:if="${not #lists.isEmpty(doiChieu.danhSachLichSuTrangThai)}">
+                    <div class="timeline-item" th:each="ls : ${doiChieu.danhSachLichSuTrangThai}">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="badge bg-light text-dark border fw-bold" th:text="${ls.trangThaiMoi}">ĐÃ GIAO</span>
+                            <small class="text-muted font-monospace" th:text="${#temporals.format(ls.thoiGian, 'dd/MM/yyyy HH:mm:ss')}">04/09/2026 14:15:00</small>
+                        </div>
+                        <div class="small fw-semibold text-dark" th:text="${ls.nguoiThucHien}">Shipper Phạm Văn Giao Vận</div>
+                        <div class="small text-muted" th:text="${ls.ghiChu}">Giao hàng thành công tận tay người nhận</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GHI CHÚ ĐIỀU TRA NỘI BỘ CSKH -->
+        <div class="col-lg-6">
+            <div class="card card-custom bg-white p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-journal-text text-danger me-2"></i> Ghi Chú Điều Tra Nội Bộ (CSKH & Admin)
+                    </h5>
+                    <span class="badge bg-secondary-subtle text-secondary small">Chỉ Nội Bộ Thấy</span>
+                </div>
+
+                <!-- Form Thêm Ghi Chú Mới -->
+                <form th:action="@{/cskh/ghi-chu-noi-bo/{id}(id=${doiChieu.phieuKhieuNai.maPhieu})}" 
+                      th:object="${formGhiChu}" method="post" class="mb-4">
+                    <input type="hidden" th:field="*{maNhanVien}">
+                    
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold text-muted">Thêm nhật ký điều tra / xác minh 3 bên mới:</label>
+                        <textarea th:field="*{noiDung}" class="form-control" rows="3" 
+                                  th:classappend="${#fields.hasErrors('noiDung')} ? 'is-invalid' : ''"
+                                  placeholder="Nhập chi tiết biên bản làm việc với Shipper, kết quả đối chiếu camera đóng gói của Shop, hoặc thỏa thuận với khách hàng..." required minlength="5" maxlength="2000"></textarea>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('noiDung')}" th:errors="*{noiDung}"></div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted fst-italic">Tối thiểu 5 ký tự. Được lưu vĩnh viễn theo mã Ticket.</small>
+                        <button type="submit" class="btn btn-navy btn-sm px-3">
+                            <i class="bi bi-plus-circle"></i> Lưu ghi chú điều tra
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Danh sách các ghi chú đã lưu -->
+                <div class="border-top pt-3" style="max-height: 380px; overflow-y: auto;">
+                    <div th:if="${#lists.isEmpty(doiChieu.danhSachGhiChuNoiBo)}" class="text-center py-4 text-muted small">
+                        Chưa có ghi chú điều tra nội bộ nào cho ticket này.
+                    </div>
+
+                    <div class="note-bubble" th:each="note : ${doiChieu.danhSachGhiChuNoiBo}">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <div class="fw-bold text-dark small">
+                                <i class="bi bi-person-badge text-primary me-1"></i> <span th:text="${note.nhanVien.hoVaTen}">Ngô Thị CSKH</span>
+                            </div>
+                            <small class="text-muted font-monospace" th:text="${#temporals.format(note.ngayTao, 'dd/MM/yyyy HH:mm:ss')}">04/09/2026 15:30</small>
+                        </div>
+                        <div class="small text-secondary" style="white-space: pre-wrap;" th:text="${note.noiDung}">Nội dung ghi chú...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL PHÂN LOẠI & CHUYỂN TRẠNG THÁI -->
+<div class="modal fade" id="modalPhanLoaiChiTiet" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form th:action="@{/cskh/phan-loai/{id}(id=${doiChieu.phieuKhieuNai.maPhieu})}" 
+                  th:object="${formPhanLoai}" method="post">
+                <input type="hidden" name="redirectUrl" th:value="'/cskh/doi-chieu/' + ${doiChieu.phieuKhieuNai.maPhieu}">
+                
+                <div class="modal-header bg-light">
+                    <h6 class="modal-title fw-bold">
+                        <i class="bi bi-tags text-primary"></i> Phân Loại & Đổi Trạng Thái Ticket
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Nhóm sự cố -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Nhóm sự cố khiếu nại</label>
+                        <select th:field="*{loaiKhieuNai}" class="form-select" required>
+                            <option value="HONG_VO">Hàng bị hỏng vỡ / Móp méo bao bì</option>
+                            <option value="GIAO_SAI">Giao sai mẫu mã / Kích cỡ / Màu sắc</option>
+                            <option value="HANG_GIA">Hàng giả / Nhái / Nghi vấn tem mác</option>
+                            <option value="THIEU_HANG">Giao thiếu sản phẩm / Phụ kiện</option>
+                            <option value="HET_HAN">Sản phẩm hết hạn sử dụng</option>
+                            <option value="KHAC">Lý do khác</option>
+                        </select>
+                    </div>
+
+                    <!-- Mức độ ưu tiên -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Mức độ ưu tiên xử lý (SLA)</label>
+                        <select th:field="*{mucDoUuTien}" class="form-select" required>
+                            <option value="THAP">🟢 Thấp (Xử lý trong 48h)</option>
+                            <option value="TRUNG_BINH">⚡ Trung bình (Xử lý trong 24h)</option>
+                            <option value="CAO">🔥 Cao (Ưu tiên xử lý trong 8h)</option>
+                            <option value="KHAN_CAP">🚨 Khẩn cấp (Xử lý ngay trong 2h)</option>
+                        </select>
+                    </div>
+
+                    <!-- Trạng thái xử lý -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Trạng thái ticket</label>
+                        <select th:field="*{trangThai}" class="form-select" required>
+                            <option value="MO_MOI">Mở mới</option>
+                            <option value="DANG_XU_LY">CSKH đang xử lý</option>
+                            <option value="CHO_SHOP_PHAN_HOI">Chờ Shop phản hồi</option>
+                            <option value="CHAP_NHAN_HOAN_TIEN">Chấp thuận hoàn tiền</option>
+                            <option value="TU_CHOI_KHIEU_NAI">Từ chối khiếu nại</option>
+                            <option value="DONG_PHIEU">Đóng ticket</option>
+                        </select>
+                    </div>
+
+                    <!-- Nhân viên CSKH phụ trách -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Gán nhân viên phụ trách</label>
+                        <select th:field="*{maCskhPhuTrach}" class="form-select">
+                            <option value="">-- Chưa gán người xử lý --</option>
+                            <option th:each="nv : ${dsNhanVien}" 
+                                    th:value="${nv.maNguoiDung}" 
+                                    th:text="${nv.hoVaTen} + ' (' + ${nv.email} + ')'">
+                                Ngô Thị CSKH
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Ghi chú nội bộ -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Ghi chú điều phối (Nội bộ CSKH)</label>
+                        <textarea th:field="*{ghiChuXuLy}" class="form-control" rows="2" 
+                                  placeholder="Ghi nhận căn cứ chuyển trạng thái hoặc phân công..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary-custom btn-sm">Cập nhật hồ sơ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

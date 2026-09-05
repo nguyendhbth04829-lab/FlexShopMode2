@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSKH Dashboard - Tiếp Nhận & Phân Loại Ticket - FlexShop</title>
+    <!-- Google Fonts: Be Vietnam Pro (Chuẩn phông chữ Tiếng Việt) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f0f2f5;
+            color: #2b2f38;
+            -webkit-font-smoothing: antialiased;
+        }
+        .navbar-brand-custom {
+            font-weight: 700;
+            color: #ee4d2d !important;
+            letter-spacing: 0.5px;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+        .kpi-card {
+            border-radius: 12px;
+            border: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.09);
+        }
+        .btn-primary-custom {
+            background-color: #ee4d2d;
+            border-color: #ee4d2d;
+            color: white;
+            font-weight: 600;
+        }
+        .btn-primary-custom:hover {
+            background-color: #d73211;
+            border-color: #d73211;
+            color: white;
+        }
+        .btn-navy {
+            background-color: #1e293b;
+            color: #fff;
+            border-color: #1e293b;
+        }
+        .btn-navy:hover {
+            background-color: #0f172a;
+            color: #fff;
+        }
+        .badge-priority-urgent {
+            background-color: #dc3545;
+            color: #fff;
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.5); }
+            70% { box-shadow: 0 0 0 8px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar CSKH -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm sticky-top">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand navbar-brand-custom" href="/cskh/dashboard">
+            <i class="bi bi-headset"></i> FlexShop CSKH Triage
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navMain">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active fw-bold" href="/cskh/dashboard">
+                        <i class="bi bi-kanban"></i> Dashboard Tiếp Nhận & Phân Loại
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white-50" href="/khieu-nai/danh-sach">
+                        <i class="bi bi-person-badge"></i> Góc Khách Hàng (US-45)
+                    </a>
+                </li>
+            </ul>
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-secondary-subtle text-white border border-secondary px-3 py-2">
+                    <i class="bi bi-person-check-fill text-success"></i> Đang đăng nhập: <b>Ngô Thị CSKH Hỗ Trợ (ID: 6)</b>
+                </span>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid px-4 pb-5">
+
+    <!-- Thông báo Alert Flash -->
+    <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2 fs-5"></i> <span th:text="${thongBaoThanhCong}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i> <span th:text="${thongBaoLoi}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Tiêu đề trang -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1"><i class="bi bi-speedometer2 text-danger"></i> CSKH Ticket Triage & Điều Tra Tranh Chấp</h3>
+            <p class="text-muted mb-0">Tiếp nhận, phân loại mức độ khẩn cấp và tra cứu đối chiếu 3 bên (Khách hàng - Shop - Shipper POD).</p>
+        </div>
+        <div>
+            <a href="/cskh/dashboard" class="btn btn-outline-secondary btn-sm shadow-sm">
+                <i class="bi bi-arrow-clockwise"></i> Tải lại dữ liệu
+            </a>
+        </div>
+    </div>
+
+    <!-- 4 THẺ KPI DASHBOARD THỐNG KÊ THỜI GIAN THỰC -->
+    <div class="row g-3 mb-4">
+        <!-- Tổng số Ticket -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card kpi-card bg-white shadow-sm p-3 border-start border-4 border-primary">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Tổng Ticket Toàn Sàn</div>
+                        <h2 class="fw-bold text-dark mt-2 mb-0" th:text="${thongKe.tongSoTicket}">0</h2>
+                        <small class="text-muted">Tất cả khiếu nại phát sinh</small>
+                    </div>
+                    <div class="bg-primary-subtle text-primary p-3 rounded-circle fs-3">
+                        <i class="bi bi-receipt"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chờ tiếp nhận -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card kpi-card bg-white shadow-sm p-3 border-start border-4 border-warning">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Chờ Tiếp Nhận / Chưa Gán</div>
+                        <h2 class="fw-bold text-warning mt-2 mb-0" th:text="${thongKe.ticketChuaTiepNhan}">0</h2>
+                        <small class="text-danger fw-semibold">Cần CSKH nhận xử lý ngay</small>
+                    </div>
+                    <div class="bg-warning-subtle text-warning p-3 rounded-circle fs-3">
+                        <i class="bi bi-inbox-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ưu tiên cao / Khẩn cấp -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card kpi-card bg-white shadow-sm p-3 border-start border-4 border-danger">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Khẩn Cấp / Ưu Tiên Cao</div>
+                        <h2 class="fw-bold text-danger mt-2 mb-0" th:text="${thongKe.ticketUuTienCao}">0</h2>
+                        <small class="text-muted">Ưu tiên thụ lý trong 2h</small>
+                    </div>
+                    <div class="bg-danger-subtle text-danger p-3 rounded-circle fs-3">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Khiếu nại Vận chuyển & POD -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card kpi-card bg-white shadow-sm p-3 border-start border-4 border-info">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Khiếu Nại Vận Chuyển & POD</div>
+                        <h2 class="fw-bold text-info mt-2 mb-0" th:text="${thongKe.khieuNaiVanChuyenPod}">0</h2>
+                        <small class="text-muted">Hỏng vỡ, giao sai, thiếu hàng</small>
+                    </div>
+                    <div class="bg-info-subtle text-info p-3 rounded-circle fs-3">
+                        <i class="bi bi-truck"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BỘ LỌC TÌM KIẾM ĐA TIÊU CHÍ CHO CSKH -->
+    <div class="card card-custom bg-white mb-4">
+        <div class="card-body p-4">
+            <h6 class="fw-bold text-secondary mb-3"><i class="bi bi-funnel-fill text-primary"></i> Bộ Lọc & Tìm Kiếm Ticket Hỗ Trợ</h6>
+            <form th:action="@{/cskh/dashboard}" method="get" class="row g-3">
+                <!-- Từ khóa -->
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold">Từ khóa tìm kiếm</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                        <input type="text" name="tuKhoa" th:value="${tuKhoa}" class="form-control"
+                               placeholder="Mã ticket, Mã đơn, Vận đơn, Tên/SĐT khách...">
+                    </div>
+                </div>
+
+                <!-- Phân công phụ trách -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Phân công CSKH</label>
+                    <select name="locPhuTrach" class="form-select">
+                        <option value="TAT_CA" th:selected="${locPhuTrach == 'TAT_CA'}">Toàn bộ ticket</option>
+                        <option value="CHUA_TIEP_NHAN" th:selected="${locPhuTrach == 'CHUA_TIEP_NHAN'}">⚠️ Chưa có người tiếp nhận</option>
+                        <option value="CUA_TOI" th:selected="${locPhuTrach == 'CUA_TOI'}">👤 Được gán cho tôi</option>
+                    </select>
+                </div>
+
+                <!-- Trạng thái -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Trạng thái xử lý</label>
+                    <select name="trangThai" class="form-select">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="MO_MOI" th:selected="${trangThai == 'MO_MOI'}">Mở mới</option>
+                        <option value="DANG_XU_LY" th:selected="${trangThai == 'DANG_XU_LY'}">CSKH đang xử lý</option>
+                        <option value="CHO_SHOP_PHAN_HOI" th:selected="${trangThai == 'CHO_SHOP_PHAN_HOI'}">Chờ Shop phản hồi</option>
+                        <option value="CHAP_NHAN_HOAN_TIEN" th:selected="${trangThai == 'CHAP_NHAN_HOAN_TIEN'}">Chấp nhận hoàn tiền</option>
+                        <option value="TU_CHOI_KHIEU_NAI" th:selected="${trangThai == 'TU_CHOI_KHIEU_NAI'}">Từ chối khiếu nại</option>
+                        <option value="DA_HUY" th:selected="${trangThai == 'DA_HUY'}">Đã hủy</option>
+                    </select>
+                </div>
+
+                <!-- Mức độ ưu tiên -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Mức độ ưu tiên</label>
+                    <select name="mucDoUuTien" class="form-select">
+                        <option value="">Tất cả ưu tiên</option>
+                        <option value="KHAN_CAP" th:selected="${mucDoUuTien == 'KHAN_CAP'}">🚨 Khẩn cấp</option>
+                        <option value="CAO" th:selected="${mucDoUuTien == 'CAO'}">🔥 Cao</option>
+                        <option value="TRUNG_BINH" th:selected="${mucDoUuTien == 'TRUNG_BINH'}">⚡ Trung bình</option>
+                        <option value="THAP" th:selected="${mucDoUuTien == 'THAP'}">🟢 Thấp</option>
+                    </select>
+                </div>
+
+                <!-- Loại khiếu nại -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Nhóm sự cố</label>
+                    <select name="loaiKhieuNai" class="form-select">
+                        <option value="">Tất cả sự cố</option>
+                        <option value="HONG_VO" th:selected="${loaiKhieuNai == 'HONG_VO'}">Hàng hỏng vỡ / Móp méo</option>
+                        <option value="GIAO_SAI" th:selected="${loaiKhieuNai == 'GIAO_SAI'}">Giao sai mẫu / size</option>
+                        <option value="HANG_GIA" th:selected="${loaiKhieuNai == 'HANG_GIA'}">Hàng giả / nhái</option>
+                        <option value="THIEU_HANG" th:selected="${loaiKhieuNai == 'THIEU_HANG'}">Giao thiếu hàng</option>
+                        <option value="KHAC" th:selected="${loaiKhieuNai == 'KHAC'}">Lý do khác</option>
+                    </select>
+                </div>
+
+                <!-- Từ ngày -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Từ ngày</label>
+                    <input type="date" name="tuNgay" th:value="${tuNgay}" class="form-control">
+                </div>
+
+                <!-- Đến ngày -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Đến ngày</label>
+                    <input type="date" name="denNgay" th:value="${denNgay}" class="form-control">
+                </div>
+
+                <!-- Số dòng hiển thị -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Số dòng / trang</label>
+                    <select name="size" class="form-select">
+                        <option value="5" th:selected="${size == 5}">5 dòng</option>
+                        <option value="10" th:selected="${size == 10}">10 dòng</option>
+                        <option value="20" th:selected="${size == 20}">20 dòng</option>
+                        <option value="50" th:selected="${size == 50}">50 dòng</option>
+                    </select>
+                </div>
+
+                <!-- Nút thao tác -->
+                <div class="col-md-6 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-navy px-4">
+                        <i class="bi bi-filter"></i> Lọc Ticket
+                    </button>
+                    <a th:href="@{/cskh/dashboard}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Đặt lại
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- BẢNG DANH SÁCH TICKET HỖ TRỢ TOÀN SÀN -->
+    <div class="card card-custom bg-white">
+        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0">
+                <i class="bi bi-list-task text-primary me-2"></i> Danh Sách Ticket Hỗ Trợ 
+                <span class="badge bg-secondary ms-2" th:text="${pageTicket.totalElements} + ' ticket'"></span>
+            </h5>
+            <small class="text-muted">Hiển thị trang <b th:text="${pageTicket.number + 1}"></b> / <b th:text="${pageTicket.totalPages > 0 ? pageTicket.totalPages : 1}"></b></small>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-secondary small text-uppercase">
+                    <tr>
+                        <th class="ps-4">Mã Ticket & Ưu Tiên</th>
+                        <th>Đơn Hàng / Vận Đơn</th>
+                        <th>Khách Hàng & Shop</th>
+                        <th>Phân Loại Sự Cố</th>
+                        <th>CSKH Phụ Trách</th>
+                        <th>Trạng Thái</th>
+                        <th>Ngày Tạo</th>
+                        <th class="text-end pe-4">Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${pageTicket.empty}">
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="bi bi-folder-x fs-1 d-block text-secondary mb-2"></i>
+                            Không tìm thấy ticket nào phù hợp với điều kiện tìm kiếm.
+                        </td>
+                    </tr>
+                    <tr th:each="ticket : ${pageTicket.content}">
+                        <!-- Mã Ticket & Ưu Tiên -->
+                        <td class="ps-4">
+                            <div class="fw-bold text-dark fs-6" th:text="${ticket.maCodePhieu}">KN-1001</div>
+                            <span class="badge mt-1" 
+                                  th:classappend="${ticket.mucDoUuTien == 'KHAN_CAP' ? 'badge-priority-urgent' : ticket.mucDoUuTienBadgeClass}"
+                                  th:text="${ticket.mucDoUuTienDisplay}">
+                                Cao
+                            </span>
+                        </td>
+
+                        <!-- Đơn hàng / Vận đơn -->
+                        <td>
+                            <div class="fw-semibold text-primary" th:text="${ticket.donHangShop.maCodeDonShop}">SHOP-TECH-88</div>
+                            <div class="small text-muted">
+                                Vận đơn: <code th:text="${ticket.donHangShop.maVanDon != null ? ticket.donHangShop.maVanDon : 'Chưa có'}">VNPOST-88</code>
+                            </div>
+                        </td>
+
+                        <!-- Khách hàng & Shop -->
+                        <td>
+                            <div class="fw-semibold text-dark">
+                                <i class="bi bi-person text-secondary"></i> <span th:text="${ticket.khachHang.hoVaTen}">Nguyễn Văn An</span>
+                            </div>
+                            <div class="small text-muted">
+                                <i class="bi bi-shop text-danger"></i> <span th:text="${ticket.gianHang.tenGianHang}">TechZone Store</span>
+                            </div>
+                        </td>
+
+                        <!-- Phân loại sự cố -->
+                        <td>
+                            <div class="fw-semibold" th:text="${ticket.tenLoaiKhieuNaiDisplay}">Hàng hỏng vỡ</div>
+                            <small class="text-muted d-block text-truncate" style="max-width: 220px;" th:text="${ticket.noiDungMoTa}">Mô tả</small>
+                        </td>
+
+                        <!-- CSKH Phụ Trách -->
+                        <td>
+                            <span th:if="${ticket.cskhXuLy != null}" class="badge bg-light text-dark border">
+                                <i class="bi bi-headset text-success"></i> <span th:text="${ticket.cskhXuLy.hoVaTen}">Ngô Thị CSKH</span>
+                            </span>
+                            <span th:if="${ticket.cskhXuLy == null}" class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                <i class="bi bi-hourglass-split"></i> Chưa tiếp nhận
+                            </span>
+                        </td>
+
+                        <!-- Trạng thái -->
+                        <td>
+                            <span class="badge" th:classappend="${ticket.badgeClass}" th:text="${ticket.trangThaiDisplay}">Đang xử lý</span>
+                        </td>
+
+                        <!-- Ngày tạo -->
+                        <td class="small text-muted" th:text="${#temporals.format(ticket.ngayTao, 'dd/MM/yyyy HH:mm')}">
+                            04/09/2026 14:00
+                        </td>
+
+                        <!-- Hành động -->
+                        <td class="text-end pe-4">
+                            <div class="btn-group btn-group-sm">
+                                <!-- Nút Tiếp nhận nhanh nếu chưa có người tiếp nhận -->
+                                <form th:if="${ticket.cskhXuLy == null}" th:action="@{/cskh/tiep-nhan/{id}(id=${ticket.maPhieu})}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-warning btn-sm fw-bold me-1" title="Tiếp nhận xử lý ticket này">
+                                        <i class="bi bi-hand-index-thumb"></i> Tiếp nhận
+                                    </button>
+                                </form>
+
+                                <!-- Nút Mở Modal Phân Loại -->
+                                <button type="button" class="btn btn-outline-secondary btn-sm me-1" 
+                                        data-bs-toggle="modal" 
+                                        th:data-bs-target="'#modalPhanLoai-' + ${ticket.maPhieu}"
+                                        title="Phân loại nhóm lỗi & Mức độ ưu tiên">
+                                    <i class="bi bi-tags"></i> Phân loại
+                                </button>
+
+                                <!-- Nút Mở Tra Cứu Đối Chiếu 3 Bên -->
+                                <a th:href="@{/cskh/doi-chieu/{id}(id=${ticket.maPhieu})}" 
+                                   class="btn btn-primary-custom btn-sm"
+                                   title="Xem hồ sơ đối chiếu 3 bên (Khách - Shop - Shipper POD)">
+                                    <i class="bi bi-layout-three-columns"></i> Đối chiếu 3 bên
+                                </a>
+                            </div>
+
+                            <!-- MODAL PHÂN LOẠI TICKET NHANH CHO TỪNG PHIẾU -->
+                            <div class="modal fade text-start" th:id="'modalPhanLoai-' + ${ticket.maPhieu}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <form th:action="@{/cskh/phan-loai/{id}(id=${ticket.maPhieu})}" method="post">
+                                            <div class="modal-header bg-light">
+                                                <h6 class="modal-title fw-bold">
+                                                    <i class="bi bi-tags text-primary"></i> Phân Loại Ticket: <span th:text="${ticket.maCodePhieu}"></span>
+                                                </h6>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body p-4">
+                                                <!-- Nhóm sự cố -->
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-semibold small">Nhóm phân loại khiếu nại</label>
+                                                    <select name="loaiKhieuNai" class="form-select" required>
+                                                        <option value="HONG_VO" th:selected="${ticket.loaiKhieuNai == 'HONG_VO'}">Hàng bị hỏng vỡ / Móp méo bao bì</option>
+                                                        <option value="GIAO_SAI" th:selected="${ticket.loaiKhieuNai == 'GIAO_SAI'}">Giao sai mẫu mã / Kích cỡ / Màu sắc</option>
+                                                        <option value="HANG_GIA" th:selected="${ticket.loaiKhieuNai == 'HANG_GIA'}">Hàng giả / Nhái / Nghi vấn tem mác</option>
+                                                        <option value="THIEU_HANG" th:selected="${ticket.loaiKhieuNai == 'THIEU_HANG'}">Giao thiếu sản phẩm / Phụ kiện</option>
+                                                        <option value="HET_HAN" th:selected="${ticket.loaiKhieuNai == 'HET_HAN'}">Sản phẩm hết hạn sử dụng</option>
+                                                        <option value="KHAC" th:selected="${ticket.loaiKhieuNai == 'KHAC'}">Lý do khác</option>
+                                                    </select>
+                                                </div>
+
+                                                <!-- Mức độ ưu tiên -->
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-semibold small">Mức độ ưu tiên xử lý (SLA)</label>
+                                                    <select name="mucDoUuTien" class="form-select" required>
+                                                        <option value="THAP" th:selected="${ticket.mucDoUuTien == 'THAP'}">🟢 Thấp (Xử lý trong 48h)</option>
+                                                        <option value="TRUNG_BINH" th:selected="${ticket.mucDoUuTien == 'TRUNG_BINH'}">⚡ Trung bình (Xử lý trong 24h)</option>
+                                                        <option value="CAO" th:selected="${ticket.mucDoUuTien == 'CAO'}">🔥 Cao (Ưu tiên xử lý trong 8h)</option>
+                                                        <option value="KHAN_CAP" th:selected="${ticket.mucDoUuTien == 'KHAN_CAP'}">🚨 Khẩn cấp (Xử lý ngay trong 2h)</option>
+                                                    </select>
+                                                </div>
+
+                                                <!-- Trạng thái xử lý -->
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-semibold small">Trạng thái ticket</label>
+                                                    <select name="trangThai" class="form-select" required>
+                                                        <option value="MO_MOI" th:selected="${ticket.trangThai == 'MO_MOI'}">Mở mới</option>
+                                                        <option value="DANG_XU_LY" th:selected="${ticket.trangThai == 'DANG_XU_LY'}">CSKH đang xử lý</option>
+                                                        <option value="CHO_SHOP_PHAN_HOI" th:selected="${ticket.trangThai == 'CHO_SHOP_PHAN_HOI'}">Chờ Shop phản hồi</option>
+                                                        <option value="CHAP_NHAN_HOAN_TIEN" th:selected="${ticket.trangThai == 'CHAP_NHAN_HOAN_TIEN'}">Chấp thuận hoàn tiền</option>
+                                                        <option value="TU_CHOI_KHIEU_NAI" th:selected="${ticket.trangThai == 'TU_CHOI_KHIEU_NAI'}">Từ chối khiếu nại</option>
+                                                        <option value="DONG_PHIEU" th:selected="${ticket.trangThai == 'DONG_PHIEU'}">Đóng ticket</option>
+                                                    </select>
+                                                </div>
+
+                                                <!-- Nhân viên CSKH phụ trách -->
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-semibold small">Gán nhân viên CSKH phụ trách</label>
+                                                    <select name="maCskhPhuTrach" class="form-select">
+                                                        <option value="">-- Chưa gán người xử lý --</option>
+                                                        <option th:each="nv : ${dsNhanVien}" 
+                                                                th:value="${nv.maNguoiDung}" 
+                                                                th:text="${nv.hoVaTen} + ' (' + ${nv.email} + ')'"
+                                                                th:selected="${ticket.cskhXuLy != null && ticket.cskhXuLy.maNguoiDung == nv.maNguoiDung}">
+                                                            Ngô Thị CSKH
+                                                        </option>
+                                                    </select>
+                                                </div>
+
+                                                <!-- Ghi chú nội bộ phân loại -->
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-semibold small">Ghi chú điều phối / Phân loại (Nội bộ)</label>
+                                                    <textarea name="ghiChuXuLy" class="form-control" rows="2" 
+                                                              placeholder="Ví dụ: Đã thẩm định ảnh vỡ gọng, chuyển mức Khẩn cấp yêu cầu Shop giải trình..."></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer bg-light">
+                                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                                                <button type="submit" class="btn btn-primary-custom btn-sm">Lưu phân loại</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- END MODAL PHÂN LOẠI -->
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PHÂN TRANG -->
+        <div th:if="${pageTicket.totalPages > 1}" class="card-footer bg-white py-3 border-0">
+            <nav>
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    <li class="page-item" th:classappend="${pageTicket.first ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/cskh/dashboard(page=0, size=${size}, tuKhoa=${tuKhoa}, trangThai=${trangThai}, loaiKhieuNai=${loaiKhieuNai}, mucDoUuTien=${mucDoUuTien}, locPhuTrach=${locPhuTrach}, tuNgay=${tuNgay}, denNgay=${denNgay})}">
+                            <i class="bi bi-chevron-double-left"></i> Đầu
+                        </a>
+                    </li>
+                    <li class="page-item" th:classappend="${pageTicket.first ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/cskh/dashboard(page=${pageTicket.number - 1}, size=${size}, tuKhoa=${tuKhoa}, trangThai=${trangThai}, loaiKhieuNai=${loaiKhieuNai}, mucDoUuTien=${mucDoUuTien}, locPhuTrach=${locPhuTrach}, tuNgay=${tuNgay}, denNgay=${denNgay})}">
+                            Trước
+                        </a>
+                    </li>
+                    <li th:each="i : ${#numbers.sequence(0, pageTicket.totalPages - 1)}" 
+                        class="page-item" 
+                        th:classappend="${pageTicket.number == i ? 'active' : ''}">
+                        <a class="page-link" th:href="@{/cskh/dashboard(page=${i}, size=${size}, tuKhoa=${tuKhoa}, trangThai=${trangThai}, loaiKhieuNai=${loaiKhieuNai}, mucDoUuTien=${mucDoUuTien}, locPhuTrach=${locPhuTrach}, tuNgay=${tuNgay}, denNgay=${denNgay})}" 
+                           th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${pageTicket.last ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/cskh/dashboard(page=${pageTicket.number + 1}, size=${size}, tuKhoa=${tuKhoa}, trangThai=${trangThai}, loaiKhieuNai=${loaiKhieuNai}, mucDoUuTien=${mucDoUuTien}, locPhuTrach=${locPhuTrach}, tuNgay=${tuNgay}, denNgay=${denNgay})}">
+                            Sau
+                        </a>
+                    </li>
+                    <li class="page-item" th:classappend="${pageTicket.last ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/cskh/dashboard(page=${pageTicket.totalPages - 1}, size=${size}, tuKhoa=${tuKhoa}, trangThai=${trangThai}, loaiKhieuNai=${loaiKhieuNai}, mucDoUuTien=${mucDoUuTien}, locPhuTrach=${locPhuTrach}, tuNgay=${tuNgay}, denNgay=${denNgay})}">
+                            Cuối <i class="bi bi-chevron-double-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

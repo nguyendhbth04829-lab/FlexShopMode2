@@ -54,4 +54,43 @@ public interface PhieuKhieuNaiRepository extends JpaRepository<PhieuKhieuNai, Lo
     BigDecimal tinhTongTienTheoDanhSachTrangThai(
             @Param("maKhachHang") Long maKhachHang,
             @Param("danhSachTrangThai") List<String> danhSachTrangThai);
+
+    // =========================================================================
+    // TRUY VẤN DÀNH RIÊNG CHO CSKH (US-46)
+    // =========================================================================
+    @Query("SELECT p FROM PhieuKhieuNai p WHERE " +
+           "(:trangThai IS NULL OR :trangThai = '' OR p.trangThai = :trangThai) " +
+           "AND (:loaiKhieuNai IS NULL OR :loaiKhieuNai = '' OR p.loaiKhieuNai = :loaiKhieuNai) " +
+           "AND (:mucDoUuTien IS NULL OR :mucDoUuTien = '' OR p.mucDoUuTien = :mucDoUuTien) " +
+           "AND (:tuNgay IS NULL OR p.ngayTao >= :tuNgay) " +
+           "AND (:denNgay IS NULL OR p.ngayTao <= :denNgay) " +
+           "AND (:maCskh IS NULL OR p.cskhXuLy.maNguoiDung = :maCskh) " +
+           "AND (:chiChuaTiepNhan = false OR p.cskhXuLy IS NULL) " +
+           "AND (:tuKhoa IS NULL OR :tuKhoa = '' " +
+           "     OR LOWER(p.maCodePhieu) LIKE LOWER(CONCAT('%', :tuKhoa, '%')) " +
+           "     OR LOWER(p.donHangShop.maCodeDonShop) LIKE LOWER(CONCAT('%', :tuKhoa, '%')) " +
+           "     OR LOWER(p.donHangShop.maVanDon) LIKE LOWER(CONCAT('%', :tuKhoa, '%')) " +
+           "     OR LOWER(p.gianHang.tenGianHang) LIKE LOWER(CONCAT('%', :tuKhoa, '%')) " +
+           "     OR LOWER(p.khachHang.hoVaTen) LIKE LOWER(CONCAT('%', :tuKhoa, '%')) " +
+           "     OR LOWER(p.khachHang.soDienThoai) LIKE LOWER(CONCAT('%', :tuKhoa, '%'))) " +
+           "ORDER BY p.ngayTao DESC")
+    Page<PhieuKhieuNai> timKiemTicketCskh(
+            @Param("tuKhoa") String tuKhoa,
+            @Param("trangThai") String trangThai,
+            @Param("loaiKhieuNai") String loaiKhieuNai,
+            @Param("mucDoUuTien") String mucDoUuTien,
+            @Param("maCskh") Long maCskh,
+            @Param("chiChuaTiepNhan") boolean chiChuaTiepNhan,
+            @Param("tuNgay") LocalDateTime tuNgay,
+            @Param("denNgay") LocalDateTime denNgay,
+            Pageable pageable);
+
+    // KPI Dashboard CSKH
+    long countByCskhXuLyIsNullAndTrangThaiNotIn(List<String> trangThaiDong);
+
+    long countByMucDoUuTienInAndTrangThaiNotIn(List<String> mucDoUuTienList, List<String> trangThaiDong);
+
+    long countByLoaiKhieuNaiInAndTrangThaiNotIn(List<String> loaiKhieuNaiList, List<String> trangThaiDong);
+
+    long countByTrangThai(String trangThai);
 }

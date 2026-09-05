@@ -74,7 +74,33 @@ public class PhieuKhieuNai {
     @OneToMany(mappedBy = "phieuKhieuNai", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<BangChungKhieuNai> danhSachBangChung = new ArrayList<>();
 
+    @ToString.Exclude
+    @OneToMany(mappedBy = "phieuKhieuNai", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<GhiChuNoiBoKhieuNai> danhSachGhiChuNoiBo = new ArrayList<>();
+
     // Tiện ích hiển thị giao diện (View Helpers)
+    public String getMucDoUuTienDisplay() {
+        if (mucDoUuTien == null) return "Trung bình";
+        switch (mucDoUuTien) {
+            case "THAP": return "Thấp";
+            case "TRUNG_BINH": return "Trung bình";
+            case "CAO": return "Cao";
+            case "KHAN_CAP": return "Khẩn cấp";
+            default: return mucDoUuTien;
+        }
+    }
+
+    public String getMucDoUuTienBadgeClass() {
+        if (mucDoUuTien == null) return "bg-secondary text-white";
+        switch (mucDoUuTien) {
+            case "THAP": return "bg-secondary-subtle text-secondary border";
+            case "TRUNG_BINH": return "bg-info-subtle text-info-emphasis border border-info-subtle";
+            case "CAO": return "bg-warning-subtle text-warning-emphasis border border-warning-subtle";
+            case "KHAN_CAP": return "bg-danger text-white";
+            default: return "bg-secondary text-white";
+        }
+    }
+
     public String getTenLoaiKhieuNaiDisplay() {
         if (loaiKhieuNai == null) return "Không xác định";
         switch (loaiKhieuNai) {
@@ -83,7 +109,8 @@ public class PhieuKhieuNai {
             case "HANG_GIA": return "Hàng giả / Nhái / Kém chất lượng";
             case "THIEU_HANG": return "Giao thiếu sản phẩm / Phụ kiện";
             case "HET_HAN": return "Sản phẩm hết hạn sử dụng";
-            default: return "Lý do khác: " + loaiKhieuNai;
+            case "KHAC": return "Lý do khác";
+            default: return loaiKhieuNai;
         }
     }
 
