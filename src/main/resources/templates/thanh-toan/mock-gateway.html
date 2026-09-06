@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh Toán Chuyển Khoản Ngân Hàng - FlexShop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background: linear-gradient(135deg, #0d324d 0%, #7f5a83 100%); min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .payment-box { border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: none; overflow: hidden; }
+        .qr-frame {
+            background: #ffffff;
+            padding: 12px;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            display: inline-block;
+            border: 2px dashed #0d6efd;
+        }
+        .qr-img {
+            max-width: 240px;
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .info-pill {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 10px 14px;
+        }
+    </style>
+</head>
+<body class="py-4">
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7">
+            <div class="card payment-box bg-white">
+                <!-- Header -->
+                <div class="bg-primary text-white p-4 text-center">
+                    <div class="badge bg-warning text-dark px-3 py-1 mb-2 fw-bold">
+                        <i class="bi bi-qr-code-scan me-1"></i> VIETQR BANK TRANSFER
+                    </div>
+                    <h4 class="fw-bold mb-1">Thanh Toán Chuyển Khoản</h4>
+                    <p class="small mb-0 opacity-75">Quét mã QR bằng ứng dụng ngân hàng hoặc ví điện tử bất kỳ</p>
+                </div>
+
+                <div class="card-body p-4 text-center">
+                    <!-- Ảnh QR của Minh -->
+                    <div class="mb-3">
+                        <div class="qr-frame">
+                            <img th:src="@{/images/my-qr.png}" alt="Mã QR Ngân Hàng - LAI BACH GIA MINH" class="qr-img">
+                        </div>
+                        <div class="mt-2">
+                            <span class="badge bg-primary fs-6 px-3 py-1">
+                                <i class="bi bi-person-check-fill me-1"></i> LAI BACH GIA MINH
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Bảng Thông tin số tiền & Nội dung chuyển khoản -->
+                    <div class="text-start mb-4">
+                        <div class="info-pill mb-2 d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted d-block">Số tiền thanh toán:</small>
+                                <span class="fs-5 fw-bold text-danger"
+                                      th:text="${#numbers.formatDecimal(donHang.tongThanhToanCuoi, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}"></span>
+                            </div>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="copyText('amountVal')">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                            <span id="amountVal" class="d-none" th:text="${donHang.tongThanhToanCuoi}"></span>
+                        </div>
+
+                        <div class="info-pill mb-2 d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted d-block">Nội dung chuyển khoản:</small>
+                                <span class="fw-bold text-primary" th:text="${'THANHTOAN ' + donHang.maCodeDonTong}"></span>
+                            </div>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="copyText('contentVal')">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                            <span id="contentVal" class="d-none" th:text="${'THANHTOAN ' + donHang.maCodeDonTong}"></span>
+                        </div>
+
+                        <div class="info-pill d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted d-block">Mã đơn hàng:</small>
+                                <span class="fw-semibold text-dark" th:text="${donHang.maCodeDonTong}"></span>
+                            </div>
+                            <span class="badge bg-secondary">FlexShop</span>
+                        </div>
+                    </div>
+
+                    <!-- Hướng dẫn 3 bước -->
+                    <div class="alert alert-light border text-start small mb-4 py-2">
+                        <div class="fw-bold text-dark mb-1"><i class="bi bi-info-circle text-primary me-1"></i> Các bước thanh toán:</div>
+                        <ol class="mb-0 ps-3">
+                            <li>Mở App Ngân hàng (VCB, MB, Techcombank, MoMo...) quét mã QR trên.</li>
+                            <li>Kiểm tra tên người nhận <strong>LAI BACH GIA MINH</strong> và bấm chuyển tiền.</li>
+                            <li>Sau khi chuyển xong, bấm nút xác nhận màu xanh bên dưới.</li>
+                        </ol>
+                    </div>
+
+                    <!-- Form xác nhận thanh toán -->
+                    <form th:action="@{/thanh-toan/mock-process}" method="post">
+                        <input type="hidden" name="id" th:value="${donHang.maDonHangTong}">
+                        <input type="hidden" name="maNganHang" value="VIETQR_BANK">
+                        <input type="hidden" name="soThe" value="LAI BACH GIA MINH">
+
+                        <div class="d-grid gap-2">
+                            <!-- Nút Xác nhận đã chuyển khoản thành công -->
+                            <button type="submit" name="status" value="SUCCESS" class="btn btn-success btn-lg fw-bold shadow py-3">
+                                <i class="bi bi-check2-circle me-1"></i> Tôi Đã Chuyển Khoản Thành Công
+                            </button>
+
+                            <!-- Nút Thất bại để test các luồng ngoại lệ -->
+                            <button type="submit" name="status" value="FAILED" class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-x-circle me-1"></i> Báo lỗi giao dịch / Chưa chuyển được
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="mt-3">
+                        <a th:href="@{|/thanh-toan/chon-phuong-thuc?id=${donHang.maDonHangTong}|}" class="text-muted small text-decoration-none">
+                            <i class="bi bi-arrow-left me-1"></i> Quay lại chọn phương thức thanh toán
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-light text-center small text-muted py-2">
+                    <i class="bi bi-shield-check text-success me-1"></i> Thanh toán an toàn qua cổng ngân hàng FlexShop
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copyText(id) {
+        const text = document.getElementById(id).innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Đã sao chép: ' + text);
+        });
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexShop - Quản Lý Thanh Toán Đơn Hàng (US-26)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card-header-flex { background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%); color: white; }
+        .table-hover tbody tr:hover { background-color: #f0f7ff; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/thanh-toan/danh-sach">
+            <i class="bi bi-wallet2 me-2 text-warning"></i>FlexShop Payment
+        </a>
+        <div class="navbar-nav ms-auto">
+            <span class="navbar-text text-white me-3">
+                <i class="bi bi-person-circle me-1"></i> Khách hàng: Nguyễn Văn Khách
+            </span>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-credit-card-2-front text-primary me-2"></i>Chọn Phương Thức Thanh Toán (US-26)
+            </h3>
+            <p class="text-muted mb-0">Hỗ trợ thanh toán COD (khi nhận hàng) và Cổng thanh toán trực tuyến giả lập (Mock Online Payment).</p>
+        </div>
+    </div>
+
+    <!-- Thông báo kết quả nếu có -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Thanh tìm kiếm & lọc -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form action="/thanh-toan/danh-sach" method="get" class="row g-3">
+                <div class="col-md-7">
+                    <label class="form-label fw-semibold">Tìm kiếm mã đơn / người nhận:</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" name="keyword" th:value="${keyword}" class="form-control"
+                               placeholder="Nhập mã đơn tổng (DHT-...) hoặc họ tên khách hàng...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Trạng thái thanh toán:</label>
+                    <select name="trangThaiThanhToan" class="form-select">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        <option value="CHUA_THANH_TOAN" th:selected="${trangThaiThanhToan == 'CHUA_THANH_TOAN'}">Chưa thanh toán</option>
+                        <option value="DA_THANH_TOAN" th:selected="${trangThaiThanhToan == 'DA_THANH_TOAN'}">Đã thanh toán</option>
+                        <option value="THANH_TOAN_THAT_BAI" th:selected="${trangThaiThanhToan == 'THANH_TOAN_THAT_BAI'}">Thanh toán thất bại</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel"></i> Lọc đơn
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Danh sách Đơn Hàng Cần Thanh Toán -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header card-header-flex py-3 d-flex justify-content-between align-items-center">
+            <span class="fw-bold fs-5"><i class="bi bi-receipt me-2"></i>Danh Sách Đơn Hàng Của Bạn</span>
+            <span class="badge bg-light text-dark fs-6" th:text="${pageDonHang != null ? 'Tổng: ' + pageDonHang.totalElements + ' đơn' : ''}"></span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Mã Đơn Tổng</th>
+                        <th>Khách Hàng</th>
+                        <th>Số Gian Hàng (Đa Shop)</th>
+                        <th>Tổng Thanh Toán</th>
+                        <th>Phương Thức</th>
+                        <th>Trạng Thái TT</th>
+                        <th class="text-center pe-3">Hành Động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${listDonHang == null or #lists.isEmpty(listDonHang)}">
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            Không tìm thấy đơn hàng nào phù hợp.
+                        </td>
+                    </tr>
+                    <tr th:each="dh : ${listDonHang}">
+                        <td class="ps-3">
+                            <span class="fw-bold text-primary" th:text="${dh.maCodeDonTong}"></span>
+                            <div class="small text-muted" th:text="${#temporals.format(dh.ngayTao, 'dd/MM/yyyy HH:mm')}"></div>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark" th:text="${dh.khachHang.hoVaTen}"></div>
+                            <small class="text-muted" th:text="${dh.khachHang.email}"></small>
+                        </td>
+                        <td>
+                            <span class="badge bg-info text-dark" th:text="${#lists.size(dh.danhSachShopOrder) + ' Shop'}"></span>
+                        </td>
+                        <td>
+                            <span class="fw-bold text-danger fs-6"
+                                  th:text="${#numbers.formatDecimal(dh.tongThanhToanCuoi, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border" th:text="${dh.tenPhuongThucTiengViet}"></span>
+                        </td>
+                        <td>
+                            <span class="badge px-2 py-1" th:classappend="${dh.badgeTrangThaiThanhToan}"
+                                  th:text="${dh.tenTrangThaiThanhToanTiengViet}"></span>
+                        </td>
+                        <td class="text-center pe-3">
+                            <!-- Nút Thanh toán khi chưa thanh toán -->
+                            <a th:if="${dh.trangThaiThanhToan != 'DA_THANH_TOAN'}"
+                               th:href="@{|/thanh-toan/chon-phuong-thuc?id=${dh.maDonHangTong}|}"
+                               class="btn btn-sm btn-success fw-semibold shadow-sm">
+                                <i class="bi bi-wallet2 me-1"></i> Thanh Toán Ngay
+                            </a>
+
+                            <!-- Nút Xem hóa đơn khi đã thanh toán -->
+                            <a th:if="${dh.trangThaiThanhToan == 'DA_THANH_TOAN'}"
+                               th:href="@{|/thanh-toan/ket-qua?id=${dh.maDonHangTong}|}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-file-earmark-text me-1"></i> Hóa Đơn
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Phân trang -->
+        <div class="card-footer bg-white py-3" th:if="${totalPages > 1}">
+            <nav>
+                <ul class="pagination justify-content-center mb-0">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/thanh-toan/danh-sach(page=${currentPage - 1}, keyword=${keyword}, trangThaiThanhToan=${trangThaiThanhToan})}">Trước</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:classappend="${currentPage == i} ? 'active'">
+                        <a class="page-link" th:text="${i + 1}"
+                           th:href="@{/thanh-toan/danh-sach(page=${i}, keyword=${keyword}, trangThaiThanhToan=${trangThaiThanhToan})}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                        <a class="page-link" th:href="@{/thanh-toan/danh-sach(page=${currentPage + 1}, keyword=${keyword}, trangThaiThanhToan=${trangThaiThanhToan})}">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
