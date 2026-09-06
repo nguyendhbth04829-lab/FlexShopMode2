@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khám Phá Mua Kèm Deal Sốc - Giảm Giá 50% Phụ Kiện - FlexShop</title>
+    <!-- Google Fonts: Be Vietnam Pro -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f6f7fb;
+            color: #2b2f38;
+            -webkit-font-smoothing: antialiased;
+        }
+        .navbar-brand-custom {
+            font-weight: 700;
+            color: #ee4d2d !important;
+            letter-spacing: 0.5px;
+        }
+        .banner-deal {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            border-radius: 16px;
+            color: white;
+            padding: 36px 32px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(238, 77, 45, 0.25);
+        }
+        .banner-badge {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(8px);
+            border-radius: 30px;
+            padding: 6px 16px;
+            display: inline-block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 14px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            background: #ffffff;
+            transition: all 0.2s;
+        }
+        .btn-shopee {
+            background-color: #ee4d2d;
+            color: white;
+            border: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-shopee:hover {
+            background-color: #d73211;
+            color: white;
+        }
+        .addon-card {
+            border: 2px solid #edf2f7;
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.2s;
+            cursor: pointer;
+            background: white;
+        }
+        .addon-card.selected {
+            border-color: #ee4d2d;
+            background-color: #fffaf8;
+        }
+        .addon-card:hover {
+            border-color: #ff9e8a;
+        }
+        .img-main {
+            width: 100%;
+            max-height: 320px;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+        .img-addon {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #edf2f7;
+        }
+        .tag-deal-50 {
+            background: #ffebee;
+            color: #d32f2f;
+            font-weight: 700;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #ffcdd2;
+        }
+        .summary-card {
+            position: sticky;
+            top: 90px;
+            border-radius: 16px;
+            border: 2px solid #ee4d2d;
+            background: white;
+            padding: 24px;
+            box-shadow: 0 8px 30px rgba(238, 77, 45, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header / Navigation -->
+<nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top py-2">
+    <div class="container">
+        <a class="navbar-brand navbar-brand-custom d-flex align-items-center gap-2" href="/">
+            <i class="bi bi-bag-heart-fill fs-3 text-danger"></i>
+            <span>FlexShop</span>
+        </a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-3">
+                <li class="nav-item">
+                    <a class="nav-link fw-bold text-danger active" href="/khuyen-mai/combo-deal-soc">
+                        <i class="bi bi-lightning-fill me-1"></i>Mua Kèm Deal Sốc
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-secondary" href="/flash-sale">
+                        <i class="bi bi-clock-history me-1"></i>Flash Sale
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-secondary" href="/khach-hang/thanh-toan/voucher">
+                        <i class="bi bi-ticket-perforated-fill me-1"></i>Kho Voucher
+                    </a>
+                </li>
+            </ul>
+            <div class="d-flex align-items-center gap-2">
+                <a href="/seller/combo-khuyen-mai" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                    <i class="bi bi-shop me-1"></i> Kênh Người Bán (Cấu hình)
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <!-- Banner Giới thiệu Deal Sốc Mua Kèm -->
+    <div class="banner-deal mb-4">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="banner-badge">
+                    <i class="bi bi-stars me-1"></i> Ưu Đãi Độc Quyền Dành Cho Bạn
+                </div>
+                <h2 class="fw-bold mb-2">MUA KÈM DEAL SỐC - GIẢM ĐẾN 50% PHỤ KIỆN CHÍNH HÃNG</h2>
+                <p class="mb-0 text-white-50 fs-6">
+                    Chọn mua Sản phẩm chính (A) và thả ga thêm các Phụ kiện cao cấp (B) với mức giảm sốc 50%. Số lượng có hạn cho mỗi đơn hàng!
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <span class="badge bg-white text-danger fs-5 px-3 py-2 rounded-pill shadow">
+                    <i class="bi bi-fire text-danger me-1"></i> Giảm Ngay 50%
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Khu vực hiển thị Mua Kèm Deal Sốc: Sản phẩm chính A + Phụ kiện B -->
+    <div class="row g-4" th:if="${sanPhamChinh != null}">
+        <!-- Cột Trái & Giữa: Chi tiết Sản Phẩm Chính A và Danh Sách Phụ Kiện B -->
+        <div class="col-lg-8">
+            <!-- Sản phẩm chính A -->
+            <div class="card card-custom p-4 mb-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="badge bg-primary px-3 py-1 fs-6">1. Sản Phẩm Chính (A)</span>
+                    <span class="text-success fw-bold"><i class="bi bi-check2-circle me-1"></i>Đã chọn vào gói combo</span>
+                </div>
+                <div class="row align-items-center">
+                    <div class="col-md-4 text-center">
+                        <img th:src="${sanPhamChinh.linkAnh != null ? sanPhamChinh.linkAnh : '/images/product-placeholder.jpg'}"
+                             alt="Ảnh SP Chính" class="img-main p-2 border rounded">
+                    </div>
+                    <div class="col-md-8">
+                        <span class="badge bg-secondary-subtle text-secondary mb-2" th:text="${sanPhamChinh.sanPham.gianHang.tenGianHang}">TechZone Flagship Store</span>
+                        <h4 class="fw-bold text-dark mb-2" th:text="${sanPhamChinh.sanPham.tenSanPham}">Điện Thoại FlexPhone Ultra 5G</h4>
+                        <div class="mb-2">
+                            <span class="badge bg-light text-dark border px-2 py-1" th:text="'Biến thể: ' + ${sanPhamChinh.tenBienThe}">256GB Titan Tự Nhiên</span>
+                            <span class="text-muted small ms-2 font-monospace" th:text="'SKU: ' + ${sanPhamChinh.maSku}">SKU-123</span>
+                        </div>
+                        <div class="d-flex align-items-baseline gap-2 mb-3">
+                            <span class="fs-3 fw-bold text-danger"
+                                  id="giaChinhVal"
+                                  th:data-gia="${sanPhamChinh.giaBan}"
+                                  th:text="${#numbers.formatDecimal(sanPhamChinh.giaBan, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                26,990,000 đ
+                            </span>
+                            <span th:if="${sanPhamChinh.giaGoc != null && sanPhamChinh.giaGoc > sanPhamChinh.giaBan}"
+                                  class="text-decoration-line-through text-muted"
+                                  th:text="${#numbers.formatDecimal(sanPhamChinh.giaGoc, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                29,990,000 đ
+                            </span>
+                        </div>
+                        <div class="alert alert-light border py-2 px-3 small text-muted mb-0">
+                            <i class="bi bi-info-circle text-primary me-1"></i> Mua sản phẩm này để mở khóa quyền mua phụ kiện bên dưới với giá ưu đãi <strong>giảm sốc 50%</strong>.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danh sách Phụ kiện B Mua Kèm Deal Sốc -->
+            <div class="card card-custom p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-1 text-danger">
+                            <i class="bi bi-lightning-charge-fill me-1"></i>2. Chọn Phụ Kiện Mua Kèm Deal Sốc (B)
+                        </h5>
+                        <small class="text-muted">Tích chọn các phụ kiện bạn muốn mua kèm để nhận chiết khấu 50% ngay lập tức!</small>
+                    </div>
+                    <span class="badge bg-danger-subtle text-danger px-3 py-1 fs-7 fw-bold" th:text="${dsDealSocMuaKem.size()} + ' Deal khả dụng'">2 Deal</span>
+                </div>
+
+                <div th:if="${#lists.isEmpty(dsDealSocMuaKem)}" class="text-center py-5 text-muted">
+                    <i class="bi bi-emoji-smile fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                    Hiện tại chưa có phụ kiện deal sốc nào được cấu hình cho sản phẩm này.
+                </div>
+
+                <div class="row g-3" th:unless="${#lists.isEmpty(dsDealSocMuaKem)}">
+                    <div class="col-12" th:each="addon : ${dsDealSocMuaKem}">
+                        <div class="addon-card d-flex align-items-center justify-content-between gap-3"
+                             th:id="'card-addon-' + ${addon.maSanPhamCombo}"
+                             th:data-id="${addon.maSanPhamCombo}"
+                             th:data-gia-goc="${addon.giaGoc}"
+                             th:data-gia-uu-dai="${addon.giaUuDai}"
+                             th:data-tiet-kiem="${addon.tietKiem}"
+                             onclick="toggleAddonCard(this)">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="form-check m-0">
+                                    <input class="form-check-input addon-checkbox" type="checkbox"
+                                           th:id="'chk-' + ${addon.maSanPhamCombo}"
+                                           th:data-id="${addon.maSanPhamCombo}"
+                                           th:data-gia-goc="${addon.giaGoc}"
+                                           th:data-gia-uu-dai="${addon.giaUuDai}"
+                                           th:data-tiet-kiem="${addon.tietKiem}"
+                                           onclick="event.stopPropagation(); capNhatTongTienCombo();">
+                                </div>
+                                <img th:src="${addon.linkAnh}" alt="Ảnh phụ kiện" class="img-addon">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="tag-deal-50" th:text="'-' + ${#numbers.formatDecimal(addon.phanTramGiam, 0, 'COMMA', 0, 'POINT')} + '%'">-50%</span>
+                                        <span class="badge bg-secondary-subtle text-secondary" th:text="${addon.tenBienThe}">Màu Trắng</span>
+                                    </div>
+                                    <h6 class="fw-bold text-dark mb-1" th:text="${addon.tenSanPham}">Củ Sạc Nhanh 65W GaN FlexPower</h6>
+                                    <div class="d-flex align-items-baseline gap-2">
+                                        <span class="fw-bold text-danger fs-5" th:text="${#numbers.formatDecimal(addon.giaUuDai, 0, 'COMMA', 0, 'POINT')} + ' đ'">325,000 đ</span>
+                                        <span class="text-decoration-line-through text-muted small" th:text="${#numbers.formatDecimal(addon.giaGoc, 0, 'COMMA', 0, 'POINT')} + ' đ'">650,000 đ</span>
+                                        <span class="badge bg-success-subtle text-success small" th:text="'Tiết kiệm ' + ${#numbers.formatDecimal(addon.tietKiem, 0, 'COMMA', 0, 'POINT')} + ' đ'">Tiết kiệm 325,000 đ</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-light text-secondary border d-block mb-1" th:text="'Giới hạn: ' + ${addon.gioiHanMuaKemMoiDon} + ' cái'">1 cái</span>
+                                <small class="text-muted" th:text="'Còn lại: ' + ${addon.conLai}">Còn 100</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột Phải: Tổng Hợp Gói Combo & Đặt Mua -->
+        <div class="col-lg-4">
+            <div class="summary-card">
+                <h5 class="fw-bold text-dark mb-3">
+                    <i class="bi bi-cart-check-fill text-danger me-2"></i>Tổng Kết Gói Mua Kèm
+                </h5>
+
+                <div class="d-flex justify-content-between py-2 border-bottom">
+                    <span class="text-muted">Sản phẩm chính (A):</span>
+                    <span class="fw-bold text-dark">1 sản phẩm</span>
+                </div>
+                <div class="d-flex justify-content-between py-2 border-bottom">
+                    <span class="text-muted">Phụ kiện mua kèm (B):</span>
+                    <span class="fw-bold text-danger" id="displaySoPhuKien">0 phụ kiện</span>
+                </div>
+                <div class="d-flex justify-content-between py-2 border-bottom">
+                    <span class="text-muted">Tổng giá trị gốc:</span>
+                    <span class="text-decoration-line-through text-muted" id="displayTongGiaGoc">0 đ</span>
+                </div>
+                <div class="d-flex justify-content-between py-2 border-bottom">
+                    <span class="text-success fw-bold">Tiết kiệm được:</span>
+                    <span class="text-success fw-bold" id="displayTongTietKiem">- 0 đ</span>
+                </div>
+
+                <div class="py-3">
+                    <div class="text-muted small">Tổng thanh toán gói combo:</div>
+                    <div class="fs-2 fw-bold text-danger" id="displayTongThanhToan">0 đ</div>
+                </div>
+
+                <button class="btn btn-shopee w-100 py-3 rounded-pill fs-6 shadow mb-2" onclick="muaCombo()">
+                    <i class="bi bi-cart-plus-fill me-1"></i> Thêm Gói Vào Giỏ Hàng
+                </button>
+                <div class="text-center">
+                    <small class="text-muted"><i class="bi bi-shield-check text-success me-1"></i> Cam kết 100% hàng chính hãng</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Khối Danh sách các Chương Trình Combo Khác Đang Chạy -->
+    <div class="mt-5">
+        <h4 class="fw-bold mb-3"><i class="bi bi-fire text-danger me-2"></i>Các Chương Trình Deal Sốc Khác</h4>
+        <div class="row g-3">
+            <div class="col-md-6 col-lg-4" th:each="cb : ${dsComboDangChay}">
+                <div class="card card-custom p-3 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-danger-subtle text-danger fw-bold" th:text="'-' + ${#numbers.formatDecimal(cb.giaTriGiam, 0, 'COMMA', 0, 'POINT')} + '% Ưu Đãi'">-50% Ưu Đãi</span>
+                        <small class="text-muted"><i class="bi bi-clock me-1"></i>Đang diễn ra</small>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-2" th:text="${cb.tenCombo}">Deal Sốc Phụ Kiện</h6>
+                    <p class="text-muted small mb-3">Gian hàng: <strong th:text="${cb.gianHang.tenGianHang}">TechZone</strong></p>
+                    <div class="mt-auto">
+                        <a th:href="@{'/khuyen-mai/combo-deal-soc?maBienTheChinh=' + ${cb.danhSachSanPham[0].bienTheSanPham.maBienThe}}"
+                           class="btn btn-outline-danger btn-sm w-100 rounded-pill">
+                            Xem Deal & Mua Kèm <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function toggleAddonCard(cardEl) {
+        const chk = cardEl.querySelector('.addon-checkbox');
+        if (chk) {
+            chk.checked = !chk.checked;
+            capNhatTongTienCombo();
+        }
+    }
+
+    function capNhatTongTienCombo() {
+        const giaChinhEl = document.getElementById('giaChinhVal');
+        const giaChinh = giaChinhEl ? (parseFloat(giaChinhEl.getAttribute('data-gia')) || 0) : 0;
+
+        let tongGiaGoc = giaChinh;
+        let tongThanhToan = giaChinh;
+        let tongTietKiem = 0;
+        let soPhuKien = 0;
+
+        const checkboxes = document.querySelectorAll('.addon-checkbox');
+        checkboxes.forEach(chk => {
+            const card = document.getElementById('card-addon-' + chk.getAttribute('data-id'));
+            if (chk.checked) {
+                if (card) card.classList.add('selected');
+                const giaGoc = parseFloat(chk.getAttribute('data-gia-goc')) || 0;
+                const giaUuDai = parseFloat(chk.getAttribute('data-gia-uu-dai')) || 0;
+                const tietKiem = parseFloat(chk.getAttribute('data-tiet-kiem')) || 0;
+
+                tongGiaGoc += giaGoc;
+                tongThanhToan += giaUuDai;
+                tongTietKiem += tietKiem;
+                soPhuKien++;
+            } else {
+                if (card) card.classList.remove('selected');
+            }
+        });
+
+        document.getElementById('displaySoPhuKien').textContent = soPhuKien + ' phụ kiện';
+        document.getElementById('displayTongGiaGoc').textContent = tongGiaGoc.toLocaleString('vi-VN') + ' đ';
+        document.getElementById('displayTongTietKiem').textContent = '- ' + tongTietKiem.toLocaleString('vi-VN') + ' đ';
+        document.getElementById('displayTongThanhToan').textContent = tongThanhToan.toLocaleString('vi-VN') + ' đ';
+    }
+
+    function muaCombo() {
+        alert('Đã thêm sản phẩm chính cùng các phụ kiện mua kèm deal sốc vào giỏ hàng của bạn thành công!');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        capNhatTongTienCombo();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Combo Khuyến Mãi & Mua Kèm Deal Sốc - Kênh Người Bán FlexShop</title>
+    <!-- Google Fonts: Be Vietnam Pro -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f6f7fb;
+            color: #2b2f38;
+            -webkit-font-smoothing: antialiased;
+        }
+        .navbar-seller {
+            background: #ffffff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .brand-text {
+            font-weight: 700;
+            color: #ee4d2d;
+            font-size: 1.25rem;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            background: #ffffff;
+        }
+        .kpi-card {
+            border-radius: 12px;
+            border: none;
+            background: white;
+            padding: 16px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: transform 0.2s;
+        }
+        .kpi-card:hover {
+            transform: translateY(-2px);
+        }
+        .kpi-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+        .btn-shopee {
+            background-color: #ee4d2d;
+            color: white;
+            border: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-shopee:hover {
+            background-color: #d73211;
+            color: white;
+        }
+        .badge-live {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+            font-weight: 600;
+        }
+        .badge-upcoming {
+            background-color: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #bbdefb;
+            font-weight: 600;
+        }
+        .badge-ended {
+            background-color: #f5f5f5;
+            color: #757575;
+            border: 1px solid #e0e0e0;
+            font-weight: 600;
+        }
+        .badge-closed {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+            font-weight: 600;
+        }
+        .table-custom th {
+            background-color: #f9fafb;
+            color: #4b5563;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            padding: 14px 16px;
+            border-bottom: 2px solid #edf2f7;
+        }
+        .table-custom td {
+            padding: 14px 16px;
+            vertical-align: middle;
+            border-bottom: 1px solid #edf2f7;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-seller sticky-top py-2">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/seller/combo-khuyen-mai">
+            <i class="bi bi-shop fs-4 text-danger"></i>
+            <span class="brand-text">Kênh Người Bán</span>
+            <span class="badge bg-secondary-subtle text-secondary fs-7 ms-2">US-54 Promotion</span>
+        </a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-3">
+                <li class="nav-item">
+                    <a class="nav-link active fw-bold text-danger" href="/seller/combo-khuyen-mai">
+                        <i class="bi bi-tags-fill me-1"></i>Combo & Mua Kèm Deal Sốc
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-secondary" href="/quan-ly/flash-sale">
+                        <i class="bi bi-lightning-charge-fill me-1"></i>Khung Giờ Flash Sale
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-secondary" href="/seller/danh-gia">
+                        <i class="bi bi-star-fill me-1"></i>Phản Hồi Đánh Giá
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-primary" href="/khuyen-mai/combo-deal-soc" target="_blank">
+                        <i class="bi bi-box-arrow-up-right me-1"></i>Xem Trang Người Mua
+                    </a>
+                </li>
+            </ul>
+            <div class="d-flex align-items-center gap-3">
+                <div class="text-end">
+                    <div class="fw-bold text-dark" th:text="${gianHang != null ? gianHang.tenGianHang : 'TechZone Flagship Store'}">TechZone Flagship Store</div>
+                    <small class="text-muted" th:text="${seller != null ? seller.email : 'techzone@flexshop.vn'}">techzone@flexshop.vn</small>
+                </div>
+                <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
+                    TZ
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid px-4 py-4">
+    <!-- Thông báo Alert -->
+    <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show card-custom" role="alert">
+        <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+        <span th:text="${thongBaoThanhCong}">Thao tác thành công!</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show card-custom" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+        <span th:text="${thongBaoLoi}">Đã có lỗi xảy ra!</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Tiêu đề và nút Tạo mới -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="bi bi-boxes text-danger me-2"></i>Chương Trình Combo Khuyến Mãi & Mua Kèm Deal Sốc
+            </h4>
+            <p class="text-muted mb-0">Cấu hình khuyến mãi "Mua sản phẩm chính A giảm giá 50% cho phụ kiện B" để tăng giá trị đơn hàng.</p>
+        </div>
+        <div>
+            <button class="btn btn-shopee px-4 py-2 rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTaoCombo">
+                <i class="bi bi-plus-circle-fill me-1"></i> Tạo Chương Trình Mới
+            </button>
+        </div>
+    </div>
+
+    <!-- 6 Khối Thống kê KPI -->
+    <div class="row g-3 mb-4" th:if="${thongKe}">
+        <div class="col-md-2">
+            <div class="kpi-card">
+                <div class="kpi-icon-box bg-primary-subtle text-primary">
+                    <i class="bi bi-collection-fill"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Tổng Combo</div>
+                    <div class="fs-4 fw-bold text-dark" th:text="${thongKe.tongSoCombo}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="kpi-card">
+                <div class="kpi-icon-box bg-success-subtle text-success">
+                    <i class="bi bi-play-circle-fill"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Đang Diễn Ra</div>
+                    <div class="fs-4 fw-bold text-success" th:text="${thongKe.soComboDangChay}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="kpi-card">
+                <div class="kpi-icon-box bg-info-subtle text-info">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Sắp Diễn Ra</div>
+                    <div class="fs-4 fw-bold text-info" th:text="${thongKe.soComboSapChay}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="kpi-card">
+                <div class="kpi-icon-box bg-warning-subtle text-warning">
+                    <i class="bi bi-box-seam-fill"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Sản Phẩm Đang Chạy</div>
+                    <div class="fs-4 fw-bold text-warning" th:text="${thongKe.tongSanPhamThamGia}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="kpi-card">
+                <div class="kpi-icon-box bg-danger-subtle text-danger">
+                    <i class="bi bi-bag-check-fill"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Suất Ưu Đãi Đã Bán</div>
+                    <div class="fs-4 fw-bold text-danger" th:text="${thongKe.tongLuotBanUuDai}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="kpi-card">
+                <div class="kpi-icon-box bg-purple-subtle text-purple" style="background-color: #f3e5f5; color: #7b1fa2;">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Doanh Thu Combo</div>
+                    <div class="fs-5 fw-bold text-dark" th:text="${#numbers.formatDecimal(thongKe.tongDoanhThuCombo != null ? thongKe.tongDoanhThuCombo : 0, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thanh Tìm kiếm và Lọc -->
+    <div class="card card-custom p-3 mb-4">
+        <form th:action="@{/seller/combo-khuyen-mai}" method="get" class="row g-2 align-items-center">
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="tuKhoa" class="form-control border-start-0 ps-0" placeholder="Tìm theo tên chương trình..." th:value="${tuKhoa}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="loaiCombo" class="form-select">
+                    <option value="TAT_CA" th:selected="${loaiComboHienTai == 'TAT_CA'}">-- Tất cả loại chương trình --</option>
+                    <option value="DEAL_SOC_MUA_KEM" th:selected="${loaiComboHienTai == 'DEAL_SOC_MUA_KEM'}">Mua Kèm Deal Sốc (Add-on Deals)</option>
+                    <option value="COMBO_GIAM_GIA" th:selected="${loaiComboHienTai == 'COMBO_GIAM_GIA'}">Combo Giảm Giá Khi Mua Nhiều</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="trangThai" class="form-select">
+                    <option value="TAT_CA" th:selected="${trangThaiHienTai == 'TAT_CA'}">-- Tất cả trạng thái --</option>
+                    <option value="DANG_DIEN_RA" th:selected="${trangThaiHienTai == 'DANG_DIEN_RA'}">Đang Diễn Ra (Live)</option>
+                    <option value="SAP_DIEN_RA" th:selected="${trangThaiHienTai == 'SAP_DIEN_RA'}">Sắp Diễn Ra (Upcoming)</option>
+                    <option value="DA_KET_THUC" th:selected="${trangThaiHienTai == 'DA_KET_THUC'}">Đã Kết Thúc (Expired)</option>
+                    <option value="DA_DONG" th:selected="${trangThaiHienTai == 'DA_DONG'}">Đã Tạm Dừng (Disabled)</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-dark px-4 flex-grow-1">
+                    <i class="bi bi-funnel me-1"></i> Lọc Dữ Liệu
+                </button>
+                <a href="/seller/combo-khuyen-mai" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bảng Danh Sách Combo -->
+    <div class="card card-custom overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-custom table-hover align-middle mb-0">
+                <thead>
+                <tr>
+                    <th style="width: 70px;">Mã</th>
+                    <th style="min-width: 250px;">Tên Chương Trình</th>
+                    <th>Loại Khuyến Mãi</th>
+                    <th>Mức Giảm Ưu Đãi</th>
+                    <th>Thời Gian Áp Dụng</th>
+                    <th class="text-center">Số Mặt Hàng</th>
+                    <th class="text-center">Trạng Thái</th>
+                    <th class="text-end" style="min-width: 180px;">Thao Tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(danhSachCombo)}">
+                    <td colspan="8" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                        Chưa tìm thấy chương trình Combo khuyến mãi nào phù hợp. Hãy nhấn nút <strong>"Tạo Chương Trình Mới"</strong>!
+                    </td>
+                </tr>
+                <tr th:each="cb : ${danhSachCombo}">
+                    <td>
+                        <span class="badge bg-light text-secondary border fw-bold" th:text="'#' + ${cb.maCombo}">#1</span>
+                    </td>
+                    <td>
+                        <a th:href="@{'/seller/combo-khuyen-mai/' + ${cb.maCombo}}" class="text-decoration-none fw-bold text-dark d-block">
+                            <span th:text="${cb.tenCombo}">Tên Combo</span>
+                        </a>
+                        <small class="text-muted">Tối thiểu: <span th:text="${cb.soLuongToiThieu}">1</span> món</small>
+                    </td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${cb.loaiCombo == 'DEAL_SOC_MUA_KEM' ? 'bg-danger-subtle text-danger' : 'bg-primary-subtle text-primary'}"
+                              th:text="${cb.loaiCombo == 'DEAL_SOC_MUA_KEM' ? 'Mua Kèm Deal Sốc' : 'Combo Giảm Giá'}">
+                            Mua Kèm Deal Sốc
+                        </span>
+                    </td>
+                    <td>
+                        <span class="fw-bold text-danger fs-6" th:text="'-' + ${#numbers.formatDecimal(cb.giaTriGiam, 0, 'COMMA', 0, 'POINT')} + '%'">-50%</span>
+                    </td>
+                    <td>
+                        <div class="small">
+                            <div><i class="bi bi-calendar-event text-success me-1"></i><span th:text="${#temporals.format(cb.ngayBatDau, 'dd/MM/yyyy HH:mm')}">01/01/2026 00:00</span></div>
+                            <div><i class="bi bi-calendar-x text-danger me-1"></i><span th:text="${#temporals.format(cb.ngayKetThuc, 'dd/MM/yyyy HH:mm')}">08/01/2026 23:59</span></div>
+                        </div>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge bg-secondary-subtle text-secondary px-2 py-1 fs-7" th:text="${cb.danhSachSanPham.size()} + ' SP'">2 SP</span>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge rounded-pill px-3 py-1"
+                              th:classappend="${cb.trangThaiHienThi == 'Đang diễn ra' ? 'badge-live' : (cb.trangThaiHienThi == 'Sắp diễn ra' ? 'badge-upcoming' : (cb.trangThaiHienThi == 'Đã tạm dừng' ? 'badge-closed' : 'badge-ended'))}"
+                              th:text="${cb.trangThaiHienThi}">
+                            Đang diễn ra
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        <div class="btn-group">
+                            <a th:href="@{'/seller/combo-khuyen-mai/' + ${cb.maCombo}}" class="btn btn-sm btn-outline-primary" title="Cấu hình Sản phẩm chính A & Phụ kiện B">
+                                <i class="bi bi-gear-fill me-1"></i> Cấu hình
+                            </a>
+                            <form th:action="@{'/seller/combo-khuyen-mai/doi-trang-thai/' + ${cb.maCombo}}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm"
+                                        th:classappend="${cb.dangHoatDong ? 'btn-outline-warning' : 'btn-outline-success'}"
+                                        th:title="${cb.dangHoatDong ? 'Tạm dừng chạy' : 'Bật hoạt động'}">
+                                    <i class="bi" th:classappend="${cb.dangHoatDong ? 'bi-pause-fill' : 'bi-play-fill'}"></i>
+                                </button>
+                            </form>
+                            <form th:action="@{'/seller/combo-khuyen-mai/xoa/' + ${cb.maCombo}}" method="post" class="d-inline"
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa chương trình này không?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa chương trình">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Phân trang -->
+        <div class="card-footer bg-white border-0 py-3 d-flex justify-content-between align-items-center" th:if="${totalPages > 1}">
+            <div class="text-muted small">
+                Hiển thị trang <span class="fw-bold" th:text="${currentPage + 1}">1</span> / <span th:text="${totalPages}">10</span> (Tổng <span th:text="${totalElements}">100</span> chương trình)
+            </div>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/seller/combo-khuyen-mai(page=${currentPage - 1}, loaiCombo=${loaiComboHienTai}, trangThai=${trangThaiHienTai}, tuKhoa=${tuKhoa})}">Trước</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${currentPage == i ? 'active' : ''}">
+                        <a class="page-link" th:href="@{/seller/combo-khuyen-mai(page=${i}, loaiCombo=${loaiComboHienTai}, trangThai=${trangThaiHienTai}, tuKhoa=${tuKhoa})}" th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/seller/combo-khuyen-mai(page=${currentPage + 1}, loaiCombo=${loaiComboHienTai}, trangThai=${trangThaiHienTai}, tuKhoa=${tuKhoa})}">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tạo Mới Combo Khuyến Mãi -->
+<div class="modal fade" id="modalTaoCombo" tabindex="-1" aria-labelledby="modalTaoComboLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold" id="modalTaoComboLabel">
+                    <i class="bi bi-gift-fill me-2"></i>Tạo Chương Trình Mua Kèm Deal Sốc / Combo Khuyến Mãi
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:action="@{/seller/combo-khuyen-mai/tao-moi}" method="post" th:object="${comboForm}">
+                <div class="modal-body p-4">
+                    <div class="alert alert-info py-2 d-flex align-items-center mb-3">
+                        <i class="bi bi-info-circle-fill fs-5 me-2"></i>
+                        <span class="small">Chương trình <strong>"Mua sản phẩm chính A giảm 50% cho phụ kiện B"</strong> giúp tăng mạnh tỷ lệ chuyển đổi và giá trị trung bình đơn hàng (AOV).</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tên Chương Trình <span class="text-danger">*</span></label>
+                        <input type="text" th:field="*{tenCombo}" class="form-control" placeholder="Ví dụ: Deal Sốc: Mua Điện Thoại Giảm 50% Phụ Kiện Cao Cấp" required>
+                        <div class="form-text">Tên chương trình sẽ hiển thị trên nhãn khuyến mại của sản phẩm.</div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Loại Chương Trình <span class="text-danger">*</span></label>
+                            <select th:field="*{loaiCombo}" class="form-select" required>
+                                <option value="DEAL_SOC_MUA_KEM">Mua Kèm Deal Sốc (Add-on Deals)</option>
+                                <option value="COMBO_GIAM_GIA">Combo Giảm Giá Theo Gói</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Mức Giảm Ưu Đãi (%) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="number" th:field="*{giaTriGiam}" class="form-control" min="1" max="99" step="0.5" value="50.0" required>
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Số Lượng Tối Thiểu</label>
+                            <input type="number" th:field="*{soLuongToiThieu}" class="form-control" min="1" value="1" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Thời Gian Bắt Đầu <span class="text-danger">*</span></label>
+                            <input type="datetime-local" th:field="*{thoiGianBatDau}" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Thời Gian Kết Thúc <span class="text-danger">*</span></label>
+                            <input type="datetime-local" th:field="*{thoiGianKetThuc}" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="form-check form-switch mt-3">
+                        <input class="form-check-input" type="checkbox" role="switch" id="switchDangHoatDong" th:field="*{dangHoatDong}" checked>
+                        <label class="form-check-label fw-bold" for="switchDangHoatDong">Kích hoạt chương trình ngay sau khi tạo</label>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-shopee px-4">
+                        <i class="bi bi-arrow-right-circle me-1"></i> Tiếp tục: Chọn Sản Phẩm & Phụ Kiện
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
