@@ -1,4 +1,4 @@
--- =========================================================================================
+﻿-- =========================================================================================
 -- KỊCH BẢN NẠP DỮ LIỆU MẪU KIỂM THỬ US-53 (MODULE: PROMOTION)
 -- Admin / Seller tạo chương trình Flash Sale theo Khung giờ (0h, 12h, 21h)
 -- Thiết lập khung giờ, giá giảm sốc, giới hạn số lượng và đếm ngược thời gian

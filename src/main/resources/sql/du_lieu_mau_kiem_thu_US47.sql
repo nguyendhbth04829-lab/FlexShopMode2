@@ -1,4 +1,4 @@
--- ==============================================================================
+﻿-- ==============================================================================
 -- KỊCH BẢN NẠP DỮ LIỆU MẪU KIỂM THỬ US-47: CSKH RA PHÁN QUYẾT TRANH CHẤP
 -- TỰ ĐỘNG TẠO LỆNH HOÀN TIỀN / BỒI THƯỜNG & ĐỒNG BỘ VÍ NGƯỜI BÁN
 -- Hệ quản trị CSDL: Microsoft SQL Server (FlexShop_V2_Full)

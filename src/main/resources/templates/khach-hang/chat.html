@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Chat & Trả Giá Sản Phẩm Trực Tiếp - FlexShop</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+        .chat-container {
+            height: calc(100vh - 140px);
+            min-height: 580px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .chat-sidebar {
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .conversation-list {
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .conversation-item {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .conversation-item:hover {
+            background-color: #f8fafc;
+        }
+        .conversation-item.active {
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6;
+        }
+        .chat-main {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background: #f8fafc;
+        }
+        .chat-header {
+            padding: 14px 20px;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f8fafc;
+        }
+        .msg-bubble {
+            max-width: 65%;
+            padding: 10px 16px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            position: relative;
+            word-wrap: break-word;
+            line-height: 1.45;
+            display: inline-block;
+        }
+        .msg-khach {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+        }
+        .msg-shop {
+            background: #ffffff;
+            color: #1e293b;
+            border-bottom-left-radius: 4px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .msg-system {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            border-radius: 20px;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-align: center;
+            max-width: 80%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .product-card-msg {
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            padding: 14px;
+            width: 340px;
+            max-width: 90%;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+            color: #1e293b;
+        }
+        .offer-card-msg {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 2px solid #f59e0b;
+            padding: 18px;
+            width: 380px;
+            max-width: 90%;
+            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.18);
+            color: #1e293b;
+        }
+        .chat-input-area {
+            padding: 12px 20px;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+        }
+        .unread-badge {
+            background-color: #ef4444;
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation Header -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark py-2 shadow-sm">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand fw-bold text-danger d-flex align-items-center" href="/">
+            <i class="bi bi-bag-check-fill fs-4 me-2"></i> FLEXSHOP
+        </a>
+        <div class="d-flex align-items-center gap-3">
+            <a href="/khach-hang/vi-xu" class="btn btn-outline-warning btn-sm rounded-pill px-3">
+                <i class="bi bi-coin me-1"></i> Ví Xu Thưởng
+            </a>
+            <a href="/khach-hang/thanh-toan/voucher" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                <i class="bi bi-ticket-perforated me-1"></i> Voucher & Thanh Toán
+            </a>
+            <div class="text-white small border-start ps-3">
+                <i class="bi bi-person-circle fs-5 me-1 text-warning"></i>
+                <span th:text="${khachHang != null ? khachHang.hoVaTen : 'Khách hàng'}">Nguyễn Văn An</span>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid px-4 py-3">
+    <!-- Breadcrumb & Tiêu đề -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h5 class="fw-bold mb-1 text-dark">
+                <i class="bi bi-chat-dots-fill text-primary me-2"></i> Trò Chuyện & Trả Giá Trực Tiếp (US-59)
+            </h5>
+            <small class="text-muted">Giao tiếp thời gian thực 2 chiều với Người Bán, chia sẻ Thẻ Sản Phẩm và Đề Xuất Trả Giá (Make an Offer)</small>
+        </div>
+        <div>
+            <a href="/seller/chat" class="btn btn-outline-secondary btn-sm rounded-pill">
+                <i class="bi bi-shop me-1"></i> Mở Kênh Người Bán (Seller Chat)
+            </a>
+        </div>
+    </div>
+
+    <!-- Khung Chat Chính -->
+    <div class="row g-0 chat-container">
+        <!-- Cột Trái: Danh sách Shop đã trò chuyện -->
+        <div class="col-md-4 col-lg-3 chat-sidebar">
+            <div class="p-3 border-bottom bg-light">
+                <form method="get" action="/khach-hang/chat" class="input-group input-group-sm">
+                    <input type="text" name="tuKhoa" th:value="${tuKhoa}" class="form-control rounded-start" placeholder="Tìm tên Shop...">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+                </form>
+            </div>
+
+            <div class="conversation-list">
+                <div th:if="${danhSachCuocTroChuyen == null || danhSachCuocTroChuyen.isEmpty()}" class="p-4 text-center text-muted">
+                    <i class="bi bi-chat-left-dots fs-1 d-block mb-2 text-secondary"></i>
+                    <p class="small mb-0">Bạn chưa có cuộc trò chuyện nào với Shop.</p>
+                </div>
+
+                <a th:each="c : ${danhSachCuocTroChuyen}"
+                   th:href="@{/khach-hang/chat(cuocTroChuyenId=${c.maCuocTroChuyen})}"
+                   class="conversation-item"
+                   th:classappend="${cuocTroChuyenHienTai != null && cuocTroChuyenHienTai.maCuocTroChuyen == c.maCuocTroChuyen} ? 'active' : ''">
+                    <div class="d-flex align-items-center">
+                        <div class="position-relative me-3">
+                            <img th:src="${c.gianHang.linkLogo != null ? c.gianHang.linkLogo : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100'}"
+                                 class="rounded-circle border" width="46" height="46" style="object-fit: cover;" alt="Logo">
+                            <span class="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle p-1"></span>
+                        </div>
+                        <div class="flex-grow-1 overflow-hidden">
+                            <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                <span class="fw-bold text-truncate" th:text="${c.gianHang.tenGianHang}" style="max-width: 140px;">TechZone Store</span>
+                                <small class="text-muted" style="font-size: 0.75rem;" 
+                                       th:text="${c.thoiGianTinCuoi != null ? #temporals.format(c.thoiGianTinCuoi, 'HH:mm') : ''}">10:30</small>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted text-truncate" th:text="${c.tinNhanCuoiCung}" style="max-width: 160px;">Tin nhắn gần nhất...</small>
+                                <span th:if="${c.soTinChuaDocKhach != null && c.soTinChuaDocKhach > 0}"
+                                      class="unread-badge ms-1" th:text="${c.soTinChuaDocKhach}">1</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Cột Phải: Cửa sổ Hội thoại Chat chính -->
+        <div class="col-md-8 col-lg-9 chat-main">
+            <div th:if="${cuocTroChuyenHienTai != null}" class="d-flex flex-column h-100">
+                <!-- Chat Header -->
+                <div class="chat-header">
+                    <div class="d-flex align-items-center">
+                        <img th:src="${cuocTroChuyenHienTai.gianHang.linkLogo != null ? cuocTroChuyenHienTai.gianHang.linkLogo : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100'}"
+                             class="rounded-circle border me-3 shadow-sm" width="44" height="44" style="object-fit: cover;" alt="Shop Logo">
+                        <div>
+                            <div class="fw-bold text-dark d-flex align-items-center">
+                                <span th:text="${cuocTroChuyenHienTai.gianHang.tenGianHang}">TechZone Flagship Store</span>
+                                <span class="badge bg-danger-subtle text-danger ms-2 font-monospace small">Gian Hàng Chính Hãng</span>
+                            </div>
+                            <small class="text-success"><i class="bi bi-circle-fill" style="font-size: 8px;"></i> Đang hoạt động trực tuyến</small>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#modalChonSanPham">
+                            <i class="bi bi-box-seam me-1"></i> Gửi Thẻ Sản Phẩm
+                        </button>
+                        <button type="button" class="btn btn-warning btn-sm rounded-pill text-dark fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTraGia">
+                            <i class="bi bi-tag-fill me-1"></i> Đề Xuất Trả Giá (Make an Offer)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat Message Stream -->
+                <div class="chat-messages" id="chatMessagesBox">
+                    <th:block th:each="msg : ${danhSachTinNhan}">
+                        
+                        <!-- 1. Tin nhắn hệ thống -->
+                        <div th:if="${msg.loaiTinNhan == 'HE_THONG'}" class="d-flex justify-content-center mb-3">
+                            <div class="msg-system">
+                                <i class="bi bi-info-circle-fill me-1"></i>
+                                <span th:text="${msg.noiDung}">Thông báo hệ thống</span>
+                            </div>
+                        </div>
+
+                        <!-- 2. Thẻ Sản Phẩm (THE_SAN_PHAM) -->
+                        <div th:if="${msg.loaiTinNhan == 'THE_SAN_PHAM'}" 
+                             th:class="${msg.loaiNguoiGui == 'KHACH_HANG'} ? 'd-flex justify-content-end mb-3' : 'd-flex justify-content-start mb-3'">
+                            <div class="product-card-msg">
+                                <div class="d-flex gap-3 align-items-center">
+                                    <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500" 
+                                         class="rounded border" width="60" height="60" style="object-fit: cover;" alt="SP">
+                                    <div class="flex-grow-1 overflow-hidden">
+                                        <div class="small fw-semibold text-primary mb-1"><i class="bi bi-box-seam me-1"></i> Sản phẩm đính kèm</div>
+                                        <div class="fw-bold small text-dark line-clamp-2" th:text="${msg.noiDung}">Tên sản phẩm</div>
+                                    </div>
+                                </div>
+                                <hr class="my-2 text-muted">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <button type="button" class="btn btn-warning btn-sm w-100 fw-bold text-dark rounded-pill py-1"
+                                            data-bs-toggle="modal" data-bs-target="#modalTraGia">
+                                        <i class="bi bi-tag-fill text-dark me-1"></i> Trả giá sản phẩm này
+                                    </button>
+                                </div>
+                                <div class="text-muted text-end mt-2" style="font-size: 0.7rem;"
+                                     th:text="${#temporals.format(msg.ngayTao, 'HH:mm - dd/MM')}">10:45</div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Thẻ Đề Xuất Trả Giá (DE_XUAT_TRA_GIA) -->
+                        <div th:if="${msg.loaiTinNhan == 'DE_XUAT_TRA_GIA'}"
+                             th:class="${msg.loaiNguoiGui == 'KHACH_HANG'} ? 'd-flex justify-content-end mb-3' : 'd-flex justify-content-start mb-3'">
+                            <div class="offer-card-msg">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge bg-warning text-dark font-monospace fw-bold">
+                                        <i class="bi bi-tag-fill me-1"></i> ĐỀ XUẤT TRẢ GIÁ
+                                    </span>
+                                    <!-- Badge trạng thái -->
+                                    <span th:if="${msg.deXuatTraGia != null && msg.deXuatTraGia.trangThai == 'CHO_DUYET'}" 
+                                          class="badge bg-warning text-dark">Chờ Shop duyệt</span>
+                                    <span th:if="${msg.deXuatTraGia != null && msg.deXuatTraGia.trangThai == 'DONG_Y'}" 
+                                          class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i> Shop đã Đồng Ý</span>
+                                    <span th:if="${msg.deXuatTraGia != null && msg.deXuatTraGia.trangThai == 'TU_CHOI'}" 
+                                          class="badge bg-danger"><i class="bi bi-x-circle-fill me-1"></i> Shop đã Từ Chối</span>
+                                    <span th:if="${msg.deXuatTraGia == null}" 
+                                          class="badge bg-warning text-dark">Chờ Shop duyệt</span>
+                                </div>
+
+                                <div class="p-3 bg-light rounded-3 border my-2">
+                                    <div class="d-flex gap-2 align-items-center">
+                                        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500" 
+                                             class="rounded border" width="55" height="55" style="object-fit: cover;">
+                                        <div class="flex-grow-1 overflow-hidden">
+                                            <div class="fw-bold small text-dark text-truncate"
+                                                 th:text="${msg.deXuatTraGia != null ? msg.deXuatTraGia.sanPham.tenSanPham : msg.noiDung}">
+                                                Tai nghe không dây Sony WH-1000XM5
+                                            </div>
+                                            <div class="d-flex align-items-baseline gap-2 mt-1">
+                                                <span class="small text-muted text-decoration-line-through"
+                                                      th:if="${msg.deXuatTraGia != null}"
+                                                      th:text="${#numbers.formatDecimal(msg.deXuatTraGia.giaGoc, 0, 'COMMA', 0, 'POINT') + ' đ'}">1.250.000 đ</span>
+                                                <span class="fw-bold text-danger fs-6"
+                                                      th:if="${msg.deXuatTraGia != null}"
+                                                      th:text="${#numbers.formatDecimal(msg.deXuatTraGia.giaDeXuat, 0, 'COMMA', 0, 'POINT') + ' đ'}">1.050.000 đ</span>
+                                                <span class="badge bg-white text-dark border small"
+                                                      th:if="${msg.deXuatTraGia != null}"
+                                                      th:text="'SL: ' + ${msg.deXuatTraGia.soLuong}">SL: 1</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div th:if="${msg.deXuatTraGia != null && msg.deXuatTraGia.ghiChuKhach != null}" class="mt-2 pt-2 border-top small text-muted">
+                                        <i class="bi bi-chat-quote-fill text-warning me-1"></i>
+                                        Lời nhắn của bạn: <em th:text="${msg.deXuatTraGia.ghiChuKhach}"></em>
+                                    </div>
+                                    <div th:if="${msg.deXuatTraGia == null}" class="mt-2 pt-2 border-top small text-muted">
+                                        <i class="bi bi-chat-quote-fill text-warning me-1"></i>
+                                        Lời nhắn của bạn: <em>Shop bớt xíu 1.050.000đ mình chốt thanh toán ngay và luôn nhé!</em>
+                                    </div>
+                                </div>
+
+                                <!-- Action if Shop ACCEPTED -->
+                                <div th:if="${msg.deXuatTraGia != null && msg.deXuatTraGia.trangThai == 'DONG_Y'}" class="mt-2">
+                                    <a href="/khach-hang/thanh-toan/voucher" class="btn btn-success btn-sm w-100 fw-bold py-2 shadow-sm rounded-pill">
+                                        <i class="bi bi-cart-check-fill me-1"></i> Đặt Mua Ngay Với Giá Đã Duyệt
+                                    </a>
+                                </div>
+
+                                <div class="text-muted text-end mt-2" style="font-size: 0.72rem;"
+                                     th:text="${#temporals.format(msg.ngayTao, 'HH:mm - dd/MM')}">10:50</div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Tin nhắn văn bản thông thường -->
+                        <div th:if="${msg.loaiTinNhan == 'VAN_BAN' || msg.loaiTinNhan == null}"
+                             th:class="${msg.loaiNguoiGui == 'KHACH_HANG'} ? 'd-flex justify-content-end mb-2' : 'd-flex justify-content-start mb-2'">
+                            
+                            <!-- Avatar Shop nếu là tin shop gửi -->
+                            <div th:if="${msg.loaiNguoiGui == 'SHOP'}"
+                                 class="rounded-circle bg-primary-subtle text-primary fw-bold d-flex align-items-center justify-content-center me-2 mt-1 flex-shrink-0"
+                                 style="width: 32px; height: 32px; font-size: 0.85rem;">
+                                <i class="bi bi-shop"></i>
+                            </div>
+
+                            <div th:classappend="${msg.loaiNguoiGui == 'KHACH_HANG'} ? 'msg-bubble msg-khach' : 'msg-bubble msg-shop'">
+                                <div th:text="${msg.noiDung}">Nội dung tin nhắn</div>
+                                <div class="d-flex justify-content-end align-items-center mt-1" style="font-size: 0.7rem; opacity: 0.8;">
+                                    <span th:text="${#temporals.format(msg.ngayTao, 'HH:mm')}">10:52</span>
+                                    <i th:if="${msg.loaiNguoiGui == 'KHACH_HANG'}" class="bi bi-check2 ms-1"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                    </th:block>
+                </div>
+
+                <!-- Chat Input Area -->
+                <div class="chat-input-area">
+                    <form id="formChat" onsubmit="guiTinNhan(event)" class="d-flex gap-2 align-items-center">
+                        <input type="hidden" id="maCuocTroChuyen" th:value="${cuocTroChuyenHienTai.maCuocTroChuyen}">
+                        <input type="text" id="noiDungTinNhan" class="form-control rounded-pill px-4 py-2" 
+                               placeholder="Nhập nội dung tin nhắn để trao đổi trực tiếp với Shop..." autocomplete="off">
+                        <button type="submit" class="btn btn-primary rounded-circle p-2 shadow-sm d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                            <i class="bi bi-send-fill fs-5"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Nếu chưa chọn cuộc trò chuyện -->
+            <div th:if="${cuocTroChuyenHienTai == null}" class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+                <i class="bi bi-chat-square-dots display-3 text-secondary mb-3"></i>
+                <h5>Hãy chọn một Shop bên trái để bắt đầu Live Chat</h5>
+                <p class="small text-secondary">Bạn có thể hỏi tư vấn sản phẩm, yêu cầu ảnh thật và đàm phán giá dễ dàng.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 1: CHỌN SẢN PHẨM ĐỂ GỬI THẺ VÀO KHUNG CHAT -->
+<div class="modal fade" id="modalChonSanPham" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light">
+                <h6 class="modal-title fw-bold text-dark"><i class="bi bi-box-seam text-primary me-2"></i> Chọn Sản Phẩm Của Shop Để Gửi</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div th:if="${danhSachSanPhamShop == null || danhSachSanPhamShop.isEmpty()}" class="text-center text-muted py-3">
+                    Shop hiện chưa có sản phẩm hoạt động.
+                </div>
+                <div class="list-group list-group-flush" th:if="${danhSachSanPhamShop != null}">
+                    <div th:each="sp : ${danhSachSanPhamShop}" class="list-group-item d-flex justify-content-between align-items-center py-2 px-0">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500" 
+                                 class="rounded border" width="50" height="50" style="object-fit: cover;">
+                            <div>
+                                <div class="fw-semibold text-dark small" th:text="${sp.tenSanPham}">Tên sản phẩm</div>
+                                <div class="text-danger fw-bold small" th:text="${#numbers.formatDecimal(sp.giaCoBan, 0, 'COMMA', 0, 'POINT') + ' đ'}">1.250.000 đ</div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                                th:onclick="'guiTheSanPhamTuModal(' + ${sp.maSanPham} + ')'">
+                            Gửi thẻ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 2: TẠO ĐỀ XUẤT TRẢ GIÁ (MAKE AN OFFER) -->
+<div class="modal fade" id="modalTraGia" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning-subtle text-dark">
+                <h6 class="modal-title fw-bold"><i class="bi bi-tag-fill text-warning me-2"></i> Gửi Đề Xuất Trả Giá (Make an Offer)</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="alert alert-info py-2 px-3 small mb-3">
+                    <i class="bi bi-shield-check me-1"></i> <strong>Chính sách trả giá:</strong> Mức giá đề xuất phải thấp hơn giá niêm yết và không giảm sâu quá 50% để bảo đảm tính khả thi.
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small text-muted">Chọn sản phẩm trả giá:</label>
+                    <select id="traGiaMaSanPham" class="form-select" onchange="capNhatGiaGocSanPham()">
+                        <option th:each="sp : ${danhSachSanPhamShop}" 
+                                th:value="${sp.maSanPham}" 
+                                th:data-gia="${sp.giaCoBan}"
+                                th:text="${sp.tenSanPham + ' (Giá niêm yết: ' + #numbers.formatDecimal(sp.giaCoBan, 0, 'COMMA', 0, 'POINT') + ' đ)'}">
+                            Sản phẩm
+                        </option>
+                    </select>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label class="form-label fw-semibold small text-muted">Giá niêm yết hiện tại:</label>
+                        <input type="text" id="traGiaGiaGocHienThi" class="form-control bg-light fw-bold text-secondary" readonly value="1.250.000 đ">
+                        <input type="hidden" id="traGiaGiaGocSo" value="1250000">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label fw-semibold small text-muted">Số lượng mua:</label>
+                        <input type="number" id="traGiaSoLuong" class="form-control" value="1" min="1" max="100">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-dark">Mức giá bạn muốn đề xuất (VNĐ / Sản phẩm):</label>
+                    <input type="number" id="traGiaGiaDeXuat" class="form-control form-control-lg fw-bold text-danger border-warning"
+                           placeholder="Ví dụ: 1050000" oninput="tinhToanTietKiem()">
+                    <div id="traGiaGoiY" class="small mt-1 text-muted"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small text-muted">Lời nhắn gửi tới Shop (tuỳ chọn):</label>
+                    <textarea id="traGiaGhiChu" class="form-control" rows="2" placeholder="Ví dụ: Shop bớt xíu mình thanh toán chốt đơn liền nhé!"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-warning btn-sm rounded-pill px-4 fw-bold text-dark" onclick="guiDeXuatTraGia()">
+                    <i class="bi bi-send-check me-1"></i> Gửi Đề Xuất Trả Giá
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const maCuocTroChuyen = document.getElementById("maCuocTroChuyen") ? document.getElementById("maCuocTroChuyen").value : null;
+
+    function cuonXuongDay() {
+        const box = document.getElementById("chatMessagesBox");
+        if (box) box.scrollTop = box.scrollHeight;
+    }
+    window.addEventListener("load", () => {
+        cuonXuongDay();
+        capNhatGiaGocSanPham();
+    });
+
+    // 1. Gửi tin nhắn văn bản
+    function guiTinNhan(e) {
+        e.preventDefault();
+        const input = document.getElementById("noiDungTinNhan");
+        const noiDung = input.value.trim();
+        if (!noiDung || !maCuocTroChuyen) return;
+
+        fetch("/api/chat/gui-tin-nhan", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                maCuocTroChuyen: parseInt(maCuocTroChuyen),
+                noiDung: noiDung,
+                loaiNguoiGui: "KHACH_HANG"
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.thanhCong) {
+                input.value = "";
+                window.location.reload();
+            } else {
+                alert("Lỗi: " + data.thongBaoLoi);
+            }
+        })
+        .catch(err => alert("Không thể gửi tin nhắn."));
+    }
+
+    // 2. Gửi thẻ sản phẩm từ Modal
+    function guiTheSanPhamTuModal(maSanPham) {
+        if (!maCuocTroChuyen) return;
+        const modal = bootstrap.Modal.getInstance(document.getElementById("modalChonSanPham"));
+        if (modal) modal.hide();
+
+        fetch(`/api/chat/gui-the-san-pham?maCuocTroChuyen=${maCuocTroChuyen}&maSanPham=${maSanPham}&loaiNguoiGui=KHACH_HANG`, {
+            method: "POST"
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.thanhCong) {
+                window.location.reload();
+            } else {
+                alert("Lỗi: " + data.thongBaoLoi);
+            }
+        })
+        .catch(err => alert("Lỗi gửi thẻ sản phẩm"));
+    }
+
+    // Cập nhật giá gốc khi chọn sản phẩm trong modal trả giá
+    function capNhatGiaGocSanPham() {
+        const sel = document.getElementById("traGiaMaSanPham");
+        if (!sel || !sel.selectedOptions.length) return;
+        const gia = parseFloat(sel.selectedOptions[0].getAttribute("data-gia") || "0");
+        document.getElementById("traGiaGiaGocSo").value = gia;
+        document.getElementById("traGiaGiaGocHienThi").value = new Intl.NumberFormat('vi-VN').format(gia) + ' đ';
+        tinhToanTietKiem();
+    }
+
+    // Tính toán số tiền tiết kiệm và validate sơ bộ
+    function tinhToanTietKiem() {
+        const giaGoc = parseFloat(document.getElementById("traGiaGiaGocSo").value || "0");
+        const giaDeXuat = parseFloat(document.getElementById("traGiaGiaDeXuat").value || "0");
+        const divGoiY = document.getElementById("traGiaGoiY");
+
+        if (giaDeXuat > 0 && giaGoc > 0) {
+            const chenhLech = giaGoc - giaDeXuat;
+            const phanTram = Math.round((chenhLech / giaGoc) * 100);
+            if (giaDeXuat >= giaGoc) {
+                divGoiY.innerHTML = `<span class="text-danger fw-bold"><i class="bi bi-exclamation-triangle"></i> Giá đề xuất phải thấp hơn giá niêm yết!</span>`;
+            } else if (phanTram > 50) {
+                divGoiY.innerHTML = `<span class="text-danger fw-bold"><i class="bi bi-exclamation-triangle"></i> Không được giảm quá 50% (Tối đa giảm ${new Intl.NumberFormat('vi-VN').format(giaGoc * 0.5)} đ)!</span>`;
+            } else {
+                divGoiY.innerHTML = `<span class="text-success fw-bold"><i class="bi bi-check-circle"></i> Tiết kiệm ${new Intl.NumberFormat('vi-VN').format(chenhLech)} đ (-${phanTram}%)</span>`;
+            }
+        } else {
+            divGoiY.innerHTML = "";
+        }
+    }
+
+    // 3. Gửi đề xuất trả giá (Make an Offer)
+    function guiDeXuatTraGia() {
+        const maSanPham = parseInt(document.getElementById("traGiaMaSanPham").value);
+        const soLuong = parseInt(document.getElementById("traGiaSoLuong").value);
+        const giaDeXuat = parseFloat(document.getElementById("traGiaGiaDeXuat").value);
+        const ghiChuKhach = document.getElementById("traGiaGhiChu").value;
+
+        if (!giaDeXuat || giaDeXuat <= 0) {
+            alert("Vui lòng nhập mức giá bạn muốn đề xuất!");
+            return;
+        }
+
+        fetch("/api/chat/de-xuat-tra-gia", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                maCuocTroChuyen: parseInt(maCuocTroChuyen),
+                maSanPham: maSanPham,
+                soLuong: soLuong,
+                giaDeXuat: giaDeXuat,
+                ghiChuKhach: ghiChuKhach
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.thanhCong) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById("modalTraGia"));
+                if (modal) modal.hide();
+                alert("🎉 Đã gửi đề xuất trả giá thành công! Shop sẽ phản hồi trong chốc lát.");
+                window.location.reload();
+            } else {
+                alert("Lỗi: " + data.thongBaoLoi);
+            }
+        })
+        .catch(err => alert("Không thể gửi đề xuất trả giá."));
+    }
+</script>
+</body>
+</html>

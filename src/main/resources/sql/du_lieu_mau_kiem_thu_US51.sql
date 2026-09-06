@@ -1,4 +1,4 @@
--- ==============================================================================
+﻿-- ==============================================================================
 -- KỊCH BẢN NẠP DỮ LIỆU MẪU KIỂM THỬ US-51: WISHLIST, FOLLOW SHOP & Q&A
 -- Module: ENGAGE (Kênh khách hàng tương tác: Yêu thích, Theo dõi & Hỏi đáp)
 -- Hệ quản trị CSDL: Microsoft SQL Server (FlexShop_V2_Full) - Chuẩn Unicode Tiếng Việt

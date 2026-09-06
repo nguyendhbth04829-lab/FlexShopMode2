@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface SanPhamRepository extends JpaRepository<SanPham, Long> {
     Optional<SanPham> findByDuongDanSlug(String duongDanSlug);
+    java.util.List<SanPham> findByGianHang_MaGianHang(Long maGianHang);
+    java.util.List<SanPham> findByGianHang_MaGianHangAndTrangThai(Long maGianHang, String trangThai);
 }

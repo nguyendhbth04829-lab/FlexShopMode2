@@ -1,4 +1,4 @@
--- =========================================================================================
+﻿-- =========================================================================================
 -- KỊCH BẢN NẠP DỮ LIỆU MẪU KIỂM THỬ US-52 (MODULE: VOUCHER)
 -- Khách hàng áp dụng đồng thời: Mã Freeship Sàn + Voucher Sàn + Voucher Shop
 -- Thuật toán Voucher lồng nhau (Stackable Vouchers) phân bổ chính xác nguồn tiền tài trợ

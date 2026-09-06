@@ -50,9 +50,16 @@ public class ViXuServiceTest {
     }
 
     private DonHangTong layDonHangTest(Long maNguoiDung) {
-        return donHangTongRepository.findByKhachHangMaNguoiDungOrderByNgayTaoDesc(maNguoiDung).stream()
+        DonHangTong dh = donHangTongRepository.findByKhachHangMaNguoiDungOrderByNgayTaoDesc(maNguoiDung).stream()
                 .findFirst()
                 .orElseGet(() -> donHangTongRepository.findAll().stream().findFirst().orElseThrow());
+        if (dh.getSoXuDaDung() != null && dh.getSoXuDaDung() > 0) {
+            dh.setTongThanhToanCuoi(dh.getTongThanhToanCuoi().add(dh.getSoTienGiamTuXu()));
+            dh.setSoXuDaDung(0L);
+            dh.setSoTienGiamTuXu(BigDecimal.ZERO);
+            dh = donHangTongRepository.saveAndFlush(dh);
+        }
+        return dh;
     }
 
     @Test

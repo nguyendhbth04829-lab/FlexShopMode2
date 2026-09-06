@@ -1,4 +1,4 @@
--- ==============================================================================
+﻿-- ==============================================================================
 -- KỊCH BẢN NẠP DỮ LIỆU MẪU KIỂM THỬ US-49: ĐÁNH GIÁ SẢN PHẨM & TÍNH ĐIỂM RATING
 -- Module: ENGAGE (Khách hàng đánh giá 1-5 sao + Nhận xét + Đính kèm ảnh)
 -- Tự động tính lại điểm Rating trung bình của Sản phẩm & Gian Hàng

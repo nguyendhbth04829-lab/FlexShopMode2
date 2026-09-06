@@ -1,4 +1,4 @@
--- ==============================================================================
+﻿-- ==============================================================================
 -- KỊCH BẢN NẠP DỮ LIỆU MẪU KIỂM THỬ US-50: SELLER XEM VÀ PHẢN HỒI ĐÁNH GIÁ
 -- Module: ENGAGE (Kênh người bán - Quản lý phản hồi công khai đánh giá của khách)
 -- Hệ quản trị CSDL: Microsoft SQL Server (FlexShop_V2_Full) - Chuẩn Unicode Tiếng Việt
