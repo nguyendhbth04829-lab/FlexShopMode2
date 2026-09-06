@@ -29,6 +29,9 @@
             <i class="bi bi-wallet2 text-warning me-2"></i>Ví Người Bán FlexShop
         </a>
         <div class="navbar-nav ms-auto">
+            <a href="/rut-tien-nguoi-ban/danh-sach" class="btn btn-sm btn-outline-warning me-2 fw-semibold">
+                <i class="bi bi-cash-stack me-1"></i> US-44: Rút Tiền Người Bán
+            </a>
             <a href="/ky-quy/danh-sach" class="btn btn-sm btn-outline-light me-2">
                 <i class="bi bi-safe me-1"></i> Danh Sách Ký Quỹ Escrow
             </a>
@@ -64,9 +67,10 @@
                 <a href="/ky-quy/danh-sach" class="btn btn-outline-secondary btn-sm me-2">
                     <i class="bi bi-arrow-left me-1"></i> Trở về Ký Quỹ
                 </a>
-                <button class="btn btn-success fw-semibold" disabled title="Sắp ra mắt tại US-44!">
+                <a th:href="@{|/rut-tien-nguoi-ban/tao-yeu-cau?maGianHang=${gianHang.maGianHang}|}"
+                   class="btn btn-success fw-semibold shadow-sm">
                     <i class="bi bi-cash-stack me-1"></i> Rút Tiền Về Ngân Hàng (US-44)
-                </button>
+                </a>
             </div>
         </div>
     </div>
@@ -154,10 +158,13 @@
                             <span th:if="${ls.loaiGiaoDich == 'RUT_TIEN'}" class="badge bg-danger-subtle text-danger border border-danger-subtle">
                                 <i class="bi bi-arrow-up-right me-1"></i> Rút Tiền
                             </span>
+                            <span th:if="${ls.loaiGiaoDich == 'HOAN_TIEN_RUT_THAT_BAI'}" class="badge bg-warning-subtle text-dark border border-warning-subtle">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i> Hoàn Tiền Rút
+                            </span>
                         </td>
                         <td>
-                            <span class="fw-bold text-success fs-6"
-                                  th:text="'+' + ${#numbers.formatDecimal(ls.soTien, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+                            <span th:class="${ls.soTien >= 0 ? 'fw-bold text-success fs-6' : 'fw-bold text-danger fs-6'}"
+                                  th:text="${(ls.soTien >= 0 ? '+' : '') + #numbers.formatDecimal(ls.soTien, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
                         </td>
                         <td>
                             <strong class="text-dark"
