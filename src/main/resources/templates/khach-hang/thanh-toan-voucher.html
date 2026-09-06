@@ -150,7 +150,7 @@
                     <i class="bi bi-box-seam fs-4 text-primary"></i>
                     <div>
                         <div class="fw-bold">Chọn Đơn Hàng Cần Áp Dụng Voucher</div>
-                        <small class="text-muted">Đang đăng nhập: <strong class="text-dark" th:text="${khachHang != null ? khachHang.hoTen + ' (' + khachHang.email + ')' : 'Khách Hàng'}"></strong></small>
+                        <small class="text-muted">Đang đăng nhập: <strong class="text-dark" th:text="${khachHang != null ? khachHang.hoVaTen + ' (' + khachHang.email + ')' : 'Khách Hàng'}"></strong></small>
                     </div>
                 </div>
                 <form th:action="@{/khach-hang/thanh-toan/voucher}" method="get" class="d-flex align-items-center gap-2">
@@ -225,12 +225,15 @@
                             <!-- Gợi ý mã voucher của Shop -->
                             <div class="mt-2 small text-muted" th:if="${voucherGoiY != null and voucherGoiY.get('SHOP') != null}">
                                 Gợi ý mã shop:
-                                <span th:each="v : ${voucherGoiY.get('SHOP')}"
-                                      th:if="${donShop.gianHang != null and v.gianHang != null and v.gianHang.maGianHang == donShop.gianHang.maGianHang}"
-                                      class="badge-voucher-pill py-1"
-                                      th:onclick="'chonMaShop(' + ${donShop.gianHang.maGianHang} + ', \'' + ${v.maCodeVoucher} + '\')'"
-                                      th:text="${v.maCodeVoucher} + ' (-' + ${#numbers.formatDecimal(v.giaTriGiam, 0, 'POINT', 0, 'COMMA')} + 'đ)'">
-                                </span>
+                                <th:block th:each="v : ${voucherGoiY.get('SHOP')}">
+                                    <span th:if="${donShop.gianHang != null and v.gianHang != null and v.gianHang.maGianHang == donShop.gianHang.maGianHang}"
+                                          class="badge-voucher-pill py-1"
+                                          th:data-shop="${donShop.gianHang.maGianHang}"
+                                          th:data-code="${v.maCodeVoucher}"
+                                          onclick="chonMaShop(this.getAttribute('data-shop'), this.getAttribute('data-code'))"
+                                          th:text="${v.maCodeVoucher} + ' (-' + ${#numbers.formatDecimal(v.giaTriGiam, 0, 'POINT', 0, 'COMMA')} + 'đ)'">
+                                    </span>
+                                </th:block>
                             </div>
                         </div>
                     </div>
@@ -257,7 +260,8 @@
                                 Gợi ý mã Sàn:
                                 <span th:each="v : ${voucherGoiY.get('SAN')}"
                                       class="badge-voucher-pill py-1"
-                                      th:onclick="'document.getElementById(\'maVoucherSanInput\').value=\'' + ${v.maCodeVoucher} + '\''"
+                                      th:data-code="${v.maCodeVoucher}"
+                                      onclick="document.getElementById('maVoucherSanInput').value = this.getAttribute('data-code')"
                                       th:text="${v.maCodeVoucher} + ' (' + ${v.tenVoucher} + ')'">
                                 </span>
                             </div>
@@ -286,7 +290,8 @@
                                 Gợi ý mã Freeship:
                                 <span th:each="v : ${voucherGoiY.get('FREESHIP')}"
                                       class="badge-voucher-pill py-1"
-                                      th:onclick="'document.getElementById(\'maFreeshipSanInput\').value=\'' + ${v.maCodeVoucher} + '\''"
+                                      th:data-code="${v.maCodeVoucher}"
+                                      onclick="document.getElementById('maFreeshipSanInput').value = this.getAttribute('data-code')"
                                       th:text="${v.maCodeVoucher} + ' (-' + ${#numbers.formatDecimal(v.giaTriGiam, 0, 'POINT', 0, 'COMMA')} + 'đ ship)'">
                                 </span>
                             </div>

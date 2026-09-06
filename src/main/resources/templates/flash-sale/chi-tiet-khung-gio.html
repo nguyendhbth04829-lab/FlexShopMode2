@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Khung Giờ & Sản Phẩm Giảm Sốc - FlexShop</title>
+    <!-- Google Fonts: Be Vietnam Pro -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f6f7fb;
+            color: #2b2f38;
+            -webkit-font-smoothing: antialiased;
+        }
+        .navbar-brand-custom {
+            font-weight: 700;
+            color: #ee4d2d !important;
+            letter-spacing: 0.5px;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            background: #ffffff;
+        }
+        .table-custom th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+        }
+        .product-thumb {
+            width: 48px;
+            height: 48px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-white shadow-sm sticky-top py-2">
+        <div class="container">
+            <a class="navbar-brand navbar-brand-custom d-flex align-items-center fs-4" th:href="@{/quan-ly/flash-sale}">
+                <i class="bi bi-lightning-charge-fill text-warning me-2"></i>FlexShop <span class="badge bg-danger ms-2 fs-6 fw-normal">Quản Lý Khung Giờ</span>
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <a th:href="@{/flash-sale(maFlashSale=${khungGio.maFlashSale})}" class="btn btn-warning btn-sm text-dark fw-bold">
+                    <i class="bi bi-eye-fill me-1"></i> Xem Giao Diện Khách
+                </a>
+                <a th:href="@{/quan-ly/flash-sale}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Trở Về Danh Sách
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+
+        <!-- Flash alerts -->
+        <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show card-custom mb-3" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+            <span th:text="${thongBaoThanhCong}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show card-custom mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+            <span th:text="${thongBaoLoi}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- THẺ THÔNG TIN KHUNG GIỜ -->
+        <div class="card card-custom p-4 mb-4 bg-light border" th:if="${khungGio != null}">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <img th:if="${khungGio.linkBanner != null and !khungGio.linkBanner.isEmpty()}" th:src="@{${khungGio.linkBanner}}" alt="Banner" class="rounded border shadow-sm" style="width: 80px; height: 50px; object-fit: cover;" onerror="this.style.display='none'">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge" th:classappend="${khungGio.badgeClass}" th:text="${khungGio.trangThaiHienThi}"></span>
+                            <h4 class="fw-bold mb-0 text-dark" th:text="${khungGio.tieuDe}"></h4>
+                        </div>
+                        <div class="text-muted small">
+                            <i class="bi bi-calendar-check me-1"></i> Bắt đầu: <strong th:text="${#temporals.format(khungGio.thoiGianBatDau, 'dd/MM/yyyy HH:mm')}"></strong>
+                            | <i class="bi bi-clock me-1"></i> Kết thúc: <strong th:text="${#temporals.format(khungGio.thoiGianKetThuc, 'dd/MM/yyyy HH:mm')}"></strong>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-danger fw-bold" data-bs-toggle="modal" data-bs-target="#modalDangKySP">
+                        <i class="bi bi-plus-circle me-1"></i> Đăng Ký Sản Phẩm Giảm Sốc
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- DANH SÁCH SẢN PHẨM TRONG KHUNG GIỜ FLASH SALE -->
+        <div class="card card-custom p-4">
+            <h5 class="fw-bold mb-3 text-dark">
+                <i class="bi bi-fire text-danger me-2"></i>Danh Sách Sản Phẩm Giảm Sốc Trong Khung Giờ
+            </h5>
+
+            <div class="table-responsive" th:if="${not #lists.isEmpty(danhSachSanPham)}">
+                <table class="table table-hover table-custom align-middle">
+                    <thead>
+                        <tr>
+                            <th># Mã</th>
+                            <th>Sản Phẩm & Biến Thể</th>
+                            <th>Gian Hàng</th>
+                            <th class="text-end">Giá Niêm Yết</th>
+                            <th class="text-end">Giá Giảm Sốc</th>
+                            <th class="text-center">% Giảm</th>
+                            <th>Tiến Độ Bán Hàng</th>
+                            <th class="text-center">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="sp : ${danhSachSanPham}">
+                            <td class="fw-bold text-muted" th:text="'#' + ${sp.maSanPhamFs}"></td>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <img th:src="${sp.bienTheSanPham.linkAnh != null and sp.bienTheSanPham.linkAnh != '' ? sp.bienTheSanPham.linkAnh : '/images/product-placeholder.jpg'}"
+                                         class="product-thumb" alt="Ảnh sản phẩm">
+                                    <div>
+                                        <div class="fw-bold text-dark" th:text="${sp.bienTheSanPham.sanPham != null ? sp.bienTheSanPham.sanPham.tenSanPham : 'Sản phẩm'}"></div>
+                                        <small class="text-muted" th:text="'Biến thể: ' + ${sp.bienTheSanPham.tenBienThe} + ' (SKU: ' + ${sp.bienTheSanPham.maSku} + ')'"></small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border"
+                                      th:text="${sp.bienTheSanPham.sanPham != null and sp.bienTheSanPham.sanPham.gianHang != null ? sp.bienTheSanPham.sanPham.gianHang.tenGianHang : 'Gian Hàng'}">
+                                </span>
+                            </td>
+                            <td class="text-end text-muted text-decoration-line-through"
+                                th:text="${#numbers.formatDecimal(sp.bienTheSanPham.giaBan, 0, 'POINT', 0, 'COMMA')} + ' đ'">
+                            </td>
+                            <td class="text-end fw-bold text-danger fs-6"
+                                th:text="${#numbers.formatDecimal(sp.giaFlashSale, 0, 'POINT', 0, 'COMMA')} + ' đ'">
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-danger" th:text="'-' + ${sp.phanTramGiamGia} + '%'"></span>
+                            </td>
+                            <td style="min-width: 170px;">
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span class="text-muted">Đã bán: <strong th:text="${sp.soLuongDaBan != null ? sp.soLuongDaBan : 0} + '/' + ${sp.soLuongGioiHan}"></strong></span>
+                                    <span class="fw-bold" th:classappend="${sp.isChayHang() ? 'text-danger' : 'text-success'}"
+                                          th:text="${sp.isChayHang() ? 'CHÁY HÀNG' : sp.phanTramDaBan + '%'}">
+                                    </span>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-danger" role="progressbar"
+                                         th:style="'width: ' + ${sp.phanTramDaBan} + '%'"></div>
+                                </div>
+                                <small class="text-muted" style="font-size: 0.75rem;"
+                                       th:text="'Giới hạn: ' + ${sp.gioiHanMuaMoiKhach} + ' cái/khách'">
+                                </small>
+                            </td>
+                            <td class="text-center">
+                                <form th:action="@{/quan-ly/flash-sale/xoa-san-pham/{id}(id=${sp.maSanPhamFs})}" method="post"
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn gỡ sản phẩm này khỏi Flash Sale không?');">
+                                    <input type="hidden" name="maFlashSale" th:value="${khungGio.maFlashSale}">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Gỡ khỏi Flash Sale">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Trống -->
+            <div th:if="${#lists.isEmpty(danhSachSanPham)}" class="text-center py-5">
+                <i class="bi bi-box2 fs-1 text-muted"></i>
+                <p class="mt-2 text-muted">Chưa có sản phẩm nào được đăng ký vào khung giờ này.</p>
+                <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalDangKySP">
+                    <i class="bi bi-plus-circle me-1"></i> Đăng Ký Sản Phẩm Ngay
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL ĐĂNG KÝ SẢN PHẨM GIẢM SỐC -->
+    <div class="modal fade" id="modalDangKySP" tabindex="-1" aria-labelledby="modalDangKySPLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/quan-ly/flash-sale/{id}/them-san-pham(id=${khungGio.maFlashSale})}" method="post" th:object="${dangKyForm}">
+                    <input type="hidden" th:field="*{maFlashSale}">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" id="modalDangKySPLabel"><i class="bi bi-fire me-2 text-danger"></i>Đăng Ký Sản Phẩm Giảm Sốc</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Chọn biến thể sản phẩm -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Chọn Biến Thể Sản Phẩm <span class="text-danger">*</span></label>
+                            <select th:field="*{maBienThe}" id="bienTheSelect" class="form-select" required onchange="capNhatGiaGoc()">
+                                <option value="">-- Chọn sản phẩm tham gia --</option>
+                                <option th:each="bt : ${danhSachBienThe}"
+                                        th:value="${bt.maBienThe}"
+                                        th:data-price="${bt.giaBan}"
+                                        th:text="${bt.sanPham != null ? bt.sanPham.tenSanPham : ''} + ' - ' + ${bt.tenBienThe} + ' (Giá gốc: ' + ${#numbers.formatDecimal(bt.giaBan, 0, 'POINT', 0, 'COMMA')} + ' đ)'">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Giá Flash Sale -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Giá Flash Sale (Giá Giảm Sốc) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="number" step="1000" th:field="*{giaFlashSale}" id="giaFlashSaleInput" class="form-control"
+                                       placeholder="Ví dụ: 799000" required oninput="tinhPhanTramGiam()">
+                                <span class="input-group-text">VND</span>
+                            </div>
+                            <small id="previewGiamGia" class="text-success fw-bold d-block mt-1"></small>
+                            <small class="text-muted d-block mt-1"><i class="bi bi-info-circle me-1"></i>Giá Flash Sale bắt buộc phải nhỏ hơn giá niêm yết hiện tại và giảm tối thiểu 5%.</small>
+                        </div>
+
+                        <!-- Số lượng suất mở bán -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Số Suất Mở Bán <span class="text-danger">*</span></label>
+                                <input type="number" min="1" th:field="*{soLuongGioiHan}" class="form-control" placeholder="Ví dụ: 50" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Giới Hạn / Khách <span class="text-danger">*</span></label>
+                                <input type="number" min="1" th:field="*{gioiHanMuaMoiKhach}" class="form-control" value="1" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-danger fw-bold">Xác Nhận Đăng Ký</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentGiaGoc = 0;
+
+        function capNhatGiaGoc() {
+            const select = document.getElementById('bienTheSelect');
+            const selectedOption = select.options[select.selectedIndex];
+            if (selectedOption && selectedOption.dataset.price) {
+                currentGiaGoc = parseFloat(selectedOption.dataset.price);
+                tinhPhanTramGiam();
+            }
+        }
+
+        function tinhPhanTramGiam() {
+            const input = document.getElementById('giaFlashSaleInput');
+            const preview = document.getElementById('previewGiamGia');
+            const val = parseFloat(input.value);
+
+            if (currentGiaGoc > 0 && val > 0) {
+                if (val >= currentGiaGoc) {
+                    preview.className = 'text-danger fw-bold d-block mt-1';
+                    preview.innerText = 'Lỗi: Giá Flash Sale phải nhỏ hơn giá gốc (' + currentGiaGoc.toLocaleString('vi-VN') + ' đ)!';
+                } else {
+                    const pct = Math.round(((currentGiaGoc - val) / currentGiaGoc) * 100);
+                    preview.className = 'text-success fw-bold d-block mt-1';
+                    preview.innerText = 'Tiết kiệm: ' + (currentGiaGoc - val).toLocaleString('vi-VN') + ' đ (-' + pct + '%)';
+                }
+            } else {
+                preview.innerText = '';
+            }
+        }
+    </script>
+</body>
+</html>

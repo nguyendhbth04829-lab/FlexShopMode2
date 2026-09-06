@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Khung Giờ Flash Sale (0h, 12h, 21h) - FlexShop Admin</title>
+    <!-- Google Fonts: Be Vietnam Pro -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f6f7fb;
+            color: #2b2f38;
+            -webkit-font-smoothing: antialiased;
+        }
+        .navbar-brand-custom {
+            font-weight: 700;
+            color: #ee4d2d !important;
+            letter-spacing: 0.5px;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            background: #ffffff;
+        }
+        .kpi-card {
+            border-radius: 12px;
+            border: none;
+            background: white;
+            padding: 16px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .kpi-icon-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .slot-btn {
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+        .slot-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+        .table-custom th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-white shadow-sm sticky-top py-2">
+        <div class="container">
+            <a class="navbar-brand navbar-brand-custom d-flex align-items-center fs-4" th:href="@{/quan-ly/flash-sale}">
+                <i class="bi bi-lightning-charge-fill text-warning me-2"></i>FlexShop <span class="badge bg-danger ms-2 fs-6 fw-normal">Quản Lý Flash Sale</span>
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <a th:href="@{/flash-sale}" class="btn btn-warning btn-sm text-dark fw-bold">
+                    <i class="bi bi-eye-fill me-1"></i> Xem Trang Flash Sale Khách Hàng
+                </a>
+                <a th:href="@{/quan-ly/flash-sale}" class="btn btn-danger btn-sm">
+                    <i class="bi bi-gear-fill me-1"></i> Quản Lý Khung Giờ (US-53)
+                </a>
+                <a th:href="@{/khach-hang/kho-voucher}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-wallet2 me-1"></i> Kho Voucher
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+
+        <!-- Flash alerts -->
+        <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show card-custom mb-3" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+            <span th:text="${thongBaoThanhCong}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show card-custom mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+            <span th:text="${thongBaoLoi}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- 4 Thẻ KPI Thống Kê Flash Sale -->
+        <div class="row g-3 mb-4" th:if="${thongKe != null}">
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-icon-box bg-danger-subtle text-danger">
+                        <i class="bi bi-fire"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Đang Diễn Ra</div>
+                        <h4 class="fw-bold mb-0 text-danger" th:text="${thongKe.tongKhungGioDangDienRa}">0</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-icon-box bg-warning-subtle text-warning-emphasis">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Sắp Diễn Ra</div>
+                        <h4 class="fw-bold mb-0 text-dark" th:text="${thongKe.tongKhungGioSapDienRa}">0</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-icon-box bg-primary-subtle text-primary">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Tổng Sản Phẩm FS</div>
+                        <h4 class="fw-bold mb-0 text-dark" th:text="${thongKe.tongSanPhamThamGia}">0</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-icon-box bg-success-subtle text-success">
+                        <i class="bi bi-cash-coin"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Suất Đã Bán / Doanh Thu</div>
+                        <h4 class="fw-bold mb-0 text-success" th:text="${thongKe.tongSuatDaBan} + ' suất'">0</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KHU VỰC THIẾT LẬP NHANH CÁC KHUNG GIỜ VÀNG (0H, 12H, 21H) -->
+        <div class="card card-custom p-4 mb-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3 border-bottom pb-2">
+                <div>
+                    <h5 class="fw-bold mb-1 text-dark">
+                        <i class="bi bi-lightning-charge-fill text-warning me-1"></i>Thiết Lập Nhanh Khung Giờ Flash Sale Chuẩn (US-53)
+                    </h5>
+                    <small class="text-muted">Bấm 1 click để tạo ngay các mốc giờ vàng trong ngày theo chuẩn sàn thương mại điện tử</small>
+                </div>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTuyChinh">
+                    <i class="bi bi-plus-circle me-1"></i> Tạo Giờ Tùy Chỉnh
+                </button>
+            </div>
+
+            <div class="row g-3">
+                <!-- Nút tạo mốc 0h -->
+                <div class="col-md-4">
+                    <form th:action="@{/quan-ly/flash-sale/tao-nhanh}" method="post">
+                        <input type="hidden" name="mocGio" value="0H">
+                        <button type="submit" class="btn btn-outline-danger slot-btn w-100 text-start">
+                            <i class="bi bi-moon-stars-fill fs-3 text-danger"></i>
+                            <div>
+                                <div class="fs-6 fw-bold">⚡ Khung Giờ 0H (00:00 - 02:00)</div>
+                                <small class="text-muted">Nửa Đêm Săn Deal Cháy Phố</small>
+                            </div>
+                        </button>
+                    </form>
+                </div>
+                <!-- Nút tạo mốc 12h -->
+                <div class="col-md-4">
+                    <form th:action="@{/quan-ly/flash-sale/tao-nhanh}" method="post">
+                        <input type="hidden" name="mocGio" value="12H">
+                        <button type="submit" class="btn btn-outline-warning slot-btn w-100 text-start">
+                            <i class="bi bi-sun-fill fs-3 text-warning"></i>
+                            <div>
+                                <div class="fs-6 fw-bold text-dark">⚡ Khung Giờ 12H (12:00 - 14:00)</div>
+                                <small class="text-muted">Nghỉ Trưa Deal Sốc Chớp Nhoáng</small>
+                            </div>
+                        </button>
+                    </form>
+                </div>
+                <!-- Nút tạo mốc 21h -->
+                <div class="col-md-4">
+                    <form th:action="@{/quan-ly/flash-sale/tao-nhanh}" method="post">
+                        <input type="hidden" name="mocGio" value="21H">
+                        <button type="submit" class="btn btn-outline-primary slot-btn w-100 text-start">
+                            <i class="bi bi-stars fs-3 text-primary"></i>
+                            <div>
+                                <div class="fs-6 fw-bold">⚡ Khung Giờ 21H (21:00 - 23:59)</div>
+                                <small class="text-muted">Giờ Vàng Xả Kho Giá Rẻ Vô Địch</small>
+                            </div>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- DANH SÁCH CÁC KHUNG GIỜ FLASH SALE ĐÃ THIẾT LẬP -->
+        <div class="card card-custom p-4">
+            <div class="row g-3 align-items-center justify-content-between mb-3">
+                <div class="col-md-6">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-list-stars me-2 text-danger"></i>Danh Sách Khung Giờ Flash Sale
+                    </h5>
+                </div>
+                <div class="col-md-6">
+                    <form th:action="@{/quan-ly/flash-sale}" method="get" class="d-flex gap-2 justify-content-md-end">
+                        <select name="trangThai" class="form-select form-select-sm" onchange="this.form.submit()" style="max-width: 170px;">
+                            <option value="TAT_CA" th:selected="${trangThaiHienTai == 'TAT_CA'}">Tất cả trạng thái</option>
+                            <option value="DANG_DIEN_RA" th:selected="${trangThaiHienTai == 'DANG_DIEN_RA'}">Đang diễn ra</option>
+                            <option value="SAP_DIEN_RA" th:selected="${trangThaiHienTai == 'SAP_DIEN_RA'}">Sắp diễn ra</option>
+                            <option value="DA_KET_THUC" th:selected="${trangThaiHienTai == 'DA_KET_THUC'}">Đã kết thúc</option>
+                            <option value="TAM_KHOA" th:selected="${trangThaiHienTai == 'TAM_KHOA'}">Tạm khóa</option>
+                        </select>
+                        <input type="text" name="tuKhoa" class="form-control form-control-sm" placeholder="Tìm tiêu đề..." th:value="${tuKhoa}" style="max-width: 200px;">
+                        <button class="btn btn-outline-secondary btn-sm" type="submit"><i class="bi bi-search"></i></button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="table-responsive" th:if="${not #lists.isEmpty(danhSachKhungGio)}">
+                <table class="table table-hover table-custom align-middle">
+                    <thead>
+                        <tr>
+                            <th># Mã</th>
+                            <th>Tiêu Đề Khung Giờ</th>
+                            <th>Thời Gian Bắt Đầu</th>
+                            <th>Thời Gian Kết Thúc</th>
+                            <th>Trạng Thái</th>
+                            <th>Số SP Tham Gia</th>
+                            <th class="text-center">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="slot : ${danhSachKhungGio}">
+                            <td class="fw-bold text-muted" th:text="'#' + ${slot.maFlashSale}"></td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img th:if="${slot.linkBanner != null and !slot.linkBanner.isEmpty()}" th:src="@{${slot.linkBanner}}" alt="Banner" class="rounded border shadow-sm flex-shrink-0" style="width: 56px; height: 38px; object-fit: cover;" onerror="this.style.display='none'">
+                                    <div>
+                                        <div class="fw-bold text-dark" th:text="${slot.tieuDe}"></div>
+                                        <small class="text-muted" th:if="${slot.linkBanner != null}" th:text="${slot.linkBanner}"></small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    <i class="bi bi-calendar-event me-1"></i>
+                                    <span th:text="${#temporals.format(slot.thoiGianBatDau, 'dd/MM/yyyy HH:mm')}"></span>
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    <i class="bi bi-clock me-1"></i>
+                                    <span th:text="${#temporals.format(slot.thoiGianKetThuc, 'dd/MM/yyyy HH:mm')}"></span>
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge" th:classappend="${slot.badgeClass}" th:text="${slot.trangThaiHienThi}"></span>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary-subtle text-primary fw-bold"
+                                      th:text="${slot.danhSachSanPham != null ? slot.danhSachSanPham.size() : 0} + ' sản phẩm'">
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a th:href="@{/quan-ly/flash-sale/{id}(id=${slot.maFlashSale})}" class="btn btn-primary" title="Xem & Thêm SP">
+                                        <i class="bi bi-plus-circle me-1"></i> Thêm SP Sốc
+                                    </a>
+                                    <a th:href="@{/flash-sale(maFlashSale=${slot.maFlashSale})}" class="btn btn-outline-warning text-dark" title="Xem Giao Diện Khách">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <form th:action="@{/quan-ly/flash-sale/xoa/{id}(id=${slot.maFlashSale})}" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa khung giờ Flash Sale này không?');">
+                                        <button type="submit" class="btn btn-outline-danger" title="Xóa khung giờ">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Trống -->
+            <div th:if="${#lists.isEmpty(danhSachKhungGio)}" class="text-center py-5">
+                <i class="bi bi-calendar-x fs-1 text-muted"></i>
+                <p class="mt-2 text-muted">Chưa có khung giờ Flash Sale nào. Hãy bấm nút tạo nhanh 0h, 12h, 21h ở trên!</p>
+            </div>
+
+            <!-- Phân trang -->
+            <div class="d-flex justify-content-center mt-4" th:if="${totalPages > 1}">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/quan-ly/flash-sale(trangThai=${trangThaiHienTai}, tuKhoa=${tuKhoa}, page=${currentPage - 1})}">&laquo;</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${currentPage == i ? 'active' : ''}">
+                            <a class="page-link" th:href="@{/quan-ly/flash-sale(trangThai=${trangThaiHienTai}, tuKhoa=${tuKhoa}, page=${i})}" th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/quan-ly/flash-sale(trangThai=${trangThaiHienTai}, tuKhoa=${tuKhoa}, page=${currentPage + 1})}">&raquo;</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL TẠO KHUNG GIỜ TÙY CHỈNH -->
+    <div class="modal fade" id="modalTuyChinh" tabindex="-1" aria-labelledby="modalTuyChinhLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/quan-ly/flash-sale/tao-tuy-chinh}" method="post" th:object="${khungGioForm}" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" id="modalTuyChinhLabel"><i class="bi bi-clock me-2 text-danger"></i>Tạo Khung Giờ Tùy Chỉnh</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Tiêu Đề Khung Giờ <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{tieuDe}" class="form-control" placeholder="Ví dụ: Flash Sale Đại Tiệc Cuối Tuần..." required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-image me-1 text-danger"></i>Ảnh Banner Khung Giờ (Chọn Từ Máy Tính)
+                            </label>
+                            <input type="file" id="tepAnhBanner" name="tepAnhBanner" class="form-control" accept="image/png, image/jpeg, image/webp, image/gif" onchange="xemTruocAnhBanner(this)">
+                            <small class="text-muted d-block mt-1">
+                                <i class="bi bi-info-circle me-1"></i>Hỗ trợ JPG, PNG, WEBP, GIF (Tối đa 15MB). Không bắt buộc - nếu để trống sẽ tự động áp dụng banner Flash Sale mặc định.
+                            </small>
+
+                            <!-- Khung xem trước ảnh tải từ máy -->
+                            <div id="bannerPreviewBox" class="mt-2 text-center p-2 border rounded bg-light d-none">
+                                <img id="bannerPreviewImg" src="#" alt="Xem trước ảnh banner" class="img-fluid rounded shadow-sm" style="max-height: 130px; width: 100%; object-fit: cover;">
+                                <div class="small text-success mt-1 fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Đã chọn ảnh từ máy tính thành công</div>
+                            </div>
+                            <input type="hidden" th:field="*{linkBanner}" id="linkBannerFallback">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold mb-1"><i class="bi bi-magic me-1 text-danger"></i>Gợi Ý Nhanh Khung Giờ (1 Click):</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="chonKhungGioMau('CHIEU_NAY')">
+                                    <i class="bi bi-sun-fill me-1 text-warning"></i>Chiều Nay (15:00 - 17:00)
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="chonKhungGioMau('TOI_NAY')">
+                                    <i class="bi bi-moon-stars-fill me-1 text-danger"></i>Tối Nay (19:00 - 21:00)
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-dark" onclick="chonKhungGioMau('DEM_NAY')">
+                                    <i class="bi bi-stars me-1 text-info"></i>Đêm Nay (21:00 - 23:59)
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-success" onclick="chonKhungGioMau('SANG_MAI')">
+                                    <i class="bi bi-brightness-high-fill me-1 text-success"></i>Sáng Mai (09:00 - 11:00)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- THIẾT LẬP THỜI GIAN CHUẨN 24 GIỜ (KHÔNG DÙNG AM/PM) -->
+                        <div class="card bg-light border p-3 mb-3">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <label class="form-label fw-bold text-dark mb-0">
+                                    <i class="bi bi-clock-history me-1 text-danger"></i>Chọn Thời Gian (Hệ 24 Giờ: 00:00 - 23:59) <span class="text-danger">*</span>
+                                </label>
+                                <span class="badge bg-danger">Chuẩn 24H (00:00 - 23:59)</span>
+                            </div>
+
+                            <div class="row g-3">
+                                <!-- Bắt Đầu -->
+                                <div class="col-md-6">
+                                    <div class="border rounded p-2 bg-white shadow-sm">
+                                        <div class="small fw-bold text-primary mb-2">
+                                            <i class="bi bi-play-circle-fill me-1"></i>THỜI GIAN BẮT ĐẦU:
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="small text-muted mb-1 d-block fw-semibold">Ngày bắt đầu:</label>
+                                            <input type="date" id="ngayBatDau24h" class="form-control form-control-sm" required onchange="dongBoGio24H()">
+                                        </div>
+                                        <div>
+                                            <label class="small text-muted mb-1 d-block fw-semibold">Giờ bắt đầu (24H):</label>
+                                            <select id="gioBatDau24h" class="form-select form-select-sm" required onchange="dongBoGio24H()">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Kết Thúc -->
+                                <div class="col-md-6">
+                                    <div class="border rounded p-2 bg-white shadow-sm">
+                                        <div class="small fw-bold text-danger mb-2">
+                                            <i class="bi bi-stop-circle-fill me-1"></i>THỜI GIAN KẾT THÚC:
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="small text-muted mb-1 d-block fw-semibold">Ngày kết thúc:</label>
+                                            <input type="date" id="ngayKetThuc24h" class="form-control form-control-sm" required onchange="dongBoGio24H()">
+                                        </div>
+                                        <div>
+                                            <label class="small text-muted mb-1 d-block fw-semibold">Giờ kết thúc (24H):</label>
+                                            <select id="gioKetThuc24h" class="form-select form-select-sm" required onchange="dongBoGio24H()">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Live Preview & Thời lượng -->
+                            <div class="mt-3 p-2 bg-white rounded border text-center shadow-sm">
+                                <div class="small text-muted mb-1">Khung giờ 24h áp dụng:</div>
+                                <div id="livePreviewThoiGian" class="fw-bold text-dark fs-6">
+                                    -- : --
+                                </div>
+                                <div id="livePreviewThoiLuong" class="small text-secondary mt-1">
+                                    Thời lượng: --
+                                </div>
+                            </div>
+
+                            <!-- Hidden inputs bound to Spring Form -->
+                            <input type="hidden" th:field="*{thoiGianBatDau}" id="thoiGianBatDau" required>
+                            <input type="hidden" th:field="*{thoiGianKetThuc}" id="thoiGianKetThuc" required>
+                        </div>
+                        <small class="text-muted d-block mt-2"><i class="bi bi-info-circle me-1"></i>Khung giờ tối thiểu 30 phút và không được chồng chéo với khung giờ khác đang mở.</small>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-danger fw-bold" onclick="return kiemTraFormTruocKhiGui()">Lưu Khung Giờ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        function xemTruocAnhBanner(input) {
+            const previewBox = document.getElementById('bannerPreviewBox');
+            const previewImg = document.getElementById('bannerPreviewImg');
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                if (file.size > 15 * 1024 * 1024) {
+                    alert('Ảnh banner vượt quá dung lượng cho phép 15MB! Vui lòng chọn ảnh khác.');
+                    input.value = '';
+                    previewBox.classList.add('d-none');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewBox.classList.remove('d-none');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewBox.classList.add('d-none');
+            }
+        }
+
+        function pad2(n) { return n < 10 ? '0' + n : n; }
+
+        function layNgayDinhDang(d) {
+            return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+        }
+
+        function khoiTaoDanhSachGio24h() {
+            const selStart = document.getElementById('gioBatDau24h');
+            const selEnd = document.getElementById('gioKetThuc24h');
+            if (!selStart || !selEnd || selStart.options.length > 0) return;
+
+            const danhSachGio = [];
+            for (let h = 0; h < 24; h++) {
+                const hh = pad2(h);
+                danhSachGio.push(hh + ':00');
+                danhSachGio.push(hh + ':30');
+            }
+            danhSachGio.push('23:59');
+
+            function moTaGio(timeStr) {
+                if (timeStr === '00:00') return ' (Nửa đêm / 0h)';
+                if (timeStr === '06:00') return ' (Sáng sớm / 6h)';
+                if (timeStr === '09:00') return ' (Sáng / 9h)';
+                if (timeStr === '12:00') return ' (Trưa / 12h)';
+                if (timeStr === '15:00') return ' (Chiều / 3h)';
+                if (timeStr === '18:00') return ' (Tối / 6h)';
+                if (timeStr === '21:00') return ' (Đêm / 9h)';
+                if (timeStr === '23:59') return ' (Hết ngày / 23:59)';
+                return '';
+            }
+
+            danhSachGio.forEach(function(g) {
+                const text = g + moTaGio(g);
+                selStart.add(new Option(text, g));
+                selEnd.add(new Option(text, g));
+            });
+
+            selStart.value = '09:00';
+            selEnd.value = '11:00';
+        }
+
+        function dongBoGio24H() {
+            const inpNgayBatDau = document.getElementById('ngayBatDau24h');
+            const inpNgayKetThuc = document.getElementById('ngayKetThuc24h');
+            const selStart = document.getElementById('gioBatDau24h');
+            const selEnd = document.getElementById('gioKetThuc24h');
+
+            if (!inpNgayBatDau || !inpNgayKetThuc || !selStart || !selEnd) return;
+
+            const ngayS = inpNgayBatDau.value;
+            const gioS = selStart.value;
+            const ngayE = inpNgayKetThuc.value;
+            const gioE = selEnd.value;
+
+            if (!ngayS || !gioS || !ngayE || !gioE) return;
+
+            const startIso = ngayS + 'T' + gioS;
+            const endIso = ngayE + 'T' + gioE;
+
+            document.getElementById('thoiGianBatDau').value = startIso;
+            document.getElementById('thoiGianKetThuc').value = endIso;
+
+            const previewText = document.getElementById('livePreviewThoiGian');
+            const previewDuration = document.getElementById('livePreviewThoiLuong');
+            if (previewText && previewDuration) {
+                const sDate = new Date(startIso);
+                const eDate = new Date(endIso);
+
+                const dinhDangNgayVN = function(d) {
+                    return pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1) + '/' + d.getFullYear();
+                };
+
+                previewText.innerHTML = '<span class="badge bg-primary fs-6">' + gioS + '</span> ' + dinhDangNgayVN(sDate) +
+                    ' <i class="bi bi-arrow-right mx-2 text-danger fw-bold"></i> ' +
+                    '<span class="badge bg-danger fs-6">' + gioE + '</span> ' + dinhDangNgayVN(eDate);
+
+                const diffMs = eDate.getTime() - sDate.getTime();
+                if (diffMs > 0) {
+                    const totalMins = Math.round(diffMs / (1000 * 60));
+                    const hours = Math.floor(totalMins / 60);
+                    const mins = totalMins % 60;
+                    let str = '';
+                    if (hours > 0) str += hours + ' giờ ';
+                    if (mins > 0) str += mins + ' phút';
+
+                    if (totalMins < 30) {
+                        previewDuration.innerHTML = '<span class="text-danger fw-bold"><i class="bi bi-exclamation-circle-fill me-1"></i>Thời lượng: ' + str + ' (Lưu ý: Phải từ 30 phút trở lên!)</span>';
+                    } else {
+                        previewDuration.innerHTML = '<span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Thời lượng: ' + str + ' (Hợp lệ)</span>';
+                    }
+                } else {
+                    previewDuration.innerHTML = '<span class="text-danger fw-bold"><i class="bi bi-x-circle-fill me-1"></i>Lỗi: Thời gian kết thúc phải sau thời gian bắt đầu!</span>';
+                }
+            }
+        }
+
+        function chonKhungGioMau(loai) {
+            khoiTaoDanhSachGio24h();
+            const now = new Date();
+            const todayStr = layNgayDinhDang(now);
+            const tomorrow = new Date();
+            tomorrow.setDate(now.getDate() + 1);
+            const tomorrowStr = layNgayDinhDang(tomorrow);
+
+            const inpNgayBatDau = document.getElementById('ngayBatDau24h');
+            const inpNgayKetThuc = document.getElementById('ngayKetThuc24h');
+            const selStart = document.getElementById('gioBatDau24h');
+            const selEnd = document.getElementById('gioKetThuc24h');
+
+            if (loai === 'CHIEU_NAY') {
+                inpNgayBatDau.value = todayStr;
+                inpNgayKetThuc.value = todayStr;
+                selStart.value = '15:00';
+                selEnd.value = '17:00';
+            } else if (loai === 'TOI_NAY') {
+                inpNgayBatDau.value = todayStr;
+                inpNgayKetThuc.value = todayStr;
+                selStart.value = '19:00';
+                selEnd.value = '21:00';
+            } else if (loai === 'DEM_NAY') {
+                inpNgayBatDau.value = todayStr;
+                inpNgayKetThuc.value = todayStr;
+                selStart.value = '21:00';
+                selEnd.value = '23:59';
+            } else if (loai === 'SANG_MAI') {
+                inpNgayBatDau.value = tomorrowStr;
+                inpNgayKetThuc.value = tomorrowStr;
+                selStart.value = '09:00';
+                selEnd.value = '11:00';
+            }
+
+            dongBoGio24H();
+        }
+
+        function kiemTraFormTruocKhiGui() {
+            dongBoGio24H();
+            const startIso = document.getElementById('thoiGianBatDau').value;
+            const endIso = document.getElementById('thoiGianKetThuc').value;
+            if (!startIso || !endIso) {
+                alert('Vui lòng chọn ngày và giờ bắt đầu / kết thúc!');
+                return false;
+            }
+            const sDate = new Date(startIso);
+            const eDate = new Date(endIso);
+            const diffMs = eDate.getTime() - sDate.getTime();
+            if (diffMs < 30 * 60 * 1000) {
+                alert('Khung giờ Flash Sale phải kéo dài tối thiểu 30 phút và thời gian kết thúc phải sau thời gian bắt đầu!');
+                return false;
+            }
+            return true;
+        }
+
+        // Tự động khởi tạo thời gian 24h khi modal mở
+        const modalEl = document.getElementById('modalTuyChinh');
+        if (modalEl) {
+            modalEl.addEventListener('show.bs.modal', function () {
+                khoiTaoDanhSachGio24h();
+                const inpNgayBatDau = document.getElementById('ngayBatDau24h');
+                const inpNgayKetThuc = document.getElementById('ngayKetThuc24h');
+                if (!inpNgayBatDau.value) {
+                    const now = new Date();
+                    const todayStr = layNgayDinhDang(now);
+                    inpNgayBatDau.value = todayStr;
+                    inpNgayKetThuc.value = todayStr;
+
+                    const nextHour = (now.getHours() + 1) % 24;
+                    const endHour = (nextHour + 2) % 24;
+                    const selStart = document.getElementById('gioBatDau24h');
+                    const selEnd = document.getElementById('gioKetThuc24h');
+                    selStart.value = pad2(nextHour) + ':00';
+                    selEnd.value = pad2(endHour) + ':00';
+                }
+                dongBoGio24H();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            khoiTaoDanhSachGio24h();
+            const existingStart = document.getElementById('thoiGianBatDau') ? document.getElementById('thoiGianBatDau').value : '';
+            const existingEnd = document.getElementById('thoiGianKetThuc') ? document.getElementById('thoiGianKetThuc').value : '';
+            if (existingStart && existingEnd) {
+                const sParts = existingStart.split('T');
+                const eParts = existingEnd.split('T');
+                if (sParts.length === 2 && document.getElementById('ngayBatDau24h')) {
+                    document.getElementById('ngayBatDau24h').value = sParts[0];
+                    document.getElementById('gioBatDau24h').value = sParts[1].substring(0, 5);
+                }
+                if (eParts.length === 2 && document.getElementById('ngayKetThuc24h')) {
+                    document.getElementById('ngayKetThuc24h').value = eParts[0];
+                    document.getElementById('gioKetThuc24h').value = eParts[1].substring(0, 5);
+                }
+                dongBoGio24H();
+            }
+        });
+    </script>
+</body>
+</html>

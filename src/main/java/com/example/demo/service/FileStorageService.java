@@ -128,4 +128,51 @@ public class FileStorageService {
         String fileUrl = "/uploads/khieu-nai/" + uniqueFileName;
         return new FileUploadResult(fileUrl, fileType);
     }
+
+    /**
+     * Lưu tệp tin ảnh banner cho chương trình Flash Sale từ máy tính
+     */
+    public String luuAnhBannerFlashSale(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+
+        // 1. Kiểm tra dung lượng tối đa 15MB cho banner
+        if (file.getSize() > 15 * 1024 * 1024) {
+            throw new IllegalArgumentException("Ảnh banner vượt quá dung lượng cho phép (Tối đa 15MB)!");
+        }
+
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || originalFilename.isBlank()) {
+            throw new IllegalArgumentException("Tên tệp tin ảnh banner không hợp lệ!");
+        }
+
+        // 2. Chống Directory Traversal
+        if (originalFilename.contains("..") || originalFilename.contains("/") || originalFilename.contains("\\")) {
+            throw new SecurityException("Phát hiện tên tệp tin không an toàn: " + originalFilename);
+        }
+
+        int lastDotIndex = originalFilename.lastIndexOf(".");
+        if (lastDotIndex == -1) {
+            throw new IllegalArgumentException("Tệp tin ảnh thiếu phần mở rộng (.jpg, .png, .webp...)!");
+        }
+
+        String extension = originalFilename.substring(lastDotIndex).toLowerCase();
+        List<String> validExtensions = Arrays.asList(".jpg", ".jpeg", ".png", ".webp", ".gif");
+        if (!validExtensions.contains(extension)) {
+            throw new IllegalArgumentException("Định dạng ảnh không hợp lệ (Chỉ chấp nhận: JPG, PNG, WEBP, GIF)!");
+        }
+
+        // 3. Thư mục lưu trữ: uploads/flash-sale/
+        Path flashSaleUploadPath = Paths.get("uploads", "flash-sale");
+        if (!Files.exists(flashSaleUploadPath)) {
+            Files.createDirectories(flashSaleUploadPath);
+        }
+
+        String uniqueFileName = "banner_" + UUID.randomUUID().toString().substring(0, 8) + "_" + System.currentTimeMillis() + extension;
+        Path targetLocation = flashSaleUploadPath.resolve(uniqueFileName);
+        Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+
+        return "/uploads/flash-sale/" + uniqueFileName;
+    }
 }

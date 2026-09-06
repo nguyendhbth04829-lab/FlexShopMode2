@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ FLASH SALE GIỜ VÀNG (0H, 12H, 21H) - FlexShop</title>
+    <!-- Google Fonts: Be Vietnam Pro -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f6f7fb;
+            color: #2b2f38;
+            -webkit-font-smoothing: antialiased;
+        }
+        .navbar-brand-custom {
+            font-weight: 700;
+            color: #ee4d2d !important;
+            letter-spacing: 0.5px;
+        }
+        .flash-sale-header {
+            background: linear-gradient(135deg, #ee4d2d 0%, #ff5722 50%, #ff9800 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(238, 77, 45, 0.25);
+            margin-bottom: 25px;
+        }
+        .countdown-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 8px 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+        .countdown-unit {
+            background: #2b2f38;
+            color: white;
+            border-radius: 6px;
+            padding: 4px 8px;
+            min-width: 38px;
+            text-align: center;
+            font-family: monospace;
+        }
+        .time-slot-nav {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .time-slot-tab {
+            flex: 1;
+            min-width: 160px;
+            background: white;
+            border-radius: 12px;
+            padding: 14px 16px;
+            text-align: center;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            cursor: pointer;
+            text-decoration: none;
+            color: #475569;
+            transition: all 0.2s;
+        }
+        .time-slot-tab:hover {
+            transform: translateY(-2px);
+            border-color: #fca5a5;
+        }
+        .time-slot-tab.active {
+            background: #fff5f5;
+            border-color: #ee4d2d;
+            color: #ee4d2d;
+            box-shadow: 0 6px 18px rgba(238, 77, 45, 0.15);
+        }
+        .product-fs-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            border: 1px solid #f1f5f9;
+        }
+        .product-fs-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+        .fs-img-wrap {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+        .fs-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .discount-sticker {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #ee4d2d;
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .progress-fire {
+            background: #fed7aa;
+            height: 16px;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-fire-bar {
+            background: linear-gradient(90deg, #f97316, #ef4444);
+            height: 100%;
+            border-radius: 10px;
+        }
+        .progress-fire-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-white shadow-sm sticky-top py-2">
+        <div class="container">
+            <a class="navbar-brand navbar-brand-custom d-flex align-items-center fs-4" th:href="@{/flash-sale}">
+                <i class="bi bi-lightning-charge-fill text-warning me-2"></i>FlexShop <span class="badge bg-danger ms-2 fs-6 fw-normal">FLASH SALE</span>
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <a th:href="@{/flash-sale}" class="btn btn-danger btn-sm">
+                    <i class="bi bi-fire me-1"></i> Flash Sale Giờ Vàng
+                </a>
+                <a th:href="@{/quan-ly/flash-sale}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-gear-fill me-1"></i> Quản Lý (Admin/Seller)
+                </a>
+                <a th:href="@{/khach-hang/thanh-toan/voucher}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-ticket-perforated me-1"></i> Áp Dụng Voucher (US-52)
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+
+        <!-- Flash alerts -->
+        <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show card-custom mb-3" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+            <span th:text="${thongBaoThanhCong}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show card-custom mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+            <span th:text="${thongBaoLoi}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- TRẠNG THÁI KHI CHƯA CÓ KHUNG GIỜ NÀO HOẠT ĐỘNG -->
+        <div class="card card-custom text-center py-5 shadow-sm mb-4" th:if="${khungGioHienTai == null}">
+            <i class="bi bi-lightning-charge fs-1 text-danger"></i>
+            <h4 class="fw-bold mt-2 text-dark">Hiện chưa có chương trình Flash Sale nào</h4>
+            <p class="text-muted">Các khung giờ Flash Sale giảm giá sốc sẽ sớm được cập nhật. Xin vui lòng quay lại sau!</p>
+            <div class="mt-2">
+                <a th:href="@{/quan-ly/flash-sale}" class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-gear-wide-connected me-1"></i> Đến trang quản lý khung giờ Flash Sale
+                </a>
+            </div>
+        </div>
+
+        <!-- BANNER HEADER FLASH SALE & BỘ ĐẾM NGƯỢC COUNTDOWN -->
+        <div class="flash-sale-header shadow" th:if="${khungGioHienTai != null}"
+             th:style="${khungGioHienTai.linkBanner != null and !khungGioHienTai.linkBanner.isEmpty()} ? 'background: linear-gradient(rgba(238, 77, 45, 0.85), rgba(255, 87, 34, 0.9)), url(' + @{${khungGioHienTai.linkBanner}} + ') center/cover no-repeat;' : ''">
+            <div class="row align-items-center g-3">
+                <div class="col-md-7">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-white text-danger fw-bold fs-6">
+                            <i class="bi bi-lightning-fill"></i> FLASH SALE
+                        </span>
+                        <span class="badge bg-warning text-dark fw-bold" th:text="${khungGioHienTai.trangThaiHienThi}"></span>
+                    </div>
+                    <h2 class="fw-bold mb-1" th:text="${khungGioHienTai.tieuDe}">⚡ Flash Sale 0h - Nửa Đêm Săn Deal Cháy Phố</h2>
+                    <p class="mb-0 opacity-90">Săn deal giá sốc không tưởng, số lượng có hạn theo từng khung giờ!</p>
+                </div>
+
+                <!-- ĐỒNG HỒ ĐẾM NGƯỢC COUNTDOWN TIMER -->
+                <div class="col-md-5 text-md-end">
+                    <div class="small fw-semibold mb-1 opacity-90" id="countdownLabel">
+                        <span th:if="${khungGioHienTai.isDangDienRa()}">KẾT THÚC TRONG</span>
+                        <span th:if="${khungGioHienTai.isSapDienRa()}">BẮT ĐẦU SAU</span>
+                        <span th:if="${khungGioHienTai.isDaKetThuc()}">ĐÃ KẾT THÚC</span>
+                    </div>
+                    <div class="countdown-box shadow" id="countdownBox">
+                        <span class="countdown-unit" id="hours">00</span> :
+                        <span class="countdown-unit" id="minutes">00</span> :
+                        <span class="countdown-unit" id="seconds">00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- THANH TRƯỢT CHỌN KHUNG GIỜ TRONG NGÀY (0H, 12H, 21H...) -->
+        <div class="time-slot-nav" th:if="${not #lists.isEmpty(dsKhungGioTrongNgay)}">
+            <a th:each="slot : ${dsKhungGioTrongNgay}"
+               th:href="@{/flash-sale(maFlashSale=${slot.maFlashSale})}"
+               class="time-slot-tab"
+               th:classappend="${khungGioHienTai != null and khungGioHienTai.maFlashSale == slot.maFlashSale ? 'active' : ''}">
+                <div class="fs-5 fw-bold" th:text="${slot.nhanThoiGianTab}">00:00</div>
+                <small class="d-block fw-semibold" th:text="${slot.trangThaiHienThi}">Đang diễn ra</small>
+            </a>
+        </div>
+
+        <!-- DANH SÁCH SẢN PHẨM FLASH SALE (GRID) -->
+        <div class="row g-4" th:if="${not #lists.isEmpty(dsSanPham)}">
+            <div class="col-6 col-md-4 col-lg-3" th:each="sp : ${dsSanPham}">
+                <div class="product-fs-card h-100">
+                    <!-- Ảnh & Sticker giảm giá -->
+                    <div class="fs-img-wrap">
+                        <img th:src="${sp.bienTheSanPham.linkAnh != null and sp.bienTheSanPham.linkAnh != '' ? sp.bienTheSanPham.linkAnh : '/images/product-placeholder.jpg'}"
+                             class="fs-img" alt="Ảnh sản phẩm">
+                        <span class="discount-sticker" th:text="'-' + ${sp.phanTramGiamGia} + '%'">-35%</span>
+                    </div>
+
+                    <!-- Thông tin & Giá sốc -->
+                    <div class="p-3 d-flex flex-column justify-content-between flex-grow-1">
+                        <div>
+                            <small class="text-muted d-block mb-1"
+                                   th:text="${sp.bienTheSanPham.sanPham != null and sp.bienTheSanPham.sanPham.gianHang != null ? sp.bienTheSanPham.sanPham.gianHang.tenGianHang : ''}">
+                            </small>
+                            <h6 class="fw-bold text-dark text-truncate-2 mb-2"
+                                th:text="${sp.bienTheSanPham.sanPham != null ? sp.bienTheSanPham.sanPham.tenSanPham : ''}">
+                            </h6>
+                            <small class="text-secondary d-block mb-2" th:text="'Phân loại: ' + ${sp.bienTheSanPham.tenBienThe}"></small>
+
+                            <!-- Giá sốc -->
+                            <div class="d-flex align-items-baseline gap-2 mb-3">
+                                <span class="fs-5 fw-bold text-danger"
+                                      th:text="${#numbers.formatDecimal(sp.giaFlashSale, 0, 'POINT', 0, 'COMMA')} + ' đ'">
+                                </span>
+                                <small class="text-muted text-decoration-line-through"
+                                       th:text="${#numbers.formatDecimal(sp.bienTheSanPham.giaBan, 0, 'POINT', 0, 'COMMA')} + ' đ'">
+                                </small>
+                            </div>
+                        </div>
+
+                        <div>
+                            <!-- Thanh tiến độ lửa "ĐÃ BÁN xx%" -->
+                            <div class="progress-fire mb-3">
+                                <div class="progress-fire-bar" th:style="'width: ' + ${sp.phanTramDaBan} + '%'"></div>
+                                <div class="progress-fire-text">
+                                    <span th:if="${sp.isChayHang()}"><i class="bi bi-fire me-1"></i> ĐÃ BÁN HẾT</span>
+                                    <span th:unless="${sp.isChayHang()}"><i class="bi bi-fire me-1"></i> ĐÃ BÁN <span th:text="${sp.soLuongDaBan != null ? sp.soLuongDaBan : 0}"></span>/<span th:text="${sp.soLuongGioiHan}"></span></span>
+                                </div>
+                            </div>
+
+                            <!-- Nút Mua Ngay -->
+                            <form th:action="@{/flash-sale/mua-ngay}" method="post" th:if="${khungGioHienTai != null and khungGioHienTai.isDangDienRa() and not sp.isChayHang()}">
+                                <input type="hidden" name="maSanPhamFs" th:value="${sp.maSanPhamFs}">
+                                <input type="hidden" name="maFlashSale" th:value="${khungGioHienTai.maFlashSale}">
+                                <input type="hidden" name="soLuong" value="1">
+                                <button type="submit" class="btn btn-danger w-100 fw-bold py-2 shadow-sm">
+                                    <i class="bi bi-cart-plus me-1"></i> Mua Ngay
+                                </button>
+                            </form>
+
+                            <button th:if="${khungGioHienTai != null and khungGioHienTai.isSapDienRa()}" class="btn btn-outline-warning text-dark w-100 fw-bold py-2 disabled">
+                                <i class="bi bi-bell me-1"></i> Sắp Mở Bán
+                            </button>
+
+                            <button th:if="${sp.isChayHang() or (khungGioHienTai != null and khungGioHienTai.isDaKetThuc())}" class="btn btn-secondary w-100 fw-bold py-2 disabled">
+                                <i class="bi bi-x-circle me-1"></i> Đã Hết Hàng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trạng thái trống -->
+        <div th:if="${#lists.isEmpty(dsSanPham)}" class="card card-custom text-center py-5">
+            <i class="bi bi-lightning-charge fs-1 text-muted"></i>
+            <h5 class="fw-bold mt-2 text-dark">Chưa có sản phẩm nào trong khung giờ này</h5>
+            <p class="text-muted">Các ưu đãi giảm sốc sẽ được mở bán trong thời gian sớm nhất!</p>
+            <div class="mt-2">
+                <a th:href="@{/quan-ly/flash-sale}" class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i> Thêm sản phẩm vào Flash Sale (Dành cho Admin/Seller)
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- REAL-TIME JAVASCRIPT COUNTDOWN TIMER -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const isDangDienRa = /*[[${khungGioHienTai != null ? khungGioHienTai.isDangDienRa() : false}]]*/ false;
+        const isSapDienRa = /*[[${khungGioHienTai != null ? khungGioHienTai.isSapDienRa() : false}]]*/ false;
+        const targetTimeStr = /*[[${khungGioHienTai != null ? (khungGioHienTai.isDangDienRa() ? khungGioHienTai.thoiGianKetThuc.toString() : khungGioHienTai.thoiGianBatDau.toString()) : ''}]]*/ '';
+
+        if (targetTimeStr) {
+            const targetDate = new Date(targetTimeStr).getTime();
+
+            function updateCountdown() {
+                const now = new Date().getTime();
+                const distance = targetDate - now;
+
+                if (distance <= 0) {
+                    document.getElementById('hours').innerText = '00';
+                    document.getElementById('minutes').innerText = '00';
+                    document.getElementById('seconds').innerText = '00';
+                    document.getElementById('countdownLabel').innerText = 'ĐÃ KẾT THÚC';
+                    return;
+                }
+
+                const hours = Math.floor(distance / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                document.getElementById('hours').innerText = hours.toString().padStart(2, '0');
+                document.getElementById('minutes').innerText = minutes.toString().padStart(2, '0');
+                document.getElementById('seconds').innerText = seconds.toString().padStart(2, '0');
+            }
+
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+        /*]]>*/
+    </script>
+</body>
+</html>

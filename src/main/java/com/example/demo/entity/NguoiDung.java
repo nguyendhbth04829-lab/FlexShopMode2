@@ -31,6 +31,14 @@ public class NguoiDung {
     @Column(name = "ho_va_ten", nullable = false, length = 100)
     private String hoVaTen;
 
+    public String getHoTen() {
+        return hoVaTen;
+    }
+
+    public void setHoTen(String hoTen) {
+        this.hoVaTen = hoTen;
+    }
+
     @Column(name = "anh_dai_dien", length = 500)
     private String anhDaiDien;
 

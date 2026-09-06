@@ -7,6 +7,7 @@ import com.example.demo.entity.DonHangShop;
 import com.example.demo.entity.DonHangTong;
 import com.example.demo.entity.LichSuDungMaGiamGia;
 import com.example.demo.entity.MaGiamGia;
+import com.example.demo.entity.NguoiDung;
 import com.example.demo.repository.DonHangShopRepository;
 import com.example.demo.repository.DonHangTongRepository;
 import com.example.demo.repository.LichSuDungMaGiamGiaRepository;
@@ -290,5 +291,16 @@ public class VoucherStackableServiceTest {
         MaGiamGia vSan = maGiamGiaRepository.findByMaCodeVoucherIgnoreCaseAndDaXoaFalse("FLEXSAN100K").orElse(null);
         assertNotNull(vSan);
         assertTrue(vSan.getSoLuongDaDung() > 0, "Số lượng đã dùng của voucher Sàn phải tăng lên");
+    }
+
+    @Test
+    @DisplayName("Test 11: Kiểm tra tính tương thích đồng bộ của getHoTen và getHoVaTen trên Entity NguoiDung")
+    public void testNguoiDungHoTenVaHoVaTenDongBo() {
+        NguoiDung user = new NguoiDung();
+        user.setHoVaTen("Nguyễn Văn Khách Hàng");
+        assertEquals("Nguyễn Văn Khách Hàng", user.getHoTen(), "getHoTen phải trả về cùng giá trị với getHoVaTen");
+
+        user.setHoTen("Trần Thị Người Mua");
+        assertEquals("Trần Thị Người Mua", user.getHoVaTen(), "setHoTen phải cập nhật vào trường hoVaTen");
     }
 }
