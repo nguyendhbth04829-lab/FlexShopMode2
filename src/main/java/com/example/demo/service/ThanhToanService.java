@@ -35,6 +35,9 @@ public class ThanhToanService {
     @Autowired
     private DonHangShopRepository donHangShopRepository;
 
+    @Autowired
+    private KyQuyService kyQuyService;
+
     public Page<DonHangTong> getDanhSachDonHang(String keyword, String trangThaiThanhToan, int page, int size) {
         Pageable pageable = PageRequest.of(Math.max(0, page), size);
         return donHangTongRepository.searchAndFilter(keyword, trangThaiThanhToan, pageable);
@@ -87,6 +90,9 @@ public class ThanhToanService {
                 donHangShopRepository.save(shopOrder);
             }
         }
+
+        // US-42 & US-43: Tự động đưa tiền đơn hàng vào Ký quỹ Escrow (Shopee Guarantee 3 ngày)
+        kyQuyService.taoGiaoDichKyQuyChoDonHangTong(donHang);
 
         return donHangTongRepository.save(donHang);
     }

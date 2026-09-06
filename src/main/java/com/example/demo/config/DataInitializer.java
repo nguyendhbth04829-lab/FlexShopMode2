@@ -2,6 +2,7 @@ package com.example.demo.config;
 
 import com.example.demo.entity.*;
 import com.example.demo.repository.*;
+import com.example.demo.service.KyQuyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -42,12 +43,26 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private ChiTietDonHangRepository chiTietDonHangRepository;
 
+    @Autowired
+    private ViNguoiBanRepository viNguoiBanRepository;
+
+    @Autowired
+    private GiaoDichKyQuyRepository giaoDichKyQuyRepository;
+
+    @Autowired
+    private KyQuyService kyQuyService;
+
     @Override
     public void run(String... args) {
         try {
+            NguoiDung khachHang;
+            DiaChiNguoiDung diaChi;
+            GianHang shopAnker;
+            GianHang shopLogi;
+
+            // 1. Khách hàng mẫu
             if (nguoiDungRepository.count() == 0) {
-                // 1. Tạo Khách hàng mẫu
-                NguoiDung khachHang = new NguoiDung();
+                khachHang = new NguoiDung();
                 khachHang.setEmail("khachhang.demo@flexshop.com");
                 khachHang.setSoDienThoai("0912345678");
                 khachHang.setMatKhauMaHoa("$2a$10$e8y1d8f1h2j3k4l5m6n7o8p9q0r1s2t3u4v5w6x7y8z9a0b1c2d3e");
@@ -55,8 +70,7 @@ public class DataInitializer implements CommandLineRunner {
                 khachHang.setTrangThai("HOAT_DONG");
                 khachHang = nguoiDungRepository.save(khachHang);
 
-                // 2. Tạo Địa chỉ giao hàng mẫu cho khách
-                DiaChiNguoiDung diaChi = new DiaChiNguoiDung();
+                diaChi = new DiaChiNguoiDung();
                 diaChi.setNguoiDung(khachHang);
                 diaChi.setTenNguoiNhan("Nguyễn Văn Khách");
                 diaChi.setSoDienThoai("0912345678");
@@ -67,7 +81,6 @@ public class DataInitializer implements CommandLineRunner {
                 diaChi.setLaMacDinh(true);
                 diaChi = diaChiNguoiDungRepository.save(diaChi);
 
-                // 3. Tạo Chủ shop mẫu 1 & 2
                 NguoiDung chuShop1 = new NguoiDung();
                 chuShop1.setEmail("seller.anker@flexshop.com");
                 chuShop1.setSoDienThoai("0987654321");
@@ -84,8 +97,7 @@ public class DataInitializer implements CommandLineRunner {
                 chuShop2.setTrangThai("HOAT_DONG");
                 chuShop2 = nguoiDungRepository.save(chuShop2);
 
-                // 4. Tạo Gian hàng mẫu
-                GianHang shopAnker = new GianHang();
+                shopAnker = new GianHang();
                 shopAnker.setChuSoHuu(chuShop1);
                 shopAnker.setTenGianHang("Anker Official Store");
                 shopAnker.setDuongDanSlug("anker-official-store");
@@ -95,7 +107,7 @@ public class DataInitializer implements CommandLineRunner {
                 shopAnker.setTrangThai("HOAT_DONG");
                 shopAnker = gianHangRepository.save(shopAnker);
 
-                GianHang shopLogi = new GianHang();
+                shopLogi = new GianHang();
                 shopLogi.setChuSoHuu(chuShop2);
                 shopLogi.setTenGianHang("Logitech Flagship Store");
                 shopLogi.setDuongDanSlug("logitech-flagship-store");
@@ -104,8 +116,29 @@ public class DataInitializer implements CommandLineRunner {
                 shopLogi.setSdtKho("02839998888");
                 shopLogi.setTrangThai("HOAT_DONG");
                 shopLogi = gianHangRepository.save(shopLogi);
+            } else {
+                khachHang = nguoiDungRepository.findAll().get(0);
+                diaChi = diaChiNguoiDungRepository.findAll().isEmpty() ? null : diaChiNguoiDungRepository.findAll().get(0);
+                if (diaChi == null) {
+                    diaChi = new DiaChiNguoiDung();
+                    diaChi.setNguoiDung(khachHang);
+                    diaChi.setTenNguoiNhan(khachHang.getHoVaTen());
+                    diaChi.setSoDienThoai("0912345678");
+                    diaChi.setTinhThanh("TP. Hà Nội");
+                    diaChi.setQuanHuyen("Quận Cầu Giấy");
+                    diaChi.setXaPhuong("Phường Dịch Vọng Hậu");
+                    diaChi.setDiaChiChiTiet("Số 86 Phố Duy Tân, Tòa nhà FPT");
+                    diaChi.setLaMacDinh(true);
+                    diaChi = diaChiNguoiDungRepository.save(diaChi);
+                }
+                var shops = gianHangRepository.findAll();
+                shopAnker = shops.get(0);
+                shopLogi = shops.size() > 1 ? shops.get(1) : shops.get(0);
+            }
 
-                // 5. Đơn hàng tổng 1: ĐANG CHỜ THANH TOÁN (để test chọn COD hoặc Mock Online)
+            // 2. Tạo đơn hàng mẫu nếu chưa có
+            if (donHangTongRepository.count() == 0) {
+                // Đơn hàng 1: Đang chờ thanh toán (US-26)
                 DonHangTong don1 = new DonHangTong();
                 don1.setMaCodeDonTong("DHT-2026-PAY01");
                 don1.setKhachHang(khachHang);
@@ -120,7 +153,6 @@ public class DataInitializer implements CommandLineRunner {
                 don1.setNgayTao(LocalDateTime.now().minusMinutes(25));
                 don1 = donHangTongRepository.save(don1);
 
-                // ShopOrder con của đơn 1
                 DonHangShop shopOrder1 = new DonHangShop();
                 shopOrder1.setMaCodeDonShop("DHS-ANKER-01");
                 shopOrder1.setDonHangTong(don1);
@@ -163,7 +195,7 @@ public class DataInitializer implements CommandLineRunner {
                 ct2.setTongTien(new BigDecimal("400000"));
                 chiTietDonHangRepository.save(ct2);
 
-                // 6. Đơn hàng tổng 2: Đã thanh toán Mock Online thành công trước đó (để so sánh)
+                // Đơn hàng 2: Đã thanh toán Mock Online thành công
                 DonHangTong don2 = new DonHangTong();
                 don2.setMaCodeDonTong("DHT-2026-PAY02");
                 don2.setKhachHang(khachHang);
@@ -175,10 +207,64 @@ public class DataInitializer implements CommandLineRunner {
                 don2.setTrangThaiThanhToan("DA_THANH_TOAN");
                 don2.setTrangThaiDonHang("CHO_XU_LY");
                 don2.setNgayTao(LocalDateTime.now().minusHours(2));
-                donHangTongRepository.save(don2);
+                don2 = donHangTongRepository.save(don2);
+
+                DonHangShop shopOrder3 = new DonHangShop();
+                shopOrder3.setMaCodeDonShop("DHS-ANKER-02");
+                shopOrder3.setDonHangTong(don2);
+                shopOrder3.setGianHang(shopAnker);
+                shopOrder3.setTienHangShop(new BigDecimal("2100000"));
+                shopOrder3.setPhiVanChuyen(new BigDecimal("40000"));
+                shopOrder3.setTongTienShopNhan(new BigDecimal("2140000"));
+                shopOrder3.setTrangThai("CHO_XAC_NHAN");
+                shopOrder3 = donHangShopRepository.save(shopOrder3);
+
+                ChiTietDonHang ct3 = new ChiTietDonHang();
+                ct3.setDonHangShop(shopOrder3);
+                ct3.setMaBienThe(3L);
+                ct3.setTenSanPham("Trạm sạc Anker PowerHouse 757 GaN");
+                ct3.setTenBienThe("Màu Xám Đen");
+                ct3.setMaSku("ANK-POW-757");
+                ct3.setDonGia(new BigDecimal("2100000"));
+                ct3.setSoLuong(1);
+                ct3.setTongTien(new BigDecimal("2100000"));
+                chiTietDonHangRepository.save(ct3);
+            }
+
+            // 3. [US-42 & US-43] Đảm bảo Ví Người Bán luôn tồn tại
+            if (viNguoiBanRepository.count() == 0) {
+                var listShops = gianHangRepository.findAll();
+                for (GianHang shop : listShops) {
+                    kyQuyService.getOrCreateViNguoiBan(shop);
+                }
+            }
+
+            // 4. [US-42 & US-43] Khởi tạo các Giao dịch Ký Quỹ Escrow mẫu
+            if (giaoDichKyQuyRepository.count() == 0) {
+                var listShopOrders = donHangShopRepository.findAll();
+                if (!listShopOrders.isEmpty()) {
+                    // Đơn 1: Đang tạm giữ Escrow (Shopee Guarantee còn hạn 3 ngày)
+                    DonHangShop shopOrder1 = listShopOrders.get(0);
+                    kyQuyService.taoGiaoDichKyQuy(shopOrder1);
+
+                    // Đơn 2 (nếu có): Thiết lập thời gian hết hạn 3 ngày (quá hạn) để kiểm thử Quét tự động
+                    if (listShopOrders.size() > 1) {
+                        DonHangShop shopOrder2 = listShopOrders.get(1);
+                        GiaoDichKyQuy kq2 = kyQuyService.taoGiaoDichKyQuy(shopOrder2);
+                        kq2.setNgayDuKienNhaTien(LocalDateTime.now().minusDays(1)); // Đã quá hạn 1 ngày
+                        kq2.setNgayTao(LocalDateTime.now().minusDays(4));
+                        giaoDichKyQuyRepository.save(kq2);
+                    }
+
+                    // Đơn 3 (nếu có): Giả lập 1 đơn đã thanh toán online và đang bảo lưu
+                    if (listShopOrders.size() > 2) {
+                        DonHangShop shopOrder3 = listShopOrders.get(2);
+                        kyQuyService.taoGiaoDichKyQuy(shopOrder3);
+                    }
+                }
             }
         } catch (Exception e) {
-            System.err.println("DataInitializer US-26: " + e.getMessage());
+            System.err.println("DataInitializer US-26 & US-42: " + e.getMessage());
         }
     }
 }
