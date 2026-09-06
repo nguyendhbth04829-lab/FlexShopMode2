@@ -50,6 +50,9 @@ public class VoucherController {
     @Autowired
     private NguoiDungRepository nguoiDungRepository;
 
+    @Autowired
+    private com.example.demo.service.ViXuService viXuService;
+
     /**
      * Xác định tài khoản khách hàng đang đăng nhập
      */
@@ -114,6 +117,8 @@ public class VoucherController {
         model.addAttribute("ketQuaVoucher", ketQuaBanDau);
         model.addAttribute("voucherGoiY", voucherGoiY);
         model.addAttribute("requestVoucher", new ApDungVoucherRequestDTO());
+        model.addAttribute("thongKeViXu", viXuService.layThongKeViXu(maKhachHang));
+        model.addAttribute("soXuToiDaChoPhep", donHangDuocChon != null ? viXuService.tinhSoXuToiDaChoPhep(maKhachHang, donHangDuocChon) : 0L);
 
         return "khach-hang/thanh-toan-voucher";
     }
@@ -180,6 +185,8 @@ public class VoucherController {
         model.addAttribute("ketQuaVoucher", ketQua);
         model.addAttribute("voucherGoiY", voucherGoiY);
         model.addAttribute("requestVoucher", request);
+        model.addAttribute("thongKeViXu", viXuService.layThongKeViXu(maKhachHang));
+        model.addAttribute("soXuToiDaChoPhep", donHangDuocChon != null ? viXuService.tinhSoXuToiDaChoPhep(maKhachHang, donHangDuocChon) : 0L);
 
         return "khach-hang/thanh-toan-voucher";
     }

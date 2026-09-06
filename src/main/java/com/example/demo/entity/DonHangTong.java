@@ -58,6 +58,12 @@ public class DonHangTong {
     @Column(name = "trang_thai_don_hang", length = 30)
     private String trangThaiDonHang = "CHO_XU_LY";
 
+    @Column(name = "so_xu_da_dung")
+    private Long soXuDaDung = 0L;
+
+    @Column(name = "so_tien_giam_tu_xu", precision = 18, scale = 2)
+    private BigDecimal soTienGiamTuXu = BigDecimal.ZERO;
+
     @Column(name = "ghi_chu", length = 500)
     private String ghiChu;
 

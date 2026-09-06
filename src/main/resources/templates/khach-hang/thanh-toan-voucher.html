@@ -113,6 +113,9 @@
                 <i class="bi bi-ticket-perforated-fill text-danger me-2"></i>FlexShop <span class="badge bg-danger ms-2 fs-6 fw-normal">Áp Dụng Voucher 3 Tầng</span>
             </a>
             <div class="d-flex align-items-center gap-2">
+                <a th:href="@{/khach-hang/vi-xu}" class="btn btn-warning btn-sm text-dark fw-bold">
+                    <i class="bi bi-coin me-1"></i> Ví Xu (<span th:text="${thongKeViXu != null ? thongKeViXu.dinhDangSoXuHienTai : '0'}">50,000</span> Xu)
+                </a>
                 <a th:href="@{/khach-hang/thanh-toan/voucher}" class="btn btn-danger btn-sm">
                     <i class="bi bi-cart-check me-1"></i> Thanh Toán (US-52)
                 </a>
@@ -298,6 +301,70 @@
                         </div>
                     </div>
 
+                    <!-- TẦNG 4: DÙNG XU THƯỞNG FLEXSHOP (COIN REWARD - US-55) -->
+                    <div class="card card-custom p-4 mb-4 border border-warning" style="background-color: #fffdfa;">
+                        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-warning text-dark px-2 py-1 fw-bold"><i class="bi bi-coin me-1"></i> TẦNG 4</span>
+                                <h5 class="mb-0 fw-bold text-dark">Dùng FlexShop Xu (Coin Reward)</h5>
+                            </div>
+                            <a href="/khach-hang/vi-xu" class="small text-decoration-none text-warning fw-bold" target="_blank">
+                                Quản lý ví xu <i class="bi bi-box-arrow-up-right"></i>
+                            </a>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center p-3 rounded bg-warning-subtle mb-3">
+                            <div>
+                                <div class="small text-muted">Số dư xu của bạn:</div>
+                                <div class="fs-5 fw-bold text-dark">
+                                    <i class="bi bi-coin text-warning me-1"></i>
+                                    <span th:text="${thongKeViXu != null ? thongKeViXu.dinhDangSoXuHienTai : '0'}">50,000</span> Xu
+                                    <span class="small text-muted fw-normal">(tương đương <span th:text="${thongKeViXu != null ? thongKeViXu.dinhDangGiaTriQuyDoi : '0 đ'}">50.000 đ</span>)</span>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="small text-muted">Tối đa dùng cho đơn này:</div>
+                                <strong class="text-danger fs-6" th:text="${#numbers.formatDecimal(soXuToiDaChoPhep != null ? soXuToiDaChoPhep : 0, 0, 'POINT', 0, 'COMMA')} + ' Xu'"></strong>
+                            </div>
+                        </div>
+
+                        <!-- Trạng thái đã dùng xu -->
+                        <div th:if="${donHangHienTai.soXuDaDung != null and donHangHienTai.soXuDaDung > 0}" class="d-flex justify-content-between align-items-center p-3 border rounded bg-white">
+                            <div>
+                                <div class="text-success fw-bold">
+                                    <i class="bi bi-check-circle-fill me-1"></i>
+                                    Đang dùng <span th:text="${#numbers.formatDecimal(donHangHienTai.soXuDaDung, 0, 'POINT', 0, 'COMMA')}"></span> Xu
+                                </div>
+                                <small class="text-muted">Đã giảm trực tiếp <strong class="text-danger" th:text="${#numbers.formatDecimal(donHangHienTai.soTienGiamTuXu, 0, 'POINT', 0, 'COMMA')} + ' đ'"></strong> vào thanh toán.</small>
+                            </div>
+                            <button type="submit" form="formHuyXu" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-x-circle me-1"></i> Hủy Dùng Xu
+                            </button>
+                        </div>
+
+                        <!-- Form áp dụng xu -->
+                        <div th:if="${donHangHienTai.soXuDaDung == null or donHangHienTai.soXuDaDung == 0}">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-md-7">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white"><i class="bi bi-coin text-warning"></i></span>
+                                        <input type="number" form="formApDungXu" name="soXuMuonDung" id="inputSoXu" class="form-control"
+                                               th:max="${soXuToiDaChoPhep}" min="100" step="100"
+                                               th:value="${soXuToiDaChoPhep}" placeholder="Nhập số xu muốn dùng...">
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <button type="submit" form="formApDungXu" class="btn btn-warning text-dark fw-bold w-100" th:disabled="${soXuToiDaChoPhep == null or soXuToiDaChoPhep <= 0}">
+                                        <i class="bi bi-check-lg me-1"></i> Dùng Xu Trừ Tiền
+                                    </button>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block mt-2">
+                                <i class="bi bi-info-circle me-1"></i> 1 Xu = 1 VNĐ. Cho phép dùng xu giảm tối đa 50% giá trị đơn hàng.
+                            </small>
+                        </div>
+                    </div>
+
                     <!-- NÚT KIỂM TRA & TÍNH TOÁN -->
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary px-4 py-2 fw-bold">
@@ -374,6 +441,12 @@
                     <div class="summary-row text-muted small ps-2">
                         <span>Phí giao hàng khách trả:</span>
                         <span th:text="${ketQuaVoucher != null ? #numbers.formatDecimal(ketQuaVoucher.phiVanChuyenKhachTra, 0, 'POINT', 0, 'COMMA') + ' đ' : '0 đ'}"></span>
+                    </div>
+
+                    <!-- Nguồn tài trợ 4: Trừ từ FlexShop Xu (US-55) -->
+                    <div class="summary-row text-warning-emphasis" th:if="${donHangHienTai != null and donHangHienTai.soXuDaDung != null and donHangHienTai.soXuDaDung > 0}">
+                        <span><i class="bi bi-coin text-warning me-1"></i> Giảm trừ từ FlexShop Xu:</span>
+                        <span class="fw-bold text-warning" th:text="'-' + ${#numbers.formatDecimal(donHangHienTai.soTienGiamTuXu, 0, 'POINT', 0, 'COMMA')} + ' đ'">-35.000 đ</span>
                     </div>
 
                     <div class="p-2 my-2 rounded bg-light border">
@@ -456,6 +529,14 @@
             <i class="bi bi-inbox fs-1 text-muted"></i>
             <p class="mt-2 text-muted">Chưa có đơn hàng nào để thanh toán. Vui lòng tạo đơn hàng trước!</p>
         </div>
+
+        <!-- Form ẩn áp dụng xu & hủy xu (US-55) -->
+        <form id="formApDungXu" th:action="@{/khach-hang/thanh-toan/ap-dung-xu}" method="post" th:if="${donHangHienTai != null}">
+            <input type="hidden" name="maCodeDonTong" th:value="${donHangHienTai.maCodeDonTong}">
+        </form>
+        <form id="formHuyXu" th:action="@{/khach-hang/thanh-toan/huy-xu}" method="post" th:if="${donHangHienTai != null}">
+            <input type="hidden" name="maCodeDonTong" th:value="${donHangHienTai.maCodeDonTong}">
+        </form>
 
     </div>
 
