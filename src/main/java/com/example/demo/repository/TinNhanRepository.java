@@ -28,6 +28,9 @@ public interface TinNhanRepository extends JpaRepository<TinNhan, Long> {
     @Query("UPDATE TinNhan t SET t.daXem = true WHERE t.cuocTroChuyen.maCuocTroChuyen = :maCuocTroChuyen AND t.loaiNguoiGui = :loaiNguoiGuiVaDaGui")
     void danhDauDaXem(@Param("maCuocTroChuyen") Long maCuocTroChuyen, @Param("loaiNguoiGuiVaDaGui") String loaiNguoiGuiVaDaGui);
 
+    // Đếm tổng số tin nhắn của một cuộc trò chuyện
+    long countByCuocTroChuyen_MaCuocTroChuyen(Long maCuocTroChuyen);
+
     // Đếm số tin nhắn chưa xem của một cuộc trò chuyện
     long countByCuocTroChuyen_MaCuocTroChuyenAndLoaiNguoiGuiAndDaXemFalse(Long maCuocTroChuyen, String loaiNguoiGui);
 }

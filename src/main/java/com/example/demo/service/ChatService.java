@@ -47,6 +47,9 @@ public class ChatService {
     @Autowired
     private ChatWebSocketHandler chatWebSocketHandler;
 
+    @Autowired
+    private TinNhanTuDongService tinNhanTuDongService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final DecimalFormat df = new DecimalFormat("#,###");
 
@@ -123,6 +126,15 @@ public class ChatService {
 
         // Phát sóng WebSocket
         phatSongWebSocket(maCuocTroChuyen, "TIN_NHAN_MOI", saved, null);
+
+        // Kích hoạt Tin nhắn tự động trả lời (Auto-responder US-60) nếu người gửi là khách hàng
+        if ("KHACH_HANG".equalsIgnoreCase(loaiNguoiGui)) {
+            try {
+                tinNhanTuDongService.xuLyTuDongPhanHoi(ctc, saved);
+            } catch (Exception e) {
+                log.error("Lỗi khi chạy auto-responder US-60: {}", e.getMessage());
+            }
+        }
 
         return saved;
     }

@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kênh Người Bán - Thiết Lập Tin Nhắn Tự Động Trả Lời (US-60) - FlexShop</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .stat-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 20px 24px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        .config-card {
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+        .config-card:hover {
+            box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+            border-color: #cbd5e1;
+        }
+        .form-switch .form-check-input {
+            width: 3em;
+            height: 1.5em;
+            cursor: pointer;
+        }
+        .table-custom th {
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 14px 16px;
+        }
+        .table-custom td {
+            padding: 16px;
+            vertical-align: middle;
+        }
+        .voucher-badge {
+            background: #fef3c7;
+            color: #b45309;
+            border: 1px dashed #f59e0b;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+        }
+        .badge-type {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Seller Header -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark py-2 shadow-sm">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand fw-bold text-warning d-flex align-items-center" href="/seller/chat">
+            <i class="bi bi-robot fs-4 me-2"></i> KÊNH NGƯỜI BÁN - AUTO-RESPONDER (US-60)
+        </a>
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-white small">
+                <i class="bi bi-shop me-1 text-warning"></i>
+                <strong th:text="${gianHang != null ? gianHang.tenGianHang : 'TechZone Flagship Store'}">TechZone Flagship Store</strong>
+            </span>
+            <a href="/seller/chat" class="btn btn-outline-warning btn-sm rounded-pill px-3">
+                <i class="bi bi-chat-dots-fill me-1"></i> Khung Chat Trực Tiếp
+            </a>
+            <a href="/khach-hang/chat" class="btn btn-outline-info btn-sm rounded-pill px-3">
+                <i class="bi bi-person-fill me-1"></i> Khách Hàng Chat
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid px-4 py-4">
+
+    <!-- Toast / Alerts -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show d-flex align-items-center shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill fs-5 me-2"></i>
+        <div th:text="${successMessage}">Thao tác thành công!</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show d-flex align-items-center shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+        <div th:text="${errorMessage}">Đã xảy ra lỗi!</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Dashboard Statistics -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card border-start border-4 border-primary">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold">Tổng Số Kịch Bản</div>
+                        <h3 class="fw-bold mb-0 text-dark" th:text="${thongKe.tongSoCauHinh}">4</h3>
+                    </div>
+                    <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle fs-4">
+                        <i class="bi bi-list-task"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card border-start border-4 border-success">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold">Đang Kích Hoạt</div>
+                        <h3 class="fw-bold mb-0 text-success" th:text="${thongKe.soCauHinhDangBat}">3</h3>
+                    </div>
+                    <div class="bg-success bg-opacity-10 text-success p-3 rounded-circle fs-4">
+                        <i class="bi bi-toggle-on"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card border-start border-4 border-info">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold">Tin Đã Gửi Tự Động</div>
+                        <h3 class="fw-bold mb-0 text-info" th:text="${thongKe.tongSoTinTuDongDaGui}">50</h3>
+                    </div>
+                    <div class="bg-info bg-opacity-10 text-info p-3 rounded-circle fs-4">
+                        <i class="bi bi-send-check-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card border-start border-4 border-warning">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold">Voucher Đã Phát Qua Chat</div>
+                        <h3 class="fw-bold mb-0 text-warning" th:text="${thongKe.tongSoVoucherDaTang}">12</h3>
+                    </div>
+                    <div class="bg-warning bg-opacity-10 text-warning p-3 rounded-circle fs-4">
+                        <i class="bi bi-ticket-perforated-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Card -->
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-white py-3 px-4 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-sliders2-vertical me-2 text-primary"></i>Danh Sách Kịch Bản Tin Nhắn Tự Động
+                </h5>
+                <span class="badge bg-secondary ms-2 rounded-pill" th:text="${pageCauHinh.totalElements} + ' kịch bản'">4 kịch bản</span>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="/seller/tin-nhan-tu-dong/lich-su" class="btn btn-outline-secondary rounded-pill px-3 btn-sm d-flex align-items-center">
+                    <i class="bi bi-clock-history me-1"></i> Nhật Ký Đã Gửi
+                </a>
+                <button type="button" class="btn btn-primary rounded-pill px-3 btn-sm d-flex align-items-center fw-semibold shadow-sm" onclick="moModalThemMoi()">
+                    <i class="bi bi-plus-lg me-1"></i> Thiết Lập Kịch Bản Mới
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="card-body bg-light p-3 border-bottom">
+            <form method="get" action="/seller/tin-nhan-tu-dong" class="row g-2 align-items-center">
+                <div class="col-md-3">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                        <input type="text" name="tuKhoa" th:value="${tuKhoaHienTai}" class="form-control" placeholder="Tìm theo tiêu đề, nội dung, từ khóa...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="loai" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="TAT_CA" th:selected="${loaiHienTai == 'TAT_CA'}">-- Tất cả loại kịch bản --</option>
+                        <option value="CHAO_MUNG" th:selected="${loaiHienTai == 'CHAO_MUNG'}">👋 Chào mừng khách mới</option>
+                        <option value="NGOAI_GIO_LAM_VIEC" th:selected="${loaiHienTai == 'NGOAI_GIO_LAM_VIEC'}">🌙 Ngoài giờ làm việc</option>
+                        <option value="TU_KHOA" th:selected="${loaiHienTai == 'TU_KHOA'}">🔍 Theo từ khóa</option>
+                        <option value="VANG_MAT_TAM_THOI" th:selected="${loaiHienTai == 'VANG_MAT_TAM_THOI'}">⏳ Shop tạm vắng mặt</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="trangThai" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="TAT_CA" th:selected="${trangThaiHienTai == 'TAT_CA'}">-- Tất cả trạng thái --</option>
+                        <option value="BAT" th:selected="${trangThaiHienTai == 'BAT'}">🟢 Đang kích hoạt</option>
+                        <option value="TAT" th:selected="${trangThaiHienTai == 'TAT'}">⚪ Đang tạm dừng</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-sm btn-dark rounded-pill px-3">Lọc</button>
+                    <a href="/seller/tin-nhan-tu-dong" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Đặt lại</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table List -->
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-custom table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th style="width: 260px;">Tiêu Đề & Phân Loại</th>
+                            <th>Nội Dung Tin Nhắn Phản Hồi</th>
+                            <th style="width: 220px;">Điều Kiện / Quà Tặng</th>
+                            <th style="width: 100px;" class="text-center">Đã Gửi</th>
+                            <th style="width: 120px;" class="text-center">Kích Hoạt</th>
+                            <th style="width: 130px;" class="text-center">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${pageCauHinh.empty}">
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                                Chưa có kịch bản tin nhắn tự động nào phù hợp với bộ lọc.
+                            </td>
+                        </tr>
+                        <tr th:each="ch, iter : ${pageCauHinh.content}" th:id="'row-' + ${ch.maCauHinh}">
+                            <td class="text-muted small text-center" th:text="${iter.count + (pageCauHinh.number * pageCauHinh.size)}">1</td>
+                            <td>
+                                <div class="fw-bold text-dark mb-1" th:text="${ch.tieuDe}">Chào mừng khách hàng mới</div>
+                                <span class="badge badge-type" th:classappend="${ch.badgeClass}" th:text="${ch.tenLoaiHienThi}">Chào mừng khách mới</span>
+                            </td>
+                            <td>
+                                <div class="text-dark small" style="white-space: pre-line; max-height: 80px; overflow-y: auto;" th:text="${ch.noiDungTinNhan}">
+                                    Dạ TechZone Flagship Store xin chào quý khách! Cảm ơn bạn đã quan tâm đến gian hàng của chúng tôi.
+                                </div>
+                            </td>
+                            <td>
+                                <!-- Kịch bản Ngoài giờ -->
+                                <div th:if="${ch.loaiTinNhanTuDong == 'NGOAI_GIO_LAM_VIEC'}" class="small text-muted">
+                                    <i class="bi bi-clock me-1 text-primary"></i>
+                                    Khung giờ: <strong class="text-dark" th:text="${ch.gioBatDau} + ' - ' + ${ch.gioKetThuc}">18:00 - 08:00</strong>
+                                </div>
+                                <!-- Kịch bản Từ khóa -->
+                                <div th:if="${ch.loaiTinNhanTuDong == 'TU_KHOA'}" class="small text-muted">
+                                    <i class="bi bi-key me-1 text-success"></i>
+                                    Từ khóa: <code class="text-primary small" th:text="${ch.tuKhoaKichHoat}">bảo hành, chính hãng</code>
+                                </div>
+                                <!-- Voucher đính kèm -->
+                                <div th:if="${ch.maGiamGia != null}" class="mt-1">
+                                    <span class="voucher-badge">
+                                        <i class="bi bi-ticket-perforated me-1"></i>
+                                        <span th:text="${ch.maGiamGia.maCodeVoucher}">TECHZONE20K</span>
+                                    </span>
+                                </div>
+                                <div class="small text-secondary mt-1">
+                                    <i class="bi bi-hourglass-split me-1"></i>Trễ: <span th:text="${ch.doTreGiay}">1</span>s | Tối đa: <span th:text="${ch.gioiHanGuiMoiKhachNgay}">1</span> lần/ngày
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark border px-2 py-1 fw-bold fs-6" th:text="${ch.soLanDaGui}">12</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="form-check form-switch d-inline-block">
+                                    <input class="form-check-input" type="checkbox" 
+                                           th:id="'switch-' + ${ch.maCauHinh}"
+                                           th:checked="${ch.kichHoat}" 
+                                           th:onchange="'doiTrangThai(' + ${ch.maCauHinh} + ')'">
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-primary" th:onclick="'suaCauHinh(' + ${ch.maCauHinh} + ')'" title="Chỉnh sửa">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                    <form th:action="@{'/seller/tin-nhan-tu-dong/xoa/' + ${ch.maCauHinh}}" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa kịch bản này?');">
+                                        <button type="submit" class="btn btn-outline-danger" title="Xóa">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${pageCauHinh.totalPages > 1}" class="card-footer bg-white py-3 px-4 d-flex justify-content-between align-items-center">
+            <span class="text-muted small">
+                Hiển thị trang <strong th:text="${pageCauHinh.number + 1}">1</strong> / <strong th:text="${pageCauHinh.totalPages}">3</strong>
+            </span>
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" th:classappend="${pageCauHinh.first} ? 'disabled'">
+                    <a class="page-link" th:href="@{/seller/tin-nhan-tu-dong(page=${pageCauHinh.number - 1}, loai=${loaiHienTai}, trangThai=${trangThaiHienTai}, tuKhoa=${tuKhoaHienTai})}">Trước</a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, pageCauHinh.totalPages - 1)}" th:classappend="${pageCauHinh.number == i} ? 'active'">
+                    <a class="page-link" th:href="@{/seller/tin-nhan-tu-dong(page=${i}, loai=${loaiHienTai}, trangThai=${trangThaiHienTai}, tuKhoa=${tuKhoaHienTai})}" th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${pageCauHinh.last} ? 'disabled'">
+                    <a class="page-link" th:href="@{/seller/tin-nhan-tu-dong(page=${pageCauHinh.number + 1}, loai=${loaiHienTai}, trangThai=${trangThaiHienTai}, tuKhoa=${tuKhoaHienTai})}">Sau</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm / Chỉnh Sửa Kịch Bản -->
+<div class="modal fade" id="modalCauHinh" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <form id="formCauHinh" th:action="@{/seller/tin-nhan-tu-dong/luu}" method="post" th:object="${form}">
+                <input type="hidden" id="maCauHinh" name="maCauHinh" th:field="*{maCauHinh}">
+
+                <div class="modal-header bg-primary text-white py-3 px-4">
+                    <h5 class="modal-title fw-bold" id="modalTitle">
+                        <i class="bi bi-robot me-2"></i>Thiết Lập Kịch Bản Trả Lời Tự Động
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-7">
+                            <label class="form-label fw-bold text-dark small">Tiêu Đề Kịch Bản <span class="text-danger">*</span></label>
+                            <input type="text" id="tieuDe" name="tieuDe" th:field="*{tieuDe}" class="form-control" required placeholder="VD: Lời chào mừng khách hàng mới & Tặng Voucher">
+                        </div>
+
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold text-dark small">Phân Loại Kịch Bản <span class="text-danger">*</span></label>
+                            <select id="loaiTinNhanTuDong" name="loaiTinNhanTuDong" th:field="*{loaiTinNhanTuDong}" class="form-select" required onchange="thayDoiLoaiKichBan()">
+                                <option value="CHAO_MUNG">👋 Chào mừng khách mới</option>
+                                <option value="NGOAI_GIO_LAM_VIEC">🌙 Ngoài giờ làm việc</option>
+                                <option value="TU_KHOA">🔍 Theo từ khóa hỏi đáp</option>
+                                <option value="VANG_MAT_TAM_THOI">⏳ Shop tạm vắng mặt</option>
+                            </select>
+                        </div>
+
+                        <!-- Khung điều kiện: Ngoài giờ làm việc -->
+                        <div class="col-12" id="blockNgoaiGio" style="display: none;">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <h6 class="fw-bold small text-primary mb-2"><i class="bi bi-clock-history me-1"></i> Khung Giờ Ngoài Giờ Trực Chat (Tự Động Kích Hoạt)</h6>
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label small text-muted">Bắt đầu từ:</label>
+                                        <input type="time" id="gioBatDau" name="gioBatDau" th:field="*{gioBatDau}" class="form-control form-control-sm">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small text-muted">Đến:</label>
+                                        <input type="time" id="gioKetThuc" name="gioKetThuc" th:field="*{gioKetThuc}" class="form-control form-control-sm">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Khung điều kiện: Từ khóa -->
+                        <div class="col-12" id="blockTuKhoa" style="display: none;">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <label class="form-label fw-bold small text-primary mb-1">
+                                    <i class="bi bi-key-fill me-1"></i> Các từ khóa kích hoạt (ngăn cách bằng dấu phẩy)
+                                </label>
+                                <input type="text" id="tuKhoaKichHoat" name="tuKhoaKichHoat" th:field="*{tuKhoaKichHoat}" class="form-control form-control-sm" placeholder="VD: bảo hành, chính hãng, đổi trả, freeship">
+                                <div class="form-text small text-muted">Hệ thống sẽ tự động phản hồi khi tin nhắn của khách chứa một trong các từ khóa này.</div>
+                            </div>
+                        </div>
+
+                        <!-- Đính kèm Voucher quà tặng -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-dark small">
+                                <i class="bi bi-gift-fill text-warning me-1"></i> Đính Kèm Quà Tặng Voucher (Tùy chọn)
+                            </label>
+                            <select id="maVoucher" name="maVoucher" th:field="*{maVoucher}" class="form-select">
+                                <option value="">-- Không đính kèm mã giảm giá --</option>
+                                <option th:each="vc : ${dsVoucher}" th:value="${vc.maVoucher}"
+                                        th:text="${vc.maCodeVoucher} + ' - ' + ${vc.tenVoucher} + ' (Giảm: ' + ${#numbers.formatDecimal(vc.giaTriGiam, 0, 'COMMA', 0, 'POINT')} + 'đ)'">
+                                    TECHZONE20K - Voucher Giảm 20K
+                                </option>
+                            </select>
+                            <div class="form-text small text-muted">Khi kích hoạt, hệ thống sẽ tự động gửi thẻ Voucher để khách áp dụng ngay trong đơn hàng.</div>
+                        </div>
+
+                        <!-- Nội dung phản hồi -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-dark small">Nội Dung Tin Nhắn Tự Động Gửi Cho Khách <span class="text-danger">*</span></label>
+                            <textarea id="noiDungTinNhan" name="noiDungTinNhan" th:field="*{noiDungTinNhan}" rows="4" class="form-control" required placeholder="Nhập lời chào mừng, lời nhắn hẹn phản hồi hoặc nội dung tư vấn..."></textarea>
+                        </div>
+
+                        <!-- Cài đặt nâng cao -->
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted fw-semibold">Độ trễ phản hồi (giây)</label>
+                            <input type="number" id="doTreGiay" name="doTreGiay" th:field="*{doTreGiay}" class="form-control form-control-sm" min="0" max="60" value="1">
+                            <div class="form-text small">Tạo cảm giác tự nhiên như nhân viên đang gõ tin.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted fw-semibold">Giới hạn gửi cho mỗi khách / ngày</label>
+                            <input type="number" id="gioiHanGuiMoiKhachNgay" name="gioiHanGuiMoiKhachNgay" th:field="*{gioiHanGuiMoiKhachNgay}" class="form-control form-control-sm" min="1" max="10" value="1">
+                            <div class="form-text small">Tránh spam tin nhắn lặp lại nhiều lần.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" id="kichHoat" name="kichHoat" th:field="*{kichHoat}" checked>
+                                <label class="form-check-label fw-semibold text-dark ms-2" for="kichHoat">Bật kích hoạt kịch bản này ngay sau khi lưu</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light py-3 px-4">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
+                        <i class="bi bi-check-lg me-1"></i> Lưu Kịch Bản
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const modalEl = document.getElementById('modalCauHinh');
+    const modalCauHinh = new bootstrap.Modal(modalEl);
+
+    function thayDoiLoaiKichBan() {
+        const loai = document.getElementById('loaiTinNhanTuDong').value;
+        const blockNgoaiGio = document.getElementById('blockNgoaiGio');
+        const blockTuKhoa = document.getElementById('blockTuKhoa');
+
+        if (loai === 'NGOAI_GIO_LAM_VIEC') {
+            blockNgoaiGio.style.display = 'block';
+            blockTuKhoa.style.display = 'none';
+        } else if (loai === 'TU_KHOA') {
+            blockNgoaiGio.style.display = 'none';
+            blockTuKhoa.style.display = 'block';
+        } else {
+            blockNgoaiGio.style.display = 'none';
+            blockTuKhoa.style.display = 'none';
+        }
+    }
+
+    function moModalThemMoi() {
+        document.getElementById('modalTitle').innerHTML = '<i class="bi bi-robot me-2"></i>Thiết Lập Kịch Bản Trả Lời Tự Động Mới';
+        document.getElementById('maCauHinh').value = '';
+        document.getElementById('tieuDe').value = '';
+        document.getElementById('loaiTinNhanTuDong').value = 'CHAO_MUNG';
+        document.getElementById('noiDungTinNhan').value = '';
+        document.getElementById('maVoucher').value = '';
+        document.getElementById('gioBatDau').value = '18:00';
+        document.getElementById('gioKetThuc').value = '08:00';
+        document.getElementById('tuKhoaKichHoat').value = '';
+        document.getElementById('doTreGiay').value = '1';
+        document.getElementById('gioiHanGuiMoiKhachNgay').value = '1';
+        document.getElementById('kichHoat').checked = true;
+
+        thayDoiLoaiKichBan();
+        modalCauHinh.show();
+    }
+
+    function suaCauHinh(id) {
+        fetch('/seller/tin-nhan-tu-dong/chi-tiet/' + id)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Lỗi: ' + data.error);
+                    return;
+                }
+                document.getElementById('modalTitle').innerHTML = '<i class="bi bi-pencil-square me-2"></i>Chỉnh Sửa Kịch Bản #' + data.maCauHinh;
+                document.getElementById('maCauHinh').value = data.maCauHinh;
+                document.getElementById('tieuDe').value = data.tieuDe;
+                document.getElementById('loaiTinNhanTuDong').value = data.loaiTinNhanTuDong;
+                document.getElementById('noiDungTinNhan').value = data.noiDungTinNhan;
+                document.getElementById('maVoucher').value = data.maVoucher || '';
+                document.getElementById('gioBatDau').value = data.gioBatDau || '';
+                document.getElementById('gioKetThuc').value = data.gioKetThuc || '';
+                document.getElementById('tuKhoaKichHoat').value = data.tuKhoaKichHoat || '';
+                document.getElementById('doTreGiay').value = data.doTreGiay || 1;
+                document.getElementById('gioiHanGuiMoiKhachNgay').value = data.gioiHanGuiMoiKhachNgay || 1;
+                document.getElementById('kichHoat').checked = data.kichHoat;
+
+                thayDoiLoaiKichBan();
+                modalCauHinh.show();
+            })
+            .catch(err => {
+                alert('Không thể tải chi tiết cấu hình: ' + err);
+            });
+    }
+
+    function doiTrangThai(id) {
+        fetch('/seller/tin-nhan-tu-dong/doi-trang-thai/' + id, {
+            method: 'POST'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // Hiển thị toast nhẹ nhàng
+                console.log(data.message);
+            } else {
+                alert('Lỗi: ' + data.error);
+                // Hoàn lại trạng thái switch nếu lỗi
+                const sw = document.getElementById('switch-' + id);
+                sw.checked = !sw.checked;
+            }
+        })
+        .catch(err => {
+            alert('Lỗi kết nối máy chủ!');
+            const sw = document.getElementById('switch-' + id);
+            sw.checked = !sw.checked;
+        });
+    }
+</script>
+</body>
+</html>
