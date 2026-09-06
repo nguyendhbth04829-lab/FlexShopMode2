@@ -6,6 +6,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * =====================================================================
+ * DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+ * PHÂN HỆ: TÀI CHÍNH & THANH TOÁN (DEV 5 - MINH)
+ * USER STORY: US-26 - Repository truy vấn sổ địa chỉ giao hàng
+ * =====================================================================
+ */
 @Repository
 public interface DiaChiNguoiDungRepository extends JpaRepository<DiaChiNguoiDung, Long> {
 

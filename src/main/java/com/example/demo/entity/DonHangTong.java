@@ -11,6 +11,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * =====================================================================
+ * DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+ * PHÂN HỆ: TÀI CHÍNH & THANH TOÁN (DEV 5 - MINH)
+ * USER STORY: US-26 - Entity Đơn hàng tổng (Master Order) quản lý thanh toán
+ * =====================================================================
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

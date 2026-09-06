@@ -8,6 +8,13 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * =====================================================================
+ * DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+ * PHÂN HỆ: TÀI CHÍNH & THANH TOÁN (DEV 5 - MINH)
+ * USER STORY: US-26 - Thực thể Gian hàng (Người bán / Đối tác Shop)
+ * =====================================================================
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

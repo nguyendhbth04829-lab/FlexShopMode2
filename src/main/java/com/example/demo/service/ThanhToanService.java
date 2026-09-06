@@ -13,6 +13,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * =====================================================================
+ * DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+ * PHÂN HỆ: TÀI CHÍNH & THANH TOÁN (DEV 5 - MINH)
+ * USER STORY: US-26 - Xử lý nghiệp vụ chọn phương thức & thanh toán đơn hàng
+ * =====================================================================
+ * Nghiệp vụ chi tiết:
+ *   - Quản lý trạng thái thanh toán của Đơn hàng tổng (don_hang_tong).
+ *   - Xử lý chọn COD: cập nhật trạng thái CHUA_THANH_TOAN, kích hoạt đơn shop con CHO_XAC_NHAN.
+ *   - Xử lý Mock Online Payment: cập nhật DA_THANH_TOAN, mở đường đưa tiền vào Ký quỹ Escrow (US-42).
+ *   - Xử lý thất bại giao dịch trực tuyến: chuyển trạng thái THANH_TOAN_THAT_BAI để người mua thanh toán lại.
+ * =====================================================================
+ */
 @Service
 public class ThanhToanService {
 

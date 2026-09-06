@@ -9,6 +9,18 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * =====================================================================
+ * DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+ * PHÂN HỆ: TÀI CHÍNH & THANH TOÁN (DEV 5 - MINH)
+ * USER STORY: US-26 - Khởi tạo dữ liệu mẫu kiểm thử luồng thanh toán
+ * =====================================================================
+ * Tự động tạo:
+ *   - Khách hàng mẫu & Địa chỉ nhận hàng mặc định.
+ *   - 2 Gian hàng mẫu (Anker, Logitech).
+ *   - Đơn hàng tổng mẫu cần thanh toán và đơn hàng đã thanh toán.
+ * =====================================================================
+ */
 @Component
 public class DataInitializer implements CommandLineRunner {
 

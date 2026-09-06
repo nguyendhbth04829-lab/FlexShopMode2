@@ -10,6 +10,19 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * =====================================================================
+ * DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+ * PHÂN HỆ: TÀI CHÍNH & THANH TOÁN (DEV 5 - MINH)
+ * USER STORY: US-26 - Xử lý chọn phương thức thanh toán & Thanh toán trực tuyến
+ * =====================================================================
+ * Mô tả: Controller xử lý luồng thanh toán cho Khách hàng:
+ *   1. Xem danh sách đơn hàng cần thanh toán hoặc theo dõi trạng thái thanh toán.
+ *   2. Chọn phương thức thanh toán: COD (nhận hàng trả tiền) hoặc MOCK_ONLINE (thanh toán online).
+ *   3. Điều hướng tới cổng thanh toán trực tuyến mô phỏng (Mock Gateway có quét mã VietQR).
+ *   4. Xử lý phản hồi kết quả giao dịch và hiển thị hóa đơn / biên nhận thanh toán.
+ * =====================================================================
+ */
 @Controller
 @RequestMapping("/thanh-toan")
 public class ThanhToanController {
@@ -18,7 +31,8 @@ public class ThanhToanController {
     private ThanhToanService thanhToanService;
 
     /**
-     * US-26: Danh sách các đơn hàng cần thanh toán / theo dõi trạng thái thanh toán
+     * [US-26] - Bước 1: Hiển thị danh sách các đơn hàng tổng cần thanh toán hoặc lọc theo trạng thái.
+     * Hỗ trợ tìm kiếm theo mã đơn, người nhận và phân trang.
      */
     @GetMapping("/danh-sach")
     public String danhSach(
