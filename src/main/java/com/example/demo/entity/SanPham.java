@@ -103,6 +103,18 @@ public class SanPham {
     public BigDecimal getGiaCoBan() { return giaCoBan; }
     public void setGiaCoBan(BigDecimal giaCoBan) { this.giaCoBan = giaCoBan; }
 
+    public Integer getCanNangGram() { return canNangGram; }
+    public void setCanNangGram(Integer canNangGram) { this.canNangGram = canNangGram; }
+
+    public Integer getChieuDaiCm() { return chieuDaiCm; }
+    public void setChieuDaiCm(Integer chieuDaiCm) { this.chieuDaiCm = chieuDaiCm; }
+
+    public Integer getChieuRongCm() { return chieuRongCm; }
+    public void setChieuRongCm(Integer chieuRongCm) { this.chieuRongCm = chieuRongCm; }
+
+    public Integer getChieuCaoCm() { return chieuCaoCm; }
+    public void setChieuCaoCm(Integer chieuCaoCm) { this.chieuCaoCm = chieuCaoCm; }
+
     public Boolean getDaXoa() { return daXoa; }
     public void setDaXoa(Boolean daXoa) { this.daXoa = daXoa; }
 }
