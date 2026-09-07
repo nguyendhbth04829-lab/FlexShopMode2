@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Shipper · Trạng thái làm việc</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --blue:#1565C0; --blue-dark:#0D47A1; --blue-light:#E3F2FD; }
+        body { background:#B0BEC5; }
+        .phone { max-width:480px; margin:0 auto; background:#F4F7FC; min-height:100vh;
+                 display:flex; flex-direction:column; box-shadow:0 0 24px rgba(0,0,0,.3); }
+        .appbar { background:linear-gradient(135deg,var(--blue-dark),var(--blue)); color:#fff;
+                  padding:16px; position:sticky; top:0; z-index:10; }
+        .content { flex:1; padding:16px; padding-bottom:90px; }
+        .shipper-card { background:#fff; border-radius:16px; padding:16px;
+                        box-shadow:0 4px 16px rgba(21,101,192,.12); border-top:6px solid var(--blue); }
+        .status-pill { font-size:1rem; padding:8px 16px; border-radius:999px; font-weight:700; }
+        .on { background:#E8F5E9; color:#2E7D32; border:1px solid #A5D6A7; }
+        .off { background:#F5F5F5; color:#616161; border:1px solid #BDBDBD; }
+        .btn-big { min-height:56px; font-size:1.1rem; font-weight:700; border-radius:14px; }
+        .btn-blue { background:var(--blue); border-color:var(--blue); color:#fff; }
+        .btn-blue:hover { background:var(--blue-dark); color:#fff; }
+        .tabbar { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px;
+                  background:#fff; border-top:1px solid #CFD8DC; display:flex; z-index:10; }
+        .tabbar a { flex:1; text-align:center; padding:10px 4px 12px; font-size:.75rem; color:#78909C; text-decoration:none; }
+        .tabbar a.active { color:var(--blue); font-weight:700; }
+        .tabbar .ico { font-size:1.4rem; display:block; }
+        .gps-box { background:var(--blue-light); border:1px solid #90CAF9; border-radius:12px; }
+    </style>
+</head>
+<body>
+<div class="phone">
+    <div class="appbar">
+        <div class="small opacity-75">US-34 · APP SHIPPER</div>
+        <h5 class="mb-0">Trạng thái làm việc</h5>
+    </div>
+
+    <div class="content">
+        <div th:if="${loiNghiepVu}" class="alert alert-danger" th:text="${loiNghiepVu}"></div>
+
+        <div th:if="${shipper != null}" class="shipper-card mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    <div class="fw-bold fs-5" th:text="${shipper.nguoiDung != null ? shipper.nguoiDung.hoVaTen : 'Shipper'}">Shipper</div>
+                    <div class="text-muted small" th:text="'Biển số: ' + ${shipper.bienSoXe} + ' · ' + ${shipper.trangThai}">Biển số</div>
+                </div>
+                <span th:class="'status-pill ' + (${shipper.dangTrucTuyen} ? 'on' : 'off')"
+                      th:text="${shipper.dangTrucTuyen} ? '● ONLINE' : '○ OFFLINE'">OFFLINE</span>
+            </div>
+            <div class="small" th:if="${shipper.viDoHienTai != null}">
+                GPS: <span th:text="${shipper.viDoHienTai} + ', ' + ${shipper.kinhDoHienTai}"></span>
+            </div>
+            <div class="alert mt-2 mb-0" th:classappend="${duocNhanDon} ? 'alert-success' : 'alert-secondary'"
+                 th:text="${duocNhanDon} ? 'Đủ điều kiện nhận đơn (Online + DANG_HOAT_DONG).' : 'Chưa đủ điều kiện nhận đơn.'"></div>
+        </div>
+
+        <div th:if="${shipper != null}" class="shipper-card">
+            <h6 class="text-primary fw-bold mb-3" th:text="${shipper.dangTrucTuyen} ? 'TẮT TRẠNG THÁI (NGHỈ)' : 'BẬT TRẠNG THÁI (LÀM VIỆC)'">ĐỔI TRẠNG THÁI</h6>
+            <form method="post" th:action="@{/shipper/trang-thai}" th:object="${form}">
+                <input type="hidden" th:field="*{dangTrucTuyen}">
+                <div class="gps-box p-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <b>GPS hiện tại *</b>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-blue" onclick="layGps()">📍 Lấy GPS</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="dungGpsMau()">HN mẫu</button>
+                        </div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input id="viDo" class="form-control" th:field="*{viDoHienTai}" placeholder="Vĩ độ">
+                            <div class="text-danger small" th:if="${#fields.hasErrors('viDoHienTai')}" th:errors="*{viDoHienTai}"></div>
+                        </div>
+                        <div class="col-6">
+                            <input id="kinhDo" class="form-control" th:field="*{kinhDoHienTai}" placeholder="Kinh độ">
+                            <div class="text-danger small" th:if="${#fields.hasErrors('kinhDoHienTai')}" th:errors="*{kinhDoHienTai}"></div>
+                        </div>
+                    </div>
+                    <div id="gpsMsg" class="small text-muted mt-1">Bấm “Lấy GPS” để điện thoại tự điền tọa độ. Trên máy tính không có GPS thì bấm “Dùng tọa độ mẫu”.</div>
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="dungToaDoMau()">Dùng tọa độ mẫu (HN)</button>
+                </div>
+                <button class="btn btn-big w-100" th:classappend="${shipper.dangTrucTuyen} ? 'btn-secondary' : 'btn-blue'"
+                        type="submit" th:text="${shipper.dangTrucTuyen} ? 'Tắt làm việc' : 'Bật làm việc'">Đổi</button>
+            </form>
+        </div>
+    </div>
+
+    <nav class="tabbar">
+        <a href="/shipper/trang-thai" class="active"><span class="ico">🟢</span>Trạng thái</a>
+        <a href="#"><span class="ico">📦</span>Đơn</a>
+        <a href="#"><span class="ico">💵</span>COD</a>
+        <a href="#"><span class="ico">👤</span>Tôi</a>
+    </nav>
+</div>
+<script>
+    function dungToaDoMau(){
+        document.getElementById('viDo').value = '21.027800';
+        document.getElementById('kinhDo').value = '105.834200';
+        document.getElementById('gpsMsg').textContent = 'Đã điền tọa độ mẫu Hà Nội để test.';
+    }
+    function layGps(){
+        const msg = document.getElementById('gpsMsg');
+        if (!navigator.geolocation){ msg.textContent = 'Thiết bị không hỗ trợ GPS. Hãy nhập tay hoặc dùng tọa độ mẫu.'; return; }
+        msg.textContent = 'Đang lấy GPS...';
+        navigator.geolocation.getCurrentPosition(
+            p => {
+                document.getElementById('viDo').value = p.coords.latitude.toFixed(6);
+                document.getElementById('kinhDo').value = p.coords.longitude.toFixed(6);
+                msg.textContent = 'Đã lấy GPS (sai số ~' + Math.round(p.coords.accuracy) + 'm).';
+            },
+            e => {
+                if (e.code === 1) msg.textContent = 'Bạn đã chặn quyền vị trí. Hãy cấp quyền trong trình duyệt rồi thử lại, hoặc nhập tay.';
+                else if (e.code === 2) msg.textContent = 'Thiết bị không xác định được vị trí (máy bàn thường bị). Hãy nhập tay hoặc dùng tọa độ mẫu.';
+                else msg.textContent = 'Hết thời gian chờ GPS. Hãy thử lại, nhập tay hoặc dùng tọa độ mẫu.';
+            },
+            { enableHighAccuracy:false, timeout:20000, maximumAge:60000 }
+        );
+    }
+    function dungGpsMau(){
+        document.getElementById('viDo').value = '21.027800';
+        document.getElementById('kinhDo').value = '105.834200';
+        document.getElementById('gpsMsg').textContent = 'Đã điền GPS mẫu Hồ Gươm (Hà Nội) để test trên PC.';
+    }
+</script>
+</body>
+</html>
