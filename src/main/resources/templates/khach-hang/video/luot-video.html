@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexShop Video - Lướt Video Ngắn & Săn Deal Giỏ Hàng (US-62)</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #0f0f12;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        /* Top Navigation */
+        .video-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: rgba(15, 15, 18, 0.88);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #ff5722;
+            font-weight: 800;
+            font-size: 1.25rem;
+        }
+        .brand-logo .badge-live {
+            background: linear-gradient(45deg, #ee4d2d, #ff7337);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .search-bar {
+            max-width: 420px;
+            width: 100%;
+            position: relative;
+        }
+        .search-bar input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            color: #fff;
+            padding: 8px 16px 8px 40px;
+            width: 100%;
+            outline: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .search-bar input:focus {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: #ff5722;
+        }
+        .search-bar .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+        }
+
+        /* Video Feed Container (Snap-scroll TikTok style) */
+        .reels-wrapper {
+            margin-top: 64px;
+            height: calc(100vh - 64px);
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .reels-wrapper::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Each Video Slide Item */
+        .reel-item {
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            position: relative;
+            width: 100%;
+            max-width: 440px;
+            height: calc(100vh - 64px);
+            min-height: 580px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            margin-bottom: 8px;
+        }
+
+        .reel-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        /* Gradient Overlay for Readable Text */
+        .reel-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.85) 100%);
+            pointer-events: none;
+        }
+
+        /* Right Actions Bar (TikTok style) */
+        .action-bar {
+            position: absolute;
+            right: 14px;
+            bottom: 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            z-index: 10;
+        }
+        .action-btn {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .action-btn:hover {
+            background: rgba(255, 87, 34, 0.8);
+            transform: scale(1.1);
+            color: #fff;
+        }
+        .action-btn.liked {
+            color: #ff2d55 !important;
+        }
+        .action-btn.liked i {
+            animation: heartPulse 0.4s ease-in-out;
+        }
+        @keyframes heartPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(1); }
+        }
+        .action-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 4px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+            color: #f1f1f1;
+        }
+        .author-avatar-wrap {
+            position: relative;
+            margin-bottom: 6px;
+        }
+        .author-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid #ff5722;
+            object-fit: cover;
+        }
+        .author-plus-badge {
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff5722;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Bottom Details & Caption */
+        .caption-bar {
+            position: absolute;
+            left: 16px;
+            right: 80px;
+            bottom: 24px;
+            z-index: 10;
+            color: #fff;
+            pointer-events: auto;
+        }
+        .author-name {
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+        }
+        .video-title {
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+            line-height: 1.4;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .hashtag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .hashtag-pill {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #ff9800;
+            text-decoration: none;
+            background: rgba(0,0,0,0.4);
+            padding: 2px 8px;
+            border-radius: 12px;
+            backdrop-filter: blur(4px);
+        }
+        .hashtag-pill:hover {
+            color: #ffeb3b;
+        }
+
+        /* FLOATING SHOPPING CART BADGE (Giỏ hàng nổi bật trên video) */
+        .cart-floating-badge {
+            background: rgba(20, 20, 24, 0.92);
+            border: 1.5px solid #ff5722;
+            border-radius: 12px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 6px 20px rgba(238, 77, 45, 0.35);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: cartPulse 3s infinite;
+            text-decoration: none;
+            color: #fff;
+        }
+        @keyframes cartPulse {
+            0% { transform: scale(1); box-shadow: 0 6px 20px rgba(238, 77, 45, 0.35); }
+            50% { transform: scale(1.02); box-shadow: 0 8px 25px rgba(238, 77, 45, 0.6); }
+            100% { transform: scale(1); box-shadow: 0 6px 20px rgba(238, 77, 45, 0.35); }
+        }
+        .cart-floating-badge:hover {
+            background: #ff5722;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        .cart-badge-icon {
+            background: #ff5722;
+            color: #fff;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            flex-shrink: 0;
+        }
+        .cart-floating-badge:hover .cart-badge-icon {
+            background: #fff;
+            color: #ff5722;
+        }
+        .cart-badge-info {
+            flex-grow: 1;
+            min-width: 0;
+        }
+        .cart-badge-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+        .cart-badge-price {
+            font-size: 0.85rem;
+            color: #ffc107;
+            font-weight: 800;
+        }
+        .cart-badge-btn {
+            background: #ff5722;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border: none;
+            white-space: nowrap;
+        }
+        .cart-floating-badge:hover .cart-badge-btn {
+            background: #fff;
+            color: #ff5722;
+        }
+
+        /* Audio & Sound indicator */
+        .audio-toggle {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            cursor: pointer;
+            backdrop-filter: blur(6px);
+        }
+
+        /* Play / Pause indicator */
+        .play-pause-icon {
+            position: absolute;
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.7);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 15;
+        }
+
+        /* Offcanvas Comments Drawer */
+        .offcanvas-comments {
+            background-color: #1a1a20;
+            color: #fff;
+            border-top-left-radius: 20px;
+            border-bottom-left-radius: 20px;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .comment-item {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .comment-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        .comment-body {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 14px;
+            border-radius: 12px;
+            flex-grow: 1;
+        }
+        .comment-author {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #ff9800;
+            margin-bottom: 2px;
+        }
+        .comment-content {
+            font-size: 0.88rem;
+            color: #e0e0e0;
+            word-break: break-word;
+        }
+        .comment-time {
+            font-size: 0.72rem;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        /* Navigation Arrows on Desktop */
+        .reel-nav-btn {
+            position: fixed;
+            right: 40px;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            cursor: pointer;
+            z-index: 50;
+            transition: all 0.2s;
+        }
+        .reel-nav-btn:hover {
+            background: #ff5722;
+        }
+        .reel-nav-up { top: 45%; }
+        .reel-nav-down { top: 55%; }
+
+        @media (max-width: 768px) {
+            .reel-nav-btn { display: none; }
+            .search-bar { display: none; }
+            .reel-item { border-radius: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP NAVBAR -->
+    <header class="video-navbar">
+        <a th:href="@{/khach-hang/video}" class="brand-logo">
+            <i class="bi bi-play-circle-fill text-danger fs-3"></i>
+            <span>FlexShop Video</span>
+            <span class="badge-live">Reels</span>
+        </a>
+
+        <!-- Tìm kiếm theo Hashtag hoặc Tiêu đề -->
+        <form th:action="@{/khach-hang/video}" method="get" class="search-bar">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" name="tuKhoa" th:value="${tuKhoa}" placeholder="Tìm video, #review, #dealhot..." autocomplete="off">
+        </form>
+
+        <div class="d-flex align-items-center gap-2">
+            <a th:href="@{/khach-hang/video/koc/dang-video}" class="btn btn-sm btn-danger rounded-pill px-3 fw-bold d-flex align-items-center gap-1 shadow-sm">
+                <i class="bi bi-camera-video-fill"></i>
+                <span class="d-none d-sm-inline">Đăng Video</span>
+            </a>
+            <a th:href="@{/khach-hang/video/koc/video-cua-toi}" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-semibold d-flex align-items-center gap-1">
+                <i class="bi bi-person-video"></i>
+                <span class="d-none d-md-inline">Video Của Tôi</span>
+            </a>
+            <a th:href="@{/}" class="btn btn-sm btn-secondary rounded-pill px-2">
+                <i class="bi bi-house-door"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- DESKTOP NAV ARROWS -->
+    <button class="reel-nav-btn reel-nav-up" onclick="cuonVideo(-1)" title="Video trước (Phím mũi tên Lên)">
+        <i class="bi bi-chevron-up"></i>
+    </button>
+    <button class="reel-nav-btn reel-nav-down" onclick="cuonVideo(1)" title="Video tiếp (Phím mũi tên Xuống)">
+        <i class="bi bi-chevron-down"></i>
+    </button>
+
+    <!-- REELS SNAP FEED CONTAINER -->
+    <main class="reels-wrapper" id="reelsWrapper">
+
+        <!-- THÔNG BÁO NẾU KHÔNG CÓ VIDEO NÀO -->
+        <div th:if="${#lists.isEmpty(dsVideo)}" class="text-center my-auto p-4">
+            <i class="bi bi-camera-reels text-secondary display-1"></i>
+            <h4 class="mt-3 text-white fw-bold">Chưa có video ngắn nào!</h4>
+            <p class="text-secondary">Hãy là người đầu tiên đăng video review sản phẩm để nhận hoa hồng KOC.</p>
+            <a th:href="@{/khach-hang/video/koc/dang-video}" class="btn btn-danger rounded-pill px-4 fw-bold">
+                <i class="bi bi-plus-lg me-1"></i> Đăng Video Ngay
+            </a>
+        </div>
+
+        <!-- DANH SÁCH CÁC VIDEO NGẮN TRONG FEED -->
+        <div th:each="v, iterStat : ${dsVideo}" class="reel-item" th:id="'reel-' + ${v.maVideo}" th:data-index="${iterStat.index}" th:data-id="${v.maVideo}">
+
+            <!-- Nút bật tắt âm thanh -->
+            <button class="audio-toggle" onclick="toggleMute(this)">
+                <i class="bi bi-volume-mute-fill fs-5"></i>
+            </button>
+
+            <!-- Video Hoặc Ảnh Review -->
+            <img th:if="${v.linkVideo != null and (#strings.endsWith(#strings.toLowerCase(v.linkVideo), '.jpg') or #strings.endsWith(#strings.toLowerCase(v.linkVideo), '.jpeg') or #strings.endsWith(#strings.toLowerCase(v.linkVideo), '.png') or #strings.endsWith(#strings.toLowerCase(v.linkVideo), '.webp') or #strings.endsWith(#strings.toLowerCase(v.linkVideo), '.gif'))}"
+                 class="reel-video"
+                 th:src="${v.linkVideo}"
+                 alt="Review Image"
+                 style="object-fit: cover;">
+
+            <video th:unless="${v.linkVideo != null and (#strings.endsWith(#strings.toLowerCase(v.linkVideo), '.jpg') or #strings.endsWith(#strings.toLowerCase(v.linkVideo), '.jpeg') or #strings.endsWith(#strings.toLowerCase(v.linkVideo), '.png') or #strings.endsWith(#strings.toLowerCase(v.linkVideo), '.webp') or #strings.endsWith(#strings.toLowerCase(v.linkVideo), '.gif'))}"
+                   class="reel-video"
+                   th:src="${v.linkVideo}"
+                   th:poster="${v.linkAnhBia}"
+                   loop
+                   playsinline
+                   muted
+                   onclick="togglePlay(this)">
+            </video>
+
+            <!-- Play/Pause Icon Center -->
+            <i class="bi bi-play-fill play-pause-icon"></i>
+
+            <!-- Gradient Overlay -->
+            <div class="reel-overlay"></div>
+
+            <!-- RIGHT ACTION BAR (TIM, COMMENT, SHARE, GIỎ HÀNG) -->
+            <div class="action-bar">
+                <!-- Tác giả / KOC Avatar -->
+                <div class="author-avatar-wrap">
+                    <img th:src="${v.nguoiDang.anhDaiDien != null ? v.nguoiDang.anhDaiDien : 'https://ui-avatars.com/api/?name=' + v.nguoiDang.hoVaTen + '&background=ee4d2d&color=fff'}"
+                         class="author-avatar" alt="KOC">
+                    <span class="author-plus-badge"><i class="bi bi-check"></i></span>
+                </div>
+
+                <!-- Nút Thả tim (Like) -->
+                <div class="text-center">
+                    <button class="action-btn"
+                            th:classappend="${mapDaThich[v.maVideo]} ? 'liked' : ''"
+                            th:onclick="'thichVideo(' + ${v.maVideo} + ', this)'"
+                            title="Thả tim review">
+                        <i class="bi fs-4" th:classappend="${mapDaThich[v.maVideo]} ? 'bi-heart-fill' : 'bi-heart'"></i>
+                    </button>
+                    <div class="action-label" th:id="'like-count-' + ${v.maVideo}" th:text="${v.tongLuotTim != null ? v.tongLuotTim : 0}">0</div>
+                </div>
+
+                <!-- Nút Bình luận -->
+                <div class="text-center">
+                    <button class="action-btn" th:onclick="'moBinhLuan(' + ${v.maVideo} + ')'" title="Xem bình luận">
+                        <i class="bi bi-chat-dots-fill fs-4"></i>
+                    </button>
+                    <div class="action-label" th:id="'cmt-count-' + ${v.maVideo}" th:text="${v.tongLuotBinhLuan != null ? v.tongLuotBinhLuan : 0}">0</div>
+                </div>
+
+                <!-- Nút Chia sẻ -->
+                <div class="text-center">
+                    <button class="action-btn" th:onclick="'chiaSeVideo(' + ${v.maVideo} + ')'" title="Chia sẻ liên kết">
+                        <i class="bi bi-share-fill fs-4"></i>
+                    </button>
+                    <div class="action-label" th:id="'share-count-' + ${v.maVideo}" th:text="${v.tongLuotChiaSe != null ? v.tongLuotChiaSe : 0}">0</div>
+                </div>
+
+                <!-- Icon Giỏ Hàng Mua Ngay Nổi Bật -->
+                <div class="text-center">
+                    <button class="action-btn" style="background: #ff5722; color: #fff;"
+                            th:onclick="'moQuickCart(' + ${v.sanPhamGanKem.maSanPham} + ')'"
+                            title="Xem sản phẩm trong giỏ hàng">
+                        <i class="bi bi-bag-check-fill fs-4"></i>
+                    </button>
+                    <div class="action-label text-warning fw-bold">Mua Ngay</div>
+                </div>
+            </div>
+
+            <!-- BOTTOM CAPTION & SHOPPING CART BADGE -->
+            <div class="caption-bar">
+
+                <!-- THẺ GIỎ HÀNG GẮN KÈM TRỰC TIẾP TRÊN MÀN HÌNH VIDEO -->
+                <div class="cart-floating-badge mb-2" th:onclick="'moQuickCart(' + ${v.sanPhamGanKem.maSanPham} + ')'">
+                    <div class="cart-badge-icon">
+                        <i class="bi bi-bag-fill"></i>
+                    </div>
+                    <div class="cart-badge-info">
+                        <div class="cart-badge-title" th:text="${v.sanPhamGanKem.tenSanPham}">Tên sản phẩm review</div>
+                        <div class="cart-badge-price">
+                            <span th:text="${#numbers.formatDecimal(v.sanPhamGanKem.giaCoBan, 0, 'POINT', 0, 'COMMA')} + ' đ'">1.000.000 đ</span>
+                            <span class="badge bg-danger ms-1" style="font-size: 0.65rem;">Deal Sốc</span>
+                        </div>
+                    </div>
+                    <button type="button" class="cart-badge-btn">
+                        Mua ngay <i class="bi bi-arrow-right-short"></i>
+                    </button>
+                </div>
+
+                <!-- Tác giả & Tiêu đề -->
+                <div class="author-name">
+                    <span th:text="'@' + ${v.nguoiDang.hoVaTen}">@KOC_Reviewer</span>
+                    <span class="badge bg-warning text-dark px-2 py-0" style="font-size: 0.7rem; border-radius: 4px;">KOC</span>
+                </div>
+
+                <div class="video-title" th:text="${v.tieuDe}">Tiêu đề video review ngắn</div>
+
+                <!-- Mô tả chi tiết nếu có -->
+                <p th:if="${v.moTa != null and !v.moTa.isEmpty()}" class="small text-light text-opacity-75 mb-2"
+                   style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"
+                   th:text="${v.moTa}">
+                </p>
+
+                <!-- Danh sách Hashtag -->
+                <div class="hashtag-list" th:if="${v.hashtag != null}">
+                    <span th:each="tag : ${#strings.arraySplit(v.hashtag, ' ')}">
+                        <a th:href="@{/khach-hang/video(tuKhoa=${tag})}" class="hashtag-pill" th:text="${tag}">#review</a>
+                    </span>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- MODAL QUICK CART (XEM NHANH & MUA NGAY SẢN PHẨM TRÊN VIDEO) -->
+    <div class="modal fade" id="modalQuickCart" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-white" style="background: #1e1e24; border: 1px solid rgba(255,255,255,0.15); border-radius: 20px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-warning d-flex align-items-center gap-2">
+                        <i class="bi bi-bag-check-fill text-danger fs-4"></i> Sản phẩm trong Video
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="d-flex gap-3 align-items-center mb-3">
+                        <img id="qcHinhAnh" src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80"
+                             class="rounded-3" style="width: 100px; height: 100px; object-fit: cover; border: 2px solid #ff5722;" alt="Ảnh sản phẩm">
+                        <div>
+                            <h6 id="qcTenSanPham" class="fw-bold mb-1 text-white">Tên sản phẩm</h6>
+                            <div class="text-danger fw-bolder fs-5" id="qcGia">0 đ</div>
+                            <div class="small text-secondary" id="qcShop">Gian hàng: FlexShop Mall</div>
+                            <div class="small text-warning mt-1" id="qcDanhGia">
+                                <i class="bi bi-star-fill"></i> 4.9 | Đã bán: 120
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-dark border-0 rounded-3 small text-secondary py-2 mb-3">
+                        <i class="bi bi-shield-check text-success me-1"></i> Sản phẩm chính hãng 100% - Đổi trả miễn phí 15 ngày.
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a id="qcLinkChiTiet" href="#" class="btn btn-danger btn-lg rounded-pill fw-bold shadow">
+                            <i class="bi bi-cart-plus-fill me-1"></i> Đến Trang Chi Tiết & Mua Ngay
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OFFCANVAS BÌNH LUẬN (SLIDE-IN DRAWER) -->
+    <div class="offcanvas offcanvas-end offcanvas-comments" tabindex="-1" id="offcanvasComments" aria-labelledby="offcanvasCommentsLabel" style="width: 400px; max-width: 90vw;">
+        <div class="offcanvas-header border-bottom border-secondary border-opacity-25">
+            <h6 class="offcanvas-title fw-bold text-white d-flex align-items-center gap-2" id="offcanvasCommentsLabel">
+                <i class="bi bi-chat-text-fill text-danger"></i> Bình Luận (<span id="drawerCmtCount">0</span>)
+            </h6>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body d-flex flex-column p-3">
+            <!-- Danh sách bình luận -->
+            <div id="commentsList" class="flex-grow-1 overflow-y-auto pe-1" style="max-height: calc(100vh - 180px);">
+                <div class="text-center text-secondary py-5">
+                    <div class="spinner-border spinner-border-sm text-danger" role="status"></div>
+                    <div class="mt-2">Đang tải bình luận...</div>
+                </div>
+            </div>
+
+            <!-- Form nhập bình luận -->
+            <div class="pt-3 border-top border-secondary border-opacity-25 mt-auto">
+                <form id="commentForm" onsubmit="guiBinhLuan(event)">
+                    <div class="input-group">
+                        <input type="text" id="commentInput" class="form-control bg-dark text-white border-secondary rounded-start-pill px-3"
+                               placeholder="Thêm bình luận..." maxlength="1000" autocomplete="off" required>
+                        <button class="btn btn-danger rounded-end-pill px-3" type="submit">
+                            <i class="bi bi-send-fill"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST THÔNG BÁO -->
+    <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 2000;">
+        <div id="actionToast" class="toast align-items-center text-white bg-dark border-0 rounded-pill shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body px-4 py-2 text-center" id="toastMessage">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i> Thành công!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentVideoId = null;
+        let isGlobalMuted = true;
+        const modalQuickCart = new bootstrap.Modal(document.getElementById('modalQuickCart'));
+        const offcanvasComments = new bootstrap.Offcanvas(document.getElementById('offcanvasComments'));
+        const actionToast = new bootstrap.Toast(document.getElementById('actionToast'), { delay: 2500 });
+
+        // ===============================================
+        // 1. TỰ ĐỘNG PHÁT / DỪNG VIDEO KHI CUỘN (INTERSECTION OBSERVER)
+        // ===============================================
+        const reelsWrapper = document.getElementById('reelsWrapper');
+        const reelItems = document.querySelectorAll('.reel-item');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const video = entry.target.querySelector('video');
+                const videoId = entry.target.getAttribute('data-id');
+
+                if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+                    currentVideoId = videoId;
+                    video.muted = isGlobalMuted;
+                    video.play().catch(e => console.log("Autoplay blocked:", e));
+
+                    // Gọi API tăng view
+                    fetch(`/api/video/${videoId}/tang-view`, { method: 'POST' }).catch(e => {});
+                } else {
+                    video.pause();
+                }
+            });
+        }, {
+            threshold: [0.6]
+        });
+
+        reelItems.forEach(item => observer.observe(item));
+
+        // ===============================================
+        // 2. ĐIỀU KHIỂN PLAY / PAUSE / MUTE
+        // ===============================================
+        function togglePlay(video) {
+            const icon = video.parentElement.querySelector('.play-pause-icon');
+            if (video.paused) {
+                video.play();
+                hienThiIcon(icon, 'bi-play-fill');
+            } else {
+                video.pause();
+                hienThiIcon(icon, 'bi-pause-fill');
+            }
+        }
+
+        function hienThiIcon(icon, className) {
+            icon.className = `bi ${className} play-pause-icon`;
+            icon.style.opacity = '1';
+            setTimeout(() => { icon.style.opacity = '0'; }, 500);
+        }
+
+        function toggleMute(btn) {
+            isGlobalMuted = !isGlobalMuted;
+            const allVideos = document.querySelectorAll('.reel-video');
+            allVideos.forEach(v => { v.muted = isGlobalMuted; });
+
+            const iconClass = isGlobalMuted ? 'bi-volume-mute-fill' : 'bi-volume-up-fill';
+            document.querySelectorAll('.audio-toggle i').forEach(i => {
+                i.className = `bi ${iconClass} fs-5`;
+            });
+        }
+
+        // ===============================================
+        // 3. CUỘN CHUYỂN VIDEO (BẰNG NÚT / BÀN PHÍM)
+        // ===============================================
+        function cuonVideo(huong) {
+            const currentItem = document.getElementById(`reel-${currentVideoId}`);
+            if (!currentItem) return;
+            const currentIndex = parseInt(currentItem.getAttribute('data-index'));
+            const targetIndex = currentIndex + huong;
+            const targetItem = document.querySelector(`.reel-item[data-index="${targetIndex}"]`);
+            if (targetItem) {
+                targetItem.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (document.activeElement.tagName === 'INPUT') return;
+            if (e.key === 'ArrowDown' || e.key === 'j') {
+                e.preventDefault();
+                cuonVideo(1);
+            } else if (e.key === 'ArrowUp' || e.key === 'k') {
+                e.preventDefault();
+                cuonVideo(-1);
+            } else if (e.key === 'm') {
+                toggleMute();
+            }
+        });
+
+        // ===============================================
+        // 4. THẢ TIM (LIKE / UNLIKE) AJAX
+        // ===============================================
+        function thichVideo(maVideo, btn) {
+            fetch(`/api/video/${maVideo}/thich`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const countEl = document.getElementById(`like-count-${maVideo}`);
+                        countEl.innerText = data.tongLuotTim;
+                        const icon = btn.querySelector('i');
+                        if (data.daThich) {
+                            btn.classList.add('liked');
+                            icon.className = 'bi bi-heart-fill fs-4';
+                            hienToast("Đã thả tim video! ❤️");
+                        } else {
+                            btn.classList.remove('liked');
+                            icon.className = 'bi bi-heart fs-4';
+                        }
+                    } else {
+                        hienToast(data.message || "Vui lòng đăng nhập để thả tim");
+                    }
+                })
+                .catch(err => console.error("Lỗi thả tim:", err));
+        }
+
+        // ===============================================
+        // 5. BÌNH LUẬN (DRAWER & AJAX)
+        // ===============================================
+        function moBinhLuan(maVideo) {
+            currentVideoId = maVideo;
+            const countEl = document.getElementById(`cmt-count-${maVideo}`);
+            document.getElementById('drawerCmtCount').innerText = countEl.innerText;
+            offcanvasComments.show();
+
+            const cmtList = document.getElementById('commentsList');
+            cmtList.innerHTML = `
+                <div class="text-center text-secondary py-5">
+                    <div class="spinner-border spinner-border-sm text-danger" role="status"></div>
+                    <div class="mt-2">Đang tải bình luận...</div>
+                </div>
+            `;
+
+            fetch(`/api/video/${maVideo}/binh-luan`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.dsBinhLuan.length > 0) {
+                        cmtList.innerHTML = data.dsBinhLuan.map(c => taoHtmlBinhLuan(c)).join('');
+                    } else {
+                        cmtList.innerHTML = `<div class="text-center text-secondary py-5">Chưa có bình luận nào. Hãy là người đầu tiên bình luận!</div>`;
+                    }
+                })
+                .catch(err => {
+                    cmtList.innerHTML = `<div class="text-center text-danger py-4">Lỗi khi tải bình luận.</div>`;
+                });
+        }
+
+        function taoHtmlBinhLuan(c) {
+            return `
+                <div class="comment-item">
+                    <img src="${c.anhDaiDien}" class="comment-avatar" alt="Avatar">
+                    <div class="comment-body">
+                        <div class="comment-author">${c.hoTenNguoiDung} ${c.laToi ? '<span class="badge bg-secondary ms-1" style="font-size: 0.65rem;">Bạn</span>' : ''}</div>
+                        <div class="comment-content">${c.noiDung}</div>
+                        <div class="comment-time">${c.thoiGianGui}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function guiBinhLuan(e) {
+            e.preventDefault();
+            const input = document.getElementById('commentInput');
+            const noiDung = input.value.trim();
+            if (!noiDung || !currentVideoId) return;
+
+            fetch(`/api/video/${currentVideoId}/binh-luan`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ noiDung: noiDung })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const cmtList = document.getElementById('commentsList');
+                    // Xóa thông báo trống nếu có
+                    if (cmtList.innerText.includes("Chưa có bình luận")) {
+                        cmtList.innerHTML = '';
+                    }
+                    cmtList.insertAdjacentHTML('afterbegin', taoHtmlBinhLuan(data.binhLuan));
+                    input.value = '';
+
+                    // Cập nhật số lượng bình luận
+                    const countEl = document.getElementById(`cmt-count-${currentVideoId}`);
+                    const newCount = parseInt(countEl.innerText || '0') + 1;
+                    countEl.innerText = newCount;
+                    document.getElementById('drawerCmtCount').innerText = newCount;
+                    hienToast("Đã gửi bình luận!");
+                } else {
+                    hienToast(data.message || "Lỗi khi gửi bình luận");
+                }
+            })
+            .catch(err => console.error("Lỗi gửi bình luận:", err));
+        }
+
+        // ===============================================
+        // 6. CHIA SẺ VIDEO
+        // ===============================================
+        function chiaSeVideo(maVideo) {
+            const url = window.location.origin + `/khach-hang/video/${maVideo}`;
+            navigator.clipboard.writeText(url).then(() => {
+                hienToast("Đã sao chép liên kết video vào bộ nhớ tạm! 📋");
+                fetch(`/api/video/${maVideo}/chia-se`, { method: 'POST' })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            const countEl = document.getElementById(`share-count-${maVideo}`);
+                            if (countEl) countEl.innerText = data.tongLuotChiaSe;
+                        }
+                    });
+            }).catch(() => {
+                hienToast("Liên kết video: " + url);
+            });
+        }
+
+        // ===============================================
+        // 7. MODAL QUICK CART (SẢN PHẨM TRONG GIỎ HÀNG)
+        // ===============================================
+        function moQuickCart(maSanPham) {
+            fetch(`/api/video/tim-kiem-san-pham?tuKhoa=`)
+                .then(res => res.json())
+                .then(ds => {
+                    const sp = ds.find(s => s.maSanPham === maSanPham) || ds[0];
+                    if (sp) {
+                        document.getElementById('qcTenSanPham').innerText = sp.tenSanPham;
+                        document.getElementById('qcGia').innerText = new Intl.NumberFormat('vi-VN').format(sp.giaCoBan) + ' đ';
+                        document.getElementById('qcShop').innerText = 'Gian hàng: ' + (sp.tenGianHang || 'FlexShop Mall');
+                        document.getElementById('qcDanhGia').innerHTML = `<i class="bi bi-star-fill"></i> ${sp.danhGiaTb || '5.0'} | Đã bán: ${sp.tongDaBan || 0}`;
+                        document.getElementById('qcLinkChiTiet').href = `/san-pham/${sp.maSanPham}`;
+                        modalQuickCart.show();
+                    }
+                })
+                .catch(err => console.error("Lỗi mở quick cart:", err));
+        }
+
+        function hienToast(msg) {
+            document.getElementById('toastMessage').innerHTML = `<i class="bi bi-info-circle-fill text-warning me-2"></i> ` + msg;
+            actionToast.show();
+        }
+    </script>
+</body>
+</html>
+

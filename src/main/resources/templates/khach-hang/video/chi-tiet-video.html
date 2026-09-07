@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${video.tieuDe} + ' - FlexShop Video'">Chi Tiết Video - FlexShop Video (US-62)</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #121216;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        .navbar-custom {
+            background: #1a1a20;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 14px 28px;
+        }
+        .video-container {
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            position: relative;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        .video-player {
+            width: 100%;
+            height: 650px;
+            object-fit: cover;
+            display: block;
+        }
+        .info-card {
+            background: #1a1a20;
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .product-cart-card {
+            background: linear-gradient(135deg, rgba(238, 77, 45, 0.15) 0%, rgba(255, 115, 55, 0.08) 100%);
+            border: 1.5px solid #ee4d2d;
+            border-radius: 16px;
+            padding: 16px;
+            transition: all 0.2s;
+        }
+        .product-cart-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(238, 77, 45, 0.25);
+        }
+        .btn-like {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            transition: all 0.2s;
+        }
+        .btn-like.liked {
+            background: #ff2d55;
+            border-color: #ff2d55;
+            color: white;
+        }
+        .related-card {
+            background: #1a1a20;
+            border-radius: 12px;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            gap: 12px;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s;
+        }
+        .related-card:hover {
+            background: #24242c;
+            color: #fff;
+        }
+        .related-thumb {
+            width: 80px;
+            height: 110px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar-custom d-flex justify-content-between align-items-center mb-4">
+        <a th:href="@{/khach-hang/video}" class="d-flex align-items-center gap-2 text-decoration-none text-danger fw-bolder fs-4">
+            <i class="bi bi-play-circle-fill"></i>
+            <span>FlexShop Video</span>
+        </a>
+        <div class="d-flex gap-2">
+            <a th:href="@{/khach-hang/video}" class="btn btn-outline-light rounded-pill px-3 fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i> Xem Feed Video
+            </a>
+            <a th:href="@{/khach-hang/video/koc/dang-video}" class="btn btn-danger rounded-pill px-3 fw-bold">
+                <i class="bi bi-camera-video-fill me-1"></i> Đăng Video
+            </a>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+        <div class="row g-4">
+
+            <!-- CỘT TRÁI: VIDEO PLAYER DỌC -->
+            <div class="col-lg-5">
+                <div class="video-container">
+                    <!-- Video Hoặc Ảnh Review -->
+                    <img th:if="${video.linkVideo != null and (#strings.endsWith(#strings.toLowerCase(video.linkVideo), '.jpg') or #strings.endsWith(#strings.toLowerCase(video.linkVideo), '.jpeg') or #strings.endsWith(#strings.toLowerCase(video.linkVideo), '.png') or #strings.endsWith(#strings.toLowerCase(video.linkVideo), '.webp') or #strings.endsWith(#strings.toLowerCase(video.linkVideo), '.gif'))}"
+                         class="video-player shadow-lg"
+                         th:src="${video.linkVideo}"
+                         alt="Review Media"
+                         style="object-fit: cover; width: 100%; border-radius: 16px;">
+
+                    <video th:unless="${video.linkVideo != null and (#strings.endsWith(#strings.toLowerCase(video.linkVideo), '.jpg') or #strings.endsWith(#strings.toLowerCase(video.linkVideo), '.jpeg') or #strings.endsWith(#strings.toLowerCase(video.linkVideo), '.png') or #strings.endsWith(#strings.toLowerCase(video.linkVideo), '.webp') or #strings.endsWith(#strings.toLowerCase(video.linkVideo), '.gif'))}"
+                           class="video-player"
+                           th:src="${video.linkVideo}"
+                           th:poster="${video.linkAnhBia}"
+                           controls
+                           autoplay
+                           loop
+                           playsinline>
+                    </video>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: CHI TIẾT SẢN PHẨM GIỎ HÀNG, TÁC GIẢ & BÌNH LUẬN -->
+            <div class="col-lg-7">
+
+                <!-- 1. THẺ SẢN PHẨM GẮN TRONG GIỎ HÀNG VIDEO -->
+                <div class="product-cart-card mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="badge bg-danger px-2 py-1 rounded-pill fw-bold">
+                            <i class="bi bi-bag-check-fill me-1"></i> Sản Phẩm Gắn Trong Giỏ Hàng
+                        </span>
+                        <span class="text-warning small fw-bold">
+                            <i class="bi bi-star-fill"></i> <span th:text="${video.sanPhamGanKem.danhGiaTb != null ? video.sanPhamGanKem.danhGiaTb : '5.0'}">5.0</span>
+                        </span>
+                    </div>
+
+                    <div class="d-flex gap-3 align-items-center">
+                        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200"
+                             class="rounded-3" style="width: 80px; height: 80px; object-fit: cover; border: 2px solid #ee4d2d;" alt="Ảnh sản phẩm">
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1 text-white" th:text="${video.sanPhamGanKem.tenSanPham}">Tên sản phẩm review</h6>
+                            <div class="text-danger fw-bolder fs-5">
+                                <span th:text="${#numbers.formatDecimal(video.sanPhamGanKem.giaCoBan, 0, 'POINT', 0, 'COMMA')} + ' đ'">1.000.000 đ</span>
+                            </div>
+                            <div class="small text-secondary" th:text="'Gian hàng: ' + ${video.sanPhamGanKem.gianHang != null ? video.sanPhamGanKem.gianHang.tenGianHang : 'FlexShop'}">FlexShop Mall</div>
+                        </div>
+                        <div>
+                            <a th:href="@{'/san-pham/' + ${video.sanPhamGanKem.maSanPham}}" class="btn btn-danger rounded-pill fw-bold px-4 shadow">
+                                Mua Ngay <i class="bi bi-arrow-right-short"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. THÔNG TIN BÀI REVIEW & TÁC GIẢ -->
+                <div class="info-card mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <img th:src="${video.nguoiDang.anhDaiDien != null ? video.nguoiDang.anhDaiDien : 'https://ui-avatars.com/api/?name=' + video.nguoiDang.hoVaTen + '&background=ee4d2d&color=fff'}"
+                                 class="rounded-circle" style="width: 48px; height: 48px; object-fit: cover; border: 2px solid #ff5722;" alt="Avatar">
+                            <div>
+                                <h6 class="fw-bold mb-0 text-white" th:text="${video.nguoiDang.hoVaTen}">KOC Tên Tác Giả</h6>
+                                <span class="badge bg-warning text-dark px-2 py-0" style="font-size: 0.7rem;">KOC Reviewer</span>
+                            </div>
+                        </div>
+
+                        <!-- NÚT TƯƠNG TÁC LIKE & SHARE -->
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-like rounded-pill px-3 fw-bold d-flex align-items-center gap-1"
+                                    th:classappend="${daThich} ? 'liked' : ''"
+                                    th:onclick="'thichVideoChiTiet(' + ${video.maVideo} + ', this)'">
+                                <i class="bi" th:classappend="${daThich} ? 'bi-heart-fill' : 'bi-heart'"></i>
+                                <span id="likeCountDetail" th:text="${video.tongLuotTim != null ? video.tongLuotTim : 0}">0</span>
+                            </button>
+                            <button type="button" class="btn btn-outline-light rounded-pill px-3 fw-semibold"
+                                    th:onclick="'chiaSeVideoChiTiet(' + ${video.maVideo} + ')'">
+                                <i class="bi bi-share-fill me-1"></i> Chia sẻ
+                            </button>
+                        </div>
+                    </div>
+
+                    <h4 class="fw-bold mb-2 text-white" th:text="${video.tieuDe}">Tiêu đề video ngắn review</h4>
+                    <p class="text-secondary mb-3" th:text="${video.moTa}">Mô tả chi tiết cảm nhận của người dùng sau khi sử dụng sản phẩm...</p>
+
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span th:each="tag : ${#strings.arraySplit(video.hashtag, ' ')}">
+                            <a th:href="@{/khach-hang/video(tuKhoa=${tag})}" class="badge bg-dark text-warning text-decoration-none border border-secondary px-2 py-1" th:text="${tag}">#review</a>
+                        </span>
+                    </div>
+
+                    <div class="d-flex gap-4 text-secondary small pt-2 border-top border-secondary border-opacity-25">
+                        <div><i class="bi bi-eye-fill me-1 text-info"></i> <span th:text="${video.tongLuotXem != null ? video.tongLuotXem : 0}">0</span> lượt xem</div>
+                        <div><i class="bi bi-chat-dots-fill me-1 text-primary"></i> <span id="cmtCountDetail" th:text="${video.tongLuotBinhLuan != null ? video.tongLuotBinhLuan : 0}">0</span> bình luận</div>
+                        <div><i class="bi bi-clock-fill me-1 text-warning"></i> <span th:text="${#temporals.format(video.ngayDang, 'HH:mm dd/MM/yyyy')}">01/01/2026</span></div>
+                    </div>
+                </div>
+
+                <!-- 3. BÌNH LUẬN TRỰC TIẾP -->
+                <div class="info-card">
+                    <h5 class="fw-bold mb-3 text-white d-flex align-items-center gap-2">
+                        <i class="bi bi-chat-left-text-fill text-danger"></i> Bình Luận & Thảo Luận
+                    </h5>
+
+                    <!-- Form nhập bình luận -->
+                    <form id="detailCommentForm" onsubmit="guiBinhLuanChiTiet(event)" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" id="detailCommentInput" class="form-control bg-dark text-white border-secondary rounded-start-pill px-3"
+                                   placeholder="Viết bình luận của bạn về video hoặc sản phẩm..." maxlength="1000" required>
+                            <button class="btn btn-danger rounded-end-pill px-4 fw-bold" type="submit">
+                                <i class="bi bi-send-fill me-1"></i> Gửi
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Danh sách bình luận AJAX -->
+                    <div id="detailCommentsList" style="max-height: 380px; overflow-y: auto;">
+                        <div class="text-center text-secondary py-4">
+                            <div class="spinner-border spinner-border-sm text-danger" role="status"></div>
+                            <div class="mt-2 small">Đang tải bình luận...</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST THÔNG BÁO -->
+    <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 2000;">
+        <div id="detailToast" class="toast align-items-center text-white bg-dark border-0 rounded-pill shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body px-4 py-2 text-center" id="detailToastMessage">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i> Thành công!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const currentVideoId = /*[[${video.maVideo}]]*/ 1;
+        /*]]>*/
+
+        const detailToast = new bootstrap.Toast(document.getElementById('detailToast'), { delay: 2500 });
+
+        // Tải bình luận khi mở trang
+        document.addEventListener('DOMContentLoaded', () => {
+            taiBinhLuan();
+        });
+
+        function taiBinhLuan() {
+            const listEl = document.getElementById('detailCommentsList');
+            fetch(`/api/video/${currentVideoId}/binh-luan`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.dsBinhLuan.length > 0) {
+                        listEl.innerHTML = data.dsBinhLuan.map(c => `
+                            <div class="d-flex gap-3 mb-3 p-2 rounded-3" style="background: rgba(255,255,255,0.03);">
+                                <img src="${c.anhDaiDien}" class="rounded-circle" style="width: 36px; height: 36px; object-fit: cover;" alt="Avatar">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="fw-bold small text-warning">${c.hoTenNguoiDung} ${c.laToi ? '<span class="badge bg-secondary ms-1">Bạn</span>' : ''}</div>
+                                        <div class="text-secondary" style="font-size: 0.72rem;">${c.thoiGianGui}</div>
+                                    </div>
+                                    <div class="text-light small mt-1">${c.noiDung}</div>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        listEl.innerHTML = `<div class="text-center text-secondary py-4 small">Chưa có bình luận nào. Hãy là người đầu tiên!</div>`;
+                    }
+                })
+                .catch(() => {
+                    listEl.innerHTML = `<div class="text-center text-danger py-4 small">Lỗi khi tải bình luận.</div>`;
+                });
+        }
+
+        function guiBinhLuanChiTiet(e) {
+            e.preventDefault();
+            const input = document.getElementById('detailCommentInput');
+            const noiDung = input.value.trim();
+            if (!noiDung) return;
+
+            fetch(`/api/video/${currentVideoId}/binh-luan`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ noiDung: noiDung })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    input.value = '';
+                    taiBinhLuan();
+                    const cmtEl = document.getElementById('cmtCountDetail');
+                    cmtEl.innerText = parseInt(cmtEl.innerText || '0') + 1;
+                    hienToast("Đã gửi bình luận thành công!");
+                } else {
+                    hienToast(data.message || "Lỗi gửi bình luận");
+                }
+            });
+        }
+
+        function thichVideoChiTiet(maVideo, btn) {
+            fetch(`/api/video/${maVideo}/thich`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('likeCountDetail').innerText = data.tongLuotTim;
+                        const icon = btn.querySelector('i');
+                        if (data.daThich) {
+                            btn.classList.add('liked');
+                            icon.className = 'bi bi-heart-fill';
+                            hienToast("Đã thả tim video! ❤️");
+                        } else {
+                            btn.classList.remove('liked');
+                            icon.className = 'bi bi-heart';
+                        }
+                    } else {
+                        hienToast(data.message || "Vui lòng đăng nhập để thả tim");
+                    }
+                });
+        }
+
+        function chiaSeVideoChiTiet(maVideo) {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                hienToast("Đã sao chép liên kết video vào bộ nhớ tạm! 📋");
+                fetch(`/api/video/${maVideo}/chia-se`, { method: 'POST' });
+            });
+        }
+
+        function hienToast(msg) {
+            document.getElementById('detailToastMessage').innerHTML = `<i class="bi bi-info-circle-fill text-warning me-2"></i> ` + msg;
+            detailToast.show();
+        }
+    </script>
+</body>
+</html>
+

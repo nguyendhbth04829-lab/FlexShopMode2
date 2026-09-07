@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Video Ngắn Review Sản Phẩm - FlexShop Video (US-62)</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f4f6f8;
+            color: #212529;
+            min-height: 100vh;
+        }
+        .navbar-custom {
+            background: #ffffff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 14px 28px;
+        }
+        .upload-card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.05);
+            padding: 32px;
+        }
+        .phone-mockup {
+            width: 320px;
+            height: 580px;
+            background: #000;
+            border-radius: 36px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+            border: 10px solid #1f2327;
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        .phone-notch {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 18px;
+            background: #1f2327;
+            border-radius: 10px;
+            z-index: 30;
+        }
+        .preview-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .preview-cart-badge {
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: 70px;
+            background: rgba(20, 20, 24, 0.9);
+            border: 1.5px solid #ff5722;
+            border-radius: 10px;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(238, 77, 45, 0.4);
+            z-index: 20;
+        }
+        .preview-caption {
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: 16px;
+            color: #fff;
+            z-index: 20;
+            font-size: 0.8rem;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+        }
+        .hashtag-chip {
+            display: inline-block;
+            background: #f0f2f5;
+            color: #ff5722;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 6px;
+            margin-bottom: 6px;
+            border: 1px solid #ffe0d8;
+        }
+        .hashtag-chip:hover {
+            background: #ff5722;
+            color: #fff;
+        }
+        .nav-pills .nav-link {
+            color: #495057;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-pills .nav-link:hover {
+            background-color: #e9ecef;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #ee4d2d !important;
+            color: #fff !important;
+            box-shadow: 0 4px 12px rgba(238, 77, 45, 0.35);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP NAVBAR -->
+    <nav class="navbar-custom d-flex justify-content-between align-items-center">
+        <a th:href="@{/khach-hang/video}" class="d-flex align-items-center gap-2 text-decoration-none text-danger fw-bolder fs-4">
+            <i class="bi bi-play-circle-fill"></i>
+            <span>FlexShop Video Creator</span>
+        </a>
+        <div class="d-flex gap-2">
+            <a th:href="@{/khach-hang/video/koc/video-cua-toi}" class="btn btn-outline-secondary rounded-pill px-3 fw-semibold">
+                <i class="bi bi-collection-play me-1"></i> Video Của Tôi
+            </a>
+            <a th:href="@{/khach-hang/video}" class="btn btn-outline-danger rounded-pill px-3 fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại Feed
+            </a>
+        </div>
+    </nav>
+
+    <!-- CONTENT -->
+    <div class="container py-4">
+
+        <div class="row g-4">
+            <!-- CỘT TRÁI: FORM ĐĂNG VIDEO -->
+            <div class="col-lg-7">
+                <div class="upload-card">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="bg-danger bg-opacity-10 text-danger p-3 rounded-4 fs-3">
+                            <i class="bi bi-cloud-arrow-up-fill"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold mb-1">Đăng Video Ngắn Review</h4>
+                            <p class="text-secondary small mb-0">Gắn link sản phẩm vào giỏ hàng để người xem bấm mua ngay khi lướt video.</p>
+                        </div>
+                    </div>
+
+                    <!-- THÔNG BÁO LỖI NẾU CÓ -->
+                    <div th:if="${errorMessage}" class="alert alert-danger rounded-3 small py-2 d-flex align-items-center gap-2">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <span th:text="${errorMessage}">Lỗi khi xử lý</span>
+                    </div>
+
+                    <form th:action="@{/khach-hang/video/koc/dang-video}" th:object="${form}" method="post" enctype="multipart/form-data" id="uploadForm" onsubmit="return validateAndSubmitForm(event)">
+
+                        <!-- 1. CHỌN HÌNH THỨC TẢI VIDEO / ẢNH (2 TAB) -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold d-flex justify-content-between align-items-center mb-2">
+                                <span>1. Video Hoặc Ảnh Review Sản Phẩm <span class="text-danger">*</span></span>
+                                <span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1 small">Hỗ trợ Video & Ảnh tối đa 200MB</span>
+                            </label>
+
+                            <!-- Nav Tabs -->
+                            <ul class="nav nav-pills nav-fill mb-3 p-1 bg-light rounded-3" id="videoSourceTab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active fw-semibold py-2" id="tab-file" type="button" role="tab" onclick="chuyenTabNguon('file')">
+                                        <i class="bi bi-upload me-1"></i> Tải Tệp Từ Máy (Video/Ảnh)
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link fw-semibold py-2" id="tab-link" type="button" role="tab" onclick="chuyenTabNguon('link')">
+                                        <i class="bi bi-link-45deg me-1"></i> Dán Đường Link Trực Tiếp
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content" id="videoSourceContent">
+                                <!-- TAB 1: FILE UPLOAD -->
+                                <div class="tab-pane active" id="pills-file" role="tabpanel">
+                                    <div class="input-group mb-2">
+                                        <span class="input-group-text bg-light"><i class="bi bi-file-earmark-play-fill text-danger"></i></span>
+                                        <input type="file" th:field="*{tepVideo}" id="tepVideoInput" class="form-control"
+                                               accept="video/mp4,video/webm,video/quicktime,video/x-matroska,image/png,image/jpeg,image/webp,image/gif"
+                                               onchange="kiemTraVaPreviewFile(this)">
+                                    </div>
+                                    <div id="fileInfoBadge" class="alert alert-success py-2 px-3 small rounded-3 mb-2" style="display: none;">
+                                        <!-- Điền thông tin tệp tự động -->
+                                    </div>
+                                    <div class="form-text small text-secondary">
+                                        <i class="bi bi-info-circle me-1"></i>Hỗ trợ: <strong>Video</strong> (MP4, WebM, MOV) hoặc <strong>Ảnh</strong> (JPG, PNG, WEBP, GIF). Tối đa: <strong>200MB</strong>.
+                                    </div>
+                                </div>
+
+                                <!-- TAB 2: LINK VIDEO / ẢNH -->
+                                <div class="tab-pane" id="pills-link" role="tabpanel" style="display: none;">
+                                    <div class="input-group mb-2">
+                                        <span class="input-group-text bg-light"><i class="bi bi-globe text-primary"></i></span>
+                                        <input type="text" th:field="*{linkVideo}" id="linkVideoInput" class="form-control"
+                                               placeholder="https://.../video.mp4 hoặc link ảnh..."
+                                               oninput="previewVideoUrl(this.value)"
+                                               onpaste="setTimeout(() => previewVideoUrl(this.value), 50)"
+                                               onchange="previewVideoUrl(this.value)"
+                                               onkeyup="previewVideoUrl(this.value)">
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-1 align-items-center mt-2">
+                                        <span class="small text-secondary me-1">Gợi ý video/ảnh mẫu test nhanh:</span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2" style="font-size: 0.75rem;" onclick="dienLinkMau(1)">
+                                            <i class="bi bi-headphones me-1"></i>[Video] Tai nghe
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2" style="font-size: 0.75rem;" onclick="dienLinkMau(2)">
+                                            <i class="bi bi-bag-check me-1"></i>[Video] Áo Sơ Mi
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2" style="font-size: 0.75rem;" onclick="dienLinkMau(3)">
+                                            <i class="bi bi-phone me-1"></i>[Video] FlexPhone
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-success rounded-pill py-0 px-2" style="font-size: 0.75rem;" onclick="dienLinkMau(4)">
+                                            <i class="bi bi-image me-1"></i>[Ảnh] Review Sony
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div th:if="${#fields.hasErrors('linkVideo')}" class="text-danger small mt-1" th:errors="*{linkVideo}"></div>
+                        </div>
+
+                        <!-- 2. CHỌN SẢN PHẨM GẮN KÈM (GIỎ HÀNG VIDEO) -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold d-flex justify-content-between align-items-center">
+                                <span>2. Gắn Sản Phẩm Vào Giỏ Hàng Video <span class="text-danger">*</span></span>
+                                <span class="text-secondary small">Sản phẩm có trong shop</span>
+                            </label>
+                            
+                            <!-- Ô lọc nhanh sản phẩm -->
+                            <div class="input-group input-group-sm mb-2">
+                                <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                                <input type="text" id="timKiemSpFilter" class="form-control" placeholder="Gõ từ khóa để lọc nhanh sản phẩm..." oninput="locDanhSachSanPham(this.value)">
+                            </div>
+
+                            <select th:field="*{maSanPhamGanKem}" id="sanPhamSelect" class="form-select form-select-lg rounded-3" onchange="capNhatSanPhamPreview(this)" required>
+                                <option value="" disabled selected>-- Bấm để chọn sản phẩm review từ Cửa hàng --</option>
+                                <option th:each="sp : ${dsSanPham}"
+                                        th:value="${sp.maSanPham}"
+                                        th:data-ten="${sp.tenSanPham}"
+                                        th:data-gia="${#numbers.formatDecimal(sp.giaCoBan, 0, 'POINT', 0, 'COMMA')} + ' đ'"
+                                        th:text="${sp.tenSanPham + ' - ' + #numbers.formatDecimal(sp.giaCoBan, 0, 'POINT', 0, 'COMMA') + ' đ'}">
+                                    Tai nghe Sony WH-1000XM5 - 1.250.000 đ
+                                </option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('maSanPhamGanKem')}" class="text-danger small mt-1" th:errors="*{maSanPhamGanKem}"></div>
+                        </div>
+
+                        <!-- 3. TIÊU ĐỀ VIDEO REVIEW -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold d-flex justify-content-between">
+                                <span>3. Tiêu Đề Video Review <span class="text-danger">*</span></span>
+                                <span class="text-secondary small"><span id="titleCount">0</span>/255</span>
+                            </label>
+                            <input type="text" th:field="*{tieuDe}" id="tieuDeInput" class="form-control form-control-lg rounded-3"
+                                   placeholder="Ví dụ: [Review] Đập hộp tai nghe Sony chống ồn đỉnh chóp sau 1 tháng sử dụng!"
+                                   maxlength="255" oninput="capNhatTitlePreview(this.value)" required>
+                            <div th:if="${#fields.hasErrors('tieuDe')}" class="text-danger small mt-1" th:errors="*{tieuDe}"></div>
+                        </div>
+
+                        <!-- 4. HASHTAGS -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">4. Hashtag Gợi Ý (Click để thêm)</label>
+                            <div class="mb-2">
+                                <span class="hashtag-chip" onclick="themHashtag('#review')">#review</span>
+                                <span class="hashtag-chip" onclick="themHashtag('#shopeevideo')">#shopeevideo</span>
+                                <span class="hashtag-chip" onclick="themHashtag('#unbox')">#unbox</span>
+                                <span class="hashtag-chip" onclick="themHashtag('#dealhot')">#dealhot</span>
+                                <span class="hashtag-chip" onclick="themHashtag('#flexshop')">#flexshop</span>
+                                <span class="hashtag-chip" onclick="themHashtag('#koc')">#koc</span>
+                            </div>
+                            <input type="text" th:field="*{hashtag}" id="hashtagInput" class="form-control rounded-3"
+                                   placeholder="#review #dealhot #flexshop" oninput="capNhatHashtagPreview(this.value)">
+                        </div>
+
+                        <!-- 5. MÔ TẢ REVIEW CHI TIẾT -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">5. Mô Tả / Cảm Nhận Review Chi Tiết</label>
+                            <textarea th:field="*{moTa}" class="form-control rounded-3" rows="3"
+                                      placeholder="Chia sẻ trải nghiệm sử dụng thực tế của bạn về sản phẩm này..."></textarea>
+                            <div th:if="${#fields.hasErrors('moTa')}" class="text-danger small mt-1" th:errors="*{moTa}"></div>
+                        </div>
+
+                        <!-- 6. ẢNH BÌA POSTER (TÙY CHỌN - CHỌN ẢNH TỪ MÁY HOẶC DÁN LINK) -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold d-flex justify-content-between align-items-center mb-2">
+                                <span>6. Ảnh Bìa / Poster Đại Diện (Tùy chọn)</span>
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary px-2 py-1 small">Hiển thị trước khi xem</span>
+                            </label>
+
+                            <!-- Nav Tabs Poster -->
+                            <ul class="nav nav-pills nav-fill mb-3 p-1 bg-light rounded-3" id="posterSourceTab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active fw-semibold py-2" id="tab-poster-file" type="button" role="tab" onclick="chuyenTabPoster('file')">
+                                        <i class="bi bi-image me-1"></i> Chọn Ảnh Từ Máy
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link fw-semibold py-2" id="tab-poster-link" type="button" role="tab" onclick="chuyenTabPoster('link')">
+                                        <i class="bi bi-link-45deg me-1"></i> Dán Link Ảnh Poster
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content" id="posterSourceContent">
+                                <!-- TAB 1: TẢI ẢNH POSTER TỪ MÁY -->
+                                <div class="tab-pane active" id="pills-poster-file" role="tabpanel">
+                                    <div class="input-group mb-2">
+                                        <span class="input-group-text bg-light"><i class="bi bi-file-image text-success"></i></span>
+                                        <input type="file" th:field="*{tepAnhBia}" id="tepAnhBiaInput" class="form-control"
+                                               accept="image/png,image/jpeg,image/webp,image/gif"
+                                               onchange="kiemTraVaPreviewPosterFile(this)">
+                                    </div>
+                                    <div id="posterFileInfoBadge" class="alert alert-success py-2 px-3 small rounded-3 mb-2" style="display: none;">
+                                        <!-- Thông tin ảnh poster -->
+                                    </div>
+                                    <div class="form-text small text-secondary">
+                                        <i class="bi bi-info-circle me-1"></i>Hỗ trợ định dạng: JPG, PNG, WEBP, GIF (Khuyên dùng ảnh dọc tỉ lệ 9:16).
+                                    </div>
+                                </div>
+
+                                <!-- TAB 2: DÁN LINK ẢNH POSTER -->
+                                <div class="tab-pane" id="pills-poster-link" role="tabpanel" style="display: none;">
+                                    <div class="input-group mb-2">
+                                        <span class="input-group-text bg-light"><i class="bi bi-link-45deg text-primary"></i></span>
+                                        <input type="text" th:field="*{linkAnhBia}" id="linkAnhBiaInput" class="form-control"
+                                               placeholder="https://images.unsplash.com/.../poster.jpg"
+                                               oninput="previewPosterUrl(this.value)"
+                                               onpaste="setTimeout(() => previewPosterUrl(this.value), 50)"
+                                               onchange="previewPosterUrl(this.value)"
+                                               onkeyup="previewPosterUrl(this.value)">
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-1 align-items-center mt-2">
+                                        <span class="small text-secondary me-1">Gợi ý poster mẫu:</span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2" style="font-size: 0.75rem;" onclick="dienLinkPosterMau(1)">
+                                            Poster Tai nghe
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2" style="font-size: 0.75rem;" onclick="dienLinkPosterMau(2)">
+                                            Poster Thời trang
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2" style="font-size: 0.75rem;" onclick="dienLinkPosterMau(3)">
+                                            Poster Smartphone
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Khung xem trước poster đang chọn -->
+                            <div id="posterPreviewContainer" class="mt-3 p-2 bg-light rounded-3 d-flex align-items-center gap-3" style="display: none !important;">
+                                <img id="posterThumbPreview" src="" alt="Thumbnail Poster" class="rounded-2 shadow-sm" style="width: 55px; height: 75px; object-fit: cover; border: 1px solid #ddd;">
+                                <div class="flex-grow-1 min-width-0">
+                                    <div class="small fw-bold text-dark">Ảnh bìa poster đã chọn:</div>
+                                    <div id="posterPreviewName" class="text-secondary small text-truncate" style="max-width: 250px;">poster.jpg</div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" onclick="xoaPosterDaChon()">
+                                    <i class="bi bi-x-circle me-1"></i>Xóa ảnh bìa
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- SUBMIT BUTTON -->
+                        <div class="d-grid pt-2">
+                            <button type="submit" id="btnSubmitVideo" class="btn btn-danger btn-lg rounded-pill fw-bold py-3 shadow">
+                                <i class="bi bi-broadcast me-2"></i> Xuất Bản Video Review Lên Shopee Feed
+                            </button>
+                            <div id="uploadProgressBox" class="mt-3 text-center" style="display: none;">
+                                <div class="spinner-border text-danger me-2" role="status"></div>
+                                <span class="fw-semibold text-danger">Đang tải video lên máy chủ... Vui lòng không đóng trang!</span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: MÔ PHỎNG LIVE PREVIEW TRÊN SMARTPHONE -->
+            <div class="col-lg-5">
+                <div class="text-center mb-3">
+                    <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 rounded-pill fw-bold">
+                        <i class="bi bi-phone-fill me-1"></i> Mô Phỏng Hiển Thị Live Preview
+                    </span>
+                </div>
+
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+
+                    <!-- Video / Image Preview (Hỗ trợ phát cả video lẫn ảnh) -->
+                    <video id="liveVideoPreview" class="preview-video"
+                           src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+                           loop autoplay muted playsinline>
+                    </video>
+                    <img id="liveImgPreview" class="preview-video" style="display: none; width: 100%; height: 100%; object-fit: cover;" src="" alt="Review Preview">
+
+                    <!-- Preview Giỏ Hàng Nổi -->
+                    <div class="preview-cart-badge">
+                        <div class="bg-danger text-white rounded p-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                            <i class="bi bi-bag-fill"></i>
+                        </div>
+                        <div class="flex-grow-1 min-width-0">
+                            <div id="pvTenSp" class="fw-bold small text-truncate" style="max-width: 170px;">Tai nghe Sony WH-1000XM5</div>
+                            <div id="pvGiaSp" class="text-warning fw-bolder" style="font-size: 0.75rem;">1.250.000 đ</div>
+                        </div>
+                        <span class="badge bg-danger rounded-pill" style="font-size: 0.65rem;">Mua</span>
+                    </div>
+
+                    <!-- Preview Tiêu đề & Tác giả -->
+                    <div class="preview-caption">
+                        <div class="fw-bold text-white mb-1 d-flex align-items-center gap-1">
+                            <span th:text="'@' + ${nguoiDungHienTai != null ? nguoiDungHienTai.hoVaTen : 'KOC_Reviewer'}">@KOC_Reviewer</span>
+                            <i class="bi bi-patch-check-fill text-warning" style="font-size: 0.75rem;"></i>
+                        </div>
+                        <div id="pvTieuDe" class="text-light small text-truncate">Tiêu đề video review ngắn...</div>
+                        <div id="pvHashtag" class="text-warning small" style="font-size: 0.7rem;">#review #dealhot</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const videoEl = document.getElementById('liveVideoPreview');
+        const imgEl = document.getElementById('liveImgPreview');
+        const tieuDeInput = document.getElementById('tieuDeInput');
+        const pvTieuDe = document.getElementById('pvTieuDe');
+        const pvTenSp = document.getElementById('pvTenSp');
+        const pvGiaSp = document.getElementById('pvGiaSp');
+        const pvHashtag = document.getElementById('pvHashtag');
+        const hashtagInput = document.getElementById('hashtagInput');
+        const titleCount = document.getElementById('titleCount');
+        const tepVideoInput = document.getElementById('tepVideoInput');
+        const linkVideoInput = document.getElementById('linkVideoInput');
+        const fileInfoBadge = document.getElementById('fileInfoBadge');
+        const tepAnhBiaInput = document.getElementById('tepAnhBiaInput');
+        const linkAnhBiaInput = document.getElementById('linkAnhBiaInput');
+        const posterFileInfoBadge = document.getElementById('posterFileInfoBadge');
+        const posterPreviewContainer = document.getElementById('posterPreviewContainer');
+        const posterThumbPreview = document.getElementById('posterThumbPreview');
+        const posterPreviewName = document.getElementById('posterPreviewName');
+        const btnSubmitVideo = document.getElementById('btnSubmitVideo');
+        const uploadProgressBox = document.getElementById('uploadProgressBox');
+        const spSelect = document.getElementById('sanPhamSelect');
+
+        let tabHienTai = 'file';
+        let tabPosterHienTai = 'file';
+
+        // Chuyển tab Nguồn Video / Ảnh (Native JS hoạt động tức thì, không bị chặn)
+        function chuyenTabNguon(tab) {
+            tabHienTai = tab;
+            const tabFile = document.getElementById('tab-file');
+            const tabLink = document.getElementById('tab-link');
+            const paneFile = document.getElementById('pills-file');
+            const paneLink = document.getElementById('pills-link');
+
+            if (tab === 'file') {
+                if (tabFile) tabFile.classList.add('active');
+                if (tabLink) tabLink.classList.remove('active');
+                if (paneFile) paneFile.style.display = 'block';
+                if (paneLink) paneLink.style.display = 'none';
+            } else {
+                if (tabLink) tabLink.classList.add('active');
+                if (tabFile) tabFile.classList.remove('active');
+                if (paneLink) paneLink.style.display = 'block';
+                if (paneFile) paneFile.style.display = 'none';
+                setTimeout(() => {
+                    const inp = document.getElementById('linkVideoInput');
+                    if (inp) {
+                        inp.focus();
+                        inp.select();
+                    }
+                }, 50);
+            }
+        }
+
+        // Chuyển tab Nguồn Ảnh Bìa / Poster (Native JS hoạt động tức thì, không bị chặn)
+        function chuyenTabPoster(tab) {
+            tabPosterHienTai = tab;
+            const tabFile = document.getElementById('tab-poster-file');
+            const tabLink = document.getElementById('tab-poster-link');
+            const paneFile = document.getElementById('pills-poster-file');
+            const paneLink = document.getElementById('pills-poster-link');
+
+            if (tab === 'file') {
+                if (tabFile) tabFile.classList.add('active');
+                if (tabLink) tabLink.classList.remove('active');
+                if (paneFile) paneFile.style.display = 'block';
+                if (paneLink) paneLink.style.display = 'none';
+            } else {
+                if (tabLink) tabLink.classList.add('active');
+                if (tabFile) tabFile.classList.remove('active');
+                if (paneLink) paneLink.style.display = 'block';
+                if (paneFile) paneFile.style.display = 'none';
+                setTimeout(() => {
+                    const inp = document.getElementById('linkAnhBiaInput');
+                    if (inp) {
+                        inp.focus();
+                        inp.select();
+                    }
+                }, 50);
+            }
+        }
+
+        // 1. Kiểm tra và Preview tệp nguồn (Video hoặc Ảnh review)
+        function kiemTraVaPreviewFile(input) {
+            if (!input.files || !input.files[0]) {
+                fileInfoBadge.style.display = 'none';
+                return;
+            }
+
+            const file = input.files[0];
+            const maxKichThuocBytes = 200 * 1024 * 1024; // 200MB
+            const dungLuongMB = (file.size / (1024 * 1024)).toFixed(1);
+
+            // Kiểm tra dung lượng
+            if (file.size > maxKichThuocBytes) {
+                alert(`⚠️ TỆP QUÁ LỚN (${dungLuongMB} MB)!\n\nGiới hạn tối đa của hệ thống là 200MB.\nVui lòng nén file hoặc chuyển sang tab "Dán Đường Link Trực Tiếp".`);
+                input.value = '';
+                fileInfoBadge.style.display = 'none';
+                return;
+            }
+
+            const tenTep = file.name.toLowerCase();
+            const duoiVideo = ['.mp4', '.webm', '.mov', '.mkv'];
+            const duoiAnh = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+            const laVideo = duoiVideo.some(ext => tenTep.endsWith(ext));
+            const laAnh = duoiAnh.some(ext => tenTep.endsWith(ext));
+
+            if (!laVideo && !laAnh) {
+                alert(`⚠️ ĐỊNH DẠNG KHÔNG HỢP LỆ!\n\nVui lòng chỉ tải lên:\n- Video: MP4, WebM, MOV, MKV\n- Hoặc Ảnh review: JPG, PNG, WEBP, GIF`);
+                input.value = '';
+                fileInfoBadge.style.display = 'none';
+                return;
+            }
+
+            // Hiển thị badge thông tin tệp
+            fileInfoBadge.style.display = 'block';
+            fileInfoBadge.className = 'alert alert-success py-2 px-3 small rounded-3 mb-2 d-flex align-items-center justify-content-between';
+            const loaiTepText = laVideo ? 'Video' : 'Ảnh review';
+            fileInfoBadge.innerHTML = `
+                <div>
+                    <i class="bi bi-check-circle-fill text-success me-1"></i>
+                    <strong>[${loaiTepText}] ${file.name}</strong> <span class="badge bg-success bg-opacity-75 ms-1">${dungLuongMB} MB</span>
+                </div>
+                <span class="text-success fw-bold small">Sẵn sàng</span>
+            `;
+
+            // Preview video hoặc ảnh
+            try {
+                const fileUrl = URL.createObjectURL(file);
+                if (laVideo) {
+                    imgEl.style.display = 'none';
+                    videoEl.style.display = 'block';
+                    videoEl.src = fileUrl;
+                    videoEl.play().catch(e => {});
+                } else {
+                    videoEl.pause();
+                    videoEl.style.display = 'none';
+                    imgEl.style.display = 'block';
+                    imgEl.src = fileUrl;
+                }
+            } catch (e) {
+                console.warn("Không thể tạo URL preview:", e);
+            }
+        }
+
+        // Preview từ link URL
+        function previewVideoUrl(url) {
+            if (!url || url.trim().length < 5) return;
+            const cleanUrl = url.trim();
+            const lowerUrl = cleanUrl.toLowerCase();
+            const duoiAnh = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+            const laAnh = duoiAnh.some(ext => lowerUrl.includes(ext));
+
+            if (laAnh) {
+                videoEl.pause();
+                videoEl.style.display = 'none';
+                imgEl.style.display = 'block';
+                imgEl.src = cleanUrl;
+            } else {
+                imgEl.style.display = 'none';
+                videoEl.style.display = 'block';
+                videoEl.src = cleanUrl;
+                videoEl.play().catch(e => {});
+            }
+        }
+
+        // 2. Kiểm tra và Preview ảnh Poster tải từ máy
+        function kiemTraVaPreviewPosterFile(input) {
+            if (!input.files || !input.files[0]) {
+                posterFileInfoBadge.style.display = 'none';
+                return;
+            }
+
+            const file = input.files[0];
+            const maxKichThuocBytes = 20 * 1024 * 1024; // 20MB cho ảnh poster
+            const dungLuongMB = (file.size / (1024 * 1024)).toFixed(1);
+
+            if (file.size > maxKichThuocBytes) {
+                alert(`⚠️ ẢNH BÌA QUÁ LỚN (${dungLuongMB} MB)!\nVui lòng chọn ảnh bìa dưới 20MB.`);
+                input.value = '';
+                posterFileInfoBadge.style.display = 'none';
+                return;
+            }
+
+            const tenTep = file.name.toLowerCase();
+            const duoiAnh = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+            const laAnh = duoiAnh.some(ext => tenTep.endsWith(ext));
+            if (!laAnh) {
+                alert(`⚠️ Vui lòng chọn tệp hình ảnh hợp lệ (JPG, PNG, WEBP, GIF)!`);
+                input.value = '';
+                posterFileInfoBadge.style.display = 'none';
+                return;
+            }
+
+            posterFileInfoBadge.style.display = 'block';
+            posterFileInfoBadge.className = 'alert alert-success py-2 px-3 small rounded-3 mb-2 d-flex align-items-center justify-content-between';
+            posterFileInfoBadge.innerHTML = `
+                <div>
+                    <i class="bi bi-check-circle-fill text-success me-1"></i>
+                    <strong>${file.name}</strong> <span class="badge bg-success bg-opacity-75 ms-1">${dungLuongMB} MB</span>
+                </div>
+                <span class="text-success fw-bold small">Đã chọn</span>
+            `;
+
+            try {
+                const fileUrl = URL.createObjectURL(file);
+                posterThumbPreview.src = fileUrl;
+                posterPreviewName.innerText = `${file.name} (${dungLuongMB} MB)`;
+                posterPreviewContainer.style.setProperty('display', 'flex', 'important');
+                videoEl.poster = fileUrl;
+            } catch (e) {
+                console.warn("Lỗi preview poster:", e);
+            }
+        }
+
+        // Preview Poster từ đường link URL
+        function previewPosterUrl(url) {
+            if (!url || url.trim().length < 5) {
+                posterPreviewContainer.style.setProperty('display', 'none', 'important');
+                return;
+            }
+            const cleanUrl = url.trim();
+            posterThumbPreview.src = cleanUrl;
+            posterPreviewName.innerText = cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1) || 'Ảnh bìa từ link URL';
+            posterPreviewContainer.style.setProperty('display', 'flex', 'important');
+            videoEl.poster = cleanUrl;
+        }
+
+        // Điền link poster mẫu
+        function dienLinkPosterMau(index) {
+            chuyenTabPoster('link');
+
+            let linkPoster = '';
+            if (index === 1) {
+                linkPoster = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80';
+            } else if (index === 2) {
+                linkPoster = 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=600&auto=format&fit=crop&q=80';
+            } else if (index === 3) {
+                linkPoster = 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&auto=format&fit=crop&q=80';
+            }
+            linkAnhBiaInput.value = linkPoster;
+            previewPosterUrl(linkPoster);
+        }
+
+        // Xóa poster đã chọn
+        function xoaPosterDaChon() {
+            tepAnhBiaInput.value = '';
+            linkAnhBiaInput.value = '';
+            posterFileInfoBadge.style.display = 'none';
+            posterPreviewContainer.style.setProperty('display', 'none', 'important');
+            videoEl.poster = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80';
+        }
+
+        // Điền link video mẫu để kiểm thử nhanh
+        function dienLinkMau(index) {
+            chuyenTabNguon('link');
+
+            if (index === 1) {
+                linkVideoInput.value = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
+                if (!tieuDeInput.value) {
+                    tieuDeInput.value = '[Review] Tai nghe chống ồn Sony đỉnh chóp WH-1000XM5 sau 1 tháng trải nghiệm!';
+                    capNhatTitlePreview(tieuDeInput.value);
+                }
+                chonSanPhamTheoTuKhoa('Sony');
+                dienLinkPosterMau(1);
+            } else if (index === 2) {
+                linkVideoInput.value = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4';
+                if (!tieuDeInput.value) {
+                    tieuDeInput.value = '[OOTD] Phối đồ công sở siêu bảnh cùng Áo Sơ Mi Oxford Slimfit chống nhăn';
+                    capNhatTitlePreview(tieuDeInput.value);
+                }
+                chonSanPhamTheoTuKhoa('Áo');
+                dienLinkPosterMau(2);
+            } else if (index === 3) {
+                linkVideoInput.value = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4';
+                if (!tieuDeInput.value) {
+                    tieuDeInput.value = '[Unbox] Siêu phẩm FlexPhone Ultra 5G - Camera chụp đêm 200MP xuất sắc!';
+                    capNhatTitlePreview(tieuDeInput.value);
+                }
+                chonSanPhamTheoTuKhoa('FlexPhone');
+                dienLinkPosterMau(3);
+            } else if (index === 4) {
+                linkVideoInput.value = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80';
+                if (!tieuDeInput.value) {
+                    tieuDeInput.value = '[Review Ảnh] Cận cảnh tai nghe Sony WH-1000XM5 cực nét sau khi unbox!';
+                    capNhatTitlePreview(tieuDeInput.value);
+                }
+                chonSanPhamTheoTuKhoa('Sony');
+                dienLinkPosterMau(1);
+            }
+
+            previewVideoUrl(linkVideoInput.value);
+        }
+
+        // Chọn nhanh sản phẩm trong select theo từ khóa
+        function chonSanPhamTheoTuKhoa(kw) {
+            const lowerKw = kw.toLowerCase();
+            for (let i = 0; i < spSelect.options.length; i++) {
+                if (spSelect.options[i].text.toLowerCase().includes(lowerKw)) {
+                    spSelect.selectedIndex = i;
+                    capNhatSanPhamPreview(spSelect);
+                    break;
+                }
+            }
+        }
+
+        // Lọc danh sách sản phẩm theo ô tìm kiếm
+        function locDanhSachSanPham(kw) {
+            const lowerKw = (kw || '').trim().toLowerCase();
+            for (let i = 1; i < spSelect.options.length; i++) {
+                const opt = spSelect.options[i];
+                if (!lowerKw || opt.text.toLowerCase().includes(lowerKw)) {
+                    opt.style.display = '';
+                } else {
+                    opt.style.display = 'none';
+                }
+            }
+        }
+
+        function capNhatTitlePreview(val) {
+            pvTieuDe.innerText = val || "Tiêu đề video review ngắn...";
+            titleCount.innerText = val.length;
+        }
+
+        function capNhatSanPhamPreview(select) {
+            const opt = select.options[select.selectedIndex];
+            if (opt && opt.value) {
+                pvTenSp.innerText = opt.getAttribute('data-ten') || opt.text;
+                pvGiaSp.innerText = opt.getAttribute('data-gia') || '';
+            }
+        }
+
+        function capNhatHashtagPreview(val) {
+            pvHashtag.innerText = val || "#review #dealhot";
+        }
+
+        function themHashtag(tag) {
+            let current = hashtagInput.value.trim();
+            if (!current.includes(tag)) {
+                hashtagInput.value = current ? current + " " + tag : tag;
+                capNhatHashtagPreview(hashtagInput.value);
+            }
+        }
+
+        // Kiểm tra và submit form
+        function validateAndSubmitForm(event) {
+            const coFile = tepVideoInput && tepVideoInput.files && tepVideoInput.files.length > 0;
+            const coLink = linkVideoInput && linkVideoInput.value.trim().length > 0;
+
+            if (!coFile && !coLink) {
+                event.preventDefault();
+                alert("⚠️ Vui lòng chọn một tệp (video/ảnh) từ máy hoặc dán đường link trực tiếp!");
+                return false;
+            }
+
+            if (!spSelect.value) {
+                event.preventDefault();
+                alert("⚠️ Vui lòng chọn sản phẩm trong cửa hàng để gắn link giỏ hàng vào video!");
+                spSelect.focus();
+                return false;
+            }
+
+            const tieuDe = tieuDeInput.value.trim();
+            if (tieuDe.length < 10) {
+                event.preventDefault();
+                alert("⚠️ Tiêu đề bài review phải có ít nhất 10 ký tự để thu hút người xem!");
+                tieuDeInput.focus();
+                return false;
+            }
+
+            // Hiển thị trạng thái đang tải lên
+            if (btnSubmitVideo) {
+                btnSubmitVideo.disabled = true;
+                btnSubmitVideo.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang xuất bản video review...';
+            }
+            if (uploadProgressBox) {
+                uploadProgressBox.style.display = 'block';
+            }
+
+            return true;
+        }
+
+        // Khởi tạo ban đầu
+        if (tieuDeInput.value) {
+            capNhatTitlePreview(tieuDeInput.value);
+        }
+        if (spSelect.selectedIndex > 0) {
+            capNhatSanPhamPreview(spSelect);
+        }
+    </script>
+    <!-- Bootstrap 5 Bundle JS (hỗ trợ các tính năng tương tác UI) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

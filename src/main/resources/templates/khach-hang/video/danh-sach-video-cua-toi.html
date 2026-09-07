@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Video Của Tôi - Quản Lý Video & Thống Kê (US-62)</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f4f6f8;
+            color: #212529;
+            min-height: 100vh;
+        }
+        .navbar-custom {
+            background: #ffffff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 14px 28px;
+        }
+        .stat-card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 2px 14px rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.04);
+            transition: all 0.25s;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .main-card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.04);
+            overflow: hidden;
+        }
+        .video-thumb-preview {
+            width: 60px;
+            height: 90px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar-custom d-flex justify-content-between align-items-center mb-4">
+        <a th:href="@{/khach-hang/video}" class="d-flex align-items-center gap-2 text-decoration-none text-danger fw-bolder fs-4">
+            <i class="bi bi-play-circle-fill"></i>
+            <span>FlexShop KOC Studio</span>
+        </a>
+        <div class="d-flex gap-2">
+            <a th:href="@{/khach-hang/video/koc/dang-video}" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">
+                <i class="bi bi-plus-lg me-1"></i> Đăng Video Mới
+            </a>
+            <a th:href="@{/khach-hang/video}" class="btn btn-outline-dark rounded-pill px-3 fw-semibold">
+                <i class="bi bi-play-btn me-1"></i> Xem Feed Shopee Video
+            </a>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+
+        <!-- THÔNG BÁO FLASH MESSAGE -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}">Thành công</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}">Lỗi</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- 4 THẺ THỐNG KÊ HIỆU SUẤT VIDEO -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card d-flex align-items-center gap-3">
+                    <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-camera-reels-fill"></i>
+                    </div>
+                    <div>
+                        <div class="text-secondary small fw-semibold">Tổng Số Video</div>
+                        <div class="fs-3 fw-bolder" th:text="${thongKe.tongSoVideo}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card d-flex align-items-center gap-3">
+                    <div class="stat-icon bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-eye-fill"></i>
+                    </div>
+                    <div>
+                        <div class="text-secondary small fw-semibold">Tổng Lượt Xem</div>
+                        <div class="fs-3 fw-bolder" th:text="${#numbers.formatDecimal(thongKe.tongLuotXem, 0, 'POINT', 0, 'COMMA')}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card d-flex align-items-center gap-3">
+                    <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+                        <i class="bi bi-heart-fill"></i>
+                    </div>
+                    <div>
+                        <div class="text-secondary small fw-semibold">Tổng Lượt Tim</div>
+                        <div class="fs-3 fw-bolder" th:text="${#numbers.formatDecimal(thongKe.tongLuotTim, 0, 'POINT', 0, 'COMMA')}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card d-flex align-items-center gap-3">
+                    <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <div>
+                        <div class="text-secondary small fw-semibold">Tỷ Lệ Tương Tác</div>
+                        <div class="fs-3 fw-bolder" th:text="${thongKe.tiLeTuongTac} + '%'">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DANH SÁCH VIDEO REVIEW ĐÃ ĐĂNG -->
+        <div class="main-card p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                <div>
+                    <h5 class="fw-bold mb-1">Danh Sách Video Review Của Bạn</h5>
+                    <p class="text-secondary small mb-0">Theo dõi lượt xem, tim và quản lý các video đã xuất bản.</p>
+                </div>
+
+                <!-- TÌM KIẾM TRONG VIDEO CỦA TÔI -->
+                <form th:action="@{/khach-hang/video/koc/video-cua-toi}" method="get" class="d-flex gap-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-secondary"></i></span>
+                        <input type="text" name="tuKhoa" th:value="${tuKhoa}" class="form-control border-start-0 ps-0" placeholder="Tìm theo tiêu đề, hashtag...">
+                    </div>
+                    <button type="submit" class="btn btn-secondary px-3">Lọc</button>
+                    <a th:if="${tuKhoa != null and !tuKhoa.isEmpty()}" th:href="@{/khach-hang/video/koc/video-cua-toi}" class="btn btn-outline-secondary">Xóa lọc</a>
+                </form>
+            </div>
+
+            <!-- TABLE DANH SÁCH VIDEO -->
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light text-secondary small text-uppercase">
+                        <tr>
+                            <th style="width: 80px;">Video</th>
+                            <th>Tiêu đề & Hashtag</th>
+                            <th>Sản phẩm trong Giỏ hàng</th>
+                            <th class="text-center">Lượt xem</th>
+                            <th class="text-center">Thả tim</th>
+                            <th class="text-center">Bình luận</th>
+                            <th class="text-center">Trạng thái</th>
+                            <th class="text-end" style="width: 140px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(dsVideo)}">
+                            <td colspan="8" class="text-center py-5 text-secondary">
+                                <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                                Bạn chưa đăng video ngắn nào. Bấm nút <b>"Đăng Video Mới"</b> để bắt đầu!
+                            </td>
+                        </tr>
+                        <tr th:each="v : ${dsVideo}">
+                            <td>
+                                <a th:href="@{'/khach-hang/video/' + ${v.maVideo}}">
+                                    <img th:src="${v.linkAnhBia != null ? v.linkAnhBia : 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200'}"
+                                         class="video-thumb-preview shadow-sm" alt="Thumbnail">
+                                </a>
+                            </td>
+                            <td>
+                                <a th:href="@{'/khach-hang/video/' + ${v.maVideo}}" class="text-decoration-none text-dark fw-bold d-block mb-1" th:text="${v.tieuDe}">
+                                    Tiêu đề video review
+                                </a>
+                                <div class="small text-danger fw-semibold" th:text="${v.hashtag}">#review #dealhot</div>
+                                <div class="text-muted small mt-1" th:text="${#temporals.format(v.ngayDang, 'HH:mm dd/MM/yyyy')}">12:00 01/01/2026</div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="bg-warning bg-opacity-25 text-dark rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                        <i class="bi bi-bag-check-fill text-danger"></i>
+                                    </div>
+                                    <div>
+                                        <div class="small fw-bold text-truncate" style="max-width: 220px;" th:text="${v.sanPhamGanKem.tenSanPham}">Tên sản phẩm</div>
+                                        <div class="small text-danger fw-bold" th:text="${#numbers.formatDecimal(v.sanPhamGanKem.giaCoBan, 0, 'POINT', 0, 'COMMA')} + ' đ'">100.000 đ</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center fw-bold" th:text="${v.tongLuotXem != null ? v.tongLuotXem : 0}">0</td>
+                            <td class="text-center text-danger fw-bold">
+                                <i class="bi bi-heart-fill me-1"></i> <span th:text="${v.tongLuotTim != null ? v.tongLuotTim : 0}">0</span>
+                            </td>
+                            <td class="text-center text-primary fw-bold">
+                                <i class="bi bi-chat-dots-fill me-1"></i> <span th:text="${v.tongLuotBinhLuan != null ? v.tongLuotBinhLuan : 0}">0</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success bg-opacity-10 text-success px-2 py-1 rounded-pill">Đang hiển thị</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a th:href="@{'/khach-hang/video/' + ${v.maVideo}}" class="btn btn-outline-primary" title="Xem video">
+                                        <i class="bi bi-eye-fill"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger" th:onclick="'xacNhanXoa(' + ${v.maVideo} + ')'" title="Xóa video">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PHÂN TRANG -->
+            <div th:if="${trangVideo.totalPages > 1}" class="d-flex justify-content-center mt-4">
+                <nav>
+                    <ul class="pagination pagination-sm">
+                        <li class="page-item" th:classappend="${trangVideo.first} ? 'disabled'">
+                            <a class="page-link" th:href="@{/khach-hang/video/koc/video-cua-toi(page=${trangVideo.number - 1}, tuKhoa=${tuKhoa})}">Trước</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, trangVideo.totalPages - 1)}"
+                            th:classappend="${i == trangVideo.number} ? 'active'">
+                            <a class="page-link" th:href="@{/khach-hang/video/koc/video-cua-toi(page=${i}, tuKhoa=${tuKhoa})}" th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${trangVideo.last} ? 'disabled'">
+                            <a class="page-link" th:href="@{/khach-hang/video/koc/video-cua-toi(page=${trangVideo.number + 1}, tuKhoa=${tuKhoa})}">Sau</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL XÁC NHẬN XÓA VIDEO -->
+    <div class="modal fade" id="modalXoaVideo" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <form id="formXoaVideo" method="post">
+                    <div class="modal-body text-center p-4">
+                        <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex p-3 mb-3">
+                            <i class="bi bi-trash fs-1"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Bạn có chắc muốn xóa video này?</h5>
+                        <p class="text-secondary small mb-4">Video sẽ không còn xuất hiện trên Shopee Video Feed của người xem.</p>
+                        <div class="d-flex gap-2 justify-content-center">
+                            <button type="button" class="btn btn-light rounded-pill px-4 fw-semibold" data-bs-dismiss="modal">Hủy bỏ</button>
+                            <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">Xác nhận Xóa</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const modalXoa = new bootstrap.Modal(document.getElementById('modalXoaVideo'));
+        const formXoa = document.getElementById('formXoaVideo');
+
+        function xacNhanXoa(maVideo) {
+            formXoa.action = `/khach-hang/video/koc/xoa/${maVideo}`;
+            modalXoa.show();
+        }
+    </script>
+</body>
+</html>
+
