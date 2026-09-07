@@ -32,7 +32,7 @@ public class NhiemVuGiaoHang {
     private String loaiNhiemVu = "GIAO_HANG";
 
     @Column(name = "trang_thai", length = 30)
-    private String trangThai = "THANH_CONG";
+    private String trangThai = "DA_PHAN_CONG";
 
     @Column(name = "tien_cod_can_thu", precision = 18, scale = 2)
     private BigDecimal tienCodCanThu = BigDecimal.ZERO;
@@ -73,6 +73,7 @@ public class NhiemVuGiaoHang {
     public String getTrangThaiDisplay() {
         if (trangThai == null) return "Chưa cập nhật";
         switch (trangThai) {
+            case "DA_PHAN_CONG": return "Đã phân công, chờ lấy hàng";
             case "THANH_CONG": return "Giao hàng thành công";
             case "DANG_GIAO": return "Đang trên đường giao";
             case "CHO_LAY_HANG": return "Chờ lấy hàng từ Shop";
