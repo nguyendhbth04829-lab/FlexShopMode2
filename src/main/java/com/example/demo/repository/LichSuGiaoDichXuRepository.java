@@ -67,4 +67,15 @@ public interface LichSuGiaoDichXuRepository extends JpaRepository<LichSuGiaoDich
     );
 
     List<LichSuGiaoDichXu> findTop5ByNguoiDung_MaNguoiDungOrderByMaGiaoDichXuDesc(Long maNguoiDung);
+
+    /**
+     * Đếm số lượt người dùng đã đổi 1.000 xu lấy lượt quay hôm nay
+     */
+    @Query("SELECT COUNT(ls) FROM LichSuGiaoDichXu ls WHERE ls.nguoiDung.maNguoiDung = :maNguoiDung " +
+            "AND ls.loaiGiaoDich = 'TRU_XU_DOI_LUOT_QUAY' AND ls.ngayTao BETWEEN :dauNgay AND :cuoiNgay")
+    long demSoLuotDoiXuHomNay(
+            @Param("maNguoiDung") Long maNguoiDung,
+            @Param("dauNgay") LocalDateTime dauNgay,
+            @Param("cuoiNgay") LocalDateTime cuoiNgay
+    );
 }

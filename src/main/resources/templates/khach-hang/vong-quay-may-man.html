@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vòng Quay May Mắn - Nhận Xu & Voucher Mỗi Ngày | FlexShop (US-66)</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            color: #212529;
+            min-height: 100vh;
+        }
+        .navbar-custom {
+            background: #ffffff;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            padding: 14px 28px;
+        }
+        .wheel-container {
+            position: relative;
+            width: 480px;
+            height: 480px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        @media (max-width: 576px) {
+            .wheel-container {
+                width: 330px;
+                height: 330px;
+            }
+        }
+        .wheel-outer-ring {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            padding: 16px;
+            background: radial-gradient(circle, #ffeaa7 0%, #fdcb6e 35%, #e17055 75%, #d63031 100%);
+            box-shadow: 0 16px 45px rgba(214, 48, 49, 0.45), inset 0 2px 8px rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 4px solid #f9ca24;
+        }
+        #wheelCanvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.35);
+            display: block;
+        }
+        /* 24 Đèn LED viền tròn chuẩn Shopee */
+        .wheel-led {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 0 6px #fff, 0 0 12px #ffeb3b;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            transition: all 0.15s ease-in-out;
+        }
+        .wheel-led.active {
+            background: #ffff00;
+            box-shadow: 0 0 10px #ffff00, 0 0 20px #ff9800;
+            transform: translate(-50%, -50%) scale(1.3);
+        }
+        .wheel-led.dim {
+            background: rgba(255, 255, 255, 0.35);
+            box-shadow: none;
+            transform: translate(-50%, -50%) scale(0.85);
+        }
+        /* Kim chỉ mạ vàng phía trên đỉnh với hiệu ứng rung gõ nan quạt */
+        .wheel-pointer {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 44px;
+            height: 58px;
+            z-index: 30;
+            filter: drop-shadow(0 6px 10px rgba(0,0,0,0.4));
+            transform-origin: 50% 12px;
+            transition: transform 0.06s ease-out;
+        }
+        .wheel-pointer.flicking {
+            transform: translateX(-50%) rotate(-16deg);
+        }
+        .pointer-arrow {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 22px solid transparent;
+            border-right: 22px solid transparent;
+            border-top: 48px solid #fbc531;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+        }
+        .pointer-inner {
+            position: absolute;
+            top: 3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 14px solid transparent;
+            border-right: 14px solid transparent;
+            border-top: 36px solid #e1b12c;
+        }
+        .pointer-cap {
+            position: absolute;
+            top: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 22px;
+            height: 22px;
+            background: radial-gradient(circle, #e84118 0%, #c23616 100%);
+            border-radius: 50%;
+            border: 3px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        /* Nút quay 3D ở tâm */
+        .wheel-center-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ff6b6b 0%, #ee4d2d 60%, #c23616 100%);
+            border: 6px solid #ffffff;
+            color: #ffffff;
+            font-weight: 900;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 8px 24px rgba(238, 77, 45, 0.6), inset 0 2px 6px rgba(255,255,255,0.7);
+            transition: all 0.2s;
+            user-select: none;
+            animation: pulseBtn 2.2s infinite;
+        }
+        @keyframes pulseBtn {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 8px 24px rgba(238, 77, 45, 0.6); }
+            50% { transform: translate(-50%, -50%) scale(1.06); box-shadow: 0 12px 32px rgba(238, 77, 45, 0.85); }
+        }
+        .wheel-center-btn:hover {
+            transform: translate(-50%, -50%) scale(1.1) !important;
+            box-shadow: 0 12px 35px rgba(238, 77, 45, 0.9) !important;
+        }
+        .wheel-center-btn:active {
+            transform: translate(-50%, -50%) scale(0.95) !important;
+        }
+        .wheel-center-btn.disabled {
+            background: #7f8c8d !important;
+            cursor: not-allowed !important;
+            box-shadow: none !important;
+            animation: none !important;
+        }
+        /* Modal chúc mừng trúng thưởng Shopee Style */
+        .modal-shopee .modal-content {
+            background: #ffffff;
+            border-radius: 26px;
+            border: 3px solid #ffcc00;
+            box-shadow: 0 20px 60px rgba(238, 77, 45, 0.35);
+            position: relative;
+            overflow: hidden;
+        }
+        .shopee-sunburst {
+            position: absolute;
+            top: -110px;
+            left: 50%;
+            width: 620px;
+            height: 620px;
+            transform: translateX(-50%);
+            background: repeating-conic-gradient(
+                from 0deg,
+                rgba(255, 187, 0, 0.22) 0deg 15deg,
+                transparent 15deg 30deg
+            );
+            border-radius: 50%;
+            animation: spinSunburst 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @keyframes spinSunburst {
+            from { transform: translateX(-50%) rotate(0deg); }
+            to { transform: translateX(-50%) rotate(360deg); }
+        }
+        .shopee-coin-3d {
+            width: 96px;
+            height: 96px;
+            margin: 0 auto 12px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #fff176 0%, #ffd54f 40%, #ff8f00 100%);
+            border: 4px solid #fff9c4;
+            box-shadow: 0 10px 25px rgba(255, 143, 0, 0.6), inset 0 2px 6px rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.8rem;
+            color: #d84315;
+            animation: coinBounce 1.6s infinite ease-in-out;
+        }
+        @keyframes coinBounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.06); }
+        }
+        .shopee-voucher-card {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+            border: 2px dashed #ee4d2d;
+            border-radius: 16px;
+            padding: 16px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 4px 15px rgba(238, 77, 45, 0.12);
+        }
+        .shopee-voucher-badge {
+            width: 64px;
+            height: 64px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #ee4d2d, #ff7337);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(238, 77, 45, 0.35);
+        }
+        .shopee-voucher-code-box {
+            background: #fdf0ed;
+            border: 1px dashed #ee4d2d;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-family: monospace;
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: #ee4d2d;
+            letter-spacing: 1px;
+        }
+        .btn-shopee-primary {
+            background: linear-gradient(135deg, #ee4d2d 0%, #ff5722 100%);
+            border: none;
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: 50rem;
+            padding: 12px 24px;
+            box-shadow: 0 4px 15px rgba(238, 77, 45, 0.4);
+            transition: all 0.2s;
+        }
+        .btn-shopee-primary:hover {
+            background: linear-gradient(135deg, #d83e1f 0%, #e64a19 100%);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(238, 77, 45, 0.55);
+        }
+        .card-custom {
+            background: #ffffff;
+            border-radius: 20px;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            padding: 24px;
+        }
+        .ticker-box {
+            background: rgba(255, 234, 167, 0.35);
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 10px 16px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .ticker-item {
+            display: inline-block;
+            margin-right: 32px;
+            font-size: 0.88rem;
+            color: #d63031;
+            font-weight: 600;
+        }
+        .prize-chip {
+            padding: 8px 14px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP NAVBAR -->
+    <nav class="navbar-custom d-flex justify-content-between align-items-center mb-4">
+        <a th:href="@{/khach-hang/vong-quay-may-man}" class="d-flex align-items-center gap-2 text-decoration-none text-danger fw-bolder fs-4">
+            <i class="bi bi-disc-fill text-warning fs-3"></i>
+            <span>FlexShop Vòng Quay May Mắn</span>
+        </a>
+        <div class="d-flex align-items-center gap-2">
+            <a th:href="@{/khach-hang/vi-xu}" class="btn btn-outline-warning rounded-pill px-3 fw-semibold text-dark">
+                <i class="bi bi-coin text-warning me-1"></i> Ví Xu: 
+                <strong class="text-danger" id="navSoXu" th:text="${thongKe.soXuHienTai != null ? #numbers.formatDecimal(thongKe.soXuHienTai, 0, 'POINT', 0, 'COMMA') + ' Xu' : '0 Xu'}">50.000 Xu</strong>
+            </a>
+            <a th:href="@{/khach-hang/kho-voucher}" class="btn btn-outline-primary rounded-pill px-3 fw-semibold">
+                <i class="bi bi-ticket-perforated-fill me-1"></i> Kho Voucher
+            </a>
+            <a th:href="@{/admin/vong-quay-may-man}" class="btn btn-outline-secondary rounded-pill px-3 fw-semibold">
+                <i class="bi bi-graph-up me-1"></i> Thống Kê Quản Trị
+            </a>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <div class="container py-2">
+
+        <!-- THÔNG BÁO FLASH MESSAGE -->
+        <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+            <span th:text="${thongBaoThanhCong}">Thành công</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+            <span th:text="${thongBaoLoi}">Lỗi</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- TICKER VINH DANH NGƯỜI TRÚNG THƯỞNG -->
+        <div class="ticker-box mb-4 shadow-sm d-flex align-items-center">
+            <span class="badge bg-danger rounded-pill px-3 py-2 me-3 flex-shrink-0">
+                <i class="bi bi-broadcast me-1"></i> Vừa trúng thưởng:
+            </span>
+            <marquee behavior="scroll" direction="left" scrollamount="6" onmouseover="this.stop();" onmouseout="this.start();">
+                <span th:each="vd : ${dsVinhDanh}" class="ticker-item">
+                    <i class="bi bi-gift-fill text-warning me-1"></i>
+                    <span th:text="${vd.nguoiDung != null ? vd.nguoiDung.hoVaTen : 'Khách hàng'}">Nguyễn Văn An</span>:
+                    <strong class="text-dark" th:text="${vd.phanThuong}">1.000 Xu FlexShop</strong> 
+                    <span class="text-secondary small ms-1" th:text="${vd.ngayQuay != null ? '(' + #temporals.format(vd.ngayQuay, 'HH:mm') + ')' : ''}">(Vừa xong)</span>
+                </span>
+            </marquee>
+        </div>
+
+        <!-- KHUNG CHÍNH: 2 CỘT -->
+        <div class="row g-4 mb-5">
+            
+            <!-- CỘT TRÁI: VÒNG QUAY BÁNH XE MAY MẮN -->
+            <div class="col-lg-7 text-center">
+                <div class="card-custom h-100 d-flex flex-column align-items-center justify-content-center p-4">
+                    
+                    <div class="mb-3 text-center">
+                        <h3 class="fw-bolder text-danger mb-1">
+                            <i class="bi bi-stars text-warning me-1"></i> Vòng Quay May Mắn Mỗi Ngày
+                        </h3>
+                        <p class="text-secondary small mb-0">Quay số rinh ngay Xu thưởng và Voucher giảm giá cực khủng!</p>
+                    </div>
+
+                    <!-- BÁNH XE QUAY CANVAS -->
+                    <div class="wheel-container my-3">
+                        <!-- Kim chỉ trên đỉnh với hiệu ứng rung gõ nan quạt -->
+                        <div class="wheel-pointer" id="wheelPointer">
+                            <div class="pointer-arrow"></div>
+                            <div class="pointer-inner"></div>
+                            <div class="pointer-cap"></div>
+                        </div>
+                        <!-- Vành ngoài với 24 bóng LED viền tròn chuẩn Shopee -->
+                        <div class="wheel-outer-ring" id="wheelOuterRing">
+                            <div id="wheelLedContainer"></div>
+                            <canvas id="wheelCanvas" width="900" height="900"></canvas>
+                        </div>
+                        <!-- Nút bấm quay 3D ở tâm -->
+                        <div class="wheel-center-btn" id="btnQuay" onclick="batDauQuay()" title="Bấm vào đây để Quay thưởng">
+                            <span style="font-size: 0.75rem; font-weight: 700; line-height: 1; opacity: 0.95;">BẤM</span>
+                            <span style="font-size: 1.35rem; font-weight: 900; line-height: 1.1;">QUAY</span>
+                        </div>
+                    </div>
+
+                    <!-- TRẠNG THÁI LƯỢT QUAY & NÚT ĐỔI XU -->
+                    <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 mt-3 w-100">
+                        <div class="badge bg-light text-dark border p-2 px-3 rounded-pill fs-6">
+                            Lượt quay hôm nay: 
+                            <strong class="text-danger fs-5" id="lblSoLuotConLai" th:text="${thongKe.soLuotQuayConLaiHomNay}">1</strong> lượt
+                        </div>
+
+                        <!-- Form đổi xu lấy thêm lượt quay -->
+                        <form th:action="@{/khach-hang/vong-quay-may-man/doi-luot}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-warning rounded-pill fw-bold px-3 py-2 shadow-sm text-dark"
+                                    onclick="return confirm('Bạn có chắc chắn muốn dùng 1.000 Xu để đổi lấy +1 Lượt quay thêm?')">
+                                <i class="bi bi-plus-circle-fill me-1"></i> Đổi 1.000 Xu lấy +1 Lượt quay
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="form-text text-secondary mt-3 small">
+                        <i class="bi bi-info-circle me-1 text-primary"></i> 
+                        Mỗi ngày tặng <strong>1 lượt quay miễn phí</strong> (hệ thống tự động reset lúc 00:00). 
+                        Phần thưởng Xu và Voucher sẽ được cộng tức thì vào tài khoản!
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: THÔNG TIN TÀI KHOẢN & 8 Ô QUÀ HÔM NAY -->
+            <div class="col-lg-5">
+                <div class="card-custom mb-4">
+                    <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                        <i class="bi bi-person-badge-fill text-danger"></i> Tài Khoản Khách Hàng
+                    </h5>
+                    <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-4 mb-3">
+                        <div class="bg-danger text-white rounded-circle p-3 d-flex align-items-center justify-content-center fs-3" style="width: 60px; height: 60px;">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0" th:text="${khachHang != null ? khachHang.hoVaTen : 'Khách hàng demo'}">Nguyễn Văn An</h6>
+                            <p class="text-secondary small mb-1" th:text="${khachHang != null ? khachHang.email : 'khachhang@flexshop.vn'}">khachhang@flexshop.vn</p>
+                            <span class="badge bg-success bg-opacity-10 text-success fw-semibold">
+                                <i class="bi bi-patch-check-fill me-1"></i> Thành viên FlexShop VIP
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 text-center mb-3">
+                        <div class="col-6">
+                            <div class="p-3 bg-warning bg-opacity-10 rounded-4 border border-warning border-opacity-25">
+                                <span class="text-secondary small d-block">Số dư Ví Xu</span>
+                                <strong class="text-warning fs-5" id="boxSoXu" th:text="${#numbers.formatDecimal(thongKe.soXuHienTai, 0, 'POINT', 0, 'COMMA')} + ' đ'">50.000 đ</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-danger bg-opacity-10 rounded-4 border border-danger border-opacity-25">
+                                <span class="text-secondary small d-block">Lượt bạn đã quay</span>
+                                <strong class="text-danger fs-5" id="boxSoLuotDaQuay" th:text="${thongKe.soLuotQuayCuaToi} + ' lượt'">3 lượt</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a th:href="@{/khach-hang/vi-xu}" class="btn btn-outline-danger rounded-pill fw-semibold btn-sm">
+                            <i class="bi bi-wallet2 me-1"></i> Xem Chi Tiết Ví Xu
+                        </a>
+                        <a th:href="@{/khach-hang/kho-voucher}" class="btn btn-outline-primary rounded-pill fw-semibold btn-sm">
+                            <i class="bi bi-ticket-perforated me-1"></i> Mở Kho Voucher Của Tôi
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 8 Ô GIẢI THƯỞNG TRÊN VÒNG QUAY -->
+                <div class="card-custom">
+                    <h6 class="fw-bold mb-3 d-flex align-items-center justify-content-between">
+                        <span><i class="bi bi-gift-fill text-warning me-1"></i> 8 Ô Giải Thưởng Hôm Nay</span>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary small">Tỉ lệ 100%</span>
+                    </h6>
+                    <div class="row g-2">
+                        <div class="col-6" th:each="pt : ${dsPhanThuong}">
+                            <div class="prize-chip" th:style="'background-color:' + ${pt.mauSacO} + '; color:' + ${pt.mauChu} + ';'">
+                                <i class="bi" th:classappend="${pt.icon}"></i>
+                                <span class="text-truncate" th:text="${pt.tenPhanThuong}">1.000 Xu</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- BẢNG LỊCH SỬ QUAY THƯỞNG CÁ NHÂN (CÓ PHÂN TRANG & BỘ LỌC) -->
+        <div class="card-custom mb-5">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        <i class="bi bi-clock-history text-danger me-2"></i>Lịch Sử Quay Thưởng Của Bạn
+                    </h5>
+                    <p class="text-secondary small mb-0">Theo dõi toàn bộ các lần quay thưởng và tình trạng trả thưởng vào ví/kho voucher.</p>
+                </div>
+
+                <!-- Bộ lọc loại phần thưởng -->
+                <div class="btn-group rounded-pill p-1 bg-light shadow-sm" role="group">
+                    <a th:href="@{/khach-hang/vong-quay-may-man(loaiPhanThuong='TAT_CA')}"
+                       class="btn btn-sm rounded-pill px-3"
+                       th:classappend="${loaiHienTai == 'TAT_CA' ? 'btn-danger text-white' : 'btn-light text-secondary'}">
+                        Tất cả
+                    </a>
+                    <a th:href="@{/khach-hang/vong-quay-may-man(loaiPhanThuong='XU')}"
+                       class="btn btn-sm rounded-pill px-3"
+                       th:classappend="${loaiHienTai == 'XU' ? 'btn-danger text-white' : 'btn-light text-secondary'}">
+                        Xu Thưởng
+                    </a>
+                    <a th:href="@{/khach-hang/vong-quay-may-man(loaiPhanThuong='VOUCHER')}"
+                       class="btn btn-sm rounded-pill px-3"
+                       th:classappend="${loaiHienTai == 'VOUCHER' ? 'btn-danger text-white' : 'btn-light text-secondary'}">
+                        Voucher
+                    </a>
+                    <a th:href="@{/khach-hang/vong-quay-may-man(loaiPhanThuong='MAY_MAN_LAN_SAU')}"
+                       class="btn btn-sm rounded-pill px-3"
+                       th:classappend="${loaiHienTai == 'MAY_MAN_LAN_SAU' ? 'btn-danger text-white' : 'btn-light text-secondary'}">
+                        May Mắn
+                    </a>
+                </div>
+            </div>
+
+            <!-- Bảng danh sách -->
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="py-3">Mã Lượt</th>
+                            <th scope="col" class="py-3">Phần Thưởng</th>
+                            <th scope="col" class="py-3">Phân Loại</th>
+                            <th scope="col" class="py-3">Chi Tiết Nhận Thưởng</th>
+                            <th scope="col" class="py-3">Thời Gian Quay</th>
+                            <th scope="col" class="py-3 text-end">Trạng Thái</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lichSuTableBody">
+                        <tr id="rowChuaCoLichSu" th:if="${#lists.isEmpty(dsLichSu)}">
+                            <td colspan="6" class="text-center py-5 text-secondary">
+                                <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                                Bạn chưa có lượt quay thưởng nào trong mục này. Bấm nút <strong>QUAY</strong> để thử vận may ngay!
+                            </td>
+                        </tr>
+                        <tr th:each="ls : ${dsLichSu}">
+                            <td class="fw-semibold" th:text="'#VQ-' + ${ls.maLuotQuay}">#VQ-101</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span th:if="${ls.loaiPhanThuong == 'XU'}" class="badge bg-warning bg-opacity-25 text-warning p-2 rounded-3">
+                                        <i class="bi bi-coin fs-5"></i>
+                                    </span>
+                                    <span th:if="${ls.loaiPhanThuong == 'VOUCHER'}" class="badge bg-success bg-opacity-25 text-success p-2 rounded-3">
+                                        <i class="bi bi-ticket-perforated-fill fs-5"></i>
+                                    </span>
+                                    <span th:if="${ls.loaiPhanThuong == 'MAY_MAN_LAN_SAU'}" class="badge bg-secondary bg-opacity-25 text-secondary p-2 rounded-3">
+                                        <i class="bi bi-emoji-smile fs-5"></i>
+                                    </span>
+                                    <div>
+                                        <strong th:text="${ls.phanThuong}">1.000 Xu FlexShop</strong>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span th:if="${ls.loaiPhanThuong == 'XU'}" class="badge bg-warning text-dark rounded-pill">Xu Thưởng</span>
+                                <span th:if="${ls.loaiPhanThuong == 'VOUCHER'}" class="badge bg-success text-white rounded-pill">Voucher Giảm Giá</span>
+                                <span th:if="${ls.loaiPhanThuong == 'MAY_MAN_LAN_SAU'}" class="badge bg-secondary text-white rounded-pill">May Mắn Lần Sau</span>
+                            </td>
+                            <td>
+                                <span th:if="${ls.soXuNhan != null and ls.soXuNhan > 0}" class="text-warning fw-bold" th:text="'+' + ${#numbers.formatDecimal(ls.soXuNhan, 0, 'POINT', 0, 'COMMA')} + ' Xu'">+1.000 Xu</span>
+                                <span th:if="${ls.maCodeVoucher != null}" class="badge bg-light text-primary border font-monospace px-2 py-1" th:text="${ls.maCodeVoucher}">FREESHIP30K</span>
+                                <span th:if="${(ls.soXuNhan == null or ls.soXuNhan == 0) and ls.maCodeVoucher == null}" class="text-secondary small">Hộp quà may mắn</span>
+                            </td>
+                            <td class="text-secondary small" th:text="${ls.ngayQuay != null ? #temporals.format(ls.ngayQuay, 'dd/MM/yyyy HH:mm') : ''}">07/09/2026 11:30</td>
+                            <td class="text-end">
+                                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill fw-semibold" th:text="${ls.trangThaiTraThuong}">
+                                    Đã cộng vào ví
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Phân trang -->
+            <div th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                <span class="text-secondary small">
+                    Hiển thị trang <strong th:text="${currentPage + 1}">1</strong> / <strong th:text="${totalPages}">3</strong> 
+                    (Tổng cộng: <strong th:text="${totalElements}">15</strong> lượt quay)
+                </span>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link rounded-pill me-1 px-3" th:href="@{/khach-hang/vong-quay-may-man(page=${currentPage - 1}, loaiPhanThuong=${loaiHienTai})}">
+                            <i class="bi bi-chevron-left"></i> Trước
+                        </a>
+                    </li>
+                    <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" class="page-item" th:classappend="${currentPage == i} ? 'active'">
+                        <a class="page-link rounded-pill mx-1" th:href="@{/khach-hang/vong-quay-may-man(page=${i}, loaiPhanThuong=${loaiHienTai})}" th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link rounded-pill ms-1 px-3" th:href="@{/khach-hang/vong-quay-may-man(page=${currentPage + 1}, loaiPhanThuong=${loaiHienTai})}">
+                            Sau <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- MODAL POPUP CHÚC MỪNG TRÚNG THƯỞNG CHUẨN SHOPEE -->
+    <div class="modal fade modal-shopee" id="modalChucMung" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center p-4">
+                <!-- Hào quang tia sáng vàng xoay tròn phong cách Shopee -->
+                <div class="shopee-sunburst"></div>
+
+                <div class="modal-body p-0 position-relative" style="z-index: 2;">
+                    <!-- Tag / Huy hiệu Shopee -->
+                    <div class="mb-2">
+                        <span class="badge bg-warning text-dark px-3 py-1 rounded-pill fw-bold text-uppercase shadow-sm" style="font-size: 0.8rem; letter-spacing: 1px;">
+                            <i class="bi bi-stars me-1 text-danger"></i> PHẦN THƯỞNG MAY MẮN
+                        </span>
+                    </div>
+
+                    <h2 class="fw-bolder text-danger mb-1" id="modalTieuDe" style="text-shadow: 0 2px 8px rgba(238,77,45,0.25);">
+                        Chúc Mừng Bạn!
+                    </h2>
+                    <p class="text-secondary small mb-3" id="modalSubTieuDe">Bạn vừa nhận được phần thưởng từ Vòng Quay FlexShop</p>
+
+                    <!-- 1. MỤC TRÚNG XU (ĐỒNG XU VÀNG 3D SHOPEE) -->
+                    <div id="shopeeCoinBox" style="display: none;">
+                        <div class="shopee-coin-3d">
+                            <i class="bi bi-coin"></i>
+                        </div>
+                        <h1 class="fw-black text-warning mb-1" id="modalSoXuText" style="text-shadow: 0 2px 10px rgba(255,160,0,0.5); font-weight: 900; font-size: 2.8rem;">
+                            +1.000 Xu
+                        </h1>
+                        <div class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill fs-6 mb-3">
+                            <i class="bi bi-check-circle-fill me-1"></i> Đã tự động cộng vào Ví Xu FlexShop
+                        </div>
+                    </div>
+
+                    <!-- 2. MỤC TRÚNG VOUCHER (THẺ VOUCHER RĂNG CƯA SHOPEE) -->
+                    <div id="shopeeVoucherBox" style="display: none;">
+                        <div class="shopee-voucher-card mb-3">
+                            <div class="shopee-voucher-badge">
+                                <i class="bi bi-ticket-perforated-fill"></i>
+                            </div>
+                            <div class="text-start flex-grow-1">
+                                <span class="badge bg-danger bg-opacity-10 text-danger small mb-1 fw-bold">VOUCHER ĐỘC QUYỀN</span>
+                                <h5 class="fw-bold text-dark mb-1" id="modalTenVoucher">Voucher Freeship 30K</h5>
+                                <p class="text-secondary small mb-2">Đã tự động lưu vào <strong>Kho Voucher cá nhân</strong></p>
+                                
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="shopee-voucher-code-box flex-grow-1 text-center" id="modalCodeVoucher">
+                                        FREESHIP30K
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold" onclick="saoChepMaVoucher()">
+                                        <i class="bi bi-clipboard me-1"></i> Chép mã
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. MỤC MAY MẮN LẦN SAU -->
+                    <div id="shopeeLuckBox" style="display: none;">
+                        <div class="mb-3">
+                            <span style="font-size: 4rem;">😊</span>
+                        </div>
+                        <h4 class="fw-bold text-dark mb-2">Chúc Bạn May Mắn Lần Sau!</h4>
+                        <p class="text-secondary small mb-3">
+                            Cảm ơn bạn đã tham gia quay số hôm nay. Đừng nản lòng, bạn có thể đổi 1.000 Xu để nhận thêm lượt quay ngay bây giờ!
+                        </p>
+                    </div>
+
+                    <!-- HỆ THỐNG NÚT HÀNH ĐỘNG CHUẨN SHOPEE -->
+                    <div class="d-flex flex-column gap-2 mt-4">
+                        <!-- Nút quay tiếp nếu còn lượt -->
+                        <button type="button" id="btnQuayTiep" class="btn btn-shopee-primary fs-5 py-2" data-bs-dismiss="modal">
+                            <i class="bi bi-arrow-repeat me-1"></i> Quay Tiếp Ngay (<span id="modalLuotConLai">0</span> lượt)
+                        </button>
+
+                        <!-- Form đổi xu nếu hết lượt -->
+                        <form id="formDoiXuModal" th:action="@{/khach-hang/vong-quay-may-man/doi-luot}" method="post" style="display: none;">
+                            <button type="submit" class="btn btn-warning w-100 rounded-pill fw-bold py-2 shadow-sm text-dark fs-6">
+                                <i class="bi bi-coin me-1"></i> Đổi 1.000 Xu Để Quay Tiếp
+                            </button>
+                        </form>
+
+                        <div class="d-flex justify-content-center gap-2 mt-2">
+                            <a th:href="@{/khach-hang/kho-voucher}" id="modalLinkVoucher" class="btn btn-sm btn-outline-danger rounded-pill px-3" style="display: none;">
+                                <i class="bi bi-ticket-perforated me-1"></i> Mở Kho Voucher
+                            </a>
+                            <a th:href="@{/khach-hang/vi-xu}" id="modalLinkXu" class="btn btn-sm btn-outline-warning text-dark rounded-pill px-3" style="display: none;">
+                                <i class="bi bi-wallet2 me-1"></i> Mở Ví Xu
+                            </a>
+                            <button type="button" class="btn btn-sm btn-light text-secondary rounded-pill px-3" data-bs-dismiss="modal">
+                                Đóng
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL HẾT LƯỢT QUAY (GỢI Ý ĐỔI 1.000 XU LẤY LƯỢT) -->
+    <div class="modal fade" id="modalHetLuot" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg text-center p-4">
+                <div class="modal-body p-0">
+                    <div class="p-3 d-inline-block rounded-circle mb-3 bg-warning bg-opacity-15 text-warning fs-1">
+                        <i class="bi bi-ticket-perforated-fill text-warning"></i>
+                    </div>
+                    <h4 class="fw-bolder text-dark mb-2">Bạn Đã Hết Lượt Quay Hôm Nay!</h4>
+                    <p class="text-secondary small mb-3">
+                        Mỗi ngày bạn được tặng <strong>1 lượt quay miễn phí</strong> (hệ thống tự động làm mới lúc 00:00).<br>
+                        Bạn có muốn dùng <strong>1.000 Xu</strong> để đổi lấy <strong>+1 lượt quay thêm</strong> ngay bây giờ không?
+                    </p>
+                    <div class="d-flex flex-column gap-2 mt-3">
+                        <form th:action="@{/khach-hang/vong-quay-may-man/doi-luot}" method="post">
+                            <button type="submit" class="btn btn-warning w-100 rounded-pill fw-bold py-2 shadow-sm text-dark fs-6">
+                                <i class="bi bi-coin me-1"></i> Đổi 1.000 Xu Lấy +1 Lượt Quay Ngay
+                            </button>
+                        </form>
+                        <button type="button" class="btn btn-light rounded-pill text-secondary btn-sm" data-bs-dismiss="modal">
+                            Để Sau
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DỮ LIỆU PHẦN THƯỞNG DẠNG JSON AN TOÀN -->
+    <div id="dataPhanThuong" style="display: none;" th:attr="data-json=${dsPhanThuongJson}"></div>
+
+    <!-- LOGIC BÁNH XE QUAY HTML5 CANVAS & HOẠT HỌA VẬT LÝ -->
+    <script>
+        // 8 phần thưởng tiêu chuẩn Shopee Lucky Wheel (Fallback luôn hiển thị 100%)
+        const defaultPhanThuongList = [
+            { thuTuO: 1, tenPhanThuong: "1.000 Xu FlexShop", loaiPhanThuong: "XU", giaTriXu: 1000, mauSacO: "#FF5722", mauChu: "#FFFFFF", icon: "bi-coin" },
+            { thuTuO: 2, tenPhanThuong: "Voucher Freeship 30K", loaiPhanThuong: "VOUCHER", giaTriXu: 0, mauSacO: "#00b894", mauChu: "#FFFFFF", icon: "bi-truck" },
+            { thuTuO: 3, tenPhanThuong: "5.000 Xu May Mắn", loaiPhanThuong: "XU", giaTriXu: 5000, mauSacO: "#fdcb6e", mauChu: "#2d3436", icon: "bi-stars" },
+            { thuTuO: 4, tenPhanThuong: "Voucher Giảm 50K", loaiPhanThuong: "VOUCHER", giaTriXu: 0, mauSacO: "#0984e3", mauChu: "#FFFFFF", icon: "bi-ticket-perforated-fill" },
+            { thuTuO: 5, tenPhanThuong: "Chúc Bạn May Mắn", loaiPhanThuong: "MAY_MAN_LAN_SAU", giaTriXu: 0, mauSacO: "#636e72", mauChu: "#FFFFFF", icon: "bi-emoji-smile" },
+            { thuTuO: 6, tenPhanThuong: "2.000 Xu FlexShop", loaiPhanThuong: "XU", giaTriXu: 2000, mauSacO: "#e17055", mauChu: "#FFFFFF", icon: "bi-coin" },
+            { thuTuO: 7, tenPhanThuong: "Voucher Thời Trang 20K", loaiPhanThuong: "VOUCHER", giaTriXu: 0, mauSacO: "#6c5ce7", mauChu: "#FFFFFF", icon: "bi-bag-heart-fill" },
+            { thuTuO: 8, tenPhanThuong: "10.000 Xu Đặc Biệt", loaiPhanThuong: "XU", giaTriXu: 10000, mauSacO: "#d63031", mauChu: "#FFFFFF", icon: "bi-trophy-fill" }
+        ];
+
+        // Lấy danh sách phần thưởng an toàn, nếu rỗng thì dùng default list
+        let dsPhanThuong = defaultPhanThuongList;
+        try {
+            const rawJson = document.getElementById('dataPhanThuong') ? document.getElementById('dataPhanThuong').getAttribute('data-json') : '';
+            if (rawJson && rawJson !== '[]' && rawJson !== 'null') {
+                const parsed = JSON.parse(rawJson);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    dsPhanThuong = parsed;
+                }
+            }
+        } catch (e) {
+            console.warn("Dùng danh sách phần thưởng mặc định:", e);
+        }
+
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 900;
+        canvas.height = 900;
+
+        const numSlices = dsPhanThuong.length || 8;
+        const sliceAngle = (2 * Math.PI) / numSlices;
+        const radius = canvas.width / 2; // 450px
+
+        let currentAngle = 0; // Góc quay hiện tại (radian)
+        let isSpinning = false;
+        let ledChaseIndex = 0;
+        const pointerEl = document.getElementById('wheelPointer');
+
+        // Âm thanh Web Audio API tổng hợp chân thực
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playTickSound(progress) {
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                const freq = 720 - (progress || 0) * 220;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                const vol = Math.max(0.03, 0.12 * (1 - (progress || 0) * 0.4));
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.04);
+            } catch(e) {}
+        }
+
+        function playWinSound() {
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const now = audioCtx.currentTime;
+                const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.11);
+                    gain.gain.setValueAtTime(0.18, now + idx * 0.11);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.11 + 0.35);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.11);
+                    osc.stop(now + idx * 0.11 + 0.35);
+                });
+            } catch(e) {}
+        }
+
+        // 1. Khởi tạo 24 đèn LED viền tròn quanh bánh xe
+        function initLedLights() {
+            const container = document.getElementById('wheelLedContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            const totalLeds = 24;
+            const radiusPct = 48.2;
+            for (let i = 0; i < totalLeds; i++) {
+                const angle = (i * 360 / totalLeds) * (Math.PI / 180);
+                const x = 50 + radiusPct * Math.cos(angle);
+                const y = 50 + radiusPct * Math.sin(angle);
+                const led = document.createElement('div');
+                led.className = 'wheel-led ' + (i % 2 === 0 ? 'active' : 'dim');
+                led.style.left = x + '%';
+                led.style.top = y + '%';
+                led.id = 'wheel-led-' + i;
+                container.appendChild(led);
+            }
+        }
+
+        // Hiệu ứng đèn LED nhàn rỗi (nhấp nháy chậm)
+        setInterval(() => {
+            if (!isSpinning) {
+                const leds = document.querySelectorAll('.wheel-led');
+                leds.forEach((led, idx) => {
+                    led.className = ((idx + ledChaseIndex) % 2 === 0) ? 'wheel-led active' : 'wheel-led dim';
+                });
+                ledChaseIndex = (ledChaseIndex + 1) % 2;
+            }
+        }, 750);
+
+        // Hiệu ứng đèn LED chạy vòng cực nhanh khi đang quay
+        function runLedFastChase() {
+            const leds = document.querySelectorAll('.wheel-led');
+            leds.forEach((led, idx) => {
+                led.className = (idx % 3 === (ledChaseIndex % 3)) ? 'wheel-led active' : 'wheel-led dim';
+            });
+            ledChaseIndex = (ledChaseIndex + 1) % 24;
+        }
+
+        // Hiệu ứng toàn bộ đèn LED chớp sáng khi trúng thưởng
+        function flashAllLeds() {
+            const leds = document.querySelectorAll('.wheel-led');
+            let flashCount = 0;
+            const timer = setInterval(() => {
+                leds.forEach(led => {
+                    led.className = (flashCount % 2 === 0) ? 'wheel-led active' : 'wheel-led dim';
+                });
+                flashCount++;
+                if (flashCount > 10) clearInterval(timer);
+            }, 140);
+        }
+
+        // 2. Hàm vẽ bánh xe Canvas độ nét cao (Retina 900x900)
+        function drawWheel() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(radius, radius);
+
+            dsPhanThuong.forEach((pt, i) => {
+                const startAngle = i * sliceAngle;
+                const endAngle = startAngle + sliceAngle;
+
+                // 2.1. Vẽ ô quạt màu với Gradient tỏa sáng
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.arc(0, 0, radius - 15, startAngle, endAngle);
+                ctx.closePath();
+
+                const grad = ctx.createRadialGradient(0, 0, 60, 0, 0, radius - 15);
+                grad.addColorStop(0, '#ffffff');
+                grad.addColorStop(0.18, pt.mauSacO || '#FF5722');
+                grad.addColorStop(1, pt.mauSacO || '#D63031');
+                ctx.fillStyle = grad;
+                ctx.fill();
+
+                // Viền trắng phân cách nan quạt
+                ctx.lineWidth = 5;
+                ctx.strokeStyle = '#ffffff';
+                ctx.stroke();
+
+                // 2.2. Vẽ chữ và icon rõ nét dọc theo nan quạt
+                ctx.save();
+                ctx.rotate(startAngle + sliceAngle / 2);
+
+                // Phân tích tên phần thưởng để hiển thị 2 dòng chữ to rõ
+                let line1 = pt.tenPhanThuong;
+                let line2 = 'FlexShop';
+                let iconChar = '🪙';
+
+                if (pt.loaiPhanThuong === 'XU') {
+                    iconChar = '🪙';
+                    if (pt.giaTriXu >= 10000) {
+                        line1 = '10.000 XU';
+                        line2 = 'ĐẶC BIỆT!';
+                    } else if (pt.giaTriXu >= 5000) {
+                        line1 = '5.000 XU';
+                        line2 = 'May Mắn';
+                    } else if (pt.giaTriXu >= 2000) {
+                        line1 = '2.000 XU';
+                        line2 = 'FlexShop Xu';
+                    } else {
+                        line1 = '1.000 XU';
+                        line2 = 'FlexShop Xu';
+                    }
+                } else if (pt.loaiPhanThuong === 'VOUCHER') {
+                    iconChar = '🎟️';
+                    if (pt.tenPhanThuong.includes('30K') || pt.tenPhanThuong.includes('Freeship')) {
+                        line1 = 'FREESHIP';
+                        line2 = '30K (Đơn 0đ)';
+                    } else if (pt.tenPhanThuong.includes('50K')) {
+                        line1 = 'GIẢM 50K';
+                        line2 = 'Toàn Sàn';
+                    } else if (pt.tenPhanThuong.includes('20K') || pt.tenPhanThuong.includes('Thoi Trang') || pt.tenPhanThuong.includes('Thời Trang')) {
+                        line1 = 'GIẢM 20K';
+                        line2 = 'Thời Trang';
+                    } else {
+                        line1 = 'VOUCHER';
+                        line2 = pt.tenPhanThuong;
+                    }
+                } else {
+                    iconChar = '😊';
+                    line1 = 'MAY MẮN';
+                    line2 = 'Lần Sau Nhé';
+                }
+
+                // Vẽ Icon to ở phần nan rộng phía ngoài
+                ctx.font = '40px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(iconChar, 345, 0);
+
+                // Vẽ Chữ dòng 1 (To đậm, viền đổ bóng nổi bật)
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+                ctx.shadowBlur = 8;
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 2;
+
+                ctx.font = '900 28px "Be Vietnam Pro", sans-serif';
+                ctx.fillStyle = (pt.giaTriXu >= 10000 || pt.loaiPhanThuong === 'MAY_MAN_LAN_SAU') ? '#ffeb3b' : '#ffffff';
+                ctx.fillText(line1, 225, -12);
+
+                // Vẽ Chữ dòng 2 (Nhỏ hơn, thanh mảnh, dễ đọc)
+                ctx.font = '700 16px "Be Vietnam Pro", sans-serif';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                ctx.fillText(line2, 225, 18);
+
+                // Đốm vàng trang trí mép ngoài
+                ctx.beginPath();
+                ctx.arc(415, 0, 5, 0, 2 * Math.PI);
+                ctx.fillStyle = '#fffa65';
+                ctx.fill();
+
+                ctx.restore();
+            });
+
+            // Viền vàng kim loại xung quanh chu vi bánh xe
+            ctx.beginPath();
+            ctx.arc(0, 0, radius - 15, 0, 2 * Math.PI);
+            ctx.lineWidth = 8;
+            ctx.strokeStyle = '#fbc531';
+            ctx.stroke();
+
+            // Vòng tròn trung tâm chuyển tiếp vào nút Quay
+            ctx.beginPath();
+            ctx.arc(0, 0, 75, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = '#f9ca24';
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        // Khởi chạy ngay và vẽ lại khi phông chữ Be Vietnam Pro sẵn sàng
+        initLedLights();
+        drawWheel();
+        if (document.fonts) {
+            document.fonts.ready.then(() => drawWheel());
+        }
+
+        // 3. Xử lý hoạt họa quay vật lý chuyên nghiệp khi bấm QUAY
+        async function batDauQuay() {
+            if (isSpinning) return;
+
+            const btn = document.getElementById('btnQuay');
+            btn.classList.add('disabled');
+
+            try {
+                // Gọi API backend thực hiện quay và xác định kết quả
+                const response = await fetch('/api/vong-quay/quay', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.thanhCong) {
+                    btn.classList.remove('disabled');
+                    // Hiện Modal thông báo hết lượt quay thay vì alert
+                    const modalHetLuotEl = document.getElementById('modalHetLuot');
+                    if (modalHetLuotEl && window.bootstrap) {
+                        const m = bootstrap.Modal.getInstance(modalHetLuotEl) || new bootstrap.Modal(modalHetLuotEl);
+                        m.show();
+                    } else {
+                        alert(data.thongBao || 'Bạn đã sử dụng hết lượt quay hôm nay!');
+                    }
+                    return;
+                }
+
+                isSpinning = true;
+
+                // Kim chỉ ở đỉnh 12h: góc 1.5 * PI (270 độ).
+                // Ô thứ k có góc tâm: (k - 1) * sliceAngle + sliceAngle / 2
+                const targetSliceIndex = data.thuTuO - 1; // 0..7
+                const sliceCenter = targetSliceIndex * sliceAngle + sliceAngle / 2;
+                const pointerAngle = 1.5 * Math.PI;
+
+                // Tính toán góc dừng chính xác tuyệt đối
+                const targetMod = ((pointerAngle - sliceCenter) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+                const currentMod = (currentAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+
+                let forwardDelta = targetMod - currentMod;
+                if (forwardDelta <= 0.05) {
+                    forwardDelta += 2 * Math.PI;
+                }
+
+                // Quay tối thiểu 9 vòng trọn vẹn + khoảng lệch đến đúng ô trúng thưởng
+                const fullSpins = 9 * 2 * Math.PI;
+                const finalAngle = currentAngle + fullSpins + forwardDelta;
+
+                let start = null;
+                const duration = 5500; // 5.5 giây
+                const initialAngle = currentAngle;
+                let lastTickAngle = currentAngle;
+
+                function animateWheel(timestamp) {
+                    if (!start) start = timestamp;
+                    const elapsed = timestamp - start;
+                    const progress = Math.min(elapsed / duration, 1);
+
+                    // Easing: Quartic ease-out (tăng tốc nhanh, lướt êm, hãm tốc từ từ)
+                    const easeOut = 1 - Math.pow(1 - progress, 4);
+                    const nowAngle = initialAngle + (finalAngle - initialAngle) * easeOut;
+
+                    canvas.style.transform = 'rotate(' + nowAngle + 'rad)';
+
+                    // Đèn LED chạy rượt đuổi tốc độ cao
+                    runLedFastChase();
+
+                    // Kim chỉ gõ nan quạt (Needle Flick) & âm thanh tick theo tốc độ
+                    if (Math.abs(nowAngle - lastTickAngle) >= sliceAngle) {
+                        if (pointerEl) {
+                            pointerEl.classList.add('flicking');
+                            setTimeout(() => {
+                                if (pointerEl) pointerEl.classList.remove('flicking');
+                            }, 50);
+                        }
+                        playTickSound(progress);
+                        lastTickAngle = nowAngle;
+                    }
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animateWheel);
+                    } else {
+                        // Kết thúc quay thành công
+                        currentAngle = nowAngle;
+                        isSpinning = false;
+                        btn.classList.remove('disabled');
+                        flashAllLeds();
+                        ketThucQuay(data);
+                    }
+                }
+
+                requestAnimationFrame(animateWheel);
+
+            } catch (err) {
+                console.error("Lỗi khi quay:", err);
+                alert("Đã xảy ra lỗi kết nối hệ thống. Vui lòng thử lại!");
+                btn.classList.remove('disabled');
+                isSpinning = false;
+            }
+        }
+
+        // 4. Xử lý khi bánh xe dừng lại - Hiện Popup Shopee và tự động chèn vào Bảng Lịch Sử
+        function ketThucQuay(data) {
+            playWinSound();
+
+            // Bắn pháo hoa Confetti 3 đợt rực rỡ chuẩn game Shopee
+            confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+            setTimeout(() => {
+                confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 } });
+                confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 } });
+            }, 250);
+            setTimeout(() => {
+                confetti({ particleCount: 60, spread: 100, origin: { y: 0.45 } });
+            }, 500);
+
+            // Cập nhật số dư xu và số lượt quay trên giao diện tức thì
+            document.getElementById('lblSoLuotConLai').innerText = data.soLuotQuayConLai;
+            const xuFormat = new Intl.NumberFormat('vi-VN').format(data.soXuHienTai);
+            document.getElementById('navSoXu').innerText = xuFormat + ' Xu';
+            document.getElementById('boxSoXu').innerText = xuFormat + ' đ';
+
+            // Cập nhật nội dung Popup Modal chuẩn Shopee
+            const boxCoin = document.getElementById('shopeeCoinBox');
+            const boxVoucher = document.getElementById('shopeeVoucherBox');
+            const boxLuck = document.getElementById('shopeeLuckBox');
+            const linkVoucher = document.getElementById('modalLinkVoucher');
+            const linkXu = document.getElementById('modalLinkXu');
+            const btnQuayTiep = document.getElementById('btnQuayTiep');
+            const formDoiXu = document.getElementById('formDoiXuModal');
+
+            document.getElementById('modalLuotConLai').innerText = data.soLuotQuayConLai;
+
+            if (data.loaiPhanThuong === 'XU') {
+                boxCoin.style.display = 'block';
+                boxVoucher.style.display = 'none';
+                boxLuck.style.display = 'none';
+                linkXu.style.display = 'inline-block';
+                linkVoucher.style.display = 'none';
+                const formattedXu = new Intl.NumberFormat('vi-VN').format(data.giaTriXu || 1000);
+                document.getElementById('modalSoXuText').innerText = '+' + formattedXu + ' Xu';
+            } else if (data.loaiPhanThuong === 'VOUCHER') {
+                boxCoin.style.display = 'none';
+                boxVoucher.style.display = 'block';
+                boxLuck.style.display = 'none';
+                linkXu.style.display = 'none';
+                linkVoucher.style.display = 'inline-block';
+                document.getElementById('modalTenVoucher').innerText = data.tenPhanThuong;
+                document.getElementById('modalCodeVoucher').innerText = data.maCodeVoucher || 'FLEXSHOP';
+            } else {
+                boxCoin.style.display = 'none';
+                boxVoucher.style.display = 'none';
+                boxLuck.style.display = 'block';
+                linkXu.style.display = 'none';
+                linkVoucher.style.display = 'none';
+            }
+
+            // Quản lý nút Quay Tiếp hay Đổi Lượt
+            if (data.soLuotQuayConLai > 0) {
+                btnQuayTiep.style.display = 'block';
+                formDoiXu.style.display = 'none';
+            } else {
+                btnQuayTiep.style.display = 'none';
+                formDoiXu.style.display = 'block';
+            }
+
+            // Mở Popup Chúc Mừng Shopee
+            const modalChucMungEl = document.getElementById('modalChucMung');
+            if (modalChucMungEl && window.bootstrap) {
+                const modal = bootstrap.Modal.getInstance(modalChucMungEl) || new bootstrap.Modal(modalChucMungEl);
+                modal.show();
+            }
+
+            // TỰ ĐỘNG CHÈN DÒNG MỚI VÀO BẢNG LỊCH SỬ MÀ KHÔNG CẦN TẢI LẠI TRANG
+            themLichSuMoi(data);
+        }
+
+        // Tự động chèn lượt quay mới vào bảng lịch sử theo thời gian thực
+        function themLichSuMoi(data) {
+            const tableBody = document.getElementById('lichSuTableBody');
+            if (!tableBody) return;
+
+            // Ẩn thông báo rỗng nếu có
+            const emptyRow = document.getElementById('rowChuaCoLichSu');
+            if (emptyRow) {
+                emptyRow.style.display = 'none';
+            }
+
+            const tr = document.createElement('tr');
+            tr.style.backgroundColor = 'rgba(255, 234, 167, 0.45)';
+            tr.style.transition = 'background-color 3s ease';
+
+            let iconHtml = '';
+            let phanLoaiBadge = '';
+            let chiTietHtml = '';
+
+            if (data.loaiPhanThuong === 'XU') {
+                iconHtml = '<span class="badge bg-warning bg-opacity-25 text-warning p-2 rounded-3"><i class="bi bi-coin fs-5"></i></span>';
+                phanLoaiBadge = '<span class="badge bg-warning text-dark rounded-pill">Xu Thưởng</span>';
+                const formattedXu = new Intl.NumberFormat('vi-VN').format(data.giaTriXu || 1000);
+                chiTietHtml = '<span class="text-warning fw-bold">+' + formattedXu + ' Xu</span>';
+            } else if (data.loaiPhanThuong === 'VOUCHER') {
+                iconHtml = '<span class="badge bg-success bg-opacity-25 text-success p-2 rounded-3"><i class="bi bi-ticket-perforated-fill fs-5"></i></span>';
+                phanLoaiBadge = '<span class="badge bg-success text-white rounded-pill">Voucher Giảm Giá</span>';
+                chiTietHtml = '<span class="badge bg-light text-primary border font-monospace px-2 py-1">' + (data.maCodeVoucher || 'FLEXSHOP') + '</span>';
+            } else {
+                iconHtml = '<span class="badge bg-secondary bg-opacity-25 text-secondary p-2 rounded-3"><i class="bi bi-emoji-smile fs-5"></i></span>';
+                phanLoaiBadge = '<span class="badge bg-secondary text-white rounded-pill">May Mắn Lần Sau</span>';
+                chiTietHtml = '<span class="text-secondary small">Hộp quà may mắn</span>';
+            }
+
+            const now = new Date();
+            const timeStr = String(now.getDate()).padStart(2, '0') + '/' +
+                            String(now.getMonth() + 1).padStart(2, '0') + '/' +
+                            now.getFullYear() + ' ' +
+                            String(now.getHours()).padStart(2, '0') + ':' +
+                            String(now.getMinutes()).padStart(2, '0');
+
+            tr.innerHTML = `
+                <td class="fw-semibold">#VQ-${data.maLuotQuay}</td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        ${iconHtml}
+                        <div><strong>${data.tenPhanThuong}</strong></div>
+                    </div>
+                </td>
+                <td>${phanLoaiBadge}</td>
+                <td>${chiTietHtml}</td>
+                <td class="text-secondary small">${timeStr} <span class="badge bg-danger bg-opacity-10 text-danger ms-1">Vừa quay</span></td>
+                <td class="text-end">
+                    <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill fw-semibold">
+                        Đã nhận thưởng
+                    </span>
+                </td>
+            `;
+
+            tableBody.insertBefore(tr, tableBody.firstChild);
+
+            // Mờ dần màu highlight
+            setTimeout(() => {
+                tr.style.backgroundColor = '';
+            }, 3000);
+
+            // Tăng biến đếm số lượt đã quay ở thẻ KPI
+            const boxDaQuay = document.getElementById('boxSoLuotDaQuay');
+            if (boxDaQuay) {
+                const current = parseInt(boxDaQuay.innerText) || 0;
+                boxDaQuay.innerText = (current + 1) + ' lượt';
+            }
+
+            // Tăng tổng số bản ghi ở phân trang nếu có
+            const totalEl = document.getElementById('lblTotalElements');
+            if (totalEl) {
+                const currentTotal = parseInt(totalEl.innerText) || 0;
+                totalEl.innerText = (currentTotal + 1);
+            }
+        }
+
+        // Sao chép mã voucher vào clipboard
+        function saoChepMaVoucher() {
+            const code = document.getElementById('modalCodeVoucher').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Đã sao chép mã voucher [' + code + '] vào bộ nhớ tạm! Bạn có thể dán áp dụng ngay khi đặt hàng.');
+            });
+        }
+    </script>
+</body>
+</html>

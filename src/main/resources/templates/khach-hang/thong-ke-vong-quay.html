@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Trị & Thống Kê Vòng Quay May Mắn - FlexShop Admin</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f4f6f9;
+            color: #212529;
+            min-height: 100vh;
+        }
+        .navbar-custom {
+            background: #ffffff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 14px 28px;
+        }
+        .card-custom {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+            padding: 24px;
+        }
+        .kpi-card {
+            border-radius: 16px;
+            padding: 20px;
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .kpi-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP NAVBAR -->
+    <nav class="navbar-custom d-flex justify-content-between align-items-center mb-4">
+        <a th:href="@{/admin/vong-quay-may-man}" class="d-flex align-items-center gap-2 text-decoration-none text-danger fw-bolder fs-4">
+            <i class="bi bi-shield-lock-fill text-danger fs-3"></i>
+            <span>FlexShop Admin - Quản Trị Vòng Quay May Mắn (US-66)</span>
+        </a>
+        <div class="d-flex gap-2">
+            <a th:href="@{/khach-hang/vong-quay-may-man}" class="btn btn-outline-danger rounded-pill px-3 fw-semibold">
+                <i class="bi bi-play-circle-fill me-1"></i> Trải Nghiệm Màn Khách Hàng
+            </a>
+            <a th:href="@{/khach-hang/kho-voucher}" class="btn btn-outline-secondary rounded-pill px-3 fw-semibold">
+                <i class="bi bi-ticket-perforated-fill me-1"></i> Kho Voucher
+            </a>
+            <a th:href="@{/khach-hang/vi-xu}" class="btn btn-outline-warning rounded-pill px-3 fw-semibold text-dark">
+                <i class="bi bi-coin me-1"></i> Ví Xu
+            </a>
+        </div>
+    </nav>
+
+    <!-- CONTAINER -->
+    <div class="container-fluid px-4 py-2">
+
+        <!-- 4 KPI CARDS -->
+        <div class="row g-3 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="kpi-icon bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-disc-fill"></i>
+                    </div>
+                    <div>
+                        <span class="text-secondary small fw-semibold d-block">Tổng Lượt Quay Toàn Sàn</span>
+                        <h3 class="fw-bold text-dark mb-0" th:text="${#numbers.formatDecimal(thongKe.tongLuotQuayToanSan, 0, 'POINT', 0, 'COMMA')}">1.250</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="kpi-icon bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-coin"></i>
+                    </div>
+                    <div>
+                        <span class="text-secondary small fw-semibold d-block">Tổng Xu Đã Phát Thưởng</span>
+                        <h3 class="fw-bold text-warning mb-0" th:text="${#numbers.formatDecimal(thongKe.tongXuDaPhat, 0, 'POINT', 0, 'COMMA')} + ' Xu'">850.000 Xu</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="kpi-icon bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-ticket-perforated-fill"></i>
+                    </div>
+                    <div>
+                        <span class="text-secondary small fw-semibold d-block">Tổng Voucher Đã Trao</span>
+                        <h3 class="fw-bold text-success mb-0" th:text="${#numbers.formatDecimal(thongKe.tongVoucherDaTrao, 0, 'POINT', 0, 'COMMA')} + ' Voucher'">320 Voucher</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="kpi-icon bg-danger bg-opacity-10 text-danger">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                    </div>
+                    <div>
+                        <span class="text-secondary small fw-semibold d-block">Lượt Quay Hôm Nay</span>
+                        <h3 class="fw-bold text-danger mb-0" th:text="${#numbers.formatDecimal(thongKe.tongLuotQuayHomNay, 0, 'POINT', 0, 'COMMA')} + ' lượt'">48 lượt</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. BẢNG CẤU HÌNH 8 Ô PHẦN THƯỞNG -->
+        <div class="card-custom mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-gear-fill text-danger me-2"></i>Cấu Hình 8 Ô Giải Thưởng Vòng Quay May Mắn
+                    </h5>
+                    <p class="text-secondary small mb-0">Quản lý các ô thưởng, tỷ lệ trúng và giới hạn quà phát ra toàn sàn.</p>
+                </div>
+                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill fw-semibold">
+                    <i class="bi bi-check-circle-fill me-1"></i> Tổng tỷ lệ xác suất: 100%
+                </span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle text-center mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 70px;">Ô Số</th>
+                            <th class="text-start">Tên Phần Thưởng</th>
+                            <th>Phân Loại</th>
+                            <th>Giá Trị Thưởng</th>
+                            <th>Mã Voucher LK</th>
+                            <th>Tỷ Lệ Trúng</th>
+                            <th>Đã Trúng / Giới Hạn</th>
+                            <th>Màu Sắc Ô</th>
+                            <th>Trạng Thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="pt : ${dsPhanThuong}">
+                            <td class="fw-bold fs-5 text-danger" th:text="${pt.thuTuO}">1</td>
+                            <td class="text-start fw-bold">
+                                <i class="bi me-1" th:classappend="${pt.icon}"></i>
+                                <span th:text="${pt.tenPhanThuong}">1.000 Xu FlexShop</span>
+                            </td>
+                            <td>
+                                <span th:if="${pt.loaiPhanThuong == 'XU'}" class="badge bg-warning text-dark rounded-pill px-2">XU THƯỞNG</span>
+                                <span th:if="${pt.loaiPhanThuong == 'VOUCHER'}" class="badge bg-success text-white rounded-pill px-2">VOUCHER</span>
+                                <span th:if="${pt.loaiPhanThuong == 'MAY_MAN_LAN_SAU'}" class="badge bg-secondary text-white rounded-pill px-2">MAY MẮN</span>
+                            </td>
+                            <td>
+                                <strong th:if="${pt.giaTriXu > 0}" class="text-warning" th:text="${#numbers.formatDecimal(pt.giaTriXu, 0, 'POINT', 0, 'COMMA')} + ' Xu'">1.000 Xu</strong>
+                                <span th:if="${pt.giaTriXu == 0}" class="text-muted">-</span>
+                            </td>
+                            <td>
+                                <span th:if="${pt.maVoucher != null}" class="badge bg-light text-primary border font-monospace" th:text="'ID #' + ${pt.maVoucher}">ID #10</span>
+                                <span th:if="${pt.maVoucher == null}" class="text-muted">-</span>
+                            </td>
+                            <td>
+                                <strong class="text-danger" th:text="${pt.tyLeTrung} + '%'">25.0%</strong>
+                            </td>
+                            <td>
+                                <span th:text="${pt.soLuongDaTrung}">15</span> / <span th:text="${pt.soLuongGioiHan}">9999</span>
+                            </td>
+                            <td>
+                                <span class="d-inline-block rounded-circle border shadow-sm" th:style="'width: 24px; height: 24px; background-color:' + ${pt.mauSacO} + ';'"></span>
+                            </td>
+                            <td>
+                                <span th:if="${pt.dangHoatDong}" class="badge bg-success rounded-pill px-2">Hoạt động</span>
+                                <span th:unless="${pt.dangHoatDong}" class="badge bg-secondary rounded-pill px-2">Tạm khóa</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 2. BỘ LỌC VÀ LỊCH SỬ QUAY TOÀN SÀN -->
+        <div class="card-custom mb-5">
+            <h5 class="fw-bold mb-3">
+                <i class="bi bi-funnel-fill text-danger me-2"></i>Tìm Kiếm & Lọc Lịch Sử Quay Thưởng Toàn Hệ Thống
+            </h5>
+
+            <!-- FORM LỌC -->
+            <form th:action="@{/admin/vong-quay-may-man}" method="get" class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Từ khóa tìm kiếm</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                        <input type="text" name="tuKhoa" class="form-control" th:value="${tuKhoa}"
+                               placeholder="Tìm theo tên khách, email, mã voucher...">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Phân loại quà</label>
+                    <select name="loaiPhanThuong" class="form-select">
+                        <option value="TAT_CA" th:selected="${loaiHienTai == 'TAT_CA'}">-- Tất cả loại --</option>
+                        <option value="XU" th:selected="${loaiHienTai == 'XU'}">Xu Thưởng</option>
+                        <option value="VOUCHER" th:selected="${loaiHienTai == 'VOUCHER'}">Voucher</option>
+                        <option value="MAY_MAN_LAN_SAU" th:selected="${loaiHienTai == 'MAY_MAN_LAN_SAU'}">May Mắn</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Từ ngày</label>
+                    <input type="date" name="tuNgay" class="form-control" th:value="${tuNgay}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Đến ngày</label>
+                    <input type="date" name="denNgay" class="form-control" th:value="${denNgay}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-danger w-100 fw-semibold rounded-3">
+                        <i class="bi bi-filter me-1"></i> Lọc
+                    </button>
+                    <a th:href="@{/admin/vong-quay-may-man}" class="btn btn-outline-secondary rounded-3">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                </div>
+            </form>
+
+            <!-- BẢNG DANH SÁCH LỊCH SỬ TOÀN SÀN -->
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Mã Lượt</th>
+                            <th>Khách Hàng</th>
+                            <th>Email</th>
+                            <th>Phần Thưởng Nhận</th>
+                            <th>Phân Loại</th>
+                            <th>Giá Trị</th>
+                            <th>Mã Code Voucher</th>
+                            <th>Thời Gian</th>
+                            <th class="text-end">Trạng Thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(dsLichSu)}">
+                            <td colspan="9" class="text-center py-5 text-secondary">
+                                <i class="bi bi-search fs-1 d-block mb-2 text-muted"></i>
+                                Không tìm thấy lượt quay thưởng nào phù hợp với bộ lọc.
+                            </td>
+                        </tr>
+                        <tr th:each="ls : ${dsLichSu}">
+                            <td class="fw-bold" th:text="'#VQ-' + ${ls.maLuotQuay}">#VQ-1</td>
+                            <td class="fw-semibold" th:text="${ls.nguoiDung.hoVaTen}">Nguyễn Văn An</td>
+                            <td class="text-secondary small" th:text="${ls.nguoiDung.email}">khachhang@flexshop.vn</td>
+                            <td class="fw-bold text-dark" th:text="${ls.phanThuong}">1.000 Xu FlexShop</td>
+                            <td>
+                                <span th:if="${ls.loaiPhanThuong == 'XU'}" class="badge bg-warning text-dark rounded-pill">Xu Thưởng</span>
+                                <span th:if="${ls.loaiPhanThuong == 'VOUCHER'}" class="badge bg-success text-white rounded-pill">Voucher</span>
+                                <span th:if="${ls.loaiPhanThuong == 'MAY_MAN_LAN_SAU'}" class="badge bg-secondary text-white rounded-pill">May Mắn</span>
+                            </td>
+                            <td>
+                                <strong th:if="${ls.soXuNhan > 0}" class="text-warning" th:text="'+' + ${#numbers.formatDecimal(ls.soXuNhan, 0, 'POINT', 0, 'COMMA')} + ' Xu'">+1.000 Xu</strong>
+                                <span th:unless="${ls.soXuNhan > 0}" class="text-muted">-</span>
+                            </td>
+                            <td>
+                                <span th:if="${ls.maCodeVoucher != null}" class="badge bg-light text-primary border font-monospace px-2 py-1" th:text="${ls.maCodeVoucher}">FREESHIP30K</span>
+                                <span th:unless="${ls.maCodeVoucher != null}" class="text-muted">-</span>
+                            </td>
+                            <td class="text-secondary small" th:text="${#temporals.format(ls.ngayQuay, 'dd/MM/yyyy HH:mm')}">07/09/2026 11:30</td>
+                            <td class="text-end">
+                                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill fw-semibold" th:text="${ls.trangThaiTraThuong}">
+                                    Thành công
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PHÂN TRANG -->
+            <div th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                <span class="text-secondary small">
+                    Trang <strong th:text="${currentPage + 1}">1</strong> / <strong th:text="${totalPages}">5</strong>
+                    (Tổng: <strong th:text="${totalElements}">50</strong> bản ghi)
+                </span>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link rounded-pill me-1 px-3" th:href="@{/admin/vong-quay-may-man(page=${currentPage - 1}, tuKhoa=${tuKhoa}, loaiPhanThuong=${loaiHienTai}, tuNgay=${tuNgay}, denNgay=${denNgay})}">
+                            <i class="bi bi-chevron-left"></i> Trước
+                        </a>
+                    </li>
+                    <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" class="page-item" th:classappend="${currentPage == i} ? 'active'">
+                        <a class="page-link rounded-pill mx-1" th:href="@{/admin/vong-quay-may-man(page=${i}, tuKhoa=${tuKhoa}, loaiPhanThuong=${loaiHienTai}, tuNgay=${tuNgay}, denNgay=${denNgay})}" th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link rounded-pill ms-1 px-3" th:href="@{/admin/vong-quay-may-man(page=${currentPage + 1}, tuKhoa=${tuKhoa}, loaiPhanThuong=${loaiHienTai}, tuNgay=${tuNgay}, denNgay=${denNgay})}">
+                            Sau <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
