@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexShop Live - Xem Trực Tiếp & Săn Deal Độc Quyền (US-61)</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            color: #212529;
+        }
+        .navbar-shopee {
+            background: linear-gradient(180deg, #f53d2d, #f63);
+            color: #ffffff;
+        }
+        .hero-banner {
+            background: linear-gradient(135deg, #ee4d2d 0%, #ff7337 50%, #ffaa00 100%);
+            border-radius: 20px;
+            color: white;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(238, 77, 45, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        .live-card-khampha {
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            border: none;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+        }
+        .live-card-khampha:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 32px rgba(0,0,0,0.12);
+            color: inherit;
+        }
+        .thumb-wrapper {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            overflow: hidden;
+        }
+        .thumb-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .live-card-khampha:hover .thumb-img {
+            transform: scale(1.05);
+        }
+        .badge-live-red {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: #ee4d2d;
+            color: white;
+            font-weight: 700;
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            animation: pulse-live 1.6s infinite;
+        }
+        @keyframes pulse-live {
+            0% { box-shadow: 0 0 0 0 rgba(238, 77, 45, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(238, 77, 45, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(238, 77, 45, 0); }
+        }
+        .viewer-tag {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(4px);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        .play-hover-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(238, 77, 45, 0.9);
+            color: white;
+            border-radius: 50%;
+            width: 54px;
+            height: 54px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .live-card-khampha:hover .play-hover-btn {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .btn-shopee {
+            background-color: #ee4d2d;
+            border-color: #ee4d2d;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .btn-shopee:hover {
+            background-color: #d73211;
+            border-color: #d73211;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <nav class="navbar navbar-shopee py-2">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a href="/khach-hang/livestream" class="navbar-brand text-white fw-bold d-flex align-items-center gap-2 mb-0">
+                <i class="bi bi-broadcast-pin fs-3"></i>
+                <span class="fs-4">FlexShop LIVE</span>
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <a href="/khach-hang/chat" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                    <i class="bi bi-chat-dots me-1"></i> Tin nhắn & Trả giá
+                </a>
+                <a href="/seller/livestream" class="btn btn-light btn-sm fw-semibold text-danger rounded-pill px-3">
+                    <i class="bi bi-shop me-1"></i> Kênh Người Bán
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container py-4">
+
+        <!-- Hero Live Banner -->
+        <div class="hero-banner mb-5">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <span class="badge bg-white text-danger fw-bold px-3 py-2 rounded-pill mb-3">
+                        <i class="bi bi-fire me-1"></i> FLEXSHOP LIVE MEGA SALE
+                    </span>
+                    <h1 class="display-6 fw-bold mb-2">Xem Livestream Trực Tiếp - Săn Deal Giảm Đến 50%</h1>
+                    <p class="lead mb-4 opacity-90">
+                        Hàng ngàn sản phẩm công nghệ, phụ kiện chính hãng giảm giá sốc độc quyền trên luồng Live. Mua ngay trực tiếp trên màn hình!
+                    </p>
+                    <div class="d-flex gap-2">
+                        <a href="#danhSachLive" class="btn btn-dark rounded-pill px-4 py-2 fw-semibold">
+                            <i class="bi bi-play-circle me-1"></i> Khám phá ngay
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center d-none d-lg-block">
+                    <i class="bi bi-camera-video display-1 text-white opacity-75"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="bg-white p-3 rounded-4 shadow-sm mb-4" id="danhSachLive">
+            <form th:action="@{/khach-hang/livestream}" method="GET" class="row g-2 align-items-center">
+                <div class="col-md-9">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="tuKhoa" th:value="${tuKhoa}" class="form-control bg-light border-0 py-2" 
+                               placeholder="Tìm phòng live, tên gian hàng công nghệ, deal sốc...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-shopee w-100 rounded-pill py-2">
+                        Tìm kiếm phiên Live
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Section Title -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                <span class="p-2 bg-danger-subtle text-danger rounded-circle d-inline-flex"><i class="bi bi-broadcast"></i></span>
+                ĐANG PHÁT TRỰC TIẾP HÔM NAY
+            </h4>
+            <span class="badge bg-danger text-white rounded-pill px-3 py-2 fw-bold">LIVE STREAMING</span>
+        </div>
+
+        <!-- Danh sách Grid Live Card -->
+        <div class="row g-4 mb-5">
+            <div th:each="p : ${trangLive.content}" class="col-xl-3 col-lg-4 col-md-6">
+                <a th:href="@{'/khach-hang/livestream/xem/' + ${p.maLive}}" class="live-card-khampha h-100">
+                    <div class="thumb-wrapper">
+                        <img th:src="${p.linkAnhBia != null and !#strings.isEmpty(p.linkAnhBia) ? p.linkAnhBia : 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600'}" 
+                             alt="Live Thumbnail" class="thumb-img">
+                        
+                        <span th:if="${p.isDangLive()}" class="badge-live-red">
+                            <i class="bi bi-record-circle-fill"></i> ĐANG LIVE
+                        </span>
+                        <span th:if="${p.isSapDienRa()}" class="badge bg-warning text-dark position-absolute top-0 start-0 m-3 px-3 py-2 rounded-pill fw-bold">
+                            SẮP DIỄN RA
+                        </span>
+
+                        <div class="viewer-tag">
+                            <i class="bi bi-eye-fill me-1 text-warning"></i>
+                            <span th:text="${p.soNguoiXemHienTai != null ? p.soNguoiXemHienTai : 0}">145</span>
+                        </div>
+
+                        <div class="play-hover-btn">
+                            <i class="bi bi-play-fill"></i>
+                        </div>
+                    </div>
+
+                    <div class="p-3 d-flex flex-column flex-grow-1 justify-content-between">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="badge bg-secondary-subtle text-dark rounded-pill px-2 py-1 small">
+                                    <i class="bi bi-shop me-1"></i> <span th:text="${p.gianHang != null ? p.gianHang.tenGianHang : 'Shop'}">TechZone</span>
+                                </span>
+                            </div>
+                            <h6 class="fw-bold mb-2 text-truncate-2 text-dark" th:text="${p.tieuDe}">🔥 MEGA LIVE SIÊU SALE CÔNG NGHỆ</h6>
+                            <p class="text-muted small mb-0 text-truncate-2" th:text="${p.moTa != null ? p.moTa : 'Xem ngay để săn voucher và deal sốc!' }"></p>
+                        </div>
+
+                        <div class="mt-3 pt-2 border-top d-flex justify-content-between align-items-center small text-muted">
+                            <span><i class="bi bi-heart-fill text-danger me-1"></i> <span th:text="${p.soLuotThich != null ? p.soLuotThich : 0}">4.890</span> thích</span>
+                            <span class="text-danger fw-bold"><i class="bi bi-bag-check-fill me-1"></i> Deal Giảm Sốc</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${trangLive.empty}" class="col-12 text-center py-5">
+                <div class="p-5 bg-white rounded-4 shadow-sm">
+                    <i class="bi bi-broadcast display-3 text-muted mb-3 d-block"></i>
+                    <h5 class="fw-bold text-secondary">Hiện tại chưa có phiên Live nào phù hợp</h5>
+                    <p class="text-muted mb-4">Hãy quay lại sau hoặc thử tìm kiếm với từ khóa khác nhé!</p>
+                    <a href="/khach-hang/livestream" class="btn btn-shopee rounded-pill px-4">Xem tất cả phòng live</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phân trang -->
+        <div th:if="${trangLive.totalPages > 1}" class="d-flex justify-content-center">
+            <nav>
+                <ul class="pagination">
+                    <li class="page-item" th:classappend="${trangLive.first ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/khach-hang/livestream(page=${trangLive.number - 1}, tuKhoa=${tuKhoa})}">Trước</a>
+                    </li>
+                    <li th:each="i : ${#numbers.sequence(0, trangLive.totalPages - 1)}" class="page-item" th:classappend="${i == trangLive.number ? 'active' : ''}">
+                        <a class="page-link" th:href="@{/khach-hang/livestream(page=${i}, tuKhoa=${tuKhoa})}" th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${trangLive.last ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/khach-hang/livestream(page=${trangLive.number + 1}, tuKhoa=${tuKhoa})}">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

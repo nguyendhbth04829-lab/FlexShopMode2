@@ -16,9 +16,15 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Autowired
     private ChatWebSocketHandler chatWebSocketHandler;
 
+    @Autowired
+    private LivestreamWebSocketHandler livestreamWebSocketHandler;
+
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(chatWebSocketHandler, "/ws-chat")
+                .setAllowedOriginPatterns("*");
+
+        registry.addHandler(livestreamWebSocketHandler, "/ws-live")
                 .setAllowedOriginPatterns("*");
     }
 }

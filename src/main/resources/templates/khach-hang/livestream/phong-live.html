@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${phongLive.tieuDe} + ' - FlexShop Live'">FlexShop Live - Xem Trực Tiếp & Săn Deal Độc Quyền</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        .live-stage {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            max-width: 520px;
+            margin: 0 auto;
+            background: #09090b;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+        @media (min-width: 992px) {
+            .live-stage {
+                border-radius: 20px;
+                height: 96vh;
+                margin-top: 2vh;
+            }
+        }
+        .live-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        /* Top Bar Overlay */
+        .stage-topbar {
+            position: absolute;
+            top: 16px;
+            left: 14px;
+            right: 14px;
+            z-index: 30;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .shop-info-pill {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(8px);
+            border-radius: 30px;
+            padding: 4px 12px 4px 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .shop-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .badge-live-pulse {
+            background: #ee4d2d;
+            color: white;
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            animation: pulse-red 1.6s infinite;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(238, 77, 45, 0.8); }
+            70% { box-shadow: 0 0 0 8px rgba(238, 77, 45, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(238, 77, 45, 0); }
+        }
+        .btn-close-live {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(8px);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-close-live:hover {
+            background: #ee4d2d;
+            color: white;
+        }
+
+        /* Floating Interactive Actions (Right Column) */
+        .stage-actions-right {
+            position: absolute;
+            right: 14px;
+            bottom: 85px;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+        .action-circle-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .action-circle-btn:active {
+            transform: scale(0.85);
+        }
+        .action-circle-btn.heart:hover, .action-circle-btn.heart:active {
+            background: #ee4d2d;
+            border-color: #ee4d2d;
+        }
+        .badge-cart-count {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ee4d2d;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Live Chat Overlay Stream */
+        .stage-chat-overlay {
+            position: absolute;
+            left: 14px;
+            right: 76px;
+            bottom: 172px;
+            max-height: 220px;
+            overflow-y: auto;
+            z-index: 25;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            scrollbar-width: none;
+        }
+        .stage-chat-overlay::-webkit-scrollbar {
+            display: none;
+        }
+        .chat-pill {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            padding: 6px 12px;
+            border-radius: 14px;
+            font-size: 0.82rem;
+            align-self: flex-start;
+            max-width: 95%;
+            word-break: break-word;
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            color: #ffffff;
+            animation: slideUp 0.2s ease-out;
+        }
+        .chat-pill.system-pill {
+            background: rgba(234, 179, 8, 0.3);
+            border-color: rgba(234, 179, 8, 0.6);
+            color: #fef08a;
+        }
+        .chat-pill.shop-pill {
+            background: rgba(238, 77, 45, 0.35);
+            border-color: rgba(238, 77, 45, 0.8);
+            box-shadow: 0 4px 14px rgba(238, 77, 45, 0.35);
+        }
+
+        /* PINNED FLASH SALE PRODUCT CARD (Cốt lõi US-61) */
+        .pinned-product-card {
+            position: absolute;
+            left: 12px;
+            right: 76px;
+            bottom: 70px;
+            background: rgba(15, 23, 42, 0.94);
+            backdrop-filter: blur(12px);
+            border: 1.5px solid #ee4d2d;
+            border-radius: 16px;
+            padding: 8px 12px;
+            z-index: 30;
+            box-shadow: 0 8px 25px rgba(238, 77, 45, 0.4);
+            animation: bounceIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.3s ease;
+        }
+        .tag-deal-live {
+            background: linear-gradient(90deg, #ee4d2d, #ff7337);
+            color: white;
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-buy-flash {
+            background: linear-gradient(135deg, #ee4d2d, #ff5722);
+            border: none;
+            color: white;
+            font-weight: 700;
+            font-size: 0.82rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(238, 77, 45, 0.4);
+            transition: transform 0.15s ease;
+        }
+        .btn-buy-flash:active {
+            transform: scale(0.92);
+        }
+
+        /* Bottom Chat Bar */
+        .stage-bottombar {
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: 14px;
+            z-index: 30;
+            display: flex;
+            gap: 10px;
+        }
+        .chat-input-live {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            border-radius: 30px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+        .chat-input-live::placeholder {
+            color: rgba(255,255,255,0.65);
+        }
+        .chat-input-live:focus {
+            background: rgba(15, 23, 42, 0.95);
+            color: white;
+            border-color: #ee4d2d;
+            box-shadow: none;
+        }
+        .btn-flexshop {
+            background-color: #ee4d2d;
+            border-color: #ee4d2d;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .btn-flexshop:hover {
+            background-color: #d73211;
+            border-color: #d73211;
+            color: #ffffff;
+        }
+
+        /* Floating Hearts Animation Container */
+        .hearts-container {
+            position: absolute;
+            right: 20px;
+            bottom: 140px;
+            width: 60px;
+            height: 300px;
+            pointer-events: none;
+            z-index: 40;
+            overflow: hidden;
+        }
+        .floating-heart {
+            position: absolute;
+            bottom: 0;
+            font-size: 1.8rem;
+            opacity: 1;
+            animation: floatHeart 2.4s ease-out forwards;
+        }
+        @keyframes floatHeart {
+            0% {
+                transform: translateY(0) scale(0.6) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-120px) scale(1.1) rotate(15deg);
+                opacity: 0.85;
+            }
+            100% {
+                transform: translateY(-260px) scale(1.3) rotate(-20deg);
+                opacity: 0;
+            }
+        }
+
+        /* Purchase Ticker Alert */
+        .purchase-ticker {
+            position: absolute;
+            top: 75px;
+            left: 14px;
+            right: 14px;
+            background: rgba(234, 179, 8, 0.95);
+            color: #000;
+            font-weight: 700;
+            font-size: 0.8rem;
+            padding: 8px 16px;
+            border-radius: 30px;
+            z-index: 35;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            animation: slideDown 0.35s ease-out;
+        }
+
+        @keyframes bounceIn {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="live-stage" id="liveStage">
+
+        <!-- Video Phát Trực Tiếp (Loop hoặc RTMP) -->
+        <video id="buyerVideo" class="live-video" autoplay playsinline loop muted
+               th:src="${phongLive.linkStreamRtmp != null ? phongLive.linkStreamRtmp : 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'}">
+        </video>
+
+        <!-- Top Bar Overlay -->
+        <div class="stage-topbar">
+            <div class="shop-info-pill">
+                <img th:src="${phongLive.gianHang != null and phongLive.gianHang.linkLogo != null ? phongLive.gianHang.linkLogo : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100'}" 
+                     alt="Logo Shop" class="shop-avatar">
+                <div>
+                    <div class="fw-bold text-white small text-truncate" style="max-width: 130px;" th:text="${phongLive.gianHang != null ? phongLive.gianHang.tenGianHang : 'TechZone Store'}">TechZone</div>
+                    <div class="d-flex align-items-center gap-1">
+                        <span class="badge-live-pulse"><i class="bi bi-record-circle-fill"></i> LIVE</span>
+                        <span id="badgeLiveCamShop" class="badge bg-danger rounded-pill px-2 py-1 d-none" style="font-size: 0.65rem;">
+                            <i class="bi bi-camera-video-fill me-1"></i> LIVE CAM SHOP
+                        </span>
+                        <small class="text-white-50" style="font-size: 0.65rem;"><i class="bi bi-eye-fill text-warning"></i> <span id="soMắtXem" th:text="${phongLive.soNguoiXemHienTai}">145</span></small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <div class="badge bg-dark-subtle text-white rounded-pill px-3 py-2 border border-white-subtle">
+                    <i class="bi bi-heart-fill text-danger me-1"></i> <span id="soTim" th:text="${phongLive.soLuotThich}">4890</span>
+                </div>
+                <a href="/khach-hang/livestream" class="btn-close-live" title="Thoát Live">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Ticker thông báo mua hàng chốt deal nhanh (Ẩn mặc định, hiện khi có WS event) -->
+        <div id="purchaseTicker" class="purchase-ticker" style="display: none;">
+            <i class="bi bi-bag-check-fill text-danger fs-5"></i>
+            <span id="tickerText">Khách hàng Nguyễn V*** A vừa chốt 1x Tai nghe Sony với giá 950.000đ!</span>
+        </div>
+
+        <!-- Khung chat live trôi tự động (Floating Transparent Chat Stream) -->
+        <div class="stage-chat-overlay" id="chatOverlay">
+            <div th:each="bl : ${danhSachBinhLuan}" 
+                 th:id="'msg-' + ${bl.maBinhLuan}"
+                 class="chat-pill" 
+                 th:classappend="${bl.laTinHeThong ? 'system-pill' : (bl.laNguoiBan ? 'shop-pill' : '')}">
+                <span th:if="${bl.laNguoiBan}" class="badge bg-danger me-1 fw-bold" style="font-size: 0.65rem;">SHOP</span>
+                <span th:if="${bl.laTinHeThong}" class="badge bg-warning text-dark me-1 fw-bold" style="font-size: 0.65rem;">HỆ THỐNG</span>
+                <strong th:classappend="${bl.laNguoiBan ? 'text-warning' : (bl.laTinHeThong ? 'text-warning' : 'text-info')}" 
+                        th:text="${bl.hoTenNguoiDung + ': '}">Tên: </strong>
+                <span class="text-white" th:text="${bl.noiDung}">Nội dung bình luận</span>
+            </div>
+        </div>
+
+        <!-- THẺ GHIM SẢN PHẨM GIẢM SỐC TRÊN MÀN HÌNH (PINNED FLASH DEAL - US-61) -->
+        <div id="pinnedProductCard" class="pinned-product-card" th:style="${spDangGhim != null} ? '' : 'display: none;'">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="tag-deal-live"><i class="bi bi-lightning-charge-fill"></i> DEAL SỐC TRÊN LIVE</span>
+                <span id="conLaiBadge" class="text-white-50" style="font-size: 0.65rem;">
+                    Còn: <strong id="pinnedStock" class="text-warning" th:text="${spDangGhim != null ? spDangGhim.soLuongConLai : 50}">50</strong> suất
+                </span>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2">
+                <img id="pinnedThumb" th:src="${spDangGhim != null ? spDangGhim.linkAnh : ''}" 
+                     class="rounded-3 border border-secondary" style="width: 52px; height: 52px; object-fit: cover;">
+                
+                <div class="flex-grow-1 overflow-hidden">
+                    <div id="pinnedTitle" class="fw-bold text-white small text-truncate" th:text="${spDangGhim != null ? spDangGhim.tenSanPham : ''}">Tên sản phẩm</div>
+                    <div class="d-flex align-items-baseline gap-1">
+                        <span id="pinnedPrice" class="text-danger fw-bold fs-6" 
+                              th:text="${spDangGhim != null ? #numbers.formatDecimal(spDangGhim.giaDocQuyenLive, 0, 'POINT', 0, 'NONE') + 'đ' : ''}">950.000đ</span>
+                        <small id="pinnedOldPrice" class="text-white-50 text-decoration-line-through" style="font-size: 0.7rem;" 
+                               th:text="${spDangGhim != null ? #numbers.formatDecimal(spDangGhim.giaGoc, 0, 'POINT', 0, 'NONE') + 'đ' : ''}">1.200.000đ</small>
+                        <span id="pinnedDiscount" class="badge bg-danger rounded-pill" style="font-size: 0.65rem;" 
+                              th:text="${spDangGhim != null ? '-' + spDangGhim.phanTramGiamGia + '%' : ''}">-21%</span>
+                    </div>
+                </div>
+
+                <div>
+                    <button type="button" class="btn btn-buy-flash pulse-glow" onclick="moModalMuaGhim()">
+                        MUA NGAY
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột Nút Tương Tác Bên Phải (Túi Hàng, Thả Tim, Chia sẻ) -->
+        <div class="stage-actions-right">
+            <!-- Nút Giỏ hàng Live (Xem toàn bộ Deal) -->
+            <button class="action-circle-btn" data-bs-toggle="modal" data-bs-target="#modalGioHangLive" title="Túi sản phẩm Live">
+                <i class="bi bi-bag-fill text-warning"></i>
+                <span class="badge-cart-count" id="badgeCartCount" th:text="${#lists.size(danhSachSpLive)}">4</span>
+            </button>
+
+            <!-- Nút THẢ TIM (Bấm nhiều lần tạo hiệu ứng bay tim) -->
+            <button class="action-circle-btn heart" onclick="bamThaTim()" title="Thả tim cho Live">
+                <i class="bi bi-heart-fill text-danger"></i>
+            </button>
+
+            <!-- Nút Bật / Tắt Tiếng -->
+            <button class="action-circle-btn" id="btnAudio" onclick="toggleAudio()" title="Bật âm thanh">
+                <i class="bi bi-volume-mute-fill"></i>
+            </button>
+        </div>
+
+        <!-- Container Bong Bóng Trái Tim Bay Lên -->
+        <div class="hearts-container" id="heartsContainer"></div>
+
+        <!-- Bottom Input Bar (Gửi bình luận) -->
+        <div class="stage-bottombar">
+            <input type="text" id="inputCommentKhach" class="form-control chat-input-live flex-grow-1" 
+                   placeholder="Thêm bình luận hoặc hỏi Shop..." onkeydown="if(event.key === 'Enter') guiBinhLuanKhach();">
+            <button type="button" class="btn btn-flexshop rounded-circle p-2 d-flex align-items-center justify-content-center" 
+                    style="width: 40px; height: 40px;" onclick="guiBinhLuanKhach()">
+                <i class="bi bi-send-fill"></i>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- MODAL 1: GIỎ HÀNG SẢN PHẨM TRONG LIVE (Tất cả sản phẩm) -->
+    <div class="modal fade" id="modalGioHangLive" tabindex="-1">
+        <div class="modal-dialog modal-dialog-bottom modal-sm m-0 ms-auto me-auto" style="max-width: 500px;">
+            <div class="modal-content bg-dark text-white border-0 rounded-top-4 shadow-lg">
+                <div class="modal-header border-secondary py-2">
+                    <h6 class="modal-title fw-bold text-white d-flex align-items-center gap-2">
+                        <i class="bi bi-bag-check-fill text-danger"></i> Sản Phẩm Khuyến Mãi Trên Live
+                    </h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-3" style="max-height: 460px; overflow-y: auto;">
+                    <div class="d-flex flex-column gap-3">
+                        <div th:each="sp : ${danhSachSpLive}" class="p-2 rounded-3 bg-secondary-subtle border border-secondary d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-2">
+                                <img th:src="${sp.linkAnh}" alt="SP" class="rounded-3" style="width: 52px; height: 52px; object-fit: cover;">
+                                <div>
+                                    <div class="fw-bold text-white small text-truncate" style="max-width: 220px;" th:text="${sp.tenSanPham}">Tên SP</div>
+                                    <div class="d-flex align-items-baseline gap-2">
+                                        <span class="text-danger fw-bold small" th:text="${#numbers.formatDecimal(sp.giaDocQuyenLive, 0, 'POINT', 0, 'NONE')} + 'đ'">950.000đ</span>
+                                        <small class="text-white-50 text-decoration-line-through" style="font-size: 0.7rem;" th:text="${#numbers.formatDecimal(sp.giaGoc, 0, 'POINT', 0, 'NONE')} + 'đ'">1.200.000đ</small>
+                                    </div>
+                                    <small class="text-white-50" style="font-size: 0.68rem;">Còn: <span th:text="${sp.soLuongConLai}">50</span> suất</small>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-flexshop rounded-pill px-3 fw-bold" 
+                                    th:data-masp="${sp.maSanPham}"
+                                    th:data-tensp="${sp.tenSanPham}"
+                                    th:data-gialive="${sp.giaDocQuyenLive}"
+                                    th:data-anh="${sp.linkAnh}"
+                                    th:data-conlai="${sp.soLuongConLai}"
+                                    onclick="moModalDatHangTuButton(this)">
+                                MUA
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: MUA HÀNG NHANH TRÊN LIVE (CHỐT DEAL FLASH SALE) -->
+    <div class="modal fade" id="modalDatHangLive" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white border-secondary rounded-4 shadow-lg">
+                <div class="modal-header border-secondary py-3">
+                    <h5 class="modal-title fw-bold text-white d-flex align-items-center gap-2">
+                        <i class="bi bi-lightning-charge-fill text-warning"></i> Chốt Đơn Độc Quyền FlexShop Live
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    
+                    <!-- Chi tiết sản phẩm mua -->
+                    <div class="d-flex gap-3 align-items-center p-3 rounded-3 bg-secondary-subtle border border-secondary mb-3">
+                        <img id="modalSpImg" src="" class="rounded-3" style="width: 64px; height: 64px; object-fit: cover;">
+                        <div class="overflow-hidden">
+                            <h6 id="modalSpTen" class="fw-bold text-white mb-1 text-truncate">Tên SP</h6>
+                            <div class="d-flex align-items-baseline gap-2">
+                                <span class="badge bg-danger rounded-pill">GIÁ LIVE</span>
+                                <span id="modalSpGia" class="fs-5 fw-bold text-danger">950.000đ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="formDatHangLive">
+                        <input type="hidden" id="formMaSp">
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-white-50 small fw-semibold">Số lượng muốn mua</label>
+                            <div class="input-group" style="max-width: 140px;">
+                                <button type="button" class="btn btn-secondary" onclick="doiSoLuong(-1)">-</button>
+                                <input type="number" id="formSoLuong" class="form-control text-center bg-dark text-white border-secondary" value="1" min="1">
+                                <button type="button" class="btn btn-secondary" onclick="doiSoLuong(1)">+</button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-white-50 small fw-semibold">Họ tên người nhận <span class="text-danger">*</span></label>
+                            <input type="text" id="formHoTen" class="form-control bg-secondary-subtle text-white border-secondary" 
+                                   th:value="${khachHang != null ? khachHang.hoVaTen : 'Nguyễn Văn An'}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-white-50 small fw-semibold">Số điện thoại nhận hàng <span class="text-danger">*</span></label>
+                            <input type="tel" id="formSdt" class="form-control bg-secondary-subtle text-white border-secondary" 
+                                   th:value="${khachHang != null and khachHang.soDienThoai != null ? khachHang.soDienThoai : '0912345678'}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-white-50 small fw-semibold">Địa chỉ giao hàng <span class="text-danger">*</span></label>
+                            <input type="text" id="formDiaChi" class="form-control bg-secondary-subtle text-white border-secondary" 
+                                   value="Số 123 Đường Cầu Giấy, Quận Cầu Giấy, Hà Nội" required>
+                        </div>
+
+                        <div class="alert alert-warning py-2 small mb-0 d-flex align-items-center gap-2">
+                            <i class="bi bi-truck text-danger fs-5"></i>
+                            <span>Miễn phí vận chuyển & Nhận hàng kiểm tra thanh toán (COD)!</span>
+                        </div>
+                    </form>
+
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-flexshop rounded-pill px-4 fw-bold" onclick="xacNhanDatHangLive()">
+                        <i class="bi bi-check2-circle me-1"></i> XÁC NHẬN ĐẶT HÀNG
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const MA_LIVE = /*[[${phongLive.maLive}]]*/ 1;
+        let currentPinned = /*[[${spDangGhim}]]*/ null;
+        let ws = null;
+
+        // Cấu hình WebRTC P2P Receiver
+        const MY_VIEWER_ID = 'viewer_' + Math.random().toString(36).substring(2, 10);
+        let peerConnection = null;
+        const rtcConfig = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
+        const defaultStreamUrl = /*[[${phongLive.linkStreamRtmp != null ? phongLive.linkStreamRtmp : 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'}]]*/ 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+
+        // Khởi tạo WebSocket kết nối phòng live
+        function initWebSocket() {
+            const loc = window.location;
+            let wsUri = (loc.protocol === "https:" ? "wss://" : "ws://") + loc.host + "/ws-live?maLive=" + MA_LIVE;
+            
+            try {
+                ws = new WebSocket(wsUri);
+
+                ws.onopen = function() {
+                    console.log("WebSocket Live Viewer connected:", wsUri);
+                    // Hỏi trạng thái Camera của Shop
+                    ws.send(JSON.stringify({
+                        loai: "CHECK_STREAM_STATUS",
+                        viewerId: MY_VIEWER_ID,
+                        maLive: MA_LIVE
+                    }));
+                };
+
+                ws.onmessage = function(event) {
+                    try {
+                        const msg = JSON.parse(event.data);
+                        xuLyThongDiepRealtime(msg);
+                    } catch (e) {
+                        console.error("Lỗi parse WS msg:", e);
+                    }
+                };
+
+                ws.onclose = function() {
+                    console.warn("WebSocket Live disconnected. Thử kết nối lại sau 3s...");
+                    setTimeout(initWebSocket, 3000);
+                };
+            } catch (err) {
+                console.error("Lỗi kết nối WebSocket:", err);
+            }
+        }
+
+        function xuLyThongDiepRealtime(msg) {
+            if (!msg || !msg.loai) return;
+
+            if (msg.loai === "GHIM_SAN_PHAM") {
+                currentPinned = msg.duLieu;
+                capNhatTheGhim(msg.duLieu);
+            } else if (msg.loai === "BO_GHIM_SAN_PHAM") {
+                currentPinned = null;
+                anTheGhim();
+            } else if (msg.loai === "BINH_LUAN_MOI") {
+                themBinhLuanVaoStream(msg.duLieu);
+            } else if (msg.loai === "CHAT_SYNC") {
+                dongBoBinhLuanBackup();
+            } else if (msg.loai === "THA_TIM") {
+                taoHieuUngTimBay();
+                if (msg.duLieu && msg.duLieu.tongSoTim) {
+                    document.getElementById('soTim').innerText = msg.duLieu.tongSoTim;
+                }
+            } else if (msg.loai === "CAP_NHAT_NGUOI_XEM") {
+                if (msg.duLieu && msg.duLieu.soNguoiXem !== undefined) {
+                    document.getElementById('soMắtXem').innerText = msg.duLieu.soNguoiXem;
+                }
+            } else if (msg.loai === "THONG_BAO_MUA_HANG") {
+                hienThiTickerChotDon(msg.duLieu);
+            } else if (msg.loai === "WEBCAM_STARTED" || (msg.loai === "WEBCAM_ACTIVE" && (!msg.targetViewerId || msg.targetViewerId === MY_VIEWER_ID))) {
+                // Shop đang phát Webcam -> Gửi yêu cầu nhận stream
+                requestLiveCamStream();
+            } else if (msg.loai === "WEBRTC_OFFER" && msg.targetViewerId === MY_VIEWER_ID) {
+                // Nhận SDP Offer từ Shop
+                handleHostOffer(msg.sdp);
+            } else if (msg.loai === "WEBRTC_ICE" && msg.targetViewerId === MY_VIEWER_ID && msg.from === "HOST") {
+                // Nhận ICE candidate từ Shop
+                if (peerConnection && msg.candidate) {
+                    peerConnection.addIceCandidate(new RTCIceCandidate(msg.candidate)).catch(e => console.error(e));
+                }
+            } else if (msg.loai === "WEBCAM_STOPPED") {
+                // Shop tắt webcam -> Trở về video mặc định
+                stopLiveCamStream();
+            } else if (msg.loai === "TRANG_THAI_LIVE") {
+                if (msg.duLieu && msg.duLieu.trangThai === "DA_KET_THUC") {
+                    alert("Buổi phát trực tiếp đã kết thúc. Cảm ơn bạn đã theo dõi!");
+                    window.location.href = "/khach-hang/livestream";
+                }
+            }
+        }
+
+        // Cập nhật thẻ ghim sản phẩm
+        function capNhatTheGhim(dto) {
+            if (!dto) return;
+            const card = document.getElementById('pinnedProductCard');
+            document.getElementById('pinnedThumb').src = dto.linkAnh;
+            document.getElementById('pinnedTitle').innerText = dto.tenSanPham;
+            document.getElementById('pinnedPrice').innerText = Number(dto.giaDocQuyenLive).toLocaleString('vi-VN') + 'đ';
+            document.getElementById('pinnedOldPrice').innerText = Number(dto.giaGoc).toLocaleString('vi-VN') + 'đ';
+            document.getElementById('pinnedDiscount').innerText = '-' + dto.phanTramGiamGia + '%';
+            document.getElementById('pinnedStock').innerText = dto.soLuongConLai;
+            card.style.display = 'block';
+        }
+
+        function anTheGhim() {
+            document.getElementById('pinnedProductCard').style.display = 'none';
+        }
+
+        // Định dạng nội dung tin nhắn nếu có trích dẫn trả lời
+        function formatReplyContentKhach(content) {
+            if (!content) return '';
+            if (content.startsWith('Trả lời @') || content.startsWith('Trả lời: @')) {
+                const colonIdx = content.indexOf(': ');
+                if (colonIdx > 0) {
+                    const replyHeader = content.substring(0, colonIdx);
+                    const mainText = content.substring(colonIdx + 2);
+                    return `<span class="badge bg-warning text-dark me-1" style="font-size:0.65rem;"><i class="bi bi-reply-fill"></i> ${replyHeader}</span><span class="text-white">${mainText}</span>`;
+                }
+            }
+            return `<span class="text-white">${content}</span>`;
+        }
+
+        // Nhấp vào tin nhắn để phản hồi nhanh
+        function nhapPhanHoiNhanh(sender) {
+            if (!sender) return;
+            const input = document.getElementById('inputCommentKhach');
+            input.value = `@${sender} `;
+            input.focus();
+        }
+
+        function themBinhLuanVaoStream(bl) {
+            if (!bl || !bl.noiDung) return;
+            const overlay = document.getElementById('chatOverlay');
+            if (!overlay) return;
+
+            // 1. Kiểm tra chống trùng lặp theo ID tin nhắn của server
+            if (bl.maBinhLuan && document.getElementById('msg-' + bl.maBinhLuan)) {
+                return;
+            }
+
+            // 2. Kiểm tra nếu có tin nhắn tạm (temp-) cùng nội dung -> thay thế ID thành msg-{maBinhLuan}
+            if (bl.maBinhLuan) {
+                const tempPills = overlay.querySelectorAll('[id^="temp-"]');
+                for (let temp of tempPills) {
+                    if (temp.getAttribute('data-text') === bl.noiDung) {
+                        temp.id = 'msg-' + bl.maBinhLuan;
+                        return; // Đã có rồi, không thêm mới
+                    }
+                }
+            }
+
+            // 3. Kiểm tra chống trùng lặp theo nội dung + người gửi ở 3 tin cuối
+            const lastPills = Array.from(overlay.children).slice(-3);
+            for (let el of lastPills) {
+                if (el.getAttribute('data-text') === bl.noiDung && 
+                    (el.getAttribute('data-sender') === bl.hoTenNguoiDung || el.getAttribute('data-sender') === 'Bạn (Khách hàng)')) {
+                    if (bl.maBinhLuan && !el.id) el.id = 'msg-' + bl.maBinhLuan;
+                    return;
+                }
+            }
+
+            const div = document.createElement('div');
+            if (bl.maBinhLuan) {
+                div.id = 'msg-' + bl.maBinhLuan;
+            } else if (bl.tempId) {
+                div.id = bl.tempId;
+            }
+            div.setAttribute('data-text', bl.noiDung);
+            div.setAttribute('data-sender', bl.hoTenNguoiDung);
+            div.className = 'chat-pill ' + (bl.laTinHeThong ? 'system-pill' : (bl.laNguoiBan ? 'shop-pill' : ''));
+            div.style.cursor = 'pointer';
+            div.title = 'Bấm để trả lời';
+            div.onclick = function() { nhapPhanHoiNhanh(bl.hoTenNguoiDung); };
+            
+            let badgeHtml = '';
+            let nameClass = 'text-info';
+            if (bl.laNguoiBan) {
+                badgeHtml = '<span class="badge bg-danger me-1 fw-bold" style="font-size:0.65rem;">SHOP</span>';
+                nameClass = 'text-warning';
+            } else if (bl.laTinHeThong) {
+                badgeHtml = '<span class="badge bg-warning text-dark me-1 fw-bold" style="font-size:0.65rem;">HỆ THỐNG</span>';
+                nameClass = 'text-warning';
+            }
+
+            const contentHtml = formatReplyContentKhach(bl.noiDung);
+
+            div.innerHTML = `${badgeHtml}<strong class="${nameClass}">${bl.hoTenNguoiDung}: </strong>${contentHtml}`;
+            overlay.appendChild(div);
+            overlay.scrollTop = overlay.scrollHeight;
+        }
+
+        function hienThiTickerChotDon(data) {
+            const ticker = document.getElementById('purchaseTicker');
+            const text = document.getElementById('tickerText');
+            text.innerText = `🎉 ${data.hoTen} vừa chốt thành công ${data.soLuong}x [${data.tenSanPham}] với giá ${data.giaLive}!`;
+            ticker.style.display = 'flex';
+            setTimeout(() => {
+                ticker.style.display = 'none';
+            }, 5000);
+        }
+
+        // WebRTC: Khách gửi yêu cầu nhận luồng webcam trực tiếp từ Shop
+        function requestLiveCamStream() {
+            console.log("Khách gửi yêu cầu nhận stream Webcam từ Shop...");
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    loai: "REQUEST_WEBCAM_STREAM",
+                    viewerId: MY_VIEWER_ID,
+                    maLive: MA_LIVE
+                }));
+            }
+        }
+
+        // WebRTC: Xử lý Offer SDP từ Shop và trả lời Answer SDP
+        function handleHostOffer(sdp) {
+            console.log("Nhận WebRTC Offer từ Shop...");
+            if (peerConnection) {
+                try { peerConnection.close(); } catch(e) {}
+            }
+
+            peerConnection = new RTCPeerConnection(rtcConfig);
+
+            peerConnection.ontrack = (event) => {
+                console.log("Đã nhận luồng camera trực tiếp từ Shop qua WebRTC!");
+                const video = document.getElementById('buyerVideo');
+                if (event.streams && event.streams[0]) {
+                    video.srcObject = event.streams[0];
+                    video.play().catch(e => console.warn("Lưu ý tự động phát video:", e));
+
+                    // Hiển thị badge LIVE CAM SHOP trên top bar
+                    const badge = document.getElementById('badgeLiveCamShop');
+                    if (badge) badge.classList.remove('d-none');
+                }
+            };
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate && ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({
+                        loai: "WEBRTC_ICE",
+                        viewerId: MY_VIEWER_ID,
+                        from: "VIEWER",
+                        candidate: event.candidate,
+                        maLive: MA_LIVE
+                    }));
+                }
+            };
+
+            peerConnection.setRemoteDescription(new RTCSessionDescription(sdp))
+                .then(() => peerConnection.createAnswer())
+                .then(answer => peerConnection.setLocalDescription(answer).then(() => {
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({
+                            loai: "WEBRTC_ANSWER",
+                            viewerId: MY_VIEWER_ID,
+                            sdp: answer,
+                            maLive: MA_LIVE
+                        }));
+                        console.log("Đã gửi WebRTC Answer về Shop!");
+                    }
+                }))
+                .catch(err => console.error("Lỗi xử lý WebRTC Offer từ Shop:", err));
+        }
+
+        // WebRTC: Shop đã dừng webcam -> Khách chuyển về video mặc định
+        function stopLiveCamStream() {
+            console.log("Shop đã tắt webcam, chuyển lại video mô phỏng ban đầu...");
+            if (peerConnection) {
+                try { peerConnection.close(); } catch(e) {}
+                peerConnection = null;
+            }
+            const video = document.getElementById('buyerVideo');
+            if (video.srcObject) {
+                video.srcObject = null;
+            }
+            video.src = defaultStreamUrl;
+            video.play().catch(e => {});
+
+            const badge = document.getElementById('badgeLiveCamShop');
+            if (badge) badge.classList.add('d-none');
+        }
+
+        // Gửi bình luận của khách (Tối ưu Optimistic UI + Chống hiển thị 2 lần)
+        function guiBinhLuanKhach() {
+            const input = document.getElementById('inputCommentKhach');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const clientTempId = 'temp-' + Date.now();
+            const tempBl = {
+                tempId: clientTempId,
+                hoTenNguoiDung: 'Bạn (Khách hàng)',
+                noiDung: text,
+                laNguoiBan: false,
+                laTinHeThong: false
+            };
+            // 1. Hiển thị ngay lập tức trên màn hình khách
+            themBinhLuanVaoStream(tempBl);
+            input.value = '';
+
+            fetch(`/khach-hang/livestream/api/${MA_LIVE}/binh-luan`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ noiDung: text })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.thanhCong && data.duLieu) {
+                    // Cập nhật ID cho tin nhắn tạm, KHÔNG thêm mới để tránh nhân đôi tin nhắn
+                    const tempEl = document.getElementById(clientTempId);
+                    if (tempEl) {
+                        tempEl.id = 'msg-' + data.duLieu.maBinhLuan;
+                    } else {
+                        themBinhLuanVaoStream(data.duLieu);
+                    }
+                    // Báo hiệu ngay lập tức qua WebSocket cho Shop
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({ loai: "CHAT_SYNC", maLive: MA_LIVE }));
+                    }
+                } else if (!data.thanhCong) {
+                    alert(data.thongBao || "Lỗi khi gửi bình luận!");
+                    const tempEl = document.getElementById(clientTempId);
+                    if (tempEl) tempEl.remove();
+                }
+            })
+            .catch(err => {
+                console.error("Lỗi gửi chat:", err);
+                const tempEl = document.getElementById(clientTempId);
+                if (tempEl) tempEl.remove();
+            });
+        }
+
+        // Lấy bình luận mới nhất (backup polling định kỳ)
+        function dongBoBinhLuanBackup() {
+            fetch(`/khach-hang/livestream/api/${MA_LIVE}/binh-luan`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.thanhCong && Array.isArray(data.duLieu)) {
+                        data.duLieu.forEach(bl => themBinhLuanVaoStream(bl));
+                    }
+                })
+                .catch(err => {});
+        }
+
+        // Thả tim
+        function bamThaTim() {
+            taoHieuUngTimBay();
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ loai: "THA_TIM", maLive: MA_LIVE }));
+            }
+            fetch(`/khach-hang/livestream/api/${MA_LIVE}/tha-tim`, { method: 'POST' });
+        }
+
+        function taoHieuUngTimBay() {
+            const container = document.getElementById('heartsContainer');
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            const emojis = ['❤️', '💖', '🔥', '🎉', '🧡', '✨'];
+            heart.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            heart.style.left = (Math.random() * 30) + 'px';
+            container.appendChild(heart);
+            setTimeout(() => heart.remove(), 2400);
+        }
+
+        // Bật / tắt âm thanh
+        function toggleAudio() {
+            const vid = document.getElementById('buyerVideo');
+            const btn = document.getElementById('btnAudio');
+            vid.muted = !vid.muted;
+            if (vid.muted) {
+                btn.innerHTML = '<i class="bi bi-volume-mute-fill"></i>';
+            } else {
+                btn.innerHTML = '<i class="bi bi-volume-up-fill text-warning"></i>';
+            }
+        }
+
+        // Mở Modal Mua Hàng Ghim
+        function moModalMuaGhim() {
+            if (!currentPinned) {
+                alert("Hiện tại Shop chưa ghim sản phẩm nào!");
+                return;
+            }
+            moModalDatHang(
+                currentPinned.maSanPham,
+                currentPinned.tenSanPham,
+                currentPinned.giaDocQuyenLive,
+                currentPinned.linkAnh,
+                currentPinned.soLuongConLai
+            );
+        }
+
+        function moModalDatHangTuButton(btn) {
+            const maSp = btn.getAttribute('data-masp');
+            const tenSp = btn.getAttribute('data-tensp');
+            const giaLive = btn.getAttribute('data-gialive');
+            const linkAnh = btn.getAttribute('data-anh');
+            const conLai = btn.getAttribute('data-conlai');
+            moModalDatHang(maSp, tenSp, giaLive, linkAnh, conLai);
+        }
+
+        function moModalDatHang(maSp, tenSp, giaLive, linkAnh, conLai) {
+            document.getElementById('formMaSp').value = maSp;
+            document.getElementById('modalSpImg').src = linkAnh;
+            document.getElementById('modalSpTen').innerText = tenSp;
+            document.getElementById('modalSpGia').innerText = Number(giaLive).toLocaleString('vi-VN') + 'đ';
+            document.getElementById('formSoLuong').value = 1;
+            document.getElementById('formSoLuong').max = conLai;
+
+            // Đóng modal giỏ hàng nếu đang mở
+            const modalGioHangEl = document.getElementById('modalGioHangLive');
+            const modalGioHang = bootstrap.Modal.getInstance(modalGioHangEl);
+            if (modalGioHang) modalGioHang.hide();
+
+            const modalDatHang = new bootstrap.Modal(document.getElementById('modalDatHangLive'));
+            modalDatHang.show();
+        }
+
+        function doiSoLuong(delta) {
+            const input = document.getElementById('formSoLuong');
+            let val = parseInt(input.value) || 1;
+            val = Math.max(1, val + delta);
+            input.value = val;
+        }
+
+        function xacNhanDatHangLive() {
+            const maSp = document.getElementById('formMaSp').value;
+            const soLuong = document.getElementById('formSoLuong').value;
+            const hoTen = document.getElementById('formHoTen').value.trim();
+            const sdt = document.getElementById('formSdt').value.trim();
+            const diaChi = document.getElementById('formDiaChi').value.trim();
+
+            if (!hoTen || !sdt || !diaChi) {
+                alert("Vui lòng điền đầy đủ họ tên, số điện thoại và địa chỉ nhận hàng!");
+                return;
+            }
+
+            fetch(`/khach-hang/livestream/api/${MA_LIVE}/dat-hang-nhanh`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    maLive: MA_LIVE,
+                    maSanPham: Number(maSp),
+                    soLuong: Number(soLuong),
+                    hoTenNguoiNhan: hoTen,
+                    soDienThoai: sdt,
+                    diaChiGiaoHang: diaChi
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.thanhCong) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalDatHangLive')).hide();
+                    alert("🎉 " + data.thongBao + "\nĐơn hàng của bạn đã được tiếp nhận với giá ưu đãi độc quyền trên Live!");
+                } else {
+                    alert("⚠️ " + (data.thongBao || "Lỗi khi chốt đơn!"));
+                }
+            })
+            .catch(err => alert("Lỗi kết nối đặt hàng: " + err));
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initWebSocket();
+            const overlay = document.getElementById('chatOverlay');
+            if (overlay) overlay.scrollTop = overlay.scrollHeight;
+
+            // Chạy polling backup mỗi 1.5 giây để đảm bảo tin nhắn đồng bộ tức thì
+            setInterval(dongBoBinhLuanBackup, 1500);
+        });
+        /*]]>*/
+    </script>
+</body>
+</html>

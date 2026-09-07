@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thiết Lập Phiên Livestream Mới - FlexShop Live (US-61)</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .header-seller {
+            background: linear-gradient(135deg, #ee4d2d 0%, #ff7337 100%);
+            color: #ffffff;
+        }
+        .card-custom {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        }
+        .btn-shopee {
+            background-color: #ee4d2d;
+            border-color: #ee4d2d;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .btn-shopee:hover {
+            background-color: #d73211;
+            border-color: #d73211;
+            color: #ffffff;
+        }
+        .product-select-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px;
+            transition: all 0.2s ease;
+            background: #ffffff;
+        }
+        .product-select-item:hover {
+            border-color: #ee4d2d;
+            background-color: #fff9f8;
+        }
+        .product-select-item.selected {
+            border-color: #ee4d2d;
+            background-color: #fff4f2;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header-seller py-3">
+        <div class="container-fluid px-4 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <a href="/seller/livestream" class="text-white text-decoration-none d-flex align-items-center gap-2">
+                    <span class="fs-4 fw-bold">FlexShop</span>
+                    <span class="badge bg-white text-danger fw-bold px-2 py-1">KÊNH NGƯỜI BÁN</span>
+                </a>
+                <span class="text-white-50">|</span>
+                <span class="fw-semibold"><i class="bi bi-camera-video me-1 text-warning"></i> Thiết lập Phiên Livestream Mới</span>
+            </div>
+            <div>
+                <a href="/seller/livestream" class="btn btn-sm btn-outline-light rounded-pill px-3">
+                    <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+
+                <!-- Alert Lỗi hệ thống nếu có -->
+                <div th:if="${loiHeThong}" class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-4">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span th:text="${loiHeThong}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <form th:action="@{/seller/livestream/tao-moi}" th:object="${form}" method="POST" id="formTaoLive">
+                    
+                    <!-- Bước 1: Thông tin phiên Live -->
+                    <div class="card-custom p-4 mb-4">
+                        <div class="d-flex align-items-center gap-2 mb-3 text-danger">
+                            <i class="bi bi-1-circle-fill fs-4"></i>
+                            <h5 class="fw-bold mb-0">Thông Tin Buổi Livestream</h5>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Tiêu đề buổi phát trực tiếp <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{tieuDe}" class="form-control form-control-lg rounded-3" 
+                                   placeholder="VD: 🔥 MEGA LIVE SIÊU SALE CÔNG NGHỆ - GIẢM ĐẾN 50%" required>
+                            <div th:if="${#fields.hasErrors('tieuDe')}" th:errors="*{tieuDe}" class="text-danger small mt-1"></div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Chế độ nguồn phát Video</label>
+                                <select th:field="*{nguonVideo}" class="form-select rounded-3">
+                                    <option value="WEBCAM">📷 Sử dụng Camera / Webcam thực tế của máy tính</option>
+                                    <option value="VIDEO_SAMPLE">🎬 Sử dụng Video quảng cáo demo có sẵn</option>
+                                </select>
+                                <small class="text-muted">Bạn có thể linh hoạt chuyển đổi giữa Camera và Video trong Studio.</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Thời gian phát sóng</label>
+                                <input type="datetime-local" th:field="*{thoiGianBatDau}" class="form-control rounded-3">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Link ảnh bìa (Thumbnail URL)</label>
+                                <input type="url" th:field="*{linkAnhBia}" class="form-control rounded-3" 
+                                       placeholder="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Link RTMP / Video luồng</label>
+                                <input type="text" th:field="*{linkStreamRtmp}" class="form-control rounded-3" 
+                                       placeholder="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4">
+                            </div>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">Mô tả nội dung buổi Live</label>
+                            <textarea th:field="*{moTa}" rows="3" class="form-control rounded-3" 
+                                      placeholder="Giới thiệu các sản phẩm hot, thời gian tung deal chớp nhoáng, voucher giảm giá..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Bước 2: Chọn sản phẩm đưa vào Live & Cấu hình giá sốc -->
+                    <div class="card-custom p-4 mb-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="d-flex align-items-center gap-2 text-danger">
+                                <i class="bi bi-2-circle-fill fs-4"></i>
+                                <h5 class="fw-bold mb-0">Chọn Sản Phẩm Bán Trên Live & Cấu Hình Giá Sốc</h5>
+                            </div>
+                            <span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill fw-semibold">
+                                <i class="bi bi-tag-fill me-1"></i> Giá độc quyền chỉ áp dụng trong Live
+                            </span>
+                        </div>
+
+                        <p class="text-muted small mb-3">
+                            Tích chọn các sản phẩm bạn muốn bán trong phiên Livestream này. Sản phẩm đầu tiên sẽ được tự động Ghim nổi bật lên màn hình live!
+                        </p>
+
+                        <div class="row g-3">
+                            <div th:each="sp, iterStat : ${danhSachSanPhamShop}" class="col-12">
+                                <div class="product-select-item" th:id="'item-' + ${sp.maSanPham}">
+                                    <div class="row align-items-center g-3">
+                                        <div class="col-auto">
+                                            <div class="form-check">
+                                                <input class="form-check-input sp-checkbox" type="checkbox" 
+                                                       name="danhSachMaSanPham" th:value="${sp.maSanPham}" 
+                                                       th:id="'chk-' + ${sp.maSanPham}"
+                                                       th:checked="${iterStat.index < 3}"
+                                                       onchange="toggleProduct(this, [[${sp.maSanPham}]])">
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <img th:src="${sp.linkAnh}" alt="Ảnh sản phẩm" class="rounded-3" style="width: 64px; height: 64px; object-fit: cover;">
+                                        </div>
+                                        <div class="col">
+                                            <label th:for="'chk-' + ${sp.maSanPham}" class="fw-bold mb-1 d-block text-dark cursor-pointer" th:text="${sp.tenSanPham}">Tên SP</label>
+                                            <div class="small text-muted">
+                                                Giá gốc niêm yết: <span class="fw-bold text-dark" th:text="${#numbers.formatDecimal(sp.giaCoBan, 0, 'POINT', 0, 'NONE')} + 'đ'">1.000.000đ</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-semibold text-danger mb-1">Giá độc quyền Live (VNĐ)</label>
+                                            <input type="number" th:name="'mapGiaDocQuyen[' + ${sp.maSanPham} + ']'" 
+                                                   th:value="${sp.giaCoBan != null ? (sp.giaCoBan.multiply(T(java.math.BigDecimal).valueOf(0.8))).intValue() : 0}"
+                                                   class="form-control form-control-sm rounded-2 text-danger fw-bold" placeholder="Nhập giá live...">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-semibold mb-1">Số lượng suất live</label>
+                                            <input type="number" th:name="'mapSoLuongGioiHan[' + ${sp.maSanPham} + ']'" value="50" 
+                                                   class="form-control form-control-sm rounded-2" min="1" max="999">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div th:if="${#lists.isEmpty(danhSachSanPhamShop)}" class="col-12 text-center py-4 text-muted">
+                                <i class="bi bi-box-seam display-4 mb-2 d-block"></i>
+                                Gian hàng chưa có sản phẩm nào để thêm vào Livestream.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nút hành động -->
+                    <div class="d-flex justify-content-between align-items-center mb-5">
+                        <a href="/seller/livestream" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                            <i class="bi bi-x-circle me-1"></i> Hủy bỏ
+                        </a>
+                        <button type="submit" class="btn btn-shopee rounded-pill px-5 py-3 fs-5 shadow">
+                            <i class="bi bi-broadcast me-2"></i> TẠO PHÒNG & VÀO STUDIO PHÁT NGAY
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleProduct(checkbox, maSp) {
+            const item = document.getElementById('item-' + maSp);
+            if (checkbox.checked) {
+                item.classList.add('selected');
+            } else {
+                item.classList.remove('selected');
+            }
+        }
+        // Initialize state
+        document.querySelectorAll('.sp-checkbox').forEach(cb => {
+            if (cb.checked) {
+                cb.closest('.product-select-item').classList.add('selected');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý FlexShop Live - Kênh Người Bán FlexShop (US-61)</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .header-seller {
+            background: linear-gradient(135deg, #ee4d2d 0%, #ff7337 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 20px rgba(238, 77, 45, 0.2);
+        }
+        .stat-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            transition: all 0.25s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+        .live-card {
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .live-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+        }
+        .live-thumbnail {
+            width: 100%;
+            height: 190px;
+            object-fit: cover;
+            position: relative;
+        }
+        .badge-live-pulse {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(238, 77, 45, 0.95);
+            color: white;
+            font-weight: 700;
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(238, 77, 45, 0.4);
+            animation: pulse-red 1.8s infinite;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(238, 77, 45, 0.6); }
+            70% { box-shadow: 0 0 0 10px rgba(238, 77, 45, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(238, 77, 45, 0); }
+        }
+        .viewer-pill {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(4px);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        .btn-shopee {
+            background-color: #ee4d2d;
+            border-color: #ee4d2d;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .btn-shopee:hover {
+            background-color: #d73211;
+            border-color: #d73211;
+            color: #ffffff;
+        }
+        .btn-outline-shopee {
+            color: #ee4d2d;
+            border-color: #ee4d2d;
+            font-weight: 600;
+        }
+        .btn-outline-shopee:hover {
+            background-color: #ee4d2d;
+            color: #ffffff;
+        }
+        .filter-tab.active {
+            color: #ee4d2d !weight: 700;
+            border-bottom: 3px solid #ee4d2d;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Header -->
+    <header class="header-seller py-3">
+        <div class="container-fluid px-4 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <a href="/seller/livestream" class="text-white text-decoration-none d-flex align-items-center gap-2">
+                    <span class="fs-4 fw-bold">FlexShop</span>
+                    <span class="badge bg-white text-danger fw-bold px-2 py-1">KÊNH NGƯỜI BÁN</span>
+                </a>
+                <span class="text-white-50">|</span>
+                <span class="fw-semibold"><i class="bi bi-broadcast me-1 text-warning"></i> FlexShop Live Studio & Ghim Deal Sốc</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="text-end text-white">
+                    <div class="fw-bold" th:text="${gianHang != null ? gianHang.tenGianHang : 'TechZone Flagship Store'}">TechZone Flagship Store</div>
+                    <small class="opacity-75" th:text="${seller != null ? seller.email : 'techzone@flexshop.vn'}">techzone@flexshop.vn</small>
+                </div>
+                <a href="/khach-hang/livestream" target="_blank" class="btn btn-sm btn-light fw-semibold text-danger rounded-pill px-3">
+                    <i class="bi bi-eye me-1"></i> Xem giao diện Khách
+                </a>
+                <a href="/seller/chat" class="btn btn-sm btn-outline-light rounded-pill px-3">
+                    <i class="bi bi-chat-dots me-1"></i> Kênh Chat
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-fluid px-4 py-4">
+
+        <!-- Thông báo alert nếu có -->
+        <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span th:text="${thongBaoThanhCong}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Thống kê Livestream KPI Header -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold">Tổng số phiên Live</span>
+                        <h3 class="fw-bold mb-0 text-dark" th:text="${thongKe.tongSoPhienLive}">3</h3>
+                    </div>
+                    <div class="p-3 bg-primary-subtle text-primary rounded-circle">
+                        <i class="bi bi-camera-video fs-4"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold">Đang phát trực tiếp</span>
+                        <h3 class="fw-bold mb-0 text-danger" th:text="${thongKe.soPhienDangLive}">1</h3>
+                    </div>
+                    <div class="p-3 bg-danger-subtle text-danger rounded-circle">
+                        <i class="bi bi-broadcast fs-4"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold">Lượt xem & Lượt thích</span>
+                        <h3 class="fw-bold mb-0 text-success">
+                            <span th:text="${#numbers.formatInteger(thongKe.tongLuotXem, 0, 'POINT')}">1.250</span>
+                            <span class="fs-6 text-muted fw-normal">/ <i class="bi bi-heart-fill text-danger"></i> <span th:text="${#numbers.formatInteger(thongKe.tongLuotThich, 0, 'POINT')}">4.890</span></span>
+                        </h3>
+                    </div>
+                    <div class="p-3 bg-success-subtle text-success rounded-circle">
+                        <i class="bi bi-bar-chart-line fs-4"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold">Đơn chốt & Doanh thu Live</span>
+                        <h3 class="fw-bold mb-0 text-warning">
+                            <span th:text="${thongKe.tongDonHangLive}">18</span>
+                            <span class="fs-6 text-muted fw-normal">đơn (<span th:text="${#numbers.formatDecimal(thongKe.tongDoanhThuLive, 0, 'POINT', 0, 'NONE')} + 'đ'">18.500.000đ</span>)</span>
+                        </h3>
+                    </div>
+                    <div class="p-3 bg-warning-subtle text-warning rounded-circle">
+                        <i class="bi bi-cash-coin fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bộ lọc & Nút Tạo phiên Live -->
+        <div class="bg-white p-3 rounded-4 shadow-sm mb-4">
+            <div class="row g-3 align-items-center justify-content-between">
+                <div class="col-lg-7">
+                    <form th:action="@{/seller/livestream}" method="GET" class="d-flex gap-2">
+                        <input type="text" name="tuKhoa" th:value="${tuKhoa}" class="form-control rounded-pill px-3" placeholder="Tìm theo tiêu đề buổi live...">
+                        <select name="trangThai" class="form-select rounded-pill" style="max-width: 190px;" onchange="this.form.submit()">
+                            <option value="" th:selected="${trangThaiChon == null or trangThaiChon == ''}">Tất cả trạng thái</option>
+                            <option value="DANG_LIVE" th:selected="${trangThaiChon == 'DANG_LIVE'}">🔴 Đang Live</option>
+                            <option value="SAP_DIEN_RA" th:selected="${trangThaiChon == 'SAP_DIEN_RA'}">🟡 Sắp diễn ra</option>
+                            <option value="DA_KET_THUC" th:selected="${trangThaiChon == 'DA_KET_THUC'}">⚪ Đã kết thúc</option>
+                        </select>
+                        <button type="submit" class="btn btn-dark rounded-pill px-4">
+                            <i class="bi bi-search me-1"></i> Tìm
+                        </button>
+                    </form>
+                </div>
+                <div class="col-lg-5 text-lg-end">
+                    <a th:href="@{/seller/livestream/tao-moi}" class="btn btn-shopee rounded-pill px-4 py-2 shadow-sm">
+                        <i class="bi bi-plus-circle me-1"></i> TẠO PHIÊN LIVE MỚI
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danh sách các phiên Live (Grid Card) -->
+        <div class="row g-4 mb-4">
+            <div th:each="p : ${trangPhongLive.content}" class="col-xl-3 col-lg-4 col-md-6">
+                <div class="live-card h-100 d-flex flex-column">
+                    <div class="position-relative">
+                        <img th:src="${p.linkAnhBia != null and !#strings.isEmpty(p.linkAnhBia) ? p.linkAnhBia : 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600'}" 
+                             alt="Live Thumbnail" class="live-thumbnail">
+                        
+                        <!-- Badge Trạng thái -->
+                        <span th:if="${p.isDangLive()}" class="badge-live-pulse">
+                            <i class="bi bi-record-circle-fill"></i> ĐANG LIVE
+                        </span>
+                        <span th:if="${p.isSapDienRa()}" class="badge bg-warning text-dark position-absolute top-0 start-0 m-3 px-3 py-2 rounded-pill fw-bold">
+                            <i class="bi bi-clock-history me-1"></i> SẮP DIỄN RA
+                        </span>
+                        <span th:if="${p.isDaKetThuc()}" class="badge bg-secondary text-white position-absolute top-0 start-0 m-3 px-3 py-2 rounded-pill fw-bold">
+                            <i class="bi bi-check-circle me-1"></i> ĐÃ KẾT THÚC
+                        </span>
+
+                        <!-- Số người xem -->
+                        <div class="viewer-pill">
+                            <i class="bi bi-eye-fill me-1 text-warning"></i>
+                            <span th:text="${p.soNguoiXemHienTai != null ? p.soNguoiXemHienTai : 0}">145</span> đang xem
+                        </div>
+                    </div>
+
+                    <div class="p-3 d-flex flex-column flex-grow-1 justify-content-between">
+                        <div>
+                            <h6 class="fw-bold mb-2 text-truncate-2" th:text="${p.tieuDe}">🔥 MEGA LIVE SIÊU SALE CÔNG NGHỆ</h6>
+                            <p class="text-muted small mb-3 text-truncate-2" th:text="${p.moTa != null ? p.moTa : 'Chưa có mô tả'}"></p>
+                        </div>
+
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center small text-muted mb-3 pt-2 border-top">
+                                <span><i class="bi bi-heart-fill text-danger me-1"></i> <span th:text="${p.soLuotThich != null ? p.soLuotThich : 0}">4.890</span> thích</span>
+                                <span><i class="bi bi-calendar-event me-1"></i> <span th:text="${#temporals.format(p.thoiGianBatDau, 'dd/MM HH:mm')}">06/09 19:30</span></span>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <a th:href="@{'/seller/livestream/studio/' + ${p.maLive}}" class="btn btn-shopee rounded-pill fw-bold py-2">
+                                    <i class="bi bi-broadcast me-1"></i> VÀO STUDIO PHÁT LIVE
+                                </a>
+                                <a th:href="@{'/khach-hang/livestream/xem/' + ${p.maLive}}" target="_blank" class="btn btn-outline-secondary rounded-pill btn-sm">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i> Mở xem thử (Khách)
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trường hợp không có dữ liệu -->
+            <div th:if="${trangPhongLive.empty}" class="col-12 text-center py-5">
+                <div class="p-5 bg-white rounded-4 shadow-sm">
+                    <i class="bi bi-camera-video-off display-3 text-muted mb-3 d-block"></i>
+                    <h5 class="fw-bold text-secondary">Chưa có phiên Livestream nào</h5>
+                    <p class="text-muted mb-4">Hãy bấm nút bên dưới để lên lịch phát sóng hoặc bắt đầu buổi bán hàng trực tiếp ngay!</p>
+                    <a th:href="@{/seller/livestream/tao-moi}" class="btn btn-shopee rounded-pill px-4 py-2">
+                        <i class="bi bi-plus-circle me-1"></i> Tạo phiên Live đầu tiên
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phân trang -->
+        <div th:if="${trangPhongLive.totalPages > 1}" class="d-flex justify-content-center">
+            <nav>
+                <ul class="pagination">
+                    <li class="page-item" th:classappend="${trangPhongLive.first ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/seller/livestream(page=${trangPhongLive.number - 1}, tuKhoa=${tuKhoa}, trangThai=${trangThaiChon})}">Trước</a>
+                    </li>
+                    <li th:each="i : ${#numbers.sequence(0, trangPhongLive.totalPages - 1)}" class="page-item" th:classappend="${i == trangPhongLive.number ? 'active' : ''}">
+                        <a class="page-link" th:href="@{/seller/livestream(page=${i}, tuKhoa=${tuKhoa}, trangThai=${trangThaiChon})}" th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${trangPhongLive.last ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/seller/livestream(page=${trangPhongLive.number + 1}, tuKhoa=${tuKhoa}, trangThai=${trangThaiChon})}">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
