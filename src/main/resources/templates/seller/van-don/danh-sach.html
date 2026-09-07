@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>US-31 | In vận đơn hàng loạt A6</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --blue:#1565C0; --blue-dark:#0D47A1; --blue-light:#E3F2FD; }
+        body { background:#F4F7FC; }
+        .topbar { background:linear-gradient(135deg,var(--blue-dark),var(--blue)); color:#fff; border-radius:14px; }
+        .card-blue { border:none; border-radius:14px; box-shadow:0 4px 18px rgba(21,101,192,.12); }
+        .btn-blue { background:var(--blue); border-color:var(--blue); color:#fff; }
+        .btn-blue:hover { background:var(--blue-dark); border-color:var(--blue-dark); color:#fff; }
+        .badge-status { background:var(--blue-light); color:var(--blue-dark); border:1px solid #90CAF9; }
+        .table thead th { background:var(--blue); color:#fff; border:none; }
+        .search-box { background:#fff; border-radius:14px; }
+    </style>
+</head>
+<body>
+<div class="container py-4">
+    <div class="topbar p-4 mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="mb-1">US-31 · In phiếu đóng gói / vận đơn A6</h4>
+            <div class="opacity-75">Chọn nhiều đơn → in hàng loạt để bàn giao 3PL · Gian hàng #<span th:text="${maGianHang}">1</span></div>
+        </div>
+        <span class="badge bg-light text-primary fs-6" th:text="'Tổng: ' + ${soLuong} + ' đơn'">Tổng: 0 đơn</span>
+    </div>
+
+    <div class="card card-blue p-3 mb-3">
+        <form method="get" th:action="@{/seller/van-don}" class="row g-2">
+            <div class="col-md-9">
+                <input class="form-control" name="tuKhoa" th:value="${tuKhoa}" placeholder="Tìm mã đơn shop / mã vận đơn / trạng thái...">
+            </div>
+            <div class="col-md-3 d-grid">
+                <button class="btn btn-blue" type="submit">Tìm kiếm</button>
+            </div>
+        </form>
+    </div>
+
+    <div th:if="${param.loi}" class="alert alert-warning">Bạn chưa chọn đơn nào để in.</div>
+
+    <form method="post" th:action="@{/seller/van-don/in}" onsubmit="return kiemTraChon()">
+        <div class="card card-blue p-0 overflow-hidden">
+            <table class="table table-hover mb-0 align-middle">
+                <thead>
+                <tr>
+                    <th style="width:40px"><input type="checkbox" id="chonTat" class="form-check-input"></th>
+                    <th>Mã đơn shop</th>
+                    <th>Mã vận đơn</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Tiền hàng</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="d : ${danhSachDon}">
+                    <td><input class="chonDon form-check-input" type="checkbox" name="ids" th:value="${d.maDonHangShop}"></td>
+                    <td class="fw-bold text-primary" th:text="${d.maCodeDonShop}">SHOP-001</td>
+                    <td><span class="badge badge-status" th:text="${d.maVanDon != null ? d.maVanDon : '(tự sinh khi in)'}">VD</span></td>
+                    <td th:text="${d.trangThai}">CHO_XAC_NHAN</td>
+                    <td class="text-end" th:text="${#numbers.formatDecimal(d.tienHangShop,0,'COMMA',0,'POINT')}">0</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(danhSachDon)}">
+                    <td colspan="5" class="text-center py-4 text-muted">Chưa có đơn nào trong gian hàng.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <span class="text-muted">Đã chọn: <b id="demChon" class="text-primary">0</b> đơn</span>
+            <button class="btn btn-blue btn-lg" type="submit">🖨️ In các đơn đã chọn (A6)</button>
+        </div>
+    </form>
+</div>
+<script>
+    const chonTat = document.getElementById('chonTat');
+    const dem = document.getElementById('demChon');
+    function capNhatDem(){ dem.textContent = document.querySelectorAll('.chonDon:checked').length; }
+    chonTat.addEventListener('change', () => {
+        document.querySelectorAll('.chonDon').forEach(c => c.checked = chonTat.checked);
+        capNhatDem();
+    });
+    document.querySelectorAll('.chonDon').forEach(c => c.addEventListener('change', capNhatDem));
+    function kiemTraChon(){
+        if (document.querySelectorAll('.chonDon:checked').length === 0){
+            alert('Vui lòng chọn ít nhất 1 đơn để in (US-31).');
+            return false;
+        }
+        return true;
+    }
+</script>
+</body>
+</html>
