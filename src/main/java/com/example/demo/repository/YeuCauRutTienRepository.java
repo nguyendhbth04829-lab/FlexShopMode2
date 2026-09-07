@@ -53,4 +53,18 @@ public interface YeuCauRutTienRepository extends JpaRepository<YeuCauRutTien, Lo
      */
     @Query("SELECT COUNT(y) FROM YeuCauRutTien y WHERE y.trangThai = :trangThai")
     long demSoLuongTheoTrangThai(@Param("trangThai") String trangThai);
+
+    /**
+     * [US-58] Tính tổng tiền đã rút thành công (DA_DUYET) trong khoảng thời gian
+     */
+    @Query("SELECT COALESCE(SUM(y.soTienRut), 0) FROM YeuCauRutTien y WHERE " +
+           "y.trangThai = 'DA_DUYET' AND " +
+           "(:maGianHang IS NULL OR y.gianHang.maGianHang = :maGianHang) AND " +
+           "(:tuNgay IS NULL OR y.ngayTao >= :tuNgay) AND " +
+           "(:denNgay IS NULL OR y.ngayTao <= :denNgay)")
+    BigDecimal tinhTongTienDaRutTheoKhoang(
+            @Param("maGianHang") Long maGianHang,
+            @Param("tuNgay") java.time.LocalDateTime tuNgay,
+            @Param("denNgay") java.time.LocalDateTime denNgay
+    );
 }

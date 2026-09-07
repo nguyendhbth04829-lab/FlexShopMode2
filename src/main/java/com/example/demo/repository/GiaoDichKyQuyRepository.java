@@ -76,4 +76,31 @@ public interface GiaoDichKyQuyRepository extends JpaRepository<GiaoDichKyQuy, Lo
      */
     @Query("SELECT COUNT(g) FROM GiaoDichKyQuy g WHERE g.trangThai = 'DANG_TAM_GIU' AND g.ngayDuKienNhaTien <= :now")
     long demSoDonQuaHanChuaGiaiNgan(@Param("now") LocalDateTime now);
+
+    /**
+     * [US-58] Tính tổng phí sàn 3% trong khoảng thời gian và theo gian hàng
+     */
+    @Query("SELECT COALESCE(SUM(g.tienPhiSan), 0) FROM GiaoDichKyQuy g WHERE " +
+           "(:maGianHang IS NULL OR g.gianHang.maGianHang = :maGianHang) AND " +
+           "(:tuNgay IS NULL OR g.ngayTao >= :tuNgay) AND " +
+           "(:denNgay IS NULL OR g.ngayTao <= :denNgay)")
+    BigDecimal tinhTongPhiSanTheoKhoang(
+            @Param("maGianHang") Long maGianHang,
+            @Param("tuNgay") LocalDateTime tuNgay,
+            @Param("denNgay") LocalDateTime denNgay
+    );
+
+    /**
+     * [US-58] Tính tổng tiền đang tạm giữ Escrow trong khoảng thời gian và theo gian hàng
+     */
+    @Query("SELECT COALESCE(SUM(g.tienThucNhanVeVi), 0) FROM GiaoDichKyQuy g WHERE " +
+           "g.trangThai = 'DANG_TAM_GIU' AND " +
+           "(:maGianHang IS NULL OR g.gianHang.maGianHang = :maGianHang) AND " +
+           "(:tuNgay IS NULL OR g.ngayTao >= :tuNgay) AND " +
+           "(:denNgay IS NULL OR g.ngayTao <= :denNgay)")
+    BigDecimal tinhTongTienDangGiuEscrowTheoKhoang(
+            @Param("maGianHang") Long maGianHang,
+            @Param("tuNgay") LocalDateTime tuNgay,
+            @Param("denNgay") LocalDateTime denNgay
+    );
 }
