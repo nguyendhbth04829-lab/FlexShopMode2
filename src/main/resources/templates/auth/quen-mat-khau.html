@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khôi Phục Mật Khẩu - Sàn Thương Mại Điện Tử FlexShop</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --secondary: #06b6d4;
+            --dark: #0f172a;
+            --light-bg: #f8fafc;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+        }
+        .auth-card {
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            max-width: 1000px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .auth-sidebar {
+            background: linear-gradient(160deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%);
+            color: white;
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+        .auth-sidebar::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at top right, rgba(255,255,255,0.15) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .auth-main {
+            padding: 48px;
+            background: #ffffff;
+        }
+        .form-control, .input-group-text {
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 15px;
+            border-color: #e2e8f0;
+        }
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+        }
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border: none;
+            color: white;
+            padding: 13px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            width: 100%;
+            transition: all 0.3s;
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+        }
+        .btn-primary-custom:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 20px -3px rgba(79, 70, 229, 0.4);
+            color: white;
+        }
+        .btn-primary-custom:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+        /* Step Wizard Indicators */
+        .step-pill {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 14px;
+            background: #e2e8f0;
+            color: #64748b;
+            transition: all 0.3s;
+        }
+        .step-item.active .step-pill {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.2);
+        }
+        .step-item.completed .step-pill {
+            background: #10b981;
+            color: white;
+        }
+        .step-line {
+            flex: 1;
+            height: 3px;
+            background: #e2e8f0;
+            margin: 0 8px;
+            transition: all 0.3s;
+        }
+        .step-line.active {
+            background: var(--primary);
+        }
+        /* OTP Input Box */
+        .otp-input-field {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: 14px;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 14px;
+            border-radius: 14px;
+            border: 2px solid #cbd5e1;
+            background: #f8fafc;
+            transition: all 0.3s;
+        }
+        .otp-input-field:focus {
+            background: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+        }
+        /* Countdown timer badge */
+        .timer-badge {
+            font-size: 15px;
+            font-weight: 700;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            display: inline-flex;
+            align-items: center;
+        }
+        .timer-badge.safe {
+            background: #f0fdf4;
+            color: #16a34a;
+            border-color: #bbf7d0;
+        }
+        /* Password requirement items */
+        .pwd-requirement {
+            font-size: 12.5px;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+        .pwd-requirement.valid {
+            color: #16a34a;
+            font-weight: 500;
+        }
+        /* Modal Backdrop */
+        .custom-modal-backdrop {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: modalFadeIn 0.25s ease-out;
+        }
+        .custom-modal-dialog {
+            background: white;
+            border-radius: 24px;
+            padding: 36px 30px;
+            max-width: 440px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            animation: modalZoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .custom-modal-icon {
+            font-size: 64px;
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+        @keyframes modalZoomIn {
+            from { opacity: 0; transform: scale(0.85); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-card row g-0">
+    <!-- Cột giới thiệu bên trái -->
+    <div class="col-lg-5 auth-sidebar d-none d-lg-flex">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-4">
+                <div class="bg-white rounded-3 p-2 text-primary shadow-sm">
+                    <i class="bi bi-shield-lock-fill fs-4"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0 text-white">FlexShop</h4>
+                </div>
+            </div>
+            <h2 class="fw-bold text-white mb-3">Khôi phục quyền truy cập an toàn</h2>
+            <p class="text-white text-opacity-75 small leading-relaxed">
+                Hệ thống bảo vệ tài khoản nhiều lớp với mã xác thực OTP 6 số ngẫu nhiên chuẩn bảo mật cao cấp.
+            </p>
+
+            <div class="mt-4 pt-3 border-top border-white border-opacity-25">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <i class="bi bi-stopwatch text-warning fs-5"></i>
+                    <span class="small text-white text-opacity-90">Hiệu lực chính xác trong <strong>300 giây (5 phút)</strong></span>
+                </div>
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <i class="bi bi-shield-shaded text-info fs-5"></i>
+                    <span class="small text-white text-opacity-90">Giới hạn gửi tối đa <strong>3 lần / 1 giờ</strong> chống Spam</span>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-lock-fill text-danger fs-5"></i>
+                    <span class="small text-white text-opacity-90">Khóa an toàn <strong>24 giờ</strong> nếu nhập sai quá 5 lần</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between text-white text-opacity-50 small mt-5">
+            <span>© 2026 Hệ thống FlexShop</span>
+            <span>Phiên bản 2.0.0</span>
+        </div>
+    </div>
+
+    <!-- Cột Form bên phải (3 Bước) -->
+    <div class="col-lg-7 auth-main">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold text-dark mb-1">Khôi phục mật khẩu</h3>
+                <p class="text-muted small mb-0">Lấy lại quyền truy cập vào tài khoản FlexShop</p>
+            </div>
+            <a href="/login" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i>Đăng nhập
+            </a>
+        </div>
+
+        <!-- Wizard Step Indicators -->
+        <div class="d-flex align-items-center justify-content-between mb-4 px-2">
+            <div id="step-ind-1" class="step-item active d-flex align-items-center gap-2">
+                <div class="step-pill">1</div>
+                <span class="small fw-bold text-dark d-none d-sm-inline">Tài khoản</span>
+            </div>
+            <div id="step-line-1" class="step-line"></div>
+            <div id="step-ind-2" class="step-item d-flex align-items-center gap-2">
+                <div class="step-pill">2</div>
+                <span class="small fw-semibold text-secondary d-none d-sm-inline">Nhập OTP</span>
+            </div>
+            <div id="step-line-2" class="step-line"></div>
+            <div id="step-ind-3" class="step-item d-flex align-items-center gap-2">
+                <div class="step-pill">3</div>
+                <span class="small fw-semibold text-secondary d-none d-sm-inline">Mật khẩu mới</span>
+            </div>
+        </div>
+
+        <!-- Thông báo Alert động -->
+        <div id="alertBox" class="alert d-none rounded-3 py-2 small" role="alert">
+            <i id="alertIcon" class="bi me-2"></i>
+            <span id="alertMsg"></span>
+        </div>
+
+        <!-- ======================= BƯỚC 1: NHẬP EMAIL / SĐT ======================= -->
+        <div id="stepContainer1">
+            <form id="formStep1" onsubmit="handleGuiOtp(event)">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small text-secondary">Email hoặc Số điện thoại đăng ký</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope-at text-secondary"></i></span>
+                        <input type="text" id="taiKhoanInput" class="form-control" placeholder="Ví dụ: nguyenvana@gmail.com hoặc 0912345678" required autofocus>
+                    </div>
+                    <div class="form-text small text-muted mt-2">
+                        <i class="bi bi-info-circle me-1"></i>Hệ thống sẽ gửi mã xác thực 6 chữ số đến hòm thư Gmail của bạn.
+                    </div>
+                </div>
+
+
+
+                <button type="submit" id="btnGuiOtp" class="btn btn-primary-custom mb-3">
+                    <span id="btnGuiOtpText"><i class="bi bi-send-fill me-2"></i>Gửi Mã Xác Thực OTP</span>
+                    <span id="btnGuiOtpLoading" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                </button>
+            </form>
+        </div>
+
+        <!-- ======================= BƯỚC 2: NHẬP MÃ OTP ======================= -->
+        <div id="stepContainer2" class="d-none">
+            <div class="text-center mb-3">
+                <p class="text-muted small mb-2">Mã xác thực 6 chữ số đã được gửi đến: <strong id="displayNguoiNhan" class="text-primary"></strong></p>
+                <!-- Đồng hồ đếm ngược 300 giây -->
+                <div id="timerWrapper" class="timer-badge">
+                    <i class="bi bi-stopwatch-fill me-2"></i>
+                    <span>Hiệu lực còn lại: <strong id="countdownTimer">05:00</strong></span>
+                </div>
+            </div>
+
+            <form id="formStep2" onsubmit="handleXacThucOtp(event)">
+                <div class="mb-3 text-center">
+                    <label class="form-label fw-semibold small text-secondary mb-2">Nhập mã OTP gồm 6 chữ số</label>
+                    <input type="text" id="otpInput" class="form-control otp-input-field mx-auto" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" placeholder="------" autocomplete="one-time-code" required>
+                    <div class="form-text small text-muted mt-2">
+                        <i class="bi bi-shield-exclamation text-warning me-1"></i>Nhập sai quá <strong>5 lần</strong> tài khoản sẽ bị tạm khóa khôi phục 24 giờ.
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <button type="button" class="btn btn-sm btn-link text-secondary text-decoration-none" onclick="quayLaiBuoc1()">
+                        <i class="bi bi-pencil-square me-1"></i>Đổi email / SĐT
+                    </button>
+                    <button type="button" id="btnGuiLaiOtp" class="btn btn-sm btn-outline-primary" onclick="guiLaiOtp()" disabled>
+                        <i class="bi bi-arrow-clockwise me-1"></i>Gửi lại mã (<span id="resendCounter">60</span>s)
+                    </button>
+                </div>
+
+                <button type="submit" id="btnXacThucOtp" class="btn btn-primary-custom mb-3">
+                    <span id="btnXacThucText"><i class="bi bi-check2-circle me-2"></i>Xác Thực Mã OTP</span>
+                    <span id="btnXacThucLoading" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                </button>
+            </form>
+        </div>
+
+        <!-- ======================= BƯỚC 3: ĐẶT LẠI MẬT KHẨU MỚI ======================= -->
+        <div id="stepContainer3" class="d-none">
+            <form id="formStep3" onsubmit="handleDatLaiMatKhau(event)">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small text-secondary">Mật khẩu mới</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock text-secondary"></i></span>
+                        <input type="password" id="matKhauMoi" class="form-control" placeholder="Nhập mật khẩu mới..." required oninput="validatePasswordRules(this.value)">
+                        <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('matKhauMoi', this)">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Thanh đo độ mạnh mật khẩu -->
+                <div class="progress mb-2" style="height: 6px;">
+                    <div id="strengthBar" class="progress-bar bg-danger" role="progressbar" style="width: 0%;"></div>
+                </div>
+
+                <!-- Checklist tiêu chuẩn mật khẩu US-01 -->
+                <div class="bg-light p-3 rounded-3 border mb-3">
+                    <div class="row g-2">
+                        <div class="col-6 pwd-requirement" id="req-len">
+                            <i class="bi bi-circle me-1"></i> Tối thiểu 8 ký tự
+                        </div>
+                        <div class="col-6 pwd-requirement" id="req-upper">
+                            <i class="bi bi-circle me-1"></i> Ít nhất 1 chữ hoa (A-Z)
+                        </div>
+                        <div class="col-6 pwd-requirement" id="req-lower">
+                            <i class="bi bi-circle me-1"></i> Ít nhất 1 chữ thường (a-z)
+                        </div>
+                        <div class="col-6 pwd-requirement" id="req-digit">
+                            <i class="bi bi-circle me-1"></i> Ít nhất 1 số (0-9)
+                        </div>
+                        <div class="col-12 pwd-requirement" id="req-special">
+                            <i class="bi bi-circle me-1"></i> Ít nhất 1 ký tự đặc biệt (!@#$%^&*...)
+                        </div>
+                        <div class="col-12 text-muted small mt-1">
+                            <i class="bi bi-shield-exclamation text-warning me-1"></i> Không được trùng với mật khẩu cũ đang sử dụng.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold small text-secondary">Xác nhận mật khẩu mới</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock-fill text-secondary"></i></span>
+                        <input type="password" id="xacNhanMatKhau" class="form-control" placeholder="Nhập lại mật khẩu mới..." required oninput="checkMatchPassword()">
+                        <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('xacNhanMatKhau', this)">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <div id="pwdMatchMsg" class="form-text small d-none"></div>
+                </div>
+
+                <button type="submit" id="btnDoiMatKhau" class="btn btn-primary-custom mb-3">
+                    <span id="btnDoiMatKhauText"><i class="bi bi-key-fill me-2"></i>Đổi Mật Khẩu Ngay</span>
+                    <span id="btnDoiMatKhauLoading" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                </button>
+            </form>
+        </div>
+
+        <div class="text-center mt-3">
+            <span class="text-muted small">Đã nhớ mật khẩu?</span>
+            <a href="/login" class="fw-bold text-primary text-decoration-none ms-1">Đăng nhập ngay</a>
+        </div>
+    </div>
+</div>
+
+<!-- Modal thông báo nổi bật trước màn hình -->
+<div id="customModalOverlay" class="custom-modal-backdrop d-none">
+    <div class="custom-modal-dialog">
+        <div id="customModalIcon" class="custom-modal-icon text-success">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <h4 id="customModalTitle" class="fw-bold mb-2 text-dark">Thành Công!</h4>
+        <div id="customModalBody" class="text-secondary small mb-3">Đặt lại mật khẩu thành công.</div>
+        <div class="progress mb-3" style="height: 5px;">
+            <div id="customModalProgress" class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 100%;"></div>
+        </div>
+        <button id="customModalActionBtn" type="button" class="btn btn-primary-custom w-100 py-2" onclick="window.location.href='/login'">
+            Đến Đăng Nhập <i class="bi bi-arrow-right ms-1"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // State quản lý luồng khôi phục mật khẩu
+    let state = {
+        taiKhoan: '',
+        maOtp: '',
+        timerInterval: null,
+        resendInterval: null,
+        thoiGianConLai: 300, // 300 giây
+        resendCooldown: 60
+    };
+
+    function showAlert(msg, type = 'danger') {
+        const box = document.getElementById('alertBox');
+        const icon = document.getElementById('alertIcon');
+        const text = document.getElementById('alertMsg');
+
+        box.className = `alert alert-${type} alert-dismissible fade show rounded-3 py-2 small`;
+        if (type === 'danger') {
+            icon.className = 'bi bi-exclamation-triangle-fill me-2';
+        } else if (type === 'warning') {
+            icon.className = 'bi bi-shield-exclamation me-2';
+        } else {
+            icon.className = 'bi bi-check-circle-fill me-2';
+        }
+        text.innerText = msg;
+        box.classList.remove('d-none');
+    }
+
+    function hideAlert() {
+        document.getElementById('alertBox').classList.add('d-none');
+    }
+
+    // ==========================================
+    // BƯỚC 1: GỬI OTP
+    // ==========================================
+    async function handleGuiOtp(e) {
+        e.preventDefault();
+        hideAlert();
+
+        const taiKhoan = document.getElementById('taiKhoanInput').value.trim();
+        if (!taiKhoan) {
+            showAlert('Vui lòng nhập Email hoặc Số điện thoại!');
+            return;
+        }
+
+        const btn = document.getElementById('btnGuiOtp');
+        const btnText = document.getElementById('btnGuiOtpText');
+        const btnLoading = document.getElementById('btnGuiOtpLoading');
+
+        btn.disabled = true;
+        btnText.classList.add('d-none');
+        btnLoading.classList.remove('d-none');
+
+        try {
+            const resp = await fetch('/api/v1/auth/otp/gui-yeu-cau', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ taiKhoan: taiKhoan })
+            });
+
+            const data = await resp.json();
+
+            if (!resp.ok) {
+                showAlert(data.thongBao || data.message || 'Gửi mã OTP thất bại! Vui lòng thử lại.', resp.status === 429 ? 'warning' : 'danger');
+                return;
+            }
+
+            state.taiKhoan = taiKhoan;
+            document.getElementById('displayNguoiNhan').innerText = data.duLieu?.nguoiNhan || taiKhoan;
+
+            // Chuyển sang Bước 2
+            chuyenSangBuoc(2);
+            startCountdownTimer(data.duLieu?.soGiayHieuLuc || 300);
+            startResendCooldown(60);
+
+            // Gợi ý mã OTP nếu môi trường dev trả về demo
+            if (data.duLieu?.maOtpDemo) {
+                console.log('%c[FlexShop OTP] Mã khôi phục: ' + data.duLieu.maOtpDemo, 'color: #10b981; font-weight: bold; font-size: 14px;');
+            }
+
+            showAlert(data.thongBao || data.message || 'Mã OTP đã được gửi đến email/SĐT của bạn!', 'success');
+
+        } catch (err) {
+            showAlert('Lỗi kết nối máy chủ! Vui lòng thử lại.');
+        } finally {
+            btn.disabled = false;
+            btnText.classList.remove('d-none');
+            btnLoading.classList.add('d-none');
+        }
+    }
+
+    // ==========================================
+    // BƯỚC 2: XÁC THỰC OTP
+    // ==========================================
+    async function handleXacThucOtp(e) {
+        e.preventDefault();
+        hideAlert();
+
+        const maOtp = document.getElementById('otpInput').value.trim();
+        if (!/^\d{6}$/.test(maOtp)) {
+            showAlert('Mã OTP phải gồm đúng 6 chữ số!');
+            return;
+        }
+
+        const btn = document.getElementById('btnXacThucOtp');
+        const btnText = document.getElementById('btnXacThucText');
+        const btnLoading = document.getElementById('btnXacThucLoading');
+
+        btn.disabled = true;
+        btnText.classList.add('d-none');
+        btnLoading.classList.remove('d-none');
+
+        try {
+            const resp = await fetch('/api/v1/auth/otp/xac-thuc', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ taiKhoan: state.taiKhoan, maOtp: maOtp })
+            });
+
+            const data = await resp.json();
+
+            if (!resp.ok) {
+                showAlert(data.thongBao || data.message || 'Mã OTP không hợp lệ!', resp.status === 403 ? 'danger' : 'warning');
+                // Nếu bị khóa 24h thì vô hiệu hóa nút
+                if (resp.status === 403) {
+                    btn.disabled = true;
+                    document.getElementById('otpInput').disabled = true;
+                }
+                return;
+            }
+
+            state.maOtp = maOtp;
+            clearInterval(state.timerInterval);
+
+            // Chuyển sang Bước 3
+            chuyenSangBuoc(3);
+            showAlert('Xác thực OTP thành công! Vui lòng tạo mật khẩu mới.', 'success');
+
+        } catch (err) {
+            showAlert('Lỗi kết nối máy chủ! Vui lòng thử lại.');
+        } finally {
+            if (!document.getElementById('otpInput').disabled) {
+                btn.disabled = false;
+            }
+            btnText.classList.remove('d-none');
+            btnLoading.classList.add('d-none');
+        }
+    }
+
+    async function guiLaiOtp() {
+        hideAlert();
+        const btn = document.getElementById('btnGuiLaiOtp');
+        btn.disabled = true;
+
+        try {
+            const resp = await fetch('/api/v1/auth/otp/gui-yeu-cau', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ taiKhoan: state.taiKhoan })
+            });
+
+            const data = await resp.json();
+            if (!resp.ok) {
+                showAlert(data.thongBao || data.message || 'Không thể gửi lại mã OTP lúc này.', resp.status === 429 ? 'warning' : 'danger');
+                return;
+            }
+
+            showAlert('Đã gửi lại mã OTP mới. Vui lòng kiểm tra email!', 'success');
+            startCountdownTimer(data.duLieu?.soGiayHieuLuc || 300);
+            startResendCooldown(60);
+            document.getElementById('otpInput').value = '';
+            document.getElementById('btnXacThucOtp').disabled = false;
+
+        } catch (err) {
+            showAlert('Lỗi kết nối máy chủ khi gửi lại OTP!');
+            btn.disabled = false;
+        }
+    }
+
+    function quayLaiBuoc1() {
+        clearInterval(state.timerInterval);
+        clearInterval(state.resendInterval);
+        hideAlert();
+        chuyenSangBuoc(1);
+    }
+
+    // ==========================================
+    // BƯỚC 3: ĐẶT LẠI MẬT KHẨU MỚI
+    // ==========================================
+    async function handleDatLaiMatKhau(e) {
+        e.preventDefault();
+        hideAlert();
+
+        const matKhauMoi = document.getElementById('matKhauMoi').value;
+        const xacNhan = document.getElementById('xacNhanMatKhau').value;
+
+        if (matKhauMoi !== xacNhan) {
+            showAlert('Mật khẩu mới và xác nhận mật khẩu không trùng khớp!');
+            return;
+        }
+
+        // Kiểm tra độ mạnh theo US-01
+        const hasLen = matKhauMoi.length >= 8;
+        const hasUpper = /[A-Z]/.test(matKhauMoi);
+        const hasLower = /[a-z]/.test(matKhauMoi);
+        const hasDigit = /[0-9]/.test(matKhauMoi);
+        const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(matKhauMoi);
+
+        if (!hasLen || !hasUpper || !hasLower || !hasDigit || !hasSpecial) {
+            showAlert('Mật khẩu mới chưa đáp ứng đầy đủ tiêu chuẩn bảo mật!');
+            return;
+        }
+
+        const btn = document.getElementById('btnDoiMatKhau');
+        const btnText = document.getElementById('btnDoiMatKhauText');
+        const btnLoading = document.getElementById('btnDoiMatKhauLoading');
+
+        btn.disabled = true;
+        btnText.classList.add('d-none');
+        btnLoading.classList.remove('d-none');
+
+        try {
+            const resp = await fetch('/api/v1/auth/otp/dat-lai-mat-khau', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    taiKhoan: state.taiKhoan,
+                    maOtp: state.maOtp,
+                    matKhauMoi: matKhauMoi,
+                    xacNhanMatKhau: xacNhan
+                })
+            });
+
+            const data = await resp.json();
+
+            if (!resp.ok) {
+                showAlert(data.thongBao || data.message || 'Đặt lại mật khẩu thất bại!');
+                btn.disabled = false;
+                btnText.classList.remove('d-none');
+                btnLoading.classList.add('d-none');
+                return;
+            }
+
+            // Hiển thị modal pop-up thành công trước màn hình
+            hienThiModalThanhCong();
+
+        } catch (err) {
+            showAlert('Lỗi kết nối máy chủ! Vui lòng thử lại.');
+            btn.disabled = false;
+            btnText.classList.remove('d-none');
+            btnLoading.classList.add('d-none');
+        }
+    }
+
+    // ==========================================
+    // TIỆN ÍCH TIMER & UI
+    // ==========================================
+    function chuyenSangBuoc(buoc) {
+        document.getElementById('stepContainer1').classList.toggle('d-none', buoc !== 1);
+        document.getElementById('stepContainer2').classList.toggle('d-none', buoc !== 2);
+        document.getElementById('stepContainer3').classList.toggle('d-none', buoc !== 3);
+
+        const ind1 = document.getElementById('step-ind-1');
+        const ind2 = document.getElementById('step-ind-2');
+        const ind3 = document.getElementById('step-ind-3');
+        const line1 = document.getElementById('step-line-1');
+        const line2 = document.getElementById('step-line-2');
+
+        ind1.className = 'step-item d-flex align-items-center gap-2 ' + (buoc === 1 ? 'active' : 'completed');
+        ind2.className = 'step-item d-flex align-items-center gap-2 ' + (buoc === 2 ? 'active' : (buoc > 2 ? 'completed' : ''));
+        ind3.className = 'step-item d-flex align-items-center gap-2 ' + (buoc === 3 ? 'active' : '');
+
+        line1.className = 'step-line ' + (buoc >= 2 ? 'active' : '');
+        line2.className = 'step-line ' + (buoc >= 3 ? 'active' : '');
+
+        if (buoc === 2) {
+            setTimeout(() => document.getElementById('otpInput').focus(), 100);
+        } else if (buoc === 3) {
+            setTimeout(() => document.getElementById('matKhauMoi').focus(), 100);
+        }
+    }
+
+    function startCountdownTimer(seconds) {
+        clearInterval(state.timerInterval);
+        state.thoiGianConLai = seconds;
+        renderTimer();
+
+        state.timerInterval = setInterval(() => {
+            state.thoiGianConLai--;
+            renderTimer();
+
+            if (state.thoiGianConLai <= 0) {
+                clearInterval(state.timerInterval);
+                document.getElementById('countdownTimer').innerText = '00:00 (Đã hết hạn)';
+                document.getElementById('timerWrapper').className = 'timer-badge';
+                showAlert('Mã OTP đã hết hạn sau 300 giây (5 phút). Vui lòng gửi lại mã mới!', 'danger');
+                document.getElementById('btnXacThucOtp').disabled = true;
+            }
+        }, 1000);
+    }
+
+    function renderTimer() {
+        const min = Math.floor(state.thoiGianConLai / 60);
+        const sec = state.thoiGianConLai % 60;
+        const formatted = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+        const el = document.getElementById('countdownTimer');
+        const wrapper = document.getElementById('timerWrapper');
+        if (el) el.innerText = formatted;
+        if (wrapper) {
+            if (state.thoiGianConLai > 60) {
+                wrapper.className = 'timer-badge safe';
+            } else {
+                wrapper.className = 'timer-badge';
+            }
+        }
+    }
+
+    function startResendCooldown(seconds) {
+        clearInterval(state.resendInterval);
+        const btn = document.getElementById('btnGuiLaiOtp');
+        btn.disabled = true;
+        let left = seconds;
+        document.getElementById('resendCounter').innerText = left;
+
+        state.resendInterval = setInterval(() => {
+            left--;
+            if (document.getElementById('resendCounter')) {
+                document.getElementById('resendCounter').innerText = left;
+            }
+            if (left <= 0) {
+                clearInterval(state.resendInterval);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Gửi lại mã OTP';
+            }
+        }, 1000);
+    }
+
+    function togglePasswordVisibility(inputId, button) {
+        const input = document.getElementById(inputId);
+        const icon = button.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    }
+
+    function validatePasswordRules(pwd) {
+        const hasLen = pwd.length >= 8;
+        const hasUpper = /[A-Z]/.test(pwd);
+        const hasLower = /[a-z]/.test(pwd);
+        const hasDigit = /[0-9]/.test(pwd);
+        const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(pwd);
+
+        updateCheck('req-len', hasLen);
+        updateCheck('req-upper', hasUpper);
+        updateCheck('req-lower', hasLower);
+        updateCheck('req-digit', hasDigit);
+        updateCheck('req-special', hasSpecial);
+
+        let score = 0;
+        if (hasLen) score += 20;
+        if (hasUpper) score += 20;
+        if (hasLower) score += 20;
+        if (hasDigit) score += 20;
+        if (hasSpecial) score += 20;
+
+        const bar = document.getElementById('strengthBar');
+        bar.style.width = score + '%';
+        if (score <= 40) {
+            bar.className = 'progress-bar bg-danger';
+        } else if (score <= 80) {
+            bar.className = 'progress-bar bg-warning';
+        } else {
+            bar.className = 'progress-bar bg-success';
+        }
+
+        checkMatchPassword();
+    }
+
+    function updateCheck(id, isValid) {
+        const el = document.getElementById(id);
+        const icon = el.querySelector('i');
+        if (isValid) {
+            el.classList.add('valid');
+            icon.className = 'bi bi-check-circle-fill text-success me-1';
+        } else {
+            el.classList.remove('valid');
+            icon.className = 'bi bi-circle me-1';
+        }
+    }
+
+    function checkMatchPassword() {
+        const p1 = document.getElementById('matKhauMoi').value;
+        const p2 = document.getElementById('xacNhanMatKhau').value;
+        const msg = document.getElementById('pwdMatchMsg');
+
+        if (!p2) {
+            msg.classList.add('d-none');
+            return;
+        }
+
+        msg.classList.remove('d-none');
+        if (p1 === p2) {
+            msg.className = 'form-text small text-success';
+            msg.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Mật khẩu xác nhận trùng khớp!';
+        } else {
+            msg.className = 'form-text small text-danger';
+            msg.innerHTML = '<i class="bi bi-x-circle-fill me-1"></i>Mật khẩu xác nhận không trùng khớp!';
+        }
+    }
+
+    function hienThiModalThanhCong() {
+        const overlay = document.getElementById('customModalOverlay');
+        const prog = document.getElementById('customModalProgress');
+        overlay.classList.remove('d-none');
+
+        let width = 100;
+        const timer = setInterval(() => {
+            width -= 4;
+            prog.style.width = width + '%';
+            if (width <= 0) {
+                clearInterval(timer);
+                window.location.href = '/login';
+            }
+        }, 100);
+    }
+</script>
+
+</body>
+</html>
