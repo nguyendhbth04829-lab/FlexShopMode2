@@ -1,0 +1,264 @@
+<!--
+  =====================================================================
+  DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+  PHÂN HỆ: TÀI CHÍNH & TÍN DỤNG TIÊU DÙNG (DEV 5 - MINH)
+  USER STORY: US-63 - Chi Tiết Hợp Đồng & Lịch Trả Nợ SPayLater
+  =====================================================================
+-->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexShop - Chi Tiết Hợp Đồng SPayLater (US-63)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card-custom { border: none; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .table-hover tbody tr:hover { background-color: #f0f7ff; }
+    </style>
+</head>
+<body>
+
+<!-- Header Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/tra-sau/tai-khoan">
+            <i class="bi bi-clock-history text-warning me-2"></i>FlexShop SPayLater
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a href="/tra-sau/danh-sach-hop-dong" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách hợp đồng
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    <!-- Alert Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Tiêu đề Hợp đồng -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-file-earmark-text-fill text-warning me-2"></i>Hợp Đồng Trả Sau: <span class="text-primary" th:text="'HD#' + ${hopDong.maHopDong}"></span>
+            </h3>
+            <p class="text-muted mb-0">
+                Gắn với đơn hàng tổng <strong class="text-dark" th:text="${hopDong.donHangTong.maCodeDonTong}"></strong> 
+                | Ngày tạo: <span th:text="${#temporals.format(hopDong.ngayTao, 'dd/MM/yyyy HH:mm')}"></span>
+            </p>
+        </div>
+        <div>
+            <span class="badge fs-6 px-3 py-2" th:classappend="${hopDong.badgeClass}" th:text="${hopDong.trangThaiHopDongTiengViet}"></span>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Cột Trái: Thông tin Hợp đồng & Khách hàng -->
+        <div class="col-lg-4">
+            <!-- Thẻ Khách Hàng -->
+            <div class="card card-custom mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-person-badge text-primary me-2"></i>Thông Tin Khách Hàng
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <small class="text-muted d-block">Họ và tên:</small>
+                        <span class="fw-bold text-dark" th:text="${hopDong.taiKhoanTraSau.nguoiDung.hoVaTen}"></span>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted d-block">Số điện thoại:</small>
+                        <span class="text-dark" th:text="${hopDong.taiKhoanTraSau.nguoiDung.soDienThoai}"></span>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted d-block">Email:</small>
+                        <span class="text-dark" th:text="${hopDong.taiKhoanTraSau.nguoiDung.email}"></span>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block">Điểm tín dụng hiện tại:</small>
+                        <span class="badge bg-warning text-dark fw-bold">
+                            <i class="bi bi-star-fill me-1"></i><span th:text="${hopDong.taiKhoanTraSau.diemTinDung}"></span> điểm
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thẻ Khoản Vay -->
+            <div class="card card-custom">
+                <div class="card-header bg-white py-3">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-cash-coin text-success me-2"></i>Thông Tin Khoản Vay
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Tiền vay gốc:</span>
+                        <strong class="text-dark" th:text="${#numbers.formatDecimal(hopDong.tongSoTienVay, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Kỳ hạn trả góp:</span>
+                        <span class="fw-semibold text-dark" th:text="${hopDong.soKyTraGop} + ' kỳ (' + ${hopDong.soKyTraGop} + ' tháng)'"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Lãi suất tháng:</span>
+                        <span class="fw-bold text-primary" th:text="${hopDong.laiSuatThangPhanTram} + '%/tháng'"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Tổng cần thanh toán:</span>
+                        <strong class="text-primary" th:text="${#numbers.formatDecimal(hopDong.tongTienCanThanhToan, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Đã thanh toán:</span>
+                        <span class="fw-bold text-success" th:text="${#numbers.formatDecimal(hopDong.tongTienDaThanhToan, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-muted">Dư nợ còn lại:</span>
+                        <span class="fs-5 fw-bold text-danger" th:text="${#numbers.formatDecimal(hopDong.tongTienConNo, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột Phải: Bảng Lịch Trả Nợ Các Kỳ -->
+        <div class="col-lg-8">
+            <div class="card card-custom">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-calendar-check text-primary me-2"></i>Lịch Trả Nợ Các Kỳ (<span th:text="${hopDong.danhSachKy.size()}"></span> kỳ)
+                    </h6>
+                    <span class="badge bg-light text-dark border">
+                        Đã trả <span class="fw-bold text-success" th:text="${hopDong.soKyDaTra}"></span> / <span th:text="${hopDong.soKyTraGop}"></span> kỳ
+                    </span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Kỳ Số</th>
+                                    <th>Hạn Chốt Thanh Toán</th>
+                                    <th class="text-end">Cần Trả</th>
+                                    <th class="text-end">Đã Trả</th>
+                                    <th class="text-center">Trạng Thái</th>
+                                    <th class="text-center pe-3">Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="ky : ${hopDong.danhSachKy}">
+                                    <td class="ps-3 fw-bold text-dark">
+                                        <i class="bi bi-bookmark-fill text-warning me-1"></i>
+                                        <span th:text="'Kỳ ' + ${ky.kySo}"></span>
+                                    </td>
+                                    <td>
+                                        <span th:text="${#temporals.format(ky.hanChotThanhToan, 'dd/MM/yyyy')}"></span>
+                                        <small th:if="${ky.isQuaHan()}" class="badge bg-danger ms-1">Quá hạn</small>
+                                    </td>
+                                    <td class="text-end fw-bold text-primary" th:text="${#numbers.formatDecimal(ky.soTienCanTra, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                                    <td class="text-end fw-bold text-success" th:text="${#numbers.formatDecimal(ky.soTienDaTra, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                                    <td class="text-center">
+                                        <span class="badge" th:classappend="${ky.badgeClass}" th:text="${ky.tenTrangThaiTiengViet}"></span>
+                                    </td>
+                                    <td class="text-center pe-3">
+                                        <button th:if="${ky.trangThai != 'DA_TRA'}" type="button" 
+                                                class="btn btn-warning btn-sm fw-bold shadow-sm"
+                                                th:onclick="'moModalTraNo(' + ${ky.maKy} + ', ' + ${ky.kySo} + ', ' + ${ky.soTienCanTra} + ')'">
+                                            <i class="bi bi-credit-card-fill me-1"></i> Trả Nợ Kỳ Này
+                                        </button>
+                                        <span th:if="${ky.trangThai == 'DA_TRA'}" class="text-success fw-bold small">
+                                            <i class="bi bi-check-circle-fill me-1"></i> Đã hoàn tất
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-light p-3">
+                    <div class="d-flex align-items-center small text-muted">
+                        <i class="bi bi-info-circle-fill text-primary fs-5 me-2"></i>
+                        <span>Thanh toán đúng hạn giúp khôi phục ngay hạn mức khả dụng cho tài khoản ví và được cộng thưởng <strong>+5 điểm tín dụng</strong>.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal Trả Nợ Kỳ SPayLater -->
+<div class="modal fade" id="modalTraNo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-wallet2 me-2"></i>Thanh Toán Kỳ Trả Góp SPayLater
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form th:action="@{/tra-sau/tra-no-ky}" th:object="${traNoDTO}" method="post">
+                <div class="modal-body p-4">
+                    <input type="hidden" th:field="*{maHopDong}">
+                    <input type="hidden" th:field="*{maKy}" id="modalMaKy">
+
+                    <div class="p-3 bg-light rounded-3 mb-3 text-center">
+                        <small class="text-muted d-block">THANH TOÁN CHO</small>
+                        <h5 class="fw-bold text-dark mb-1" id="modalTenKy">Kỳ số 1</h5>
+                        <div class="fs-4 fw-bold text-danger" id="modalSoTienHienThi">0 đ</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Số tiền thanh toán (VNĐ):</label>
+                        <input type="number" class="form-control fw-bold fs-5 text-primary" th:field="*{soTienThanhToan}" id="modalSoTienInput" required readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Phương thức thanh toán nợ:</label>
+                        <select class="form-select" th:field="*{phuongThuc}">
+                            <option value="MOCK_QR">Quét Mã VietQR Ngân Hàng (Tức thì)</option>
+                            <option value="THE_NOI_DIA">Thẻ ATM Nội Địa / Napas</option>
+                            <option value="VI_FLEXPAY">Ví Điện Tử FlexPay</option>
+                        </select>
+                    </div>
+
+                    <div class="alert alert-info py-2 small mb-0">
+                        <i class="bi bi-shield-check me-1"></i> Hệ thống tự động xác nhận giao dịch thành công và phục hồi ngay hạn mức mua sắm.
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-warning fw-bold">
+                        <i class="bi bi-check2-circle me-1"></i> Xác Nhận Thanh Toán
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function moModalTraNo(maKy, kySo, soTien) {
+        document.getElementById('modalMaKy').value = maKy;
+        document.getElementById('modalTenKy').innerText = 'Kỳ số ' + kySo;
+        document.getElementById('modalSoTienInput').value = soTien;
+        document.getElementById('modalSoTienHienThi').innerText = new Intl.NumberFormat('vi-VN').format(soTien) + ' VNĐ';
+        new bootstrap.Modal(document.getElementById('modalTraNo')).show();
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -87,6 +87,9 @@ public class ThanhToanController {
             } else if ("MOCK_ONLINE".equalsIgnoreCase(dto.getPhuongThuc())) {
                 // Điều hướng sang cổng thanh toán trực tuyến giả lập Mock Gateway
                 return "redirect:/thanh-toan/mock-gateway?id=" + dto.getMaDonHangTong();
+            } else if ("SPAYLATER".equalsIgnoreCase(dto.getPhuongThuc())) {
+                // [US-63] Điều hướng sang màn hình chọn kỳ hạn và xác nhận vay SPayLater
+                return "redirect:/tra-sau/xac-nhan-vay?maDonHangTong=" + dto.getMaDonHangTong();
             } else {
                 redirectAttributes.addFlashAttribute("errorMessage", "Phương thức thanh toán không hợp lệ!");
                 return "redirect:/thanh-toan/chon-phuong-thuc?id=" + dto.getMaDonHangTong();
