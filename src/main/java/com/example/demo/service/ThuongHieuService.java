@@ -18,6 +18,9 @@ public class ThuongHieuService {
     @Autowired
     private ThuongHieuRepository thuongHieuRepository;
 
+    @Autowired
+    private FileStorageService fileStorageService;
+
     public Page<ThuongHieu> layDanhSach(String tuKhoa, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         if (tuKhoa != null && !tuKhoa.trim().isEmpty()) {
@@ -37,7 +40,15 @@ public class ThuongHieuService {
         }
         ThuongHieu th = new ThuongHieu();
         th.setTenThuongHieu(form.getTenThuongHieu().trim());
-        th.setLinkLogo(form.getLinkLogo());
+        
+        // Xử lý upload file logo nếu có
+        if (form.getFileLogo() != null && !form.getFileLogo().isEmpty()) {
+            String fileName = fileStorageService.luuFile(form.getFileLogo());
+            th.setLinkLogo(fileName);
+        } else {
+            th.setLinkLogo(form.getLinkLogo());
+        }
+        
         th.setDangHoatDong(form.getDangHoatDong() != null ? form.getDangHoatDong() : true);
         return thuongHieuRepository.save(th);
     }
@@ -47,7 +58,15 @@ public class ThuongHieuService {
         ThuongHieu th = thuongHieuRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy thương hiệu"));
         th.setTenThuongHieu(form.getTenThuongHieu().trim());
-        th.setLinkLogo(form.getLinkLogo());
+        
+        // Cập nhật file logo nếu có tải lên file mới
+        if (form.getFileLogo() != null && !form.getFileLogo().isEmpty()) {
+            String fileName = fileStorageService.luuFile(form.getFileLogo());
+            th.setLinkLogo(fileName);
+        } else if (form.getLinkLogo() != null) {
+            th.setLinkLogo(form.getLinkLogo());
+        }
+        
         th.setDangHoatDong(form.getDangHoatDong() != null ? form.getDangHoatDong() : true);
         return thuongHieuRepository.save(th);
     }

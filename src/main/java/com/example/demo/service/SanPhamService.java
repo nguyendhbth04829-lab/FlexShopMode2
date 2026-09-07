@@ -28,6 +28,7 @@ public class SanPhamService {
     @Autowired private BienTheSanPhamRepository bienTheRepository;
     @Autowired private LichSuGiaBienTheRepository lichSuGiaRepository;
     @Autowired private HinhAnhSanPhamRepository hinhAnhRepository;
+    @Autowired private FileStorageService fileStorageService;
 
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
@@ -68,7 +69,29 @@ public class SanPhamService {
         sp.setChieuRongCm(form.getChieuRongCm());
         sp.setChieuCaoCm(form.getChieuCaoCm());
 
-        return sanPhamRepository.save(sp);
+        SanPham savedSp = sanPhamRepository.save(sp);
+
+        // Xử lý upload danh sách ảnh (US-13: Max 9 ảnh)
+        if (form.getFileAnhList() != null && !form.getFileAnhList().isEmpty()) {
+            int thuTu = 1;
+            for (MultipartFile file : form.getFileAnhList()) {
+                if (file != null && !file.isEmpty()) {
+                    if (thuTu > 9) {
+                        break; // Chỉ cho phép tối đa 9 ảnh
+                    }
+                    String fileName = fileStorageService.luuFile(file);
+                    HinhAnhSanPham hinhAnh = new HinhAnhSanPham();
+                    hinhAnh.setSanPham(savedSp);
+                    hinhAnh.setLinkAnh(fileName);
+                    hinhAnh.setLaAnhChinh(thuTu == 1);
+                    hinhAnh.setThuTuHienThi(thuTu);
+                    hinhAnhRepository.save(hinhAnh);
+                    thuTu++;
+                }
+            }
+        }
+
+        return savedSp;
     }
 
     @Transactional

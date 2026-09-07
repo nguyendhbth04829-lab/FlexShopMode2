@@ -12,6 +12,10 @@ public class ThuongHieuForm {
     private String tenThuongHieu;
 
     private String linkLogo;
+    
+    // Thêm trường để hứng file upload từ form
+    private org.springframework.web.multipart.MultipartFile fileLogo;
+    
     private Boolean dangHoatDong = true;
 
     public Long getMaThuongHieu() { return maThuongHieu; }
@@ -22,6 +26,9 @@ public class ThuongHieuForm {
 
     public String getLinkLogo() { return linkLogo; }
     public void setLinkLogo(String linkLogo) { this.linkLogo = linkLogo; }
+
+    public org.springframework.web.multipart.MultipartFile getFileLogo() { return fileLogo; }
+    public void setFileLogo(org.springframework.web.multipart.MultipartFile fileLogo) { this.fileLogo = fileLogo; }
 
     public Boolean getDangHoatDong() { return dangHoatDong; }
     public void setDangHoatDong(Boolean dangHoatDong) { this.dangHoatDong = dangHoatDong; }

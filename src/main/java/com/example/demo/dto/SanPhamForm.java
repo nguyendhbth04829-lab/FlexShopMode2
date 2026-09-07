@@ -47,6 +47,9 @@ public class SanPhamForm {
     @Min(value = 1, message = "Chiều cao phải lớn hơn 0")
     private Integer chieuCaoCm;
 
+    // Danh sách file ảnh upload từ form (Max 9 ảnh theo US-13)
+    private java.util.List<org.springframework.web.multipart.MultipartFile> fileAnhList;
+
     // Getters and Setters (omitted standard implementation)
     public Long getMaSanPham() { return maSanPham; }
     public void setMaSanPham(Long maSanPham) { this.maSanPham = maSanPham; }
@@ -83,4 +86,7 @@ public class SanPhamForm {
 
     public Integer getChieuCaoCm() { return chieuCaoCm; }
     public void setChieuCaoCm(Integer chieuCaoCm) { this.chieuCaoCm = chieuCaoCm; }
+
+    public java.util.List<org.springframework.web.multipart.MultipartFile> getFileAnhList() { return fileAnhList; }
+    public void setFileAnhList(java.util.List<org.springframework.web.multipart.MultipartFile> fileAnhList) { this.fileAnhList = fileAnhList; }
 }
