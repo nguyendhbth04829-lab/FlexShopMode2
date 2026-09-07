@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sổ Địa Chỉ Giao Hàng (US-05) - Sàn Thương Mại Điện Tử FlexShop</title>
+    <!-- Bootstrap 5 CSS & Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Tom Select for Searchable Comboboxes -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .navbar-customer {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .address-card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+        .address-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+        }
+        .address-card.is-default {
+            border-color: #10b981;
+            background: linear-gradient(to bottom, #f0fdf4 0%, #ffffff 70px);
+        }
+        .default-ribbon {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #10b981;
+            color: white;
+            padding: 4px 14px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            border-bottom-left-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .progress {
+            height: 8px;
+            border-radius: 10px;
+            background-color: #e2e8f0;
+        }
+        .form-label {
+            font-weight: 600;
+            font-size: 13px;
+            color: #334155;
+            margin-bottom: 4px;
+        }
+        .btn-action {
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            padding: 0;
+        }
+        /* Tom Select Styling */
+        .ts-wrapper .ts-control {
+            border-radius: 10px !important;
+            padding: 9px 14px !important;
+            font-size: 14px;
+            border-color: #cbd5e1;
+            background-color: #ffffff;
+        }
+        .ts-wrapper.focus .ts-control {
+            border-color: #4f46e5 !important;
+            box-shadow: 0 0 0 0.25rem rgba(79, 70, 229, 0.15) !important;
+        }
+        .ts-dropdown {
+            z-index: 1070 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 15px 30px -5px rgba(0,0,0,0.15) !important;
+            border: 1px solid #e2e8f0 !important;
+            padding: 6px !important;
+        }
+        .ts-dropdown .option {
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 13.5px;
+        }
+        .ts-dropdown .active {
+            background-color: #eef2ff !important;
+            color: #4338ca !important;
+            font-weight: 600;
+        }
+        /* Gợi ý tìm kiếm nhanh */
+        .quick-item {
+            cursor: pointer;
+            padding: 10px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            transition: all 0.15s ease;
+        }
+        .quick-item:hover {
+            background-color: #f8fafc;
+            color: #4338ca;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light navbar-customer px-4 py-3 sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/customer/dashboard">
+            <div class="bg-primary text-white rounded-3 px-2 py-1 fs-5 fw-bold">
+                <i class="bi bi-bag-heart-fill"></i>
+            </div>
+            <div>
+                <span class="fw-bold tracking-tight text-dark">FlexShop</span>
+                <span class="badge bg-success text-white ms-1">KHÁCH HÀNG</span>
+            </div>
+        </a>
+
+        <div class="d-flex align-items-center gap-3">
+            <a href="/customer/dashboard" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i> Dashboard
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <img th:src="${user.anhDaiDien}" alt="Avatar" class="rounded-circle border border-2 border-success" width="36" height="36">
+                <div class="d-none d-md-block text-start">
+                    <div class="fw-bold small text-dark" th:text="${user.hoVaTen}">Nguyễn Văn Khách</div>
+                    <div class="text-muted" style="font-size: 11px;" th:text="${user.email}">customer@flexshop.com</div>
+                </div>
+            </div>
+            <a href="/logout" onclick="handleLogout(event)" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 fw-semibold">
+                <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container-xl px-4 py-4">
+
+    <!-- Breadcrumb & Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small">
+                    <li class="breadcrumb-item"><a href="/customer/dashboard" class="text-decoration-none">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Sổ Địa Chỉ Giao Hàng</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                <span>Sổ Địa Chỉ Nhận Hàng (US-05)</span>
+                <span class="badge bg-primary fs-6 fw-semibold">Tối đa 20</span>
+            </h3>
+            <p class="text-muted small mb-0">Quản lý các địa chỉ nhận hàng của bạn. Khi chọn địa chỉ mặc định mới, hệ thống tự động đồng bộ trong cùng 1 Transaction.</p>
+        </div>
+        <div class="mt-3 mt-md-0">
+            <button id="btnThemDiaChi" type="button" class="btn btn-primary fw-semibold px-3 py-2 rounded-3 shadow-sm d-flex align-items-center gap-2" onclick="moModalThemDiaChi()">
+                <i class="bi bi-plus-circle-fill"></i> Thêm Địa Chỉ Mới
+            </button>
+        </div>
+    </div>
+
+    <!-- KPI & Address Slots Overview -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-semibold">Số lượng địa chỉ đã lưu</span>
+                    <span id="txtSlotBadge" class="badge bg-success bg-opacity-10 text-success fw-bold" th:text="${thongKe.tongSoDiaChi} + '/' + ${thongKe.gioiHanToiDa}">...</span>
+                </div>
+                <div class="d-flex align-items-baseline gap-2 mb-2">
+                    <span id="txtTongSo" class="fs-2 fw-bold text-dark" th:text="${thongKe.tongSoDiaChi}">0</span>
+                    <span class="text-muted fs-5">/ 20</span>
+                </div>
+                <div class="progress mb-2">
+                    <div id="progressSlots" class="progress-bar bg-success" role="progressbar" th:style="'width: ' + (${thongKe.tongSoDiaChi} * 100 / ${thongKe.gioiHanToiDa}) + '%'"></div>
+                </div>
+                <small id="txtConLai" class="text-muted" th:text="'Còn lại ' + ${thongKe.soLuongConLai} + ' vị trí địa chỉ có thể lưu thêm.'">Còn lại 20 vị trí địa chỉ có thể thêm.</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-semibold">Địa chỉ nhận hàng mặc định</span>
+                    <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                </div>
+                <div id="boxMacDinhTomTat">
+                    <th:block th:if="${thongKe.coDiaChiMacDinh and thongKe.diaChiMacDinh != null}">
+                        <div class="fw-bold text-dark small mb-1" th:text="${thongKe.diaChiMacDinh.tenNguoiNhan + ' - ' + thongKe.diaChiMacDinh.soDienThoai}">Nguyễn Văn A - 0987654321</div>
+                        <div class="text-muted small text-truncate" th:text="${thongKe.diaChiMacDinh.diaChiDayDu}">Hà Nội</div>
+                    </th:block>
+                    <th:block th:unless="${thongKe.coDiaChiMacDinh and thongKe.diaChiMacDinh != null}">
+                        <span class="badge bg-warning text-dark">Chưa có địa chỉ mặc định</span>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-semibold">Quy định nghiệp vụ US-05</span>
+                    <i class="bi bi-shield-lock-fill text-primary fs-5"></i>
+                </div>
+                <ul class="list-unstyled small mb-0 text-secondary">
+                    <li class="mb-1"><i class="bi bi-check2 text-success me-1"></i> Tối đa lưu <b>20 địa chỉ</b> mỗi người dùng.</li>
+                    <li class="mb-1"><i class="bi bi-check2 text-success me-1"></i> Chỉ có <b>duy nhất 1 địa chỉ mặc định</b> tại một thời điểm.</li>
+                    <li><i class="bi bi-check2 text-success me-1"></i> Đồng bộ tự động trong <b>Database Transaction</b>.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+        <div class="row g-2 align-items-center">
+            <div class="col-lg-5 col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" id="inputKeyword" class="form-control bg-light border-start-0 ps-0" placeholder="Tìm theo tên người nhận, SĐT, số nhà, phường xã..." onkeyup="onSearchInput(event)">
+                    <button class="btn btn-primary px-3" type="button" onclick="taiDanhSachDiaChi(0)">Tìm</button>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6">
+                <select id="selectTinhThanh" class="form-select bg-light" onchange="taiDanhSachDiaChi(0)">
+                    <option value="">-- Tất cả Tỉnh/Thành --</option>
+                    <option th:each="tinh : ${thongKe.danhSachTinhThanh}" th:value="${tinh}" th:text="${tinh}"></option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-6">
+                <select id="selectTrangThai" class="form-select bg-light" onchange="taiDanhSachDiaChi(0)">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="true">Chỉ mặc định</option>
+                    <option value="false">Không mặc định</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-12 text-end">
+                <button type="button" class="btn btn-outline-secondary w-100 rounded-3" onclick="datLaiBoLoc()">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Đặt lại
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Address Cards Container -->
+    <div id="addressListContainer" class="row g-3">
+        <!-- Loaded dynamically via JS -->
+        <div class="col-12 text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="text-muted mt-2 small">Đang tải danh sách địa chỉ...</p>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div id="paginationContainer" class="d-flex justify-content-between align-items-center mt-4 d-none">
+        <div class="small text-muted" id="paginationInfo">Hiển thị 0 / 0 địa chỉ</div>
+        <nav>
+            <ul class="pagination pagination-sm mb-0" id="paginationList">
+                <!-- Pages injected here -->
+            </ul>
+        </nav>
+    </div>
+
+</div>
+
+<!-- Modal Thêm / Sửa Địa Chỉ -->
+<div class="modal fade" id="modalDiaChi" tabindex="-1" aria-labelledby="modalDiaChiLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold" id="modalDiaChiLabel">
+                    <i class="bi bi-geo-alt-fill text-primary me-2"></i><span id="modalTieuDe">Thêm Địa Chỉ Mới</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formDiaChi" onsubmit="xuLyLuuDiaChi(event)">
+                <input type="hidden" id="formMaDiaChi" value="">
+                <div class="modal-body px-4 py-3">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="txtTenNguoiNhan">Tên người nhận <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control rounded-3" id="txtTenNguoiNhan" required maxlength="100" placeholder="Ví dụ: Nguyễn Văn A">
+                            <div class="invalid-feedback">Vui lòng nhập họ tên người nhận (2 - 100 ký tự).</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="txtSoDienThoai">Số điện thoại liên hệ <span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control rounded-3" id="txtSoDienThoai" required placeholder="Ví dụ: 0987654321 hoặc +84987654321">
+                            <div class="invalid-feedback">Số điện thoại Việt Nam không hợp lệ (10 số, đầu số 03, 05, 07, 08, 09).</div>
+                        </div>
+
+                        <!-- THANH TÌM KIẾM NHANH TỈNH / HUYỆN / XÃ -->
+                        <div class="col-12">
+                            <div class="p-3 bg-light rounded-4 border">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label text-primary fw-bold mb-0" for="inputTimKiemDiaChiNhanh">
+                                        <i class="bi bi-search me-1"></i> Tìm Kiếm Nhanh Tỉnh / Huyện / Xã
+                                    </label>
+                                    <small class="text-muted"><i class="bi bi-lightning-charge-fill text-warning"></i> Gợi ý tức thì</small>
+                                </div>
+                                <div class="position-relative">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-geo-alt-fill text-danger"></i></span>
+                                        <input type="text" id="inputTimKiemDiaChiNhanh" class="form-control border-start-0" 
+                                               placeholder="Gõ tên Phường/Xã, Quận/Huyện hoặc Tỉnh để chọn nhanh (VD: Cầu Giấy, Dịch Vọng, Bến Nghé, Đà Nẵng)..." 
+                                               autocomplete="off" oninput="xuLyTimKiemNhanh(event)">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="xoaTimKiemNhanh()" title="Xóa tìm kiếm">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </div>
+                                    <!-- Dropdown gợi ý kết quả tìm kiếm nhanh -->
+                                    <div id="quickSearchResults" class="list-group shadow-lg position-absolute w-100 mt-1 d-none bg-white rounded-3 border" 
+                                         style="z-index: 1080; max-height: 240px; overflow-y: auto;">
+                                    </div>
+                                </div>
+
+                                <!-- Phím bấm chọn nhanh các Tỉnh/Thành phố lớn -->
+                                <div class="d-flex flex-wrap align-items-center gap-1 mt-2">
+                                    <span class="small text-muted me-1">Chọn nhanh:</span>
+                                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2" style="font-size: 11px;" onclick="chonNhanhTinh(1)">Hà Nội</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2" style="font-size: 11px;" onclick="chonNhanhTinh(79)">TP. HCM</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2" style="font-size: 11px;" onclick="chonNhanhTinh(48)">Đà Nẵng</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2" style="font-size: 11px;" onclick="chonNhanhTinh(31)">Hải Phòng</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2" style="font-size: 11px;" onclick="chonNhanhTinh(92)">Cần Thơ</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2" style="font-size: 11px;" onclick="chonNhanhTinh(74)">Bình Dương</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2" style="font-size: 11px;" onclick="chonNhanhTinh(75)">Đồng Nai</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3 COMBOBOX LỰA CHỌN TỈNH -> HUYỆN -> XÃ CÓ TÌM KIẾM LỌC TỨC THÌ -->
+                        <div class="col-md-4">
+                            <label class="form-label" for="selectModalTinhThanh">
+                                Tỉnh / Thành phố <span class="text-danger">*</span>
+                            </label>
+                            <select id="selectModalTinhThanh" class="form-select rounded-3" required>
+                                <option value="">-- Chọn hoặc gõ tìm Tỉnh/Thành --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label" for="selectModalQuanHuyen">
+                                Quận / Huyện <span class="text-danger">*</span>
+                            </label>
+                            <select id="selectModalQuanHuyen" class="form-select rounded-3" required disabled>
+                                <option value="">-- Chọn Tỉnh/Thành trước --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label" for="selectModalXaPhuong">
+                                Xã / Phường / Thị trấn <span class="text-danger">*</span>
+                            </label>
+                            <select id="selectModalXaPhuong" class="form-select rounded-3" required disabled>
+                                <option value="">-- Chọn Quận/Huyện trước --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label" for="txtDiaChiChiTiet">Địa chỉ cụ thể (Số nhà, tên đường, tòa nhà...) <span class="text-danger">*</span></label>
+                            <textarea class="form-control rounded-3" id="txtDiaChiChiTiet" rows="2" required maxlength="255" placeholder="Ví dụ: Số 123 đường Cầu Giấy, Tòa nhà Indochina, Tầng 5"></textarea>
+                            <div class="invalid-feedback">Vui lòng nhập địa chỉ cụ thể chi tiết.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" role="switch" id="chkLaMacDinh">
+                                <label class="form-check-label fw-semibold" for="chkLaMacDinh">
+                                    Đặt làm địa chỉ nhận hàng mặc định
+                                </label>
+                                <div class="text-muted small">Nếu chọn, hệ thống sẽ tự động chuyển các địa chỉ khác của bạn về không mặc định.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" id="btnSubmitForm" class="btn btn-primary rounded-pill px-4 fw-bold">
+                        <span id="btnSubmitText">Lưu Địa Chỉ</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ==========================================
+    // DANH SÁCH ĐẦY ĐỦ 63 TỈNH THÀNH VIỆT NAM
+    // ==========================================
+    const DANH_SACH_63_TINH = [
+        { code: 1, name: "Thành phố Hà Nội", clean: "Hà Nội" },
+        { code: 79, name: "Thành phố Hồ Chí Minh", clean: "Hồ Chí Minh" },
+        { code: 48, name: "Thành phố Đà Nẵng", clean: "Đà Nẵng" },
+        { code: 31, name: "Thành phố Hải Phòng", clean: "Hải Phòng" },
+        { code: 92, name: "Thành phố Cần Thơ", clean: "Cần Thơ" },
+        { code: 46, name: "Tỉnh Thừa Thiên Huế", clean: "Thừa Thiên Huế" },
+        { code: 74, name: "Tỉnh Bình Dương", clean: "Bình Dương" },
+        { code: 75, name: "Tỉnh Đồng Nai", clean: "Đồng Nai" },
+        { code: 27, name: "Tỉnh Bắc Ninh", clean: "Bắc Ninh" },
+        { code: 22, name: "Tỉnh Quảng Ninh", clean: "Quảng Ninh" },
+        { code: 77, name: "Tỉnh Bà Rịa - Vũng Tàu", clean: "Bà Rịa - Vũng Tàu" },
+        { code: 2, name: "Tỉnh Hà Giang", clean: "Hà Giang" },
+        { code: 4, name: "Tỉnh Cao Bằng", clean: "Cao Bằng" },
+        { code: 6, name: "Tỉnh Bắc Kạn", clean: "Bắc Kạn" },
+        { code: 8, name: "Tỉnh Tuyên Quang", clean: "Tuyên Quang" },
+        { code: 10, name: "Tỉnh Lào Cai", clean: "Lào Cai" },
+        { code: 11, name: "Tỉnh Điện Biên", clean: "Điện Biên" },
+        { code: 12, name: "Tỉnh Lai Châu", clean: "Lai Châu" },
+        { code: 14, name: "Tỉnh Sơn La", clean: "Sơn La" },
+        { code: 15, name: "Tỉnh Yên Bái", clean: "Yên Bái" },
+        { code: 17, name: "Tỉnh Hoà Bình", clean: "Hoà Bình" },
+        { code: 19, name: "Tỉnh Thái Nguyên", clean: "Thái Nguyên" },
+        { code: 20, name: "Tỉnh Lạng Sơn", clean: "Lạng Sơn" },
+        { code: 24, name: "Tỉnh Bắc Giang", clean: "Bắc Giang" },
+        { code: 25, name: "Tỉnh Phú Thọ", clean: "Phú Thọ" },
+        { code: 26, name: "Tỉnh Vĩnh Phúc", clean: "Vĩnh Phúc" },
+        { code: 30, name: "Tỉnh Hải Dương", clean: "Hải Dương" },
+        { code: 33, name: "Tỉnh Hưng Yên", clean: "Hưng Yên" },
+        { code: 34, name: "Tỉnh Thái Bình", clean: "Thái Bình" },
+        { code: 35, name: "Tỉnh Hà Nam", clean: "Hà Nam" },
+        { code: 36, name: "Tỉnh Nam Định", clean: "Nam Định" },
+        { code: 37, name: "Tỉnh Ninh Bình", clean: "Ninh Bình" },
+        { code: 38, name: "Tỉnh Thanh Hóa", clean: "Thanh Hóa" },
+        { code: 40, name: "Tỉnh Nghệ An", clean: "Nghệ An" },
+        { code: 42, name: "Tỉnh Hà Tĩnh", clean: "Hà Tĩnh" },
+        { code: 44, name: "Tỉnh Quảng Bình", clean: "Quảng Bình" },
+        { code: 45, name: "Tỉnh Quảng Trị", clean: "Quảng Trị" },
+        { code: 49, name: "Tỉnh Quảng Nam", clean: "Quảng Nam" },
+        { code: 51, name: "Tỉnh Quảng Ngãi", clean: "Quảng Ngãi" },
+        { code: 52, name: "Tỉnh Bình Định", clean: "Bình Định" },
+        { code: 54, name: "Tỉnh Phú Yên", clean: "Phú Yên" },
+        { code: 56, name: "Tỉnh Khánh Hòa", clean: "Khánh Hòa" },
+        { code: 58, name: "Tỉnh Ninh Thuận", clean: "Ninh Thuận" },
+        { code: 60, name: "Tỉnh Bình Thuận", clean: "Bình Thuận" },
+        { code: 62, name: "Tỉnh Kon Tum", clean: "Kon Tum" },
+        { code: 64, name: "Tỉnh Gia Lai", clean: "Gia Lai" },
+        { code: 66, name: "Tỉnh Đắk Lắk", clean: "Đắk Lắk" },
+        { code: 67, name: "Tỉnh Đắk Nông", clean: "Đắk Nông" },
+        { code: 68, name: "Tỉnh Lâm Đồng", clean: "Lâm Đồng" },
+        { code: 70, name: "Tỉnh Bình Phước", clean: "Bình Phước" },
+        { code: 72, name: "Tỉnh Tây Ninh", clean: "Tây Ninh" },
+        { code: 80, name: "Tỉnh Long An", clean: "Long An" },
+        { code: 82, name: "Tỉnh Tiền Giang", clean: "Tiền Giang" },
+        { code: 83, name: "Tỉnh Bến Tre", clean: "Bến Tre" },
+        { code: 84, name: "Tỉnh Trà Vinh", clean: "Trà Vinh" },
+        { code: 86, name: "Tỉnh Vĩnh Long", clean: "Vĩnh Long" },
+        { code: 87, name: "Tỉnh Đồng Tháp", clean: "Đồng Tháp" },
+        { code: 89, name: "Tỉnh An Giang", clean: "An Giang" },
+        { code: 91, name: "Tỉnh Kiên Giang", clean: "Kiên Giang" },
+        { code: 93, name: "Tỉnh Hậu Giang", clean: "Hậu Giang" },
+        { code: 94, name: "Tỉnh Sóc Trăng", clean: "Sóc Trăng" },
+        { code: 95, name: "Tỉnh Bạc Liêu", clean: "Bạc Liêu" },
+        { code: 96, name: "Tỉnh Cà Mau", clean: "Cà Mau" }
+    ];
+
+    // Bộ nhớ đệm cache Districts & Wards
+    const cacheDistricts = {};
+    const cacheWards = {};
+
+    let tsTinh = null;
+    let tsHuyen = null;
+    let tsXa = null;
+
+    let trangHienTai = 0;
+    const kichThuocTrang = 6;
+    let modalDiaChiInstance = null;
+    let debounceTimer = null;
+    let searchQuickTimer = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const modalEl = document.getElementById('modalDiaChi');
+        if (modalEl) {
+            modalDiaChiInstance = new bootstrap.Modal(modalEl);
+        }
+        
+        // Khởi tạo 3 Combobox Tom Select
+        khoiTaoComboboxes();
+
+        // Tải dữ liệu trang
+        taiThongKe();
+        taiDanhSachDiaChi(0);
+
+        // Đóng gợi ý tìm kiếm khi click ngoài
+        document.addEventListener('click', (e) => {
+            const container = document.getElementById('quickSearchResults');
+            const input = document.getElementById('inputTimKiemDiaChiNhanh');
+            if (container && !container.contains(e.target) && e.target !== input) {
+                container.classList.add('d-none');
+            }
+        });
+    });
+
+    // Khởi tạo 3 combobox Tom Select tìm kiếm có thể lọc
+    function khoiTaoComboboxes() {
+        if (typeof TomSelect !== 'undefined') {
+            tsTinh = new TomSelect('#selectModalTinhThanh', {
+                valueField: 'code',
+                labelField: 'name',
+                searchField: ['name', 'clean'],
+                placeholder: '🔍 Gõ hoặc chọn Tỉnh / Thành phố...',
+                maxOptions: 100,
+                onChange: function(val) {
+                    if (val) xuLyChonTinh(val);
+                    else datLaiComboboxHuyenXa();
+                }
+            });
+
+            tsHuyen = new TomSelect('#selectModalQuanHuyen', {
+                valueField: 'code',
+                labelField: 'name',
+                searchField: ['name'],
+                placeholder: '🔍 Gõ hoặc chọn Quận / Huyện...',
+                maxOptions: 100,
+                onChange: function(val) {
+                    if (val) xuLyChonHuyen(val);
+                    else datLaiComboboxXa();
+                }
+            });
+
+            tsXa = new TomSelect('#selectModalXaPhuong', {
+                valueField: 'code',
+                labelField: 'name',
+                searchField: ['name'],
+                placeholder: '🔍 Gõ hoặc chọn Xã / Phường...',
+                maxOptions: 200
+            });
+
+            // Nạp 63 tỉnh thành vào combobox tỉnh
+            tsTinh.addOptions(DANH_SACH_63_TINH);
+            tsHuyen.disable();
+            tsXa.disable();
+        } else {
+            // Fallback nếu TomSelect không load được
+            const elTinh = document.getElementById('selectModalTinhThanh');
+            DANH_SACH_63_TINH.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.code;
+                opt.textContent = t.name;
+                elTinh.appendChild(opt);
+            });
+            elTinh.addEventListener('change', (e) => xuLyChonTinh(e.target.value));
+            document.getElementById('selectModalQuanHuyen').addEventListener('change', (e) => xuLyChonHuyen(e.target.value));
+        }
+    }
+
+    // Xử lý khi người dùng chọn Tỉnh -> Lọc danh sách Quận/Huyện
+    async function xuLyChonTinh(tinhCode, callbackSauKhiLoad) {
+        if (!tinhCode) {
+            datLaiComboboxHuyenXa();
+            return;
+        }
+
+        let districts = cacheDistricts[tinhCode];
+        if (!districts) {
+            try {
+                const res = await fetch(`https://provinces.open-api.vn/api/p/${tinhCode}?depth=2`);
+                if (res.ok) {
+                    const data = await res.json();
+                    districts = (data.districts || []).map(d => ({ code: d.code, name: d.name }));
+                    cacheDistricts[tinhCode] = districts;
+                }
+            } catch (err) {
+                console.error('Không thể tải huyện từ open-api:', err);
+            }
+        }
+
+        if (!districts) districts = [];
+
+        if (tsHuyen) {
+            tsHuyen.clear();
+            tsHuyen.clearOptions();
+            tsHuyen.addOptions(districts);
+            tsHuyen.enable();
+            datLaiComboboxXa();
+        } else {
+            const elHuyen = document.getElementById('selectModalQuanHuyen');
+            elHuyen.innerHTML = '<option value="">-- Chọn Quận / Huyện --</option>';
+            districts.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d.code;
+                opt.textContent = d.name;
+                elHuyen.appendChild(opt);
+            });
+            elHuyen.disabled = false;
+            datLaiComboboxXa();
+        }
+
+        if (callbackSauKhiLoad && typeof callbackSauKhiLoad === 'function') {
+            callbackSauKhiLoad();
+        }
+    }
+
+    // Xử lý khi người dùng chọn Quận/Huyện -> Lọc danh sách Xã/Phường
+    async function xuLyChonHuyen(huyenCode, callbackSauKhiLoad) {
+        if (!huyenCode) {
+            datLaiComboboxXa();
+            return;
+        }
+
+        let wards = cacheWards[huyenCode];
+        if (!wards) {
+            try {
+                const res = await fetch(`https://provinces.open-api.vn/api/d/${huyenCode}?depth=2`);
+                if (res.ok) {
+                    const data = await res.json();
+                    wards = (data.wards || []).map(w => ({ code: w.code, name: w.name }));
+                    cacheWards[huyenCode] = wards;
+                }
+            } catch (err) {
+                console.error('Không thể tải xã/phường từ open-api:', err);
+            }
+        }
+
+        if (!wards) wards = [];
+
+        if (tsXa) {
+            tsXa.clear();
+            tsXa.clearOptions();
+            tsXa.addOptions(wards);
+            tsXa.enable();
+        } else {
+            const elXa = document.getElementById('selectModalXaPhuong');
+            elXa.innerHTML = '<option value="">-- Chọn Xã / Phường --</option>';
+            wards.forEach(w => {
+                const opt = document.createElement('option');
+                opt.value = w.code;
+                opt.textContent = w.name;
+                elXa.appendChild(opt);
+            });
+            elXa.disabled = false;
+        }
+
+        if (callbackSauKhiLoad && typeof callbackSauKhiLoad === 'function') {
+            callbackSauKhiLoad();
+        }
+    }
+
+    function datLaiComboboxHuyenXa() {
+        if (tsHuyen) {
+            tsHuyen.clear();
+            tsHuyen.clearOptions();
+            tsHuyen.disable();
+        }
+        datLaiComboboxXa();
+    }
+
+    function datLaiComboboxXa() {
+        if (tsXa) {
+            tsXa.clear();
+            tsXa.clearOptions();
+            tsXa.disable();
+        }
+    }
+
+    // Chọn nhanh Tỉnh từ các nút phím tắt (Hà Nội, TP.HCM, Đà Nẵng...)
+    function chonNhanhTinh(code) {
+        if (tsTinh) {
+            tsTinh.setValue(code);
+            tsHuyen.focus();
+        }
+    }
+
+    // THANH TÌM KIẾM NHANH TỈNH / HUYỆN / XÃ
+    function xuLyTimKiemNhanh(event) {
+        const query = event.target.value.trim();
+        const resultsBox = document.getElementById('quickSearchResults');
+
+        clearTimeout(searchQuickTimer);
+        if (!query || query.length < 2) {
+            resultsBox.classList.add('d-none');
+            resultsBox.innerHTML = '';
+            return;
+        }
+
+        searchQuickTimer = setTimeout(async () => {
+            let html = '';
+            const lowerQ = query.toLowerCase();
+
+            // 1. Tìm trong 63 Tỉnh Thành
+            const matchTinh = DANH_SACH_63_TINH.filter(t => 
+                t.name.toLowerCase().includes(lowerQ) || t.clean.toLowerCase().includes(lowerQ)
+            );
+            matchTinh.slice(0, 3).forEach(t => {
+                html += `
+                    <div class="quick-item d-flex align-items-center justify-content-between" onclick="chonGoiY('tinh', ${t.code})">
+                        <div>
+                            <span class="badge bg-primary me-2">Tỉnh/Thành</span>
+                            <strong class="text-dark">${escapeHtml(t.name)}</strong>
+                        </div>
+                        <small class="text-muted"><i class="bi bi-arrow-right"></i></small>
+                    </div>
+                `;
+            });
+
+            // 2. Tìm Quận/Huyện qua API
+            try {
+                const resD = await fetch(`https://provinces.open-api.vn/api/d/search/?q=${encodeURIComponent(query)}`);
+                if (resD.ok) {
+                    const dataD = await resD.json();
+                    dataD.slice(0, 4).forEach(d => {
+                        html += `
+                            <div class="quick-item d-flex align-items-center justify-content-between" onclick="chonGoiY('huyen', ${d.code})">
+                                <div>
+                                    <span class="badge bg-success me-2">Quận/Huyện</span>
+                                    <strong class="text-dark">${escapeHtml(d.name)}</strong>
+                                </div>
+                                <small class="text-muted"><i class="bi bi-arrow-right"></i></small>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (e) {}
+
+            // 3. Tìm Xã/Phường qua API
+            try {
+                const resW = await fetch(`https://provinces.open-api.vn/api/w/search/?q=${encodeURIComponent(query)}`);
+                if (resW.ok) {
+                    const dataW = await resW.json();
+                    dataW.slice(0, 4).forEach(w => {
+                        html += `
+                            <div class="quick-item d-flex align-items-center justify-content-between" onclick="chonGoiY('xa', ${w.code})">
+                                <div>
+                                    <span class="badge bg-info text-dark me-2">Xã/Phường</span>
+                                    <strong class="text-dark">${escapeHtml(w.name)}</strong>
+                                </div>
+                                <small class="text-muted"><i class="bi bi-arrow-right"></i></small>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (e) {}
+
+            if (!html) {
+                html = `<div class="p-3 text-center text-muted small">Không tìm thấy địa danh phù hợp với "${escapeHtml(query)}"</div>`;
+            }
+
+            resultsBox.innerHTML = html;
+            resultsBox.classList.remove('d-none');
+        }, 300);
+    }
+
+    // Khi người dùng click vào một gợi ý từ thanh tìm kiếm nhanh
+    async function chonGoiY(loai, code) {
+        document.getElementById('quickSearchResults').classList.add('d-none');
+
+        if (loai === 'tinh') {
+            if (tsTinh) tsTinh.setValue(code);
+        } else if (loai === 'huyen') {
+            try {
+                const res = await fetch(`https://provinces.open-api.vn/api/d/${code}`);
+                if (res.ok) {
+                    const d = await res.json();
+                    if (tsTinh) tsTinh.setValue(d.province_code);
+                    await xuLyChonTinh(d.province_code, () => {
+                        if (tsHuyen) tsHuyen.setValue(d.code);
+                    });
+                }
+            } catch (e) {}
+        } else if (loai === 'xa') {
+            try {
+                const resW = await fetch(`https://provinces.open-api.vn/api/w/${code}`);
+                if (resW.ok) {
+                    const w = await resW.json();
+                    const resD = await fetch(`https://provinces.open-api.vn/api/d/${w.district_code}`);
+                    if (resD.ok) {
+                        const d = await resD.json();
+                        if (tsTinh) tsTinh.setValue(d.province_code);
+                        await xuLyChonTinh(d.province_code, async () => {
+                            if (tsHuyen) tsHuyen.setValue(d.code);
+                            await xuLyChonHuyen(d.code, () => {
+                                if (tsXa) tsXa.setValue(w.code);
+                            });
+                        });
+                    }
+                }
+            } catch (e) {}
+        }
+    }
+
+    function xoaTimKiemNhanh() {
+        const input = document.getElementById('inputTimKiemDiaChiNhanh');
+        input.value = '';
+        document.getElementById('quickSearchResults').classList.add('d-none');
+    }
+
+    function handleLogout(e) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('currentUser');
+        document.cookie = "ACCESS_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        document.cookie = "REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    }
+
+    function getAuthHeaders() {
+        const token = localStorage.getItem('accessToken');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) {
+            headers['Authorization'] = 'Bearer ' + token;
+        }
+        return headers;
+    }
+
+    // Trích xuất dữ liệu trả về từ wrapper PhanHoiApi ({ thanhCong, thongBao, duLieu, data })
+    function giaiMaDuLieu(resJson) {
+        if (!resJson) return null;
+        if (resJson.duLieu !== undefined && resJson.duLieu !== null) return resJson.duLieu;
+        if (resJson.data !== undefined && resJson.data !== null) return resJson.data;
+        return resJson;
+    }
+
+    // Tải thông kê sổ địa chỉ
+    async function taiThongKe() {
+        try {
+            const res = await fetch('/api/v1/dia-chi/thong-ke', { credentials: 'include', headers: getAuthHeaders() });
+            if (!res.ok) return;
+            const resJson = await res.json();
+            const data = giaiMaDuLieu(resJson);
+            if (!data) return;
+
+            document.getElementById('txtTongSo').textContent = data.tongSoDiaChi;
+            document.getElementById('txtConLai').textContent = `Còn lại ${data.soLuongConLai} vị trí địa chỉ có thể lưu thêm.`;
+            
+            const phanTram = Math.min(100, Math.round((data.tongSoDiaChi / data.gioiHanToiDa) * 100));
+            const progressBar = document.getElementById('progressSlots');
+            progressBar.style.width = phanTram + '%';
+            if (phanTram >= 90) {
+                progressBar.className = 'progress-bar bg-danger';
+            } else if (phanTram >= 60) {
+                progressBar.className = 'progress-bar bg-warning';
+            } else {
+                progressBar.className = 'progress-bar bg-success';
+            }
+
+            const slotBadge = document.getElementById('txtSlotBadge');
+            slotBadge.textContent = `${data.tongSoDiaChi}/${data.gioiHanToiDa}`;
+
+            // Box địa chỉ mặc định
+            const boxMacDinh = document.getElementById('boxMacDinhTomTat');
+            if (data.coDiaChiMacDinh && data.diaChiMacDinh) {
+                boxMacDinh.innerHTML = `
+                    <div class="fw-bold text-dark small mb-1">${escapeHtml(data.diaChiMacDinh.tenNguoiNhan)} - ${escapeHtml(data.diaChiMacDinh.soDienThoai)}</div>
+                    <div class="text-muted small text-truncate">${escapeHtml(data.diaChiMacDinh.diaChiDayDu)}</div>
+                `;
+            } else {
+                boxMacDinh.innerHTML = `<span class="badge bg-warning text-dark">Chưa có địa chỉ mặc định</span>`;
+            }
+
+            // Đổ danh sách Tỉnh/Thành vào filter nếu có
+            if (data.danhSachTinhThanh && data.danhSachTinhThanh.length > 0) {
+                const selectTinhThanh = document.getElementById('selectTinhThanh');
+                const selectedVal = selectTinhThanh.value;
+                selectTinhThanh.innerHTML = '<option value="">-- Tất cả Tỉnh/Thành --</option>';
+                data.danhSachTinhThanh.forEach(tinh => {
+                    const opt = document.createElement('option');
+                    opt.value = tinh;
+                    opt.textContent = tinh;
+                    if (tinh === selectedVal) opt.selected = true;
+                    selectTinhThanh.appendChild(opt);
+                });
+            }
+
+            // Giới hạn nút thêm nếu đã đạt 20
+            const btnThem = document.getElementById('btnThemDiaChi');
+            if (data.tongSoDiaChi >= data.gioiHanToiDa) {
+                btnThem.classList.add('disabled');
+                btnThem.title = 'Đã đạt giới hạn 20 địa chỉ';
+            } else {
+                btnThem.classList.remove('disabled');
+                btnThem.title = '';
+            }
+
+        } catch (e) {
+            console.error('Lỗi khi tải thống kê:', e);
+        }
+    }
+
+    // Tải danh sách địa chỉ phân trang & tìm lọc
+    async function taiDanhSachDiaChi(page = 0) {
+        trangHienTai = page;
+        const container = document.getElementById('addressListContainer');
+        const keyword = document.getElementById('inputKeyword').value.trim();
+        const tinhThanh = document.getElementById('selectTinhThanh').value;
+        const laMacDinh = document.getElementById('selectTrangThai').value;
+
+        const params = new URLSearchParams({
+            page: page,
+            size: kichThuocTrang
+        });
+        if (keyword) params.append('keyword', keyword);
+        if (tinhThanh) params.append('tinhThanh', tinhThanh);
+        if (laMacDinh !== '') params.append('laMacDinh', laMacDinh);
+
+        try {
+            const res = await fetch(`/api/v1/dia-chi?${params.toString()}`, { credentials: 'include', headers: getAuthHeaders() });
+            if (!res.ok) {
+                container.innerHTML = `<div class="col-12 text-center text-danger py-4">Không thể tải danh sách địa chỉ!</div>`;
+                return;
+            }
+
+            const resJson = await res.json();
+            const pageData = giaiMaDuLieu(resJson);
+            hienThiDanhSach(pageData);
+            hienThiPhanTrang(pageData);
+
+        } catch (e) {
+            console.error('Lỗi kết nối API danh sách địa chỉ:', e);
+            container.innerHTML = `<div class="col-12 text-center text-danger py-4">Đã xảy ra lỗi kết nối!</div>`;
+        }
+    }
+
+    function hienThiDanhSach(pageData) {
+        const container = document.getElementById('addressListContainer');
+        if (!pageData) {
+            container.innerHTML = `<div class="col-12 text-center py-5"><h5 class="text-muted">Không tìm thấy địa chỉ nào</h5></div>`;
+            return;
+        }
+
+        const items = pageData.content || (Array.isArray(pageData) ? pageData : []);
+
+        if (!items || items.length === 0) {
+            container.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <div class="mb-3 text-secondary opacity-50 fs-1"><i class="bi bi-geo-alt"></i></div>
+                    <h5 class="fw-bold text-muted">Không tìm thấy địa chỉ nào</h5>
+                    <p class="text-muted small">Hãy thử tìm kiếm với từ khóa khác hoặc bấm nút thêm địa chỉ mới.</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        items.forEach(diaChi => {
+            const isDef = diaChi.laMacDinh;
+            html += `
+                <div class="col-lg-6 col-md-12">
+                    <div class="address-card p-4 h-100 ${isDef ? 'is-default' : ''}">
+                        ${isDef ? '<div class="default-ribbon"><i class="bi bi-star-fill"></i> MẶC ĐỊNH</div>' : ''}
+                        
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h5 class="fw-bold mb-1 text-dark">${escapeHtml(diaChi.tenNguoiNhan)}</h5>
+                                <div class="text-muted small">
+                                    <i class="bi bi-telephone-fill text-primary me-1"></i>
+                                    <span class="fw-semibold">${escapeHtml(diaChi.soDienThoai)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="my-3 py-2 border-top border-bottom border-light">
+                            <div class="text-secondary small mb-1">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                                <span>${escapeHtml(diaChi.diaChiChiTiet)}</span>
+                            </div>
+                            <div class="text-muted small ps-3">
+                                ${escapeHtml(diaChi.xaPhuong)}, ${escapeHtml(diaChi.quanHuyen)}, ${escapeHtml(diaChi.tinhThanh)}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center pt-1">
+                            <span class="text-muted" style="font-size: 11px;">
+                                <i class="bi bi-clock me-1"></i>${escapeHtml(diaChi.ngayTao != null ? diaChi.ngayTao.replace('T', ' ').substring(0, 16) : '')}
+                            </span>
+                            <div class="d-flex gap-2">
+                                ${!isDef ? `
+                                    <button class="btn btn-sm btn-outline-success fw-semibold px-2 py-1 rounded-3" style="font-size: 12px;" onclick="datLamMacDinh(${diaChi.maDiaChi})">
+                                        <i class="bi bi-check2-circle me-1"></i>Đặt mặc định
+                                    </button>
+                                ` : ''}
+                                <button class="btn btn-sm btn-outline-primary btn-action" title="Sửa địa chỉ" onclick="moModalSuaDiaChi(${diaChi.maDiaChi})">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger btn-action" title="Xóa địa chỉ" onclick="xacNhanXoaDiaChi(${diaChi.maDiaChi})">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    function hienThiPhanTrang(pageData) {
+        const pagContainer = document.getElementById('paginationContainer');
+        const info = document.getElementById('paginationInfo');
+        const list = document.getElementById('paginationList');
+
+        if (!pageData || pageData.totalPages <= 1) {
+            pagContainer.classList.add('d-none');
+            return;
+        }
+        pagContainer.classList.remove('d-none');
+
+        const current = pageData.number || 0;
+        const total = pageData.totalPages || 1;
+        info.textContent = `Trang ${current + 1} / ${total} (Tổng ${pageData.totalElements || 0} địa chỉ)`;
+
+        let pagHtml = '';
+        // Previous
+        pagHtml += `
+            <li class="page-item ${pageData.first ? 'disabled' : ''}">
+                <a class="page-link" href="javascript:void(0)" onclick="taiDanhSachDiaChi(${current - 1})">&laquo; Trước</a>
+            </li>
+        `;
+
+        for (let i = 0; i < total; i++) {
+            pagHtml += `
+                <li class="page-item ${i === current ? 'active' : ''}">
+                    <a class="page-link" href="javascript:void(0)" onclick="taiDanhSachDiaChi(${i})">${i + 1}</a>
+                </li>
+            `;
+        }
+
+        // Next
+        pagHtml += `
+            <li class="page-item ${pageData.last ? 'disabled' : ''}">
+                <a class="page-link" href="javascript:void(0)" onclick="taiDanhSachDiaChi(${current + 1})">Sau &raquo;</a>
+            </li>
+        `;
+        list.innerHTML = pagHtml;
+    }
+
+    function onSearchInput(event) {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            taiDanhSachDiaChi(0);
+        }, 400);
+    }
+
+    function datLaiBoLoc() {
+        document.getElementById('inputKeyword').value = '';
+        document.getElementById('selectTinhThanh').value = '';
+        document.getElementById('selectTrangThai').value = '';
+        taiDanhSachDiaChi(0);
+    }
+
+    function moModalThemDiaChi() {
+        document.getElementById('modalTieuDe').textContent = 'Thêm Địa Chỉ Mới';
+        document.getElementById('btnSubmitText').textContent = 'Lưu Địa Chỉ';
+        document.getElementById('formMaDiaChi').value = '';
+        document.getElementById('formDiaChi').reset();
+        xoaTimKiemNhanh();
+
+        // Reset comboboxes
+        if (tsTinh) tsTinh.clear();
+        datLaiComboboxHuyenXa();
+
+        document.getElementById('chkLaMacDinh').checked = false;
+        document.getElementById('chkLaMacDinh').disabled = false;
+        if (modalDiaChiInstance) {
+            modalDiaChiInstance.show();
+        }
+    }
+
+    async function moModalSuaDiaChi(id) {
+        try {
+            const res = await fetch(`/api/v1/dia-chi/${id}`, { credentials: 'include', headers: getAuthHeaders() });
+            if (!res.ok) {
+                Swal.fire('Lỗi', 'Không thể lấy dữ liệu địa chỉ này!', 'error');
+                return;
+            }
+            const resJson = await res.json();
+            const data = giaiMaDuLieu(resJson);
+            if (!data) return;
+
+            document.getElementById('modalTieuDe').textContent = 'Chỉnh Sửa Địa Chỉ';
+            document.getElementById('btnSubmitText').textContent = 'Cập Nhật';
+            document.getElementById('formMaDiaChi').value = data.maDiaChi;
+            document.getElementById('txtTenNguoiNhan').value = data.tenNguoiNhan || '';
+            document.getElementById('txtSoDienThoai').value = data.soDienThoai || '';
+            document.getElementById('txtDiaChiChiTiet').value = data.diaChiChiTiet || '';
+            document.getElementById('chkLaMacDinh').checked = Boolean(data.laMacDinh);
+            xoaTimKiemNhanh();
+
+            // Khớp nối Tỉnh -> Huyện -> Xã
+            if (data.tinhThanh) {
+                const matchedTinh = DANH_SACH_63_TINH.find(t => 
+                    t.name.toLowerCase() === data.tinhThanh.toLowerCase() ||
+                    t.clean.toLowerCase() === data.tinhThanh.toLowerCase() ||
+                    data.tinhThanh.toLowerCase().includes(t.clean.toLowerCase())
+                );
+
+                if (matchedTinh) {
+                    if (tsTinh) tsTinh.setValue(matchedTinh.code);
+
+                    await xuLyChonTinh(matchedTinh.code, async () => {
+                        const districts = cacheDistricts[matchedTinh.code] || [];
+                        const matchedHuyen = districts.find(d => 
+                            d.name.toLowerCase() === data.quanHuyen.toLowerCase() ||
+                            data.quanHuyen.toLowerCase().includes(d.name.toLowerCase()) ||
+                            d.name.toLowerCase().includes(data.quanHuyen.toLowerCase())
+                        );
+
+                        if (matchedHuyen) {
+                            if (tsHuyen) tsHuyen.setValue(matchedHuyen.code);
+
+                            await xuLyChonHuyen(matchedHuyen.code, () => {
+                                const wards = cacheWards[matchedHuyen.code] || [];
+                                const matchedXa = wards.find(w => 
+                                    w.name.toLowerCase() === data.xaPhuong.toLowerCase() ||
+                                    data.xaPhuong.toLowerCase().includes(w.name.toLowerCase()) ||
+                                    w.name.toLowerCase().includes(data.xaPhuong.toLowerCase())
+                                );
+                                if (matchedXa && tsXa) {
+                                    tsXa.setValue(matchedXa.code);
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+
+            if (modalDiaChiInstance) {
+                modalDiaChiInstance.show();
+            }
+        } catch (e) {
+            Swal.fire('Lỗi', 'Không thể kết nối đến máy chủ!', 'error');
+        }
+    }
+
+    // Submit form thêm hoặc cập nhật địa chỉ
+    async function xuLyLuuDiaChi(event) {
+        event.preventDefault();
+
+        const maDiaChi = document.getElementById('formMaDiaChi').value;
+        const tenNguoiNhan = document.getElementById('txtTenNguoiNhan').value.trim();
+        const soDienThoai = document.getElementById('txtSoDienThoai').value.trim();
+        const diaChiChiTiet = document.getElementById('txtDiaChiChiTiet').value.trim();
+        const laMacDinh = document.getElementById('chkLaMacDinh').checked;
+
+        // Lấy tên Tỉnh, Huyện, Xã từ Comboboxes
+        let tinhThanh = '';
+        let quanHuyen = '';
+        let xaPhuong = '';
+
+        if (tsTinh && tsTinh.getValue()) {
+            const opt = tsTinh.options[tsTinh.getValue()];
+            tinhThanh = opt ? opt.name : '';
+        } else {
+            const el = document.getElementById('selectModalTinhThanh');
+            tinhThanh = el.options[el.selectedIndex] ? el.options[el.selectedIndex].text : '';
+        }
+
+        if (tsHuyen && tsHuyen.getValue()) {
+            const opt = tsHuyen.options[tsHuyen.getValue()];
+            quanHuyen = opt ? opt.name : '';
+        } else {
+            const el = document.getElementById('selectModalQuanHuyen');
+            quanHuyen = el.options[el.selectedIndex] ? el.options[el.selectedIndex].text : '';
+        }
+
+        if (tsXa && tsXa.getValue()) {
+            const opt = tsXa.options[tsXa.getValue()];
+            xaPhuong = opt ? opt.name : '';
+        } else {
+            const el = document.getElementById('selectModalXaPhuong');
+            xaPhuong = el.options[el.selectedIndex] ? el.options[el.selectedIndex].text : '';
+        }
+
+        // Validate 3 cấp địa chính
+        if (!tinhThanh || tinhThanh.startsWith('--')) {
+            Swal.fire('Thiếu thông tin', 'Vui lòng chọn Tỉnh / Thành phố!', 'warning');
+            return;
+        }
+        if (!quanHuyen || quanHuyen.startsWith('--')) {
+            Swal.fire('Thiếu thông tin', 'Vui lòng chọn Quận / Huyện!', 'warning');
+            return;
+        }
+        if (!xaPhuong || xaPhuong.startsWith('--')) {
+            Swal.fire('Thiếu thông tin', 'Vui lòng chọn Xã / Phường / Thị trấn!', 'warning');
+            return;
+        }
+
+        // Client validation số điện thoại
+        const phoneRegex = /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/;
+        if (!phoneRegex.test(soDienThoai)) {
+            Swal.fire('Số điện thoại không hợp lệ', 'Vui lòng nhập số điện thoại di động Việt Nam hợp lệ (10 số, bắt đầu bằng 03, 05, 07, 08, 09).', 'warning');
+            return;
+        }
+
+        const payload = {
+            tenNguoiNhan,
+            soDienThoai,
+            tinhThanh,
+            quanHuyen,
+            xaPhuong,
+            diaChiChiTiet,
+            laMacDinh
+        };
+
+        const btnSubmit = document.getElementById('btnSubmitForm');
+        btnSubmit.disabled = true;
+
+        try {
+            let url = '/api/v1/dia-chi';
+            let method = 'POST';
+            if (maDiaChi) {
+                url = `/api/v1/dia-chi/${maDiaChi}`;
+                method = 'PUT';
+            }
+
+            const res = await fetch(url, {
+                method: method,
+                credentials: 'include',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(payload)
+            });
+
+            const resJson = await res.json();
+
+            if (res.ok) {
+                if (modalDiaChiInstance) {
+                    modalDiaChiInstance.hide();
+                }
+                document.getElementById('formDiaChi').reset();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công',
+                    text: maDiaChi ? 'Đã cập nhật địa chỉ giao hàng!' : 'Đã thêm địa chỉ giao hàng mới!',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+                taiThongKe();
+                taiDanhSachDiaChi(0); // Về trang 1 xem ngay địa chỉ mới
+            } else {
+                const errorMsg = resJson.thongBao || resJson.message || 'Đã có lỗi xảy ra!';
+                Swal.fire('Thao tác không thành công', errorMsg, 'error');
+            }
+        } catch (e) {
+            Swal.fire('Lỗi', 'Không thể kết nối đến máy chủ!', 'error');
+        } finally {
+            btnSubmit.disabled = false;
+        }
+    }
+
+    // Đặt làm mặc định (PATCH)
+    async function datLamMacDinh(id) {
+        try {
+            const res = await fetch(`/api/v1/dia-chi/${id}/dat-mac-dinh`, {
+                method: 'PATCH',
+                credentials: 'include',
+                headers: getAuthHeaders()
+            });
+
+            if (res.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Đã đặt làm mặc định',
+                    text: 'Hệ thống đã tự động chuyển các địa chỉ khác về không mặc định trong cùng 1 Transaction!',
+                    timer: 1600,
+                    showConfirmButton: false
+                });
+                taiThongKe();
+                taiDanhSachDiaChi(trangHienTai);
+            } else {
+                const resJson = await res.json();
+                const errorMsg = resJson.thongBao || resJson.message || 'Không thể thiết lập mặc định!';
+                Swal.fire('Lỗi', errorMsg, 'error');
+            }
+        } catch (e) {
+            Swal.fire('Lỗi', 'Không thể kết nối đến máy chủ!', 'error');
+        }
+    }
+
+    // Xác nhận và xóa địa chỉ
+    function xacNhanXoaDiaChi(id) {
+        Swal.fire({
+            title: 'Xóa địa chỉ này?',
+            text: 'Bạn có chắc chắn muốn xóa địa chỉ giao hàng này không? Nếu đây là địa chỉ mặc định, hệ thống sẽ tự động gán địa chỉ khác làm mặc định.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Đồng ý xóa',
+            cancelButtonText: 'Hủy'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const res = await fetch(`/api/v1/dia-chi/${id}`, {
+                        method: 'DELETE',
+                        credentials: 'include',
+                        headers: getAuthHeaders()
+                    });
+
+                    if (res.ok) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Đã xóa!',
+                            text: 'Địa chỉ đã được xóa thành công.',
+                            timer: 1400,
+                            showConfirmButton: false
+                        });
+                        taiThongKe();
+                        taiDanhSachDiaChi(trangHienTai);
+                    } else {
+                        const resJson = await res.json();
+                        const errorMsg = resJson.thongBao || resJson.message || 'Không thể xóa địa chỉ!';
+                        Swal.fire('Lỗi', errorMsg, 'error');
+                    }
+                } catch (e) {
+                    Swal.fire('Lỗi', 'Không thể kết nối đến máy chủ!', 'error');
+                }
+            }
+        });
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+</script>
+</body>
+</html>
