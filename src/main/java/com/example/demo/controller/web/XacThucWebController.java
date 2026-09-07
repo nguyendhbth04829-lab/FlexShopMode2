@@ -89,7 +89,7 @@ public class XacThucWebController {
         return "auth/quen-mat-khau";
     }
 
-    @GetMapping("/logout")
+    @GetMapping({"/logout", "/dang-xuat"})
     public String dangXuat(HttpServletRequest request, HttpServletResponse response) {
         String accessToken = null;
         String refreshToken = null;

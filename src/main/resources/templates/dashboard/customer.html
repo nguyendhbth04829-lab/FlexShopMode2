@@ -87,9 +87,9 @@
             <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 d-flex align-items-center gap-1">
                 <i class="bi bi-person-check-fill"></i> Vai trò: Khách Hàng
             </span>
-            <button type="button" class="btn btn-sm btn-outline-primary fw-bold px-3 py-2 rounded-pill shadow-sm" onclick="thongBaoDangKyShop()">
+            <a href="/seller/dang-ky" class="btn btn-sm btn-outline-primary fw-bold px-3 py-2 rounded-pill shadow-sm">
                 <i class="bi bi-shop me-1"></i> Đăng Ký Mở Shop
-            </button>
+            </a>
         </div>
     </div>
 
@@ -143,7 +143,7 @@
                         <div class="p-3 border rounded-3 bg-light h-100 d-flex flex-column justify-content-between">
                             <div>
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="badge bg-primary">US-04</span>
+                                    <span class="badge bg-primary"></span>
                                     <i class="bi bi-person-lines-fill fs-4 text-primary"></i>
                                 </div>
                                 <h6 class="fw-bold mb-1">Cập Nhật Hồ Sơ Cá Nhân</h6>
@@ -158,16 +158,16 @@
                         <div class="p-3 border rounded-3 bg-light shadow-sm h-100 d-flex flex-column justify-content-between">
                             <div>
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="badge bg-warning text-dark">US-08</span>
+                                    <span class="badge bg-warning text-dark"></span>
                                     <i class="bi bi-shop fs-4 text-warning"></i>
                                 </div>
                                 <h6 class="fw-bold mb-1">Đăng Ký Mở Gian Hàng (Người Bán)</h6>
                                 <p class="text-muted small mb-3">Gửi hồ sơ đăng ký kinh doanh để Quản trị viên (Admin) xét duyệt nâng cấp tài khoản lên Người Bán.</p>
                             </div>
                             <div>
-                                <button type="button" class="btn btn-sm btn-outline-warning text-dark fw-bold rounded-pill px-3" onclick="thongBaoDangKyShop()">
+                                <a href="/seller/dang-ky" class="btn btn-sm btn-outline-warning text-dark fw-bold rounded-pill px-3">
                                     <i class="bi bi-shop me-1"></i> Đăng Ký Mở Shop <i class="bi bi-arrow-right ms-1"></i>
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -232,18 +232,18 @@
         document.cookie = "REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     }
 
-    // Thông báo chức năng đăng ký mở gian hàng (US-08) do Admin xét duyệt
+    // Thông báo chức năng đăng ký mở gian hàng do Admin xét duyệt
     function thongBaoDangKyShop() {
         if (typeof Swal !== 'undefined') {
             Swal.fire({
                 icon: 'info',
-                title: '<span style="font-size: 22px; font-weight: 800; color: #1e1b4b;"><i class="bi bi-shop text-warning me-2"></i>Đăng Ký Mở Gian Hàng (US-08)</span>',
+                title: '<span style="font-size: 22px; font-weight: 800; color: #1e1b4b;"><i class="bi bi-shop text-warning me-2"></i>Đăng Ký Mở Gian Hàng</span>',
                 html: `
                     <div class="text-start py-2">
-                        <p class="mb-3 text-secondary">Tính năng <b>Đăng ký mở gian hàng (US-08)</b> đang trong lộ trình phát triển của giai đoạn tiếp theo.</p>
+                        <p class="mb-3 text-secondary">Tính năng <b>Đăng ký mở gian hàng</b> đang trong lộ trình phát triển của giai đoạn tiếp theo.</p>
                         <div class="alert alert-warning py-3 small mb-3 border-warning border-opacity-50">
                             <div class="fw-bold text-dark mb-1"><i class="bi bi-shield-lock-fill text-warning me-1"></i> Quy định phân quyền hệ thống:</div>
-                            <div>Khi khách hàng gửi hồ sơ đăng ký mở gian hàng, chỉ có <b>Quản Trị Viên (ADMIN)</b> mới có thẩm quyền kiểm duyệt và phê duyệt hồ sơ tại <b>US-09</b> để kích hoạt gian hàng và cấp quyền Người Bán (SELLER).</div>
+                            <div>Khi khách hàng gửi hồ sơ đăng ký mở gian hàng, chỉ có <b>Quản Trị Viên (ADMIN)</b> mới có thẩm quyền kiểm duyệt và phê duyệt hồ sơ để kích hoạt gian hàng và cấp quyền Người Bán (SELLER).</div>
                         </div>
                         <p class="small text-muted mb-0"><i class="bi bi-info-circle me-1"></i>Khách hàng không có quyền tự phê duyệt gian hàng của chính mình.</p>
                     </div>
@@ -255,7 +255,7 @@
                 }
             });
         } else {
-            alert('Chức năng Đăng ký mở gian hàng (US-08) đang trong lộ trình phát triển. Hồ sơ do Quản trị viên (Admin) phê duyệt tại US-09.');
+            alert('Chức năng Đăng ký mở gian hàng đang trong lộ trình phát triển. Hồ sơ do Quản trị viên (Admin) phê duyệt.');
         }
     }
 </script>

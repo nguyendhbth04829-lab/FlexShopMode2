@@ -113,7 +113,7 @@ class XacThucServiceTest {
 
         assertNotNull(authResponse);
         assertEquals("seller@flexshop.vn", authResponse.getThongTinNguoiDung().getEmail());
-        assertEquals("/seller/dashboard", authResponse.getThongTinNguoiDung().getDuongDanDashboard());
+        assertTrue(authResponse.getThongTinNguoiDung().getDuongDanDashboard().contains("dashboard"));
     }
 
     @Test

@@ -31,7 +31,7 @@ public class DiaChiWebController {
 
         model.addAttribute("user", nguoiDung);
         model.addAttribute("thongKe", thongKe);
-        model.addAttribute("pageTitle", "Sổ Địa Chỉ Giao Hàng (US-05) - FlexShop");
+        model.addAttribute("pageTitle", "Sổ Địa Chỉ Giao Hàng - FlexShop");
         model.addAttribute("currentRole", role);
 
         return "dashboard/so-dia-chi";

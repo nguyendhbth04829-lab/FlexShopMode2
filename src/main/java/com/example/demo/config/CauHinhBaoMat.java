@@ -51,6 +51,7 @@ public class CauHinhBaoMat {
                                 "/login",
                                 "/register",
                                 "/logout",
+                                "/dang-xuat",
                                 "/forgot-password",
                                 "/api/v1/auth/**",
                                 "/css/**",
@@ -61,9 +62,10 @@ public class CauHinhBaoMat {
                                 "/error"
                         ).permitAll()
 
-                        // Phân quyền 5 Role theo yêu cầu US-02
+                        // Phân quyền 5 Role theo yêu cầu US-02 & Đăng ký mở shop (US-08)
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/seller/**").hasAnyRole("NGUOI_BAN", "ADMIN")
+                        .requestMatchers("/seller/dang-ky", "/api/v1/seller/dang-ky-shop/**").hasAnyRole("KHACH_HANG", "NGUOI_BAN", "ADMIN")
+                        .requestMatchers("/seller/**", "/api/v1/seller/**", "/ho-so-shop").hasAnyRole("NGUOI_BAN", "ADMIN")
                         .requestMatchers("/customer/**").hasAnyRole("KHACH_HANG", "ADMIN")
                         .requestMatchers("/shipper/**").hasAnyRole("TAI_XE", "SHIPPER", "ADMIN")
                         .requestMatchers("/cskh/**").hasAnyRole("CSKH", "ADMIN")

@@ -94,9 +94,9 @@
             <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 d-flex align-items-center gap-1">
                 <i class="bi bi-check-circle-fill"></i> Phiên Đăng Nhập Đang Kích Hoạt
             </span>
-            <button type="button" class="btn btn-sm btn-warning text-dark fw-bold px-3 py-2 rounded-pill shadow-sm" onclick="thongBaoDuyetShopAdmin()">
-                <i class="bi bi-patch-check-fill me-1"></i> Duyệt Shop (US-09)
-            </button>
+            <a href="/admin/kiem-duyet-shop" class="btn btn-sm btn-warning text-dark fw-bold px-3 py-2 rounded-pill shadow-sm">
+                <i class="bi bi-patch-check-fill me-1"></i> Duyệt Shop
+            </a>
         </div>
     </div>
 
@@ -120,7 +120,7 @@
                     <i class="bi bi-shop-window"></i>
                 </div>
                 <div>
-                    <div class="text-muted small fw-semibold">Yêu Cầu Mở Shop Chờ Duyệt (US-09)</div>
+                    <div class="text-muted small fw-semibold">Yêu Cầu Mở Shop Chờ Duyệt</div>
                     <div class="fs-4 fw-bold text-warning">14</div>
                     <small class="text-muted">Cần phê duyệt</small>
                 </div>
@@ -132,7 +132,7 @@
                     <i class="bi bi-grid-3x3-gap-fill"></i>
                 </div>
                 <div>
-                    <div class="text-muted small fw-semibold">Danh Mục Sản Phẩm (US-07)</div>
+                    <div class="text-muted small fw-semibold">Danh Mục Sản Phẩm</div>
                     <div class="fs-4 fw-bold">86</div>
                     <small class="text-muted">Phân cấp Sản Phẩm</small>
                 </div>
@@ -157,52 +157,41 @@
         <!-- Chức năng quản trị Giai đoạn 1 -->
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm rounded-4 p-4">
-                <h5 class="fw-bold mb-3"><i class="bi bi-stack text-primary me-2"></i>Chức Năng Quản Trị Giai Đoạn 1</h5>
+                <h5 class="fw-bold mb-3"><i class="bi bi-stack text-primary me-2"></i>Chức Năng Quản Trị</h5>
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="p-3 border rounded-3 bg-light">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="badge bg-primary">US-06</span>
+                                <span class="badge bg-primary"></span>
                                 <i class="bi bi-person-gear fs-4 text-primary"></i>
                             </div>
                             <h6 class="fw-bold mb-1">Quản Lý Người Dùng & Phân Quyền</h6>
                             <p class="text-muted small mb-2">Tìm kiếm, khóa/mở khóa tài khoản. Cấp tài khoản Shipper & CSKH.</p>
-                            <a href="/admin/nguoi-dung" class="btn btn-sm btn-primary"><i class="bi bi-gear-fill me-1"></i> Mở Quản Lý (US-06) <i class="bi bi-arrow-right"></i></a>
+                            <a href="/admin/nguoi-dung" class="btn btn-sm btn-primary"><i class="bi bi-gear-fill me-1"></i> Mở Quản Lý <i class="bi bi-arrow-right"></i></a>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="p-3 border rounded-3 bg-light">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="badge bg-success">US-07</span>
+                                <span class="badge bg-success"></span>
                                 <i class="bi bi-diagram-3-fill fs-4 text-success"></i>
                             </div>
                             <h6 class="fw-bold mb-1">Quản Lý Danh Mục Ngành Hàng</h6>
                             <p class="text-muted small mb-2">Cây danh mục phân cấp Cha - Con, chặn xóa khi có sản phẩm.</p>
-                            <a href="javascript:void(0)" onclick="alert('Module US-07 đang được chuẩn bị trong kế hoạch tiếp theo')" class="btn btn-sm btn-outline-success">Mở quản lý <i class="bi bi-arrow-right"></i></a>
+                            <a href="javascript:void(0)" onclick="alert('Tính năng quản lý danh mục đang được chuẩn bị trong kế hoạch tiếp theo')" class="btn btn-sm btn-outline-success">Mở quản lý <i class="bi bi-arrow-right"></i></a>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="p-3 border rounded-3 bg-light shadow-sm">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="badge bg-warning text-dark">US-09</span>
+                                <span class="badge bg-warning text-dark"></span>
                                 <i class="bi bi-patch-check-fill fs-4 text-warning"></i>
                             </div>
                             <h6 class="fw-bold mb-1">Kiểm Duyệt Gian Hàng Shop</h6>
                             <p class="text-muted small mb-2">Xem giấy phép KD, Duyệt cấp vai trò Người Bán hoặc Từ chối có lý do.</p>
-                            <button type="button" class="btn btn-sm btn-outline-warning text-dark fw-bold" onclick="thongBaoDuyetShopAdmin()">
-                                <i class="bi bi-patch-check-fill me-1"></i> Duyệt Shop (US-09) <i class="bi bi-arrow-right ms-1"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="p-3 border rounded-3 bg-light">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="badge bg-info text-white">HỆ THỐNG</span>
-                                <i class="bi bi-database-check fs-4 text-info"></i>
-                            </div>
-                            <h6 class="fw-bold mb-1">74 Bảng CSDL FlexShop V2</h6>
-                            <p class="text-muted small mb-2">Toàn bộ 74 bảng cơ sở dữ liệu đã kết nối thành công trên SQL Server.</p>
-                            <span class="badge bg-success">Hoạt động 100%</span>
+                            <a href="/admin/kiem-duyet-shop" class="btn btn-sm btn-outline-warning text-dark fw-bold">
+                                <i class="bi bi-patch-check-fill me-1"></i> Duyệt Shop <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -212,7 +201,7 @@
         <!-- JWT Diagnostic Panel -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 p-4">
-                <h5 class="fw-bold mb-3"><i class="bi bi-key-fill text-danger me-2"></i>Thông Tin Phiên Xác Thực (US-02)</h5>
+                <h5 class="fw-bold mb-3"><i class="bi bi-key-fill text-danger me-2"></i>Thông Tin Phiên Xác Thực</h5>
                 <div class="p-3 bg-light rounded-3 mb-3">
                     <div class="mb-2">
                         <small class="text-muted d-block">Mã người dùng:</small>
@@ -271,21 +260,21 @@
         }
     }
 
-    // Thông báo chức năng Duyệt Shop dành riêng cho Admin (US-09)
+    // Thông báo chức năng Duyệt Shop dành riêng cho Admin
     function thongBaoDuyetShopAdmin() {
         if (typeof Swal !== 'undefined') {
             Swal.fire({
                 icon: 'info',
-                title: '<span style="font-size: 22px; font-weight: 800; color: #1e1b4b;"><i class="bi bi-patch-check-fill text-warning me-2"></i>Kiểm Duyệt Gian Hàng (US-09)</span>',
+                title: '<span style="font-size: 22px; font-weight: 800; color: #1e1b4b;"><i class="bi bi-patch-check-fill text-warning me-2"></i>Kiểm Duyệt Gian Hàng</span>',
                 html: `
                     <div class="text-start py-2">
                         <p class="mb-3 text-secondary">Đây là tính năng độc quyền dành cho <b>Quản Trị Viên (ADMIN)</b> để kiểm tra hồ sơ và phê duyệt các yêu cầu mở gian hàng do Khách Hàng gửi lên.</p>
                         <div class="alert alert-info py-3 small mb-3 border-info border-opacity-50">
                             <div class="fw-bold text-dark mb-1"><i class="bi bi-shield-check text-primary me-1"></i> Quy trình phân quyền chuẩn hệ thống:</div>
-                            <div>1. Khách hàng nộp hồ sơ tại <b>US-08</b>.<br>
-                            2. <b>Chỉ có Admin</b> có thẩm quyền phê duyệt hồ sơ tại <b>US-09</b> để kích hoạt gian hàng và cấp thêm vai trò <b>Người Bán (SELLER)</b>. Khách hàng tuyệt đối không có quyền tự duyệt gian hàng của chính mình.</div>
+                            <div>1. Khách hàng nộp hồ sơ đăng ký mở gian hàng.<br>
+                            2. <b>Chỉ có Admin</b> có thẩm quyền phê duyệt hồ sơ để kích hoạt gian hàng và cấp thêm vai trò <b>Người Bán (SELLER)</b>. Khách hàng tuyệt đối không có quyền tự duyệt gian hàng của chính mình.</div>
                         </div>
-                        <p class="small text-muted mb-0"><i class="bi bi-clock-history me-1"></i>Chức năng US-09 đang trong lộ trình triển khai tiếp theo sau khi hoàn tất US-01 & US-02.</p>
+                        <p class="small text-muted mb-0"><i class="bi bi-clock-history me-1"></i>Hồ sơ đăng ký sẽ được xử lý tự động trong hệ thống kiểm duyệt.</p>
                     </div>
                 `,
                 confirmButtonText: 'Đã hiểu',
@@ -295,7 +284,7 @@
                 }
             });
         } else {
-            alert('Chức năng Kiểm duyệt gian hàng (US-09) dành riêng cho Quản trị viên (Admin) đang trong lộ trình phát triển.');
+            alert('Chức năng Kiểm duyệt gian hàng dành riêng cho Quản trị viên (Admin).');
         }
     }
 </script>
