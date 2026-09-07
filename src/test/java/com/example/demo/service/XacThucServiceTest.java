@@ -28,6 +28,12 @@ class XacThucServiceTest {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
+    @Autowired
+    private com.example.demo.repository.NguoiDungRepository nguoiDungRepository;
+
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
     @Test
     @DisplayName("US-01: Đăng ký tài khoản thành công với email hợp lệ, mật khẩu mạnh và gán mặc định role KHACH_HANG")
     void testDangKyThanhCong() {
@@ -150,5 +156,29 @@ class XacThucServiceTest {
         assertEquals("/shipper/dashboard", xacThucService.xacDinhDuongDanDashboard(List.of("TAI_XE")));
         assertEquals("/shipper/dashboard", xacThucService.xacDinhDuongDanDashboard(List.of("SHIPPER")));
         assertEquals("/cskh/dashboard", xacThucService.xacDinhDuongDanDashboard(List.of("CSKH")));
+    }
+
+    @Test
+    @DisplayName("US-02: Chặn đăng nhập tài khoản bị khóa, hiển thị rõ lý do khóa và bỏ dòng chữ (BI_KHOA)")
+    void testDangNhapTaiKhoanBiKhoa() {
+        com.example.demo.entity.NguoiDung userKhoa = com.example.demo.entity.NguoiDung.builder()
+                .email("test_locked_user@flexshop.vn")
+                .soDienThoai("0977889900")
+                .matKhauMaHoa(passwordEncoder.encode("12345678"))
+                .hoVaTen("Người Dùng Bị Khóa")
+                .trangThai("BI_KHOA")
+                .lyDoKhoa("Vi phạm chính sách đăng tải thông tin")
+                .daXoa(false)
+                .build();
+        nguoiDungRepository.save(userKhoa);
+
+        DangNhapRequest loginRequest = DangNhapRequest.builder()
+                .taiKhoan("test_locked_user@flexshop.vn")
+                .matKhau("12345678")
+                .build();
+
+        NgoaiLeUngDung exception = assertThrows(NgoaiLeUngDung.class, () -> xacThucService.dangNhap(loginRequest));
+        assertTrue(exception.getMessage().contains("Tài khoản của bạn đã bị khóa. Lý do: Vi phạm chính sách đăng tải thông tin."));
+        assertFalse(exception.getMessage().contains("(BI_KHOA)"));
     }
 }

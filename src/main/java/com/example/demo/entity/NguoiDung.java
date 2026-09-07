@@ -40,6 +40,9 @@ public class NguoiDung {
     @Column(name = "trang_thai", length = 30)
     private String trangThai = "HOAT_DONG";
 
+    @Column(name = "ly_do_khoa", length = 500)
+    private String lyDoKhoa;
+
     @Builder.Default
     @Column(name = "da_xoa")
     private Boolean daXoa = false;

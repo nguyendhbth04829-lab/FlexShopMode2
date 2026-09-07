@@ -340,10 +340,22 @@
     // Hàm hiển thị thông báo lỗi nổi bật
     function hienThiThongBaoLoi(tieuDe, noiDung) {
         if (typeof Swal !== 'undefined') {
+            let htmlContent = noiDung;
+            if (noiDung && (noiDung.includes('khóa') || noiDung.includes('Lý do'))) {
+                htmlContent = `
+                    <div class="text-start py-2">
+                        <div class="p-3 bg-danger bg-opacity-10 border border-danger border-opacity-25 rounded-3 mb-3">
+                            <div class="text-danger fw-bold mb-1"><i class="bi bi-exclamation-octagon-fill me-1"></i> Thông Báo Khóa Tài Khoản:</div>
+                            <div class="text-dark small">${noiDung}</div>
+                        </div>
+                        <div class="small text-muted"><i class="bi bi-headset me-1"></i>Liên hệ hỗ trợ CSKH: <b>cskh@flexshop.vn</b></div>
+                    </div>
+                `;
+            }
             Swal.fire({
                 icon: 'error',
                 title: `<span style="font-size: 20px; font-weight: 700; color: #991b1b;">${tieuDe}</span>`,
-                text: noiDung,
+                html: htmlContent,
                 confirmButtonText: 'Thử lại',
                 confirmButtonColor: '#4f46e5',
                 customClass: {

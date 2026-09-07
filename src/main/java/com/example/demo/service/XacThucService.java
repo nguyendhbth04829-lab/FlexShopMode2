@@ -123,7 +123,10 @@ public class XacThucService {
             throw new NgoaiLeUngDung("Tài khoản của bạn đã bị xóa khỏi hệ thống!", HttpStatus.FORBIDDEN);
         }
         if (!"HOAT_DONG".equalsIgnoreCase(nguoiDung.getTrangThai())) {
-            throw new NgoaiLeUngDung("Tài khoản của bạn đang bị khóa (" + nguoiDung.getTrangThai() + "). Vui lòng liên hệ CSKH!", HttpStatus.FORBIDDEN);
+            String lyDo = (nguoiDung.getLyDoKhoa() != null && !nguoiDung.getLyDoKhoa().trim().isEmpty())
+                    ? nguoiDung.getLyDoKhoa().trim()
+                    : "Vi phạm quy định hoặc chính sách tiêu chuẩn của hệ thống";
+            throw new NgoaiLeUngDung("Tài khoản của bạn đã bị khóa. Lý do: " + lyDo + ". Vui lòng liên hệ CSKH để được hỗ trợ!", HttpStatus.FORBIDDEN);
         }
 
         // 3. Kiểm tra mật khẩu mã hóa BCrypt
