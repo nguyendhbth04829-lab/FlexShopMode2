@@ -51,6 +51,12 @@ public class ShipperService {
                 && "DANG_HOAT_DONG".equals(tx.getTrangThai());
     }
 
+    /** So cuoc dang lam do (DA_PHAN_CONG / DANG_GIAO) - de canh bao khi tat Online. */
+    public long demCuocDangLam(Long maTaiXe) {
+        return nhiemVuRepository.countByTaiXe_MaTaiXeAndTrangThaiIn(
+                maTaiXe, java.util.List.of("DA_PHAN_CONG", "DANG_GIAO"));
+    }
+
     @Transactional
     public TaiXeGiaoHang doiTrangThai(Long maTaiXe, CapNhatTrangThaiForm form) {
         TaiXeGiaoHang tx = taiXeRepository.findById(maTaiXe)
@@ -144,5 +150,37 @@ public class ShipperService {
             return don.getTongTienShopNhan() != null ? don.getTongTienShopNhan() : BigDecimal.ZERO;
         }
         return BigDecimal.ZERO;
+    }
+
+    // ================= US-36: Xac nhan da lay hang =================
+
+    @Transactional
+    public NhiemVuGiaoHang xacNhanLayHang(Long maTaiXe, Long maNhiemVu) {
+        NhiemVuGiaoHang nv = nhiemVuRepository.findById(maNhiemVu)
+                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay nhiem vu " + maNhiemVu));
+        if (!nv.getTaiXe().getMaTaiXe().equals(maTaiXe)) {
+            throw new IllegalStateException("Cuoc nay khong phai cua ban.");
+        }
+        if (!"DA_PHAN_CONG".equals(nv.getTrangThai())) {
+            throw new IllegalStateException("Cuoc dang " + nv.getTrangThaiDisplay() + ", khong the xac nhan lay hang.");
+        }
+        DonHangShop don = nv.getDonHangShop();
+        if (!"DA_XAC_NHAN".equals(don.getTrangThai())) {
+            throw new IllegalStateException("Don " + don.getMaCodeDonShop() + " dang " + don.getTrangThai() + ", khong the lay hang.");
+        }
+        nv.setTrangThai("DANG_GIAO");
+        nv.setThoiGianLayHang(java.time.LocalDateTime.now());
+        nv = nhiemVuRepository.save(nv);
+        don.setTrangThai("DANG_GIAO");
+        donHangShopRepository.save(don);
+        // Auto-ghi hanh trinh US-33
+        LichSuHanhTrinhDon moc = new LichSuHanhTrinhDon();
+        moc.setDonHangShop(don);
+        moc.setHub(null);
+        moc.setTieuDeMoc("Da lay hang tu Shop - dang giao");
+        moc.setViTriHienTai(don.getGianHang() != null ? don.getGianHang().getDiaChiKho() : null);
+        moc.setThoiGian(java.time.LocalDateTime.now());
+        hanhTrinhRepository.save(moc);
+        return nv;
     }
 }

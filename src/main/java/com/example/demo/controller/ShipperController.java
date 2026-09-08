@@ -27,6 +27,7 @@ public class ShipperController {
             TaiXeGiaoHang tx = shipperService.layShipperHienTai();
             model.addAttribute("shipper", tx);
             model.addAttribute("duocNhanDon", shipperService.duocNhanNhiemVu(tx));
+            model.addAttribute("soCuocDangLam", shipperService.demCuocDangLam(tx.getMaTaiXe()));
             if (!model.containsAttribute("form")) {
                 CapNhatTrangThaiForm form = new CapNhatTrangThaiForm();
                 form.setDangTrucTuyen(!Boolean.TRUE.equals(tx.getDangTrucTuyen()));
@@ -44,11 +45,13 @@ public class ShipperController {
     public String doiTrangThai(
             @Valid @ModelAttribute("form") CapNhatTrangThaiForm form,
             BindingResult bindingResult,
-            Model model) {
+            Model model,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
         TaiXeGiaoHang tx = shipperService.layShipperHienTai();
         if (bindingResult.hasErrors()) {
             model.addAttribute("shipper", tx);
             model.addAttribute("duocNhanDon", shipperService.duocNhanNhiemVu(tx));
+            model.addAttribute("soCuocDangLam", shipperService.demCuocDangLam(tx.getMaTaiXe()));
             return "shipper/trang-thai";
         }
         try {
@@ -56,8 +59,17 @@ public class ShipperController {
         } catch (IllegalArgumentException | IllegalStateException ex) {
             model.addAttribute("shipper", tx);
             model.addAttribute("duocNhanDon", shipperService.duocNhanNhiemVu(tx));
+            model.addAttribute("soCuocDangLam", shipperService.demCuocDangLam(tx.getMaTaiXe()));
             model.addAttribute("loiNghiepVu", ex.getMessage());
             return "shipper/trang-thai";
+        }
+        // Canh bao khi tat Online ma van con cuoc dang lam do
+        if (Boolean.FALSE.equals(form.getDangTrucTuyen())) {
+            long conLai = shipperService.demCuocDangLam(tx.getMaTaiXe());
+            if (conLai > 0) {
+                redirectAttributes.addFlashAttribute("canhBao",
+                        "Bạn đã Offline nhưng vẫn còn " + conLai + " cuốc đang làm dở.");
+            }
         }
         return "redirect:/shipper/trang-thai";
     }
@@ -102,5 +114,36 @@ public class ShipperController {
             return "shipper/don-cho-nhan";
         }
         return "redirect:/shipper/don-cho-nhan?nhan=ok";
+    }
+
+    /** US-36: Cuoc cua toi + xac nhan da lay hang (mobile). */
+    @GetMapping("/cuoc-cua-toi")
+    public String cuocCuaToi(Model model) {
+        try {
+            TaiXeGiaoHang tx = shipperService.layShipperHienTai();
+            model.addAttribute("shipper", tx);
+            model.addAttribute("cuocCuaToi", shipperService.layCuocCuaToi(tx.getMaTaiXe()));
+        } catch (IllegalStateException ex) {
+            model.addAttribute("loiNghiepVu", ex.getMessage());
+        }
+        return "shipper/cuoc-cua-toi";
+    }
+
+    @PostMapping("/lay-hang/{maNhiemVu}")
+    public String layHang(@PathVariable("maNhiemVu") Long maNhiemVu, Model model) {
+        try {
+            TaiXeGiaoHang tx = shipperService.layShipperHienTai();
+            shipperService.xacNhanLayHang(tx.getMaTaiXe(), maNhiemVu);
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            model.addAttribute("loiNghiepVu", ex.getMessage());
+            try {
+                TaiXeGiaoHang tx = shipperService.layShipperHienTai();
+                model.addAttribute("shipper", tx);
+                model.addAttribute("cuocCuaToi", shipperService.layCuocCuaToi(tx.getMaTaiXe()));
+            } catch (IllegalStateException ignored) {
+            }
+            return "shipper/cuoc-cua-toi";
+        }
+        return "redirect:/shipper/cuoc-cua-toi?lay=ok";
     }
 }

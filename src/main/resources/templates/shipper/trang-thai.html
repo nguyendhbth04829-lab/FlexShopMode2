@@ -38,6 +38,7 @@
 
     <div class="content">
         <div th:if="${loiNghiepVu}" class="alert alert-danger" th:text="${loiNghiepVu}"></div>
+        <div th:if="${canhBao}" class="alert alert-danger" th:text="${canhBao}"></div>
 
         <div th:if="${shipper != null}" class="shipper-card mb-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -57,8 +58,11 @@
 
         <div th:if="${shipper != null}" class="shipper-card">
             <h6 class="text-primary fw-bold mb-3" th:text="${shipper.dangTrucTuyen} ? 'TẮT TRẠNG THÁI (NGHỈ)' : 'BẬT TRẠNG THÁI (LÀM VIỆC)'">ĐỔI TRẠNG THÁI</h6>
-            <form method="post" th:action="@{/shipper/trang-thai}" th:object="${form}">
+            <form method="post" th:action="@{/shipper/trang-thai}" th:object="${form}"
+                  onsubmit="return xacNhanTat(this)">
                 <input type="hidden" th:field="*{dangTrucTuyen}">
+                <input type="hidden" id="dangLam" th:value="${soCuocDangLam != null ? soCuocDangLam : 0}">
+                <input type="hidden" id="dangOnline" th:value="${shipper.dangTrucTuyen}">
                 <div class="gps-box p-3 mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <b>GPS hiện tại *</b>
@@ -90,10 +94,18 @@
         <a href="/shipper/trang-thai" class="active"><span class="ico">🟢</span>Trạng thái</a>
         <a href="/shipper/don-cho-nhan"><span class="ico">📦</span>Đơn</a>
         <a href="#"><span class="ico">💵</span>COD</a>
-        <a href="#"><span class="ico">👤</span>Tôi</a>
+        <a href="/shipper/cuoc-cua-toi"><span class="ico">👤</span>Tôi</a>
     </nav>
 </div>
 <script>
+    function xacNhanTat(form){
+        var online = document.getElementById('dangOnline').value === 'true';
+        var n = parseInt(document.getElementById('dangLam').value || '0', 10);
+        if (online && n > 0) {
+            return confirm('Bạn còn ' + n + ' cuốc đang làm dở. Vẫn tắt làm việc?');
+        }
+        return true;
+    }
     function dungToaDoMau(){
         document.getElementById('viDo').value = '21.027800';
         document.getElementById('kinhDo').value = '105.834200';
