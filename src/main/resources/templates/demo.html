@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cổng test · Logistics US-31→41</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --blue:#1565C0; --blue-dark:#0D47A1; --blue-light:#E3F2FD; }
+        body { background:#F4F7FC; }
+        .topbar { background:linear-gradient(135deg,var(--blue-dark),var(--blue)); color:#fff; border-radius:14px; }
+        .role { background:#fff; border-radius:14px; box-shadow:0 4px 18px rgba(21,101,192,.12);
+                border-top:6px solid var(--blue); }
+        .us-link { display:flex; justify-content:space-between; align-items:center; text-decoration:none;
+                   border:1px solid #E3F2FD; border-radius:10px; padding:10px 12px; margin-bottom:8px; color:#111; }
+        .us-link:hover { background:var(--blue-light); border-color:#90CAF9; }
+    </style>
+</head>
+<body>
+<div class="container py-4" style="max-width:960px">
+    <div class="topbar p-4 mb-4">
+        <h4 class="mb-1">Cổng test · Logistics 3PL + Shipper POD (US-31 → US-41)</h4>
+        <div class="opacity-75">Luồng gợi ý: 31 → 35 → 36 → 33 → 37/38 → 41 → 39 · 32 độc lập</div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="role p-3 h-100">
+                <h6 class="text-primary fw-bold">SELLER</h6>
+                <a class="us-link" href="/seller/van-don"><span><b>US-31</b> · In vận đơn A6 hàng loạt</span><span>→</span></a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="role p-3 h-100">
+                <h6 class="text-primary fw-bold">HỆ THỐNG</h6>
+                <a class="us-link" href="/logistics/phi-van-chuyen"><span><b>US-32</b> · Tính phí vận chuyển</span><span>→</span></a>
+                <a class="us-link" href="/logistics/hanh-trinh"><span><b>US-33</b> · Hành trình qua Hub</span><span>→</span></a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="role p-3 h-100">
+                <h6 class="text-primary fw-bold">SHIPPER (MOBILE)</h6>
+                <a class="us-link" href="/shipper/trang-thai"><span><b>US-34</b> · Bật/tắt Online</span><span>→</span></a>
+                <a class="us-link" href="/shipper/don-cho-nhan"><span><b>US-35</b> · Đơn chờ nhận</span><span>→</span></a>
+                <a class="us-link" href="/shipper/cuoc-cua-toi"><span><b>US-36/37/38</b> · Cuốc của tôi (lấy hàng · POD · báo fail)</span><span>→</span></a>
+                <a class="us-link" href="/shipper/cod"><span><b>US-39</b> · Đối soát COD</span><span>→</span></a>
+                <div class="small text-muted">US-40 chuyển hoàn: tự động khi báo fail lần 3, xem ở Cuốc của tôi.</div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="role p-3 h-100">
+                <h6 class="text-primary fw-bold">KHÁCH HÀNG</h6>
+                <a class="us-link" href="/khach-hang/don-hang"><span><b>US-41</b> · Đơn của tôi (xác nhận + đánh giá)</span><span>→</span></a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
