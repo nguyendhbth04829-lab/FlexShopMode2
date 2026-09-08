@@ -1,0 +1,161 @@
+<!--
+  =====================================================================
+  DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+  PHÂN HỆ: TÀI CHÍNH & AN NINH SÀN (DEV 5 - MINH)
+  USER STORY: US-68 - Mô Phỏng Động Cơ Quét Gian Lận Tự Động
+  =====================================================================
+-->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexShop - Mô Phỏng Quét Rủi Ro Gian Lận (US-68)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card-custom { border: none; border-radius: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.06); }
+        .rule-card { border-left: 4px solid #dc3545; border-radius: 8px; background: white; padding: 15px; margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+
+<!-- Header Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/canh-bao-gian-lan/danh-sach">
+            <i class="bi bi-shield-lock-fill text-danger me-2"></i>FlexShop Anti-Fraud (US-68)
+        </a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/canh-bao-gian-lan/danh-sach">
+                        <i class="bi bi-list-check me-1"></i> Danh Sách Cảnh Báo
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active fw-bold text-warning" href="/canh-bao-gian-lan/mo-phong-quet">
+                        <i class="bi bi-cpu-fill me-1"></i> Mô Phỏng Quét Rủi Ro
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/canh-bao-gian-lan/danh-sach" class="text-decoration-none">Anti-Fraud Hub</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Động Cơ Quét Rủi Ro Tự Động</li>
+                </ol>
+            </nav>
+
+            <!-- Banner Kích Hoạt Quét Toàn Diện -->
+            <div class="card card-custom bg-white p-4 mb-4 text-center">
+                <div class="my-2">
+                    <i class="bi bi-shield-radar text-danger" style="font-size: 4rem;"></i>
+                </div>
+                <h3 class="fw-bold text-dark mt-2">Kích Hoạt Động Cơ Quét Gian Lận Toàn Diện</h3>
+                <p class="text-muted mx-auto" style="max-width: 650px;">
+                    Thuật toán sẽ tự động rà quét chéo dữ liệu của cả 5 phân hệ tài chính: 
+                    <strong>Rút tiền (US-44)</strong>, <strong>Shopee Ads (US-64)</strong>, 
+                    <strong>Tiếp thị liên kết (US-65)</strong> và <strong>SPayLater (US-63)</strong> 
+                    để phát hiện ngay lập tức các hành vi bất thường.
+                </p>
+                <form th:action="@{/canh-bao-gian-lan/kich-hoat-quet}" method="post" class="mt-3">
+                    <button type="submit" class="btn btn-danger btn-lg px-5 py-3 fw-bold shadow">
+                        <i class="bi bi-play-circle-fill me-2"></i>BẮT ĐẦU QUÉT HỆ THỐNG NGAY
+                    </button>
+                </form>
+            </div>
+
+            <!-- 4 Quy Tắc Phát Hiện Gian Lận Chuẩn -->
+            <div class="card card-custom bg-white p-4 mb-4">
+                <h5 class="fw-bold text-dark mb-3">
+                    <i class="bi bi-diagram-3-fill text-primary me-2"></i>Các Luật Phát Hiện Gian Lận Đang Được Áp Dụng (Fraud Rules)
+                </h5>
+
+                <div class="rule-card">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong class="text-danger"><i class="bi bi-cash-stack me-2"></i>Luật 1: Rút Tiền Bất Thường (US-44)</strong>
+                        <span class="badge bg-danger">Điểm rủi ro: 85</span>
+                    </div>
+                    <small class="text-muted">Cảnh báo khi người bán tạo yêu cầu rút số tiền lớn đột biến (&ge; 1,000,000 VNĐ) hoặc gửi lệnh rút tiền liên tục trong ngày nghi vấn lộ OTP / tài khoản bị xâm nhập.</small>
+                </div>
+
+                <div class="rule-card">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong class="text-danger"><i class="bi bi-share-fill me-2"></i>Luật 2: Gian Lận Hoa Hồng Tiếp Thị Affiliate (US-65)</strong>
+                        <span class="badge bg-danger">Điểm rủi ro: 75</span>
+                    </div>
+                    <small class="text-muted">Cảnh báo khi đơn hàng có hoa hồng lớn (&ge; 100,000 VNĐ) nghi vấn KOC tự đặt hàng qua link chính mình để trục lợi quỹ thưởng của sàn.</small>
+                </div>
+
+                <div class="rule-card">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong class="text-danger"><i class="bi bi-badge-ad me-2"></i>Luật 3: Click Tặc Shopee Ads (US-64)</strong>
+                        <span class="badge bg-danger">Điểm rủi ro: 80</span>
+                    </div>
+                    <small class="text-muted">Cảnh báo khi chi phí chiến dịch tăng đột biến do lượng click dồn dập từ cùng nguồn IP, nghi vấn dùng tool bot dìm cạn tiền ví của shop đối thủ.</small>
+                </div>
+
+                <div class="rule-card">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong class="text-danger"><i class="bi bi-clock-history me-2"></i>Luật 4: Rủi Ro Bùng Nợ SPayLater (US-63)</strong>
+                        <span class="badge bg-danger">Điểm rủi ro: 90</span>
+                    </div>
+                    <small class="text-muted">Cảnh báo khi tài khoản có điểm tín dụng suy giảm nghiêm trọng (&lt; 600 điểm) kèm theo nợ quá hạn chưa thanh toán.</small>
+                </div>
+            </div>
+
+            <!-- Form Tạo Cảnh Báo Test Thủ Công -->
+            <div class="card card-custom bg-white p-4">
+                <h5 class="fw-bold text-dark mb-3">
+                    <i class="bi bi-plus-circle-fill text-secondary me-2"></i>Tạo Thử Nghiệm Một Cảnh Báo Thủ Công
+                </h5>
+                <form th:action="@{/canh-bao-gian-lan/tao-thu-cong}" th:object="${taoDTO}" method="post" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Phân Hệ Đối Tượng:</label>
+                        <select class="form-select" th:field="*{loaiDoiTuong}">
+                            <option value="RUT_TIEN">Rút Tiền Ví Shop (US-44)</option>
+                            <option value="AFFILIATE">Tiếp Thị Liên Kết (US-65)</option>
+                            <option value="ADS">Quảng Cáo Ads (US-64)</option>
+                            <option value="TRA_SAU">Mua Trước Trả Sau (US-63)</option>
+                            <option value="DON_HANG">Đơn Hàng Sàn (US-26)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Mã Đối Tượng (ID):</label>
+                        <input type="number" class="form-control" th:field="*{maDoiTuong}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Điểm Rủi Ro (1 - 100):</label>
+                        <input type="number" class="form-control" th:field="*{diemRuiRo}" min="1" max="100" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-bold text-muted">Lý Do Cảnh Báo Chi Tiết:</label>
+                        <input type="text" class="form-control" th:field="*{lyDoCanhBao}" required>
+                    </div>
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-primary fw-bold">
+                            <i class="bi bi-send-plus me-1"></i>Tạo Cảnh Báo
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
