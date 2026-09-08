@@ -22,10 +22,12 @@ public class LichSuGiaoDichVi {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ma_vi", referencedColumnName = "ma_vi", nullable = false)
+    @JoinColumn(name = "ma_vi", nullable = false)
     private ViNguoiBan viNguoiBan;
 
     @Column(name = "loai_giao_dich", nullable = false, length = 50)
     private String loaiGiaoDich; // CONG_TIEN_BOI_THUONG, TRU_TIEN_HOAN_TRA, GIAI_PHONG_ESCROW, RUT_TIEN
+    private String loaiGiaoDich; // GIAI_NGAN_DON_HANG, RUT_TIEN, HOAN_TIEN_KHI_KHOA
 
     @Column(name = "so_tien", nullable = false, precision = 18, scale = 2)
     private BigDecimal soTien;

@@ -4,10 +4,20 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * =====================================================================
+ * DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+ * PHÂN HỆ: TÀI CHÍNH & THANH TOÁN (DEV 5 - MINH)
+ * USER STORY: US-26 - Entity Đơn hàng tổng (Master Order) quản lý thanh toán
+ * =====================================================================
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,10 +35,13 @@ public class DonHangTong {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ma_khach_hang", referencedColumnName = "ma_nguoi_dung", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ma_khach_hang", nullable = false)
     private NguoiDung khachHang;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ma_dia_chi_giao", referencedColumnName = "ma_dia_chi", nullable = false)
+    @JoinColumn(name = "ma_dia_chi_giao", nullable = false)
     private DiaChiNguoiDung diaChiGiao;
 
     @Column(name = "tong_tien_hang", nullable = false, precision = 18, scale = 2)
@@ -50,9 +63,11 @@ public class DonHangTong {
     private BigDecimal tongThanhToanCuoi;
 
     @Column(name = "phuong_thuc_thanh_toan", nullable = false, length = 50)
+    private String phuongThucThanhToan = "CHUA_CHON"; // COD, MOCK_ONLINE, CHUA_CHON
     private String phuongThucThanhToan;
 
     @Column(name = "trang_thai_thanh_toan", length = 30)
+    private String trangThaiThanhToan = "CHUA_THANH_TOAN"; // CHUA_THANH_TOAN, DA_THANH_TOAN, THANH_TOAN_THAT_BAI
     private String trangThaiThanhToan = "CHUA_THANH_TOAN";
 
     @Column(name = "trang_thai_don_hang", length = 30)
@@ -69,4 +84,41 @@ public class DonHangTong {
 
     @Column(name = "ngay_tao")
     private LocalDateTime ngayTao = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "donHangTong", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<DonHangShop> danhSachShopOrder = new ArrayList<>();
+
+    @Transient
+    public String getTenPhuongThucTiengViet() {
+        if (phuongThucThanhToan == null) return "Chưa xác định";
+        return switch (phuongThucThanhToan) {
+            case "COD" -> "Thanh toán khi nhận hàng (COD)";
+            case "MOCK_ONLINE" -> "Cổng thanh toán Trực tuyến (Mock Online Payment)";
+            case "SPAYLATER" -> "Mua trước trả sau (SPayLater)";
+            default -> "Chưa chọn phương thức";
+        };
+    }
+
+    @Transient
+    public String getTenTrangThaiThanhToanTiengViet() {
+        if (trangThaiThanhToan == null) return "Chưa thanh toán";
+        return switch (trangThaiThanhToan) {
+            case "DA_THANH_TOAN" -> "Đã thanh toán";
+            case "CHUA_THANH_TOAN" -> "Chưa thanh toán (Chờ COD / Chờ Online)";
+            case "THANH_TOAN_THAT_BAI" -> "Thanh toán thất bại";
+            default -> trangThaiThanhToan;
+        };
+    }
+
+    @Transient
+    public String getBadgeTrangThaiThanhToan() {
+        if (trangThaiThanhToan == null) return "bg-secondary text-white";
+        return switch (trangThaiThanhToan) {
+            case "DA_THANH_TOAN" -> "bg-success text-white";
+            case "CHUA_THANH_TOAN" -> "bg-warning text-dark";
+            case "THANH_TOAN_THAT_BAI" -> "bg-danger text-white";
+            default -> "bg-secondary text-white";
+        };
+    }
 }

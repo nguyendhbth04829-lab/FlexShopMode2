@@ -22,6 +22,7 @@ public class ViNguoiBan {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ma_gian_hang", referencedColumnName = "ma_gian_hang", nullable = false, unique = true)
+    @JoinColumn(name = "ma_gian_hang", nullable = false, unique = true)
     private GianHang gianHang;
 
     @Column(name = "so_du_kha_dung", precision = 18, scale = 2)
@@ -36,7 +37,15 @@ public class ViNguoiBan {
     @Version
     @Column(name = "phien_ban_lock")
     private Integer phienBanLock = 0;
+    private Integer phienBanLock = 1; // Optimistic Locking chống xung đột dòng tiền
 
     @Column(name = "ngay_cap_nhat")
     private LocalDateTime ngayCapNhat = LocalDateTime.now();
+
+    @Transient
+    public BigDecimal getTongTaiSan() {
+        BigDecimal khaDung = soDuKhaDung != null ? soDuKhaDung : BigDecimal.ZERO;
+        BigDecimal tamGiu = soDuTamGiuEscrow != null ? soDuTamGiuEscrow : BigDecimal.ZERO;
+        return khaDung.add(tamGiu);
+    }
 }

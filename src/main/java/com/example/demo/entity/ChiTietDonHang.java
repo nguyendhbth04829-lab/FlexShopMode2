@@ -7,6 +7,13 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+/**
+ * =====================================================================
+ * DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+ * PHÂN HỆ: TÀI CHÍNH & THANH TOÁN (DEV 5 - MINH)
+ * USER STORY: US-26 - Thực thể Chi tiết mặt hàng trong đơn shop
+ * =====================================================================
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,6 +28,7 @@ public class ChiTietDonHang {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ma_don_hang_shop", referencedColumnName = "ma_don_hang_shop", nullable = false)
+    @JoinColumn(name = "ma_don_hang_shop", nullable = false)
     private DonHangShop donHangShop;
 
     @Column(name = "ma_bien_the", nullable = false)

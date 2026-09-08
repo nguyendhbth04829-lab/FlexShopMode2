@@ -1,0 +1,331 @@
+<!--
+  =====================================================================
+  DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+  PHÂN HỆ: QUẢNG CÁO & ĐẤU THẦU TỪ KHÓA CPC (DEV 5 - MINH)
+  USER STORY: US-64 - Chi Tiết Chiến Dịch & Quản Lý Từ Khóa Đấu Thầu
+  =====================================================================
+-->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexShop - Chi Tiết Chiến Dịch Shopee Ads (US-64)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card-custom { border: none; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .table-hover tbody tr:hover { background-color: #f0f7ff; }
+    </style>
+</head>
+<body>
+
+<!-- Header Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/quang-cao-ads/danh-sach">
+            <i class="bi bi-badge-ad text-warning me-2"></i>FlexShop Ads (Shopee Ads)
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a th:href="@{/quang-cao-ads/danh-sach(maGianHang=${chienDich.gianHang.maGianHang})}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách chiến dịch
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    <!-- Alert Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Tiêu Đề Chiến Dịch -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-megaphone-fill text-danger me-2"></i>
+                <span th:text="${chienDich.tenChienDich}"></span>
+            </h3>
+            <p class="text-muted mb-0">
+                Gian hàng: <strong class="text-dark" th:text="${chienDich.gianHang.tenGianHang}"></strong> 
+                | Ngày tạo: <span th:text="${#temporals.format(chienDich.ngayBatDau, 'dd/MM/yyyy HH:mm')}"></span>
+            </p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge fs-6 px-3 py-2" th:classappend="${chienDich.badgeClass}" th:text="${chienDich.tenTrangThaiTiengViet}"></span>
+
+            <!-- Nút Bật / Tạm Dừng -->
+            <form th:if="${chienDich.trangThai == 'DANG_CHAY'}" th:action="@{/quang-cao-ads/doi-trang-thai}" method="post" class="d-inline">
+                <input type="hidden" name="maChienDich" th:value="${chienDich.maChienDich}">
+                <input type="hidden" name="trangThaiMoi" value="TAM_DUNG">
+                <input type="hidden" name="redirectUrl" value="chi-tiet">
+                <button type="submit" class="btn btn-warning fw-bold shadow-sm">
+                    <i class="bi bi-pause-fill me-1"></i> Tạm Dừng
+                </button>
+            </form>
+            <form th:if="${chienDich.trangThai == 'TAM_DUNG'}" th:action="@{/quang-cao-ads/doi-trang-thai}" method="post" class="d-inline">
+                <input type="hidden" name="maChienDich" th:value="${chienDich.maChienDich}">
+                <input type="hidden" name="trangThaiMoi" value="DANG_CHAY">
+                <input type="hidden" name="redirectUrl" value="chi-tiet">
+                <button type="submit" class="btn btn-success fw-bold shadow-sm">
+                    <i class="bi bi-play-fill me-1"></i> Tiếp Tục Chạy
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Hàng 1: Thông tin Sản Phẩm & Ngân Sách -->
+    <div class="row g-4 mb-4">
+        <!-- Thẻ Sản Phẩm -->
+        <div class="col-lg-5">
+            <div class="card card-custom h-100">
+                <div class="card-header bg-white py-3">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-box-seam text-primary me-2"></i>Sản Phẩm Quảng Cáo
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <h5 class="fw-bold text-dark mb-2" th:text="${chienDich.sanPham.tenSanPham}"></h5>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Giá bán cơ bản:</span>
+                        <span class="fs-5 fw-bold text-danger" th:text="${chienDich.sanPham.hienThiGia}"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Trạng thái sản phẩm:</span>
+                        <span class="badge bg-success">Đang hoạt động</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Đánh giá trung bình:</span>
+                        <span class="text-warning fw-bold">
+                            <i class="bi bi-star-fill me-1"></i><span th:text="${chienDich.sanPham.danhGiaTb}"></span> / 5.0
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Tổng đã bán:</span>
+                        <span class="fw-semibold text-dark" th:text="${chienDich.sanPham.tongDaBan} + ' sản phẩm'"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thẻ Ngân Sách & Chi Phí CPC -->
+        <div class="col-lg-7">
+            <div class="card card-custom h-100">
+                <div class="card-header bg-white py-3">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-pie-chart text-danger me-2"></i>Hiệu Năng & Ngân Sách CPC
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-4 text-center p-3 bg-light rounded-3">
+                            <small class="text-muted d-block">NGÂN SÁCH NGÀY</small>
+                            <span class="fs-5 fw-bold text-dark" th:text="${#numbers.formatDecimal(chienDich.nganSachNgay, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                        </div>
+                        <div class="col-sm-4 text-center p-3 bg-light rounded-3">
+                            <small class="text-muted d-block">ĐÃ CHI TIÊU (CPC)</small>
+                            <span class="fs-5 fw-bold text-danger" th:text="${#numbers.formatDecimal(chienDich.tongChiPhiDaDung, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                        </div>
+                        <div class="col-sm-4 text-center p-3 bg-light rounded-3">
+                            <small class="text-muted d-block">TỔNG LƯỢT CLICK</small>
+                            <span class="fs-5 fw-bold text-primary" th:text="${chienDich.tongLuotClick}"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between small text-muted mb-1">
+                            <span>Đã dùng: <strong class="text-danger" th:text="${chienDich.tiLeTieuNganSachPhanTram} + '%'"></strong></span>
+                            <span>Còn lại: <strong class="text-success" th:text="${#numbers.formatDecimal(chienDich.nganSachConLaiTrongNgay, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong></span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-danger" role="progressbar" 
+                                 th:style="'width: ' + ${chienDich.tiLeTieuNganSachPhanTram} + '%'"></div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between small text-muted pt-2 border-top">
+                        <span>Giá CPC trung bình: <strong class="text-dark" th:text="${#numbers.formatDecimal(chienDich.cpcTrungBinh, 0, 'COMMA', 0, 'POINT')} + ' đ/click'"></strong></span>
+                        <span>Mô hình: <strong class="text-primary">Đấu thầu theo click (CPC)</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hàng 2: Bảng Danh Sách Từ Khóa Đấu Thầu -->
+    <div class="card card-custom">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h6 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-search text-success me-2"></i>Danh Sách Từ Khóa Đấu Thầu (<span th:text="${chienDich.danhSachTuKhoa.size()}"></span> từ khóa)
+            </h6>
+            <button type="button" class="btn btn-danger btn-sm fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalThemTuKhoa">
+                <i class="bi bi-plus-lg me-1"></i> Thêm Từ Khóa Mới
+            </button>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Từ Khóa Tìm Kiếm</th>
+                            <th class="text-end">Giá Thầu CPC</th>
+                            <th class="text-center">Số Lượt Click</th>
+                            <th class="text-end">Tổng Chi Phí</th>
+                            <th class="text-center">Trạng Thái</th>
+                            <th class="text-center pe-3">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(chienDich.danhSachTuKhoa)}">
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                <i class="bi bi-search fs-2 d-block mb-1 text-secondary"></i>
+                                Chưa có từ khóa nào được thiết lập cho chiến dịch này. Nhấp vào "Thêm Từ Khóa Mới" ở trên để bắt đầu đấu thầu.
+                            </td>
+                        </tr>
+                        <tr th:each="tk : ${chienDich.danhSachTuKhoa}">
+                            <td class="ps-3 fw-bold text-dark">
+                                <i class="bi bi-hash text-muted me-1"></i><span th:text="${tk.tuKhoa}"></span>
+                            </td>
+                            <td class="text-end">
+                                <span class="fw-bold text-primary" th:text="${#numbers.formatDecimal(tk.giaThauMoiClickCpc, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                            </td>
+                            <td class="text-center fw-bold" th:text="${tk.tongLuotClick}"></td>
+                            <td class="text-end fw-bold text-danger" th:text="${#numbers.formatDecimal(tk.tongChiPhiTuKhoa, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                            <td class="text-center">
+                                <span th:if="${tk.dangKichHoat}" class="badge bg-success">Đang bật</span>
+                                <span th:unless="${tk.dangKichHoat}" class="badge bg-secondary">Tạm tắt</span>
+                            </td>
+                            <td class="text-center pe-3">
+                                <div class="d-flex gap-1 justify-content-center">
+                                    <!-- Nút Bật / Tắt từ khóa -->
+                                    <form th:action="@{/quang-cao-ads/bat-tat-tu-khoa}" method="post">
+                                        <input type="hidden" name="maTuKhoa" th:value="${tk.maTuKhoa}">
+                                        <input type="hidden" name="maChienDich" th:value="${chienDich.maChienDich}">
+                                        <input type="hidden" name="dangKichHoat" th:value="${!tk.dangKichHoat}">
+                                        <button type="submit" class="btn btn-sm" th:classappend="${tk.dangKichHoat} ? 'btn-outline-warning' : 'btn-outline-success'"
+                                                th:title="${tk.dangKichHoat} ? 'Tạm tắt từ khóa' : 'Bật kích hoạt từ khóa'">
+                                            <i class="bi" th:classappend="${tk.dangKichHoat} ? 'bi-toggle-on' : 'bi-toggle-off'"></i>
+                                        </button>
+                                    </form>
+
+                                    <!-- Nút Sửa Giá Thầu CPC -->
+                                    <button type="button" class="btn btn-outline-primary btn-sm" 
+                                            th:data-ma="${tk.maTuKhoa}"
+                                            th:data-ten="${tk.tuKhoa}"
+                                            th:data-gia="${tk.giaThauMoiClickCpc}"
+                                            onclick="moModalSuaCpc(this)"
+                                            title="Chỉnh sửa giá thầu CPC">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-light p-3 small text-muted">
+            <i class="bi bi-lightbulb me-1 text-warning"></i>
+            <strong>Mẹo tối ưu:</strong> Tăng giá thầu CPC cho các từ khóa có tỷ lệ chuyển đổi cao để giữ vững vị trí tài trợ Top 1 trên trang tìm kiếm.
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal Thêm Từ Khóa Mới -->
+<div class="modal fade" id="modalThemTuKhoa" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-plus-circle me-2"></i>Thêm Từ Khóa Đấu Thầu Ads
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form th:action="@{/quang-cao-ads/them-tu-khoa}" th:object="${themTuKhoaDTO}" method="post">
+                <div class="modal-body p-4">
+                    <input type="hidden" th:field="*{maChienDich}">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Từ khóa tìm kiếm:</label>
+                        <input type="text" class="form-control form-control-lg" th:field="*{tuKhoa}" 
+                               placeholder="Ví dụ: tai nghe bluetooth, tai nghe sony..." required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Giá thầu mỗi lượt nhấp (CPC):</label>
+                        <div class="input-group">
+                            <input type="number" step="100" min="500" max="50000" class="form-control fw-bold text-primary" 
+                                   th:field="*{giaThauMoiClickCpc}" required>
+                            <span class="input-group-text">VNĐ / click</span>
+                        </div>
+                        <small class="text-muted">Khoảng giá cho phép: 500 VNĐ - 50,000 VNĐ.</small>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-danger fw-bold">
+                        <i class="bi bi-check2 me-1"></i> Lưu Từ Khóa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Chỉnh Sửa Giá Thầu CPC -->
+<div class="modal fade" id="modalSuaCpc" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h6 class="modal-title fw-bold">
+                    <i class="bi bi-pencil me-1"></i>Sửa Giá Thầu CPC
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form th:action="@{/quang-cao-ads/cap-nhat-cpc}" method="post">
+                <div class="modal-body p-3">
+                    <input type="hidden" name="maChienDich" th:value="${chienDich.maChienDich}">
+                    <input type="hidden" name="maTuKhoa" id="editMaTuKhoa">
+
+                    <div class="text-center mb-3">
+                        <small class="text-muted d-block">TỪ KHÓA</small>
+                        <strong class="fs-6 text-dark" id="editTenTuKhoa">tai nghe</strong>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Giá thầu mới (VNĐ):</label>
+                        <input type="number" step="100" min="500" max="50000" class="form-control fw-bold text-primary" 
+                               name="giaThauMoi" id="editGiaThauMoi" required>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light p-2">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary btn-sm fw-bold">Cập Nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function moModalSuaCpc(btn) {
+        document.getElementById('editMaTuKhoa').value = btn.getAttribute('data-ma');
+        document.getElementById('editTenTuKhoa').innerText = btn.getAttribute('data-ten');
+        document.getElementById('editGiaThauMoi').value = btn.getAttribute('data-gia');
+        new bootstrap.Modal(document.getElementById('modalSuaCpc')).show();
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!--
+  =====================================================================
+  DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+  PHÂN HỆ: QUẢNG CÁO & ĐẤU THẦU TỪ KHÓA CPC (DEV 5 - MINH)
+  USER STORY: US-64 - Màn Hình Mô Phỏng Tìm Kiếm & Xếp Hạng Ads Tài Trợ
+  =====================================================================
+-->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexShop - Mô Phỏng Tìm Kiếm & Đấu Thầu Shopee Ads (US-64)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .product-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            background: #ffffff;
+            transition: all 0.2s;
+            overflow: hidden;
+        }
+        .product-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+        .product-card.sponsored {
+            border: 2px solid #ee4d2d;
+            background: linear-gradient(180deg, #fff9f8 0%, #ffffff 100%);
+            box-shadow: 0 4px 15px rgba(238, 77, 45, 0.12);
+        }
+        .badge-ads {
+            background-color: #ee4d2d;
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/quang-cao-ads/danh-sach">
+            <i class="bi bi-badge-ad text-warning me-2"></i>FlexShop Ads (Shopee Ads)
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a href="/quang-cao-ads/danh-sach" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại quản lý chiến dịch
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    <!-- Alert Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Thanh Tìm Kiếm Của Khách Hàng -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
+        <div class="card-body p-4 text-center text-white">
+            <h4 class="fw-bold mb-2">
+                <i class="bi bi-search me-2"></i>Mô Phỏng Trải Nghiệm Tìm Kiếm Sản Phẩm Khách Hàng
+            </h4>
+            <p class="text-white-50 mb-4">Gõ từ khóa tìm kiếm để kiểm tra thuật toán xếp hạng đấu thầu CPC (Shopee Ads) ưu tiên hiển thị top 1.</p>
+
+            <form th:action="@{/quang-cao-ads/mo-phong-tim-kiem}" method="get" class="row justify-content-center">
+                <div class="col-md-7">
+                    <div class="input-group input-group-lg shadow">
+                        <span class="input-group-text bg-white border-0"><i class="bi bi-search text-danger"></i></span>
+                        <input type="text" class="form-control border-0" name="tuKhoa" th:value="${tuKhoa}" 
+                               placeholder="Thử gõ: tai nghe, sạc nhanh, chuột, anker...">
+                        <button type="submit" class="btn btn-danger fw-bold px-4">
+                            Tìm Kiếm
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="mt-3 small text-white-50">
+                <span>Gợi ý từ khóa test nhanh: </span>
+                <a th:href="@{/quang-cao-ads/mo-phong-tim-kiem(tuKhoa='tai nghe')}" class="badge bg-light text-dark text-decoration-none me-1">tai nghe</a>
+                <a th:href="@{/quang-cao-ads/mo-phong-tim-kiem(tuKhoa='sạc nhanh')}" class="badge bg-light text-dark text-decoration-none me-1">sạc nhanh</a>
+                <a th:href="@{/quang-cao-ads/mo-phong-tim-kiem(tuKhoa='chuột')}" class="badge bg-light text-dark text-decoration-none me-1">chuột</a>
+                <a th:href="@{/quang-cao-ads/mo-phong-tim-kiem(tuKhoa='anker')}" class="badge bg-light text-dark text-decoration-none">anker</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kết Quả Tìm Kiếm -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold text-dark mb-0">
+            Kết quả cho từ khóa: "<span class="text-danger" th:text="${tuKhoa}"></span>"
+        </h5>
+        <span class="text-muted small">
+            Tìm thấy: <strong class="text-danger" th:text="${soLuongAds}"></strong> sản phẩm tài trợ (Ads) 
+            | <strong class="text-dark" th:text="${soLuongTuNhien}"></strong> kết quả tự nhiên
+        </span>
+    </div>
+
+    <!-- Thông báo nếu không có sản phẩm nào -->
+    <div th:if="${#lists.isEmpty(danhSachKetQua)}" class="card border-0 shadow-sm p-5 text-center text-muted">
+        <i class="bi bi-search fs-1 d-block mb-3 text-secondary"></i>
+        <h5>Không tìm thấy sản phẩm nào phù hợp với từ khóa này.</h5>
+        <p class="small">Vui lòng thử lại với các từ khóa gợi ý như "tai nghe", "sạc nhanh", "chuột".</p>
+    </div>
+
+    <!-- Danh sách thẻ sản phẩm -->
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-4" th:each="sp : ${danhSachKetQua}">
+            <div class="product-card h-100 p-3 d-flex flex-column justify-content-between" th:classappend="${sp.laQuangCao} ? 'sponsored'">
+                <div>
+                    <!-- Header thẻ: Nhãn Ads nếu là tài trợ -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span th:if="${sp.laQuangCao}" class="badge-ads">
+                            <i class="bi bi-megaphone-fill me-1"></i>TÀI TRỢ / ADS
+                        </span>
+                        <span th:unless="${sp.laQuangCao}" class="badge bg-secondary">
+                            Tự Nhiên
+                        </span>
+
+                        <span class="small text-muted">
+                            <i class="bi bi-shop me-1"></i><span th:text="${sp.tenGianHang}"></span>
+                        </span>
+                    </div>
+
+                    <!-- Tên sản phẩm -->
+                    <h6 class="fw-bold text-dark mb-2" th:text="${sp.tenSanPham}"></h6>
+
+                    <!-- Giá bán -->
+                    <div class="fs-5 fw-bold text-danger mb-3" th:text="${sp.hienThiGia}"></div>
+
+                    <!-- Chi tiết Đấu Thầu (nếu là Ads) -->
+                    <div th:if="${sp.laQuangCao}" class="p-2 bg-white rounded-3 border mb-3 small">
+                        <div class="d-flex justify-content-between text-muted mb-1">
+                            <span>Từ khóa khớp:</span>
+                            <strong class="text-dark" th:text="${sp.tuKhoaKhop}"></strong>
+                        </div>
+                        <div class="d-flex justify-content-between text-muted">
+                            <span>Giá thầu CPC thắng:</span>
+                            <strong class="text-danger" th:text="${sp.hienThiCpc}"></strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hành Động: Click vào quảng cáo (Chỉ dành cho sản phẩm Ads) -->
+                <div>
+                    <div th:if="${sp.laQuangCao}">
+                        <form th:action="@{/quang-cao-ads/mo-phong-click}" method="post">
+                            <input type="hidden" name="maTuKhoa" th:value="${sp.maTuKhoa}">
+                            <input type="hidden" name="tuKhoaTimKiem" th:value="${tuKhoa}">
+                            <button type="submit" class="btn btn-danger w-100 fw-bold shadow-sm">
+                                <i class="bi bi-cursor-fill me-1"></i> Click Vào Sản Phẩm Này (Test Trừ CPC)
+                            </button>
+                        </form>
+                        <small class="text-muted d-block text-center mt-1" style="font-size: 0.75rem;">
+                            Thao tác này sẽ trừ đúng <span th:text="${sp.hienThiCpc}"></span> vào ví của Shop và ngân sách ngày.
+                        </small>
+                    </div>
+
+                    <div th:unless="${sp.laQuangCao}">
+                        <button class="btn btn-outline-secondary w-100" disabled>
+                            <i class="bi bi-eye me-1"></i> Xem Chi Tiết Tự Nhiên (Miễn Phí)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hộp Giải Thích Thuật Toán Shopee Ads -->
+    <div class="card border-0 shadow-sm rounded-4 mt-5">
+        <div class="card-header bg-white py-3">
+            <h6 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-info-circle-fill text-primary me-2"></i>Cơ Chế Đấu Thầu Từ Khóa CPC (Cost Per Click) Hoạt Động Như Thế Nào?
+            </h6>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded-3 h-100">
+                        <div class="fw-bold text-danger mb-1"><i class="bi bi-trophy-fill me-1"></i>1. Xếp Hạng Đấu Thầu (Auction Rank)</div>
+                        <small class="text-muted">Khi có nhiều gian hàng cùng đấu thầu 1 từ khóa (ví dụ: "tai nghe"), sản phẩm nào có <strong>Giá thầu CPC cao nhất</strong> sẽ giành vị trí số 1 trên kết quả tìm kiếm.</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded-3 h-100">
+                        <div class="fw-bold text-success mb-1"><i class="bi bi-eye-fill me-1"></i>2. Hiển Thị Miễn Phí (Free Impressions)</div>
+                        <small class="text-muted">Việc sản phẩm hiển thị trên trang tìm kiếm hoàn toàn miễn phí. Người bán không mất đồng nào nếu khách hàng chỉ lướt xem mà không bấm vào.</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded-3 h-100">
+                        <div class="fw-bold text-primary mb-1"><i class="bi bi-wallet-fill me-1"></i>3. Khấu Trừ Chi Phí Khi Có Click</div>
+                        <small class="text-muted">Chỉ khi khách hàng thực sự nhấp chuột vào sản phẩm, hệ thống mới trừ tiền đúng bằng mức giá thầu CPC khỏi ví Shop và cộng dồn vào chi phí chiến dịch.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

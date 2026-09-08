@@ -1,0 +1,257 @@
+<!--
+  =====================================================================
+  DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+  PHÂN HỆ: TÀI CHÍNH & TÍN DỤNG TIÊU DÙNG (DEV 5 - MINH)
+  USER STORY: US-63 - Màn hình Xác Nhận Gói Trả Sau Cho Đơn Hàng (SPayLater Checkout)
+  =====================================================================
+-->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexShop - Xác Nhận Trả Sau SPayLater (US-63)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .plan-card {
+            border: 2px solid #dee2e6;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #ffffff;
+        }
+        .plan-card:hover { border-color: #ff9800; background-color: #fffdf9; transform: translateY(-2px); }
+        .plan-card.selected {
+            border-color: #f57c00;
+            background-color: #fff8e1;
+            box-shadow: 0 4px 12px rgba(245, 124, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/tra-sau/tai-khoan">
+            <i class="bi bi-clock-history text-warning me-2"></i>FlexShop SPayLater
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a th:href="@{/thanh-toan/chon-phuong-thuc(id=${donHang.maDonHangTong})}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại phương thức thanh toán
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    <!-- Alert Messages -->
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row g-4">
+        <!-- Cột Trái: Chọn gói kỳ hạn trả góp -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-sliders text-warning me-2"></i>Chọn Kỳ Hạn Trả Góp SPayLater (US-63)
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+
+                    <!-- Hạn mức hiện có của khách -->
+                    <div class="p-3 bg-light rounded-3 mb-4 d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted d-block">Hạn mức khả dụng SPayLater:</small>
+                            <span class="fs-5 fw-bold text-success" th:text="${#numbers.formatDecimal(taiKhoan.hanMucConLai, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted d-block">Điểm tín dụng:</small>
+                            <span class="badge bg-primary fs-6">
+                                <i class="bi bi-star-fill text-warning me-1"></i><span th:text="${taiKhoan.diemTinDung}"></span> điểm
+                            </span>
+                        </div>
+                    </div>
+
+                    <form th:action="@{/tra-sau/xac-nhan-vay}" th:object="${vayDTO}" method="post" id="formVay">
+                        <input type="hidden" th:field="*{maDonHangTong}">
+                        <input type="hidden" th:field="*{maNguoiDung}">
+
+                        <label class="form-label fw-bold text-dark mb-3">Lựa chọn gói trả góp linh hoạt:</label>
+
+                        <!-- Gói 1: 1 Kỳ (30 ngày - 0% Lãi) -->
+                        <div class="plan-card p-3 mb-3" onclick="chonGoi(1, this)">
+                            <div class="form-check d-flex align-items-center">
+                                <input class="form-check-input me-3 fs-5" type="radio" th:field="*{soKyTraGop}" value="1" id="ky1">
+                                <label class="form-check-label flex-grow-1" for="ky1" style="cursor: pointer;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold fs-6 text-dark">Trả sau 1 kỳ (30 ngày)</span>
+                                        <span class="badge bg-success">Lãi suất 0.0%</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mt-1">
+                                        <small class="text-muted">Thanh toán 1 lần duy nhất sau 30 ngày</small>
+                                        <span class="fw-bold text-primary" th:text="${#numbers.formatDecimal(duTinh1Ky[0].soTienCanTra, 0, 'COMMA', 0, 'POINT')} + ' đ/kỳ'"></span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Gói 2: 3 Kỳ (Mặc định - Khuyên Dùng) -->
+                        <div class="plan-card p-3 mb-3 selected" onclick="chonGoi(3, this)">
+                            <div class="form-check d-flex align-items-center">
+                                <input class="form-check-input me-3 fs-5" type="radio" th:field="*{soKyTraGop}" value="3" id="ky3" checked>
+                                <label class="form-check-label flex-grow-1" for="ky3" style="cursor: pointer;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold fs-6 text-dark">Trả góp 3 kỳ (3 tháng)</span>
+                                        <span class="badge bg-warning text-dark fw-bold">Khuyên Dùng (1.0%/tháng)</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mt-1">
+                                        <small class="text-muted">Mỗi tháng trả 1 kỳ (cách nhau 30 ngày)</small>
+                                        <span class="fw-bold text-primary" th:text="${#numbers.formatDecimal(duTinh3Ky[0].soTienCanTra, 0, 'COMMA', 0, 'POINT')} + ' đ/tháng'"></span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Gói 3: 6 Kỳ -->
+                        <div class="plan-card p-3 mb-3" onclick="chonGoi(6, this)">
+                            <div class="form-check d-flex align-items-center">
+                                <input class="form-check-input me-3 fs-5" type="radio" th:field="*{soKyTraGop}" value="6" id="ky6">
+                                <label class="form-check-label flex-grow-1" for="ky6" style="cursor: pointer;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold fs-6 text-dark">Trả góp 6 kỳ (6 tháng)</span>
+                                        <span class="badge bg-secondary">Lãi suất 1.5%/tháng</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mt-1">
+                                        <small class="text-muted">Số tiền chia nhỏ tiện lợi chi tiêu</small>
+                                        <span class="fw-bold text-primary" th:text="${#numbers.formatDecimal(duTinh6Ky[0].soTienCanTra, 0, 'COMMA', 0, 'POINT')} + ' đ/tháng'"></span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Gói 4: 12 Kỳ -->
+                        <div class="plan-card p-3 mb-4" onclick="chonGoi(12, this)">
+                            <div class="form-check d-flex align-items-center">
+                                <input class="form-check-input me-3 fs-5" type="radio" th:field="*{soKyTraGop}" value="12" id="ky12">
+                                <label class="form-check-label flex-grow-1" for="ky12" style="cursor: pointer;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold fs-6 text-dark">Trả góp 12 kỳ (1 năm)</span>
+                                        <span class="badge bg-secondary">Lãi suất 2.0%/tháng</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mt-1">
+                                        <small class="text-muted">Gói trả góp dài hạn nhẹ gánh nhất</small>
+                                        <span class="fw-bold text-primary" th:text="${#numbers.formatDecimal(duTinh12Ky[0].soTienCanTra, 0, 'COMMA', 0, 'POINT')} + ' đ/tháng'"></span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">Ghi chú cam kết hợp đồng:</label>
+                            <input type="text" class="form-control" th:field="*{ghiChu}" placeholder="Ví dụ: Cam kết thanh toán đúng hạn các kỳ">
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-warning btn-lg fw-bold shadow">
+                                <i class="bi bi-shield-lock-fill me-1"></i> Xác Nhận Vay & Hoàn Tất Đơn Hàng
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột Phải: Bảng tóm tắt đơn hàng & Bảng dự tính trả góp chi tiết -->
+        <div class="col-lg-5">
+            <!-- Tóm tắt đơn hàng -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-receipt me-2 text-primary"></i>Tóm Tắt Đơn Hàng
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Mã đơn hàng:</span>
+                        <span class="fw-bold text-primary" th:text="${donHang.maCodeDonTong}"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Khách hàng:</span>
+                        <span class="fw-semibold text-dark" th:text="${donHang.khachHang.hoVaTen}"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Số điện thoại:</span>
+                        <span class="text-dark" th:text="${donHang.khachHang.soDienThoai}"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Địa chỉ nhận hàng:</span>
+                        <span class="text-dark small text-end" th:text="${donHang.diaChiGiao != null ? donHang.diaChiGiao.diaChiDayDu : 'Địa chỉ mặc định'}"></span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fs-6 fw-bold text-dark">Tổng tiền vay SPayLater:</span>
+                        <span class="fs-4 fw-bold text-danger" th:text="${#numbers.formatDecimal(donHang.tongThanhToanCuoi, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bảng dự tính trả nợ (Gói 3 kỳ) -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-calendar3 me-2 text-warning"></i>Dự Tính Lịch Trả Nợ (3 Kỳ)
+                    </h6>
+                    <span class="badge bg-warning text-dark">Minh Họa</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Kỳ</th>
+                                    <th>Hạn Chốt</th>
+                                    <th class="text-end pe-3">Số Tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="ky : ${duTinh3Ky}">
+                                    <td class="ps-3 fw-bold" th:text="'Kỳ ' + ${ky.kySo}"></td>
+                                    <td>
+                                        <i class="bi bi-clock me-1 text-muted"></i>
+                                        <span th:text="${#temporals.format(ky.hanChotThanhToan, 'dd/MM/yyyy')}"></span>
+                                    </td>
+                                    <td class="text-end pe-3 fw-bold text-primary" th:text="${#numbers.formatDecimal(ky.soTienCanTra, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-light small text-muted">
+                    <i class="bi bi-info-circle me-1"></i> Hệ thống tự động chia kỳ và gửi thông báo nhắc nợ trước 3 ngày đến hạn.
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function chonGoi(soKy, element) {
+        document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+        element.classList.add('selected');
+        const radio = element.querySelector('input[type="radio"]');
+        if (radio) radio.checked = true;
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

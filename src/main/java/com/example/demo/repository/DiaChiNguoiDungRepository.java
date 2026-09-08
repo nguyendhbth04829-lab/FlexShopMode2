@@ -12,6 +12,13 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * =====================================================================
+ * DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+ * PHÂN HỆ: TÀI CHÍNH & THANH TOÁN (DEV 5 - MINH)
+ * USER STORY: US-26 - Repository truy vấn sổ địa chỉ giao hàng
+ * =====================================================================
+ */
 @Repository
 public interface DiaChiNguoiDungRepository extends JpaRepository<DiaChiNguoiDung, Long> {
     List<DiaChiNguoiDung> findAllByNguoiDung_MaNguoiDung(Long maNguoiDung);
@@ -31,6 +38,7 @@ public interface DiaChiNguoiDungRepository extends JpaRepository<DiaChiNguoiDung
      */
     Optional<DiaChiNguoiDung> findByMaNguoiDungAndLaMacDinhTrueAndDaXoaFalse(Long maNguoiDung);
 
+    List<DiaChiNguoiDung> findByNguoiDung_MaNguoiDung(Long maNguoiDung);
     /**
      * Tìm địa chỉ gần nhất còn hiệu lực để tự động gán mặc định thay thế khi xóa
      */

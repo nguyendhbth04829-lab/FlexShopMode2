@@ -10,6 +10,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+/**
+ * =====================================================================
+ * DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+ * PHÂN HỆ: TÀI CHÍNH & THANH TOÁN (DEV 5 - MINH)
+ * USER STORY: US-26 - Repository truy vấn thông tin gian hàng người bán
+ * =====================================================================
+ */
 @Repository
 public interface GianHangRepository extends JpaRepository<GianHang, Long> {
     Optional<GianHang> findByTenGianHang(String tenGianHang);
@@ -21,6 +28,7 @@ public interface GianHangRepository extends JpaRepository<GianHang, Long> {
      */
     Optional<GianHang> findByMaChuSoHuuAndDaXoaFalse(Long maChuSoHuu);
 
+    Optional<GianHang> findByDuongDanSlug(String slug);
     /**
      * Tìm gian hàng mới nhất theo mã chủ sở hữu (cho trường hợp hồ sơ đăng ký)
      */

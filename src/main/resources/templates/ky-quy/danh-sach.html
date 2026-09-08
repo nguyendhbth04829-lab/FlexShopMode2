@@ -1,0 +1,353 @@
+<!--
+  =====================================================================
+  DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+  PHÂN HỆ: TÀI CHÍNH, VÍ ESCROW & PHÍ SÀN (DEV 5 - MINH)
+  USER STORY: US-42 & US-43 - Quản lý Ký Quỹ Escrow (Shopee Guarantee 3 ngày) & Phí Sàn 3%
+  =====================================================================
+-->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexShop - Quản Lý Ký Quỹ Escrow & Phí Sàn 3% (US-42 & US-43)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card-stat { border: none; border-radius: 14px; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .card-stat:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+        .bg-gradient-warning-subtle { background: linear-gradient(135deg, #fff8e1 0%, #ffe082 100%); }
+        .bg-gradient-success-subtle { background: linear-gradient(135deg, #e8f5e9 0%, #a5d6a7 100%); }
+        .bg-gradient-primary-subtle { background: linear-gradient(135deg, #e3f2fd 0%, #90caf9 100%); }
+        .bg-gradient-danger-subtle { background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); }
+        .table-hover tbody tr:hover { background-color: #f0f7ff; }
+        .badge-pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<!-- Header Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/ky-quy/danh-sach">
+            <i class="bi bi-shield-lock-fill text-warning me-2"></i>FlexShop Escrow & Phí Sàn
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/thanh-toan/danh-sach">
+                        <i class="bi bi-credit-card me-1"></i> US-26: Thanh Toán
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active fw-bold text-warning" href="/ky-quy/danh-sach">
+                        <i class="bi bi-safe me-1"></i> US-42 & US-43: Ký Quỹ Escrow
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="/rut-tien-nguoi-ban/danh-sach">
+                        <i class="bi bi-cash-stack me-1"></i> US-44: Rút Tiền Người Bán
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="/thong-ke-bao-cao/dashboard">
+                        <i class="bi bi-pie-chart-fill me-1"></i> US-58: Báo Cáo & Doanh Thu
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-wallet2 me-1"></i> Ví Người Bán (Shop Wallets)
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li th:each="gh : ${listGianHang}">
+                            <a class="dropdown-item" th:href="@{|/ky-quy/vi-nguoi-ban/${gh.maGianHang}|}">
+                                <i class="bi bi-shop me-2 text-primary"></i><span th:text="${gh.tenGianHang}"></span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <span class="navbar-text text-white small">
+                <span class="badge bg-warning text-dark me-2">Dev 5: Minh</span> Shopee Guarantee 3 Ngày
+            </span>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    <!-- Tiêu đề & Nút thao tác nhanh -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-safe2 text-primary me-2"></i>Quản Lý Ký Quỹ Escrow & Phí Sàn (US-42 & US-43)
+            </h3>
+            <p class="text-muted mb-0">Cơ chế <strong>Shopee Guarantee 3 ngày</strong>: Tiền đơn hàng thanh toán trực tuyến được bảo lưu an toàn tại hệ thống Ký quỹ trước khi giải ngân vào Ví Người Bán.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <form action="/ky-quy/quet-tu-dong" method="post">
+                <button type="submit" class="btn btn-warning fw-semibold shadow-sm text-dark">
+                    <i class="bi bi-lightning-charge-fill me-1"></i> Quét & Giải Ngân Tự Động (Đơn Quá 3 Ngày)
+                </button>
+            </form>
+            <a href="/thanh-toan/danh-sach" class="btn btn-outline-primary">
+                <i class="bi bi-plus-circle me-1"></i> Test Thanh Toán Mới (US-26)
+            </a>
+        </div>
+    </div>
+
+    <!-- Thông báo kết quả nghiệp vụ -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${infoMessage}" class="alert alert-info alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-info-circle-fill me-2"></i><span th:text="${infoMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- 4 Thẻ KPI Thống Kê Tài Chính Đồng Bộ Trực Tiếp Từ Database -->
+    <div class="row g-3 mb-4" th:if="${thongKe}">
+        <div class="col-md-3">
+            <div class="card card-stat bg-gradient-warning-subtle p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-uppercase fw-semibold text-warning-emphasis small">Đang Tạm Giữ Escrow</span>
+                    <i class="bi bi-hourglass-split fs-4 text-warning"></i>
+                </div>
+                <h4 class="fw-bold text-dark mb-1" th:text="${#numbers.formatDecimal(thongKe.tongTamGiu, 0, 'COMMA', 0, 'POINT') + ' đ'}">0 đ</h4>
+                <small class="text-muted"><span class="fw-bold text-dark" th:text="${thongKe.countTamGiu}">0</span> đơn đang giữ 3 ngày</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-stat bg-gradient-success-subtle p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-uppercase fw-semibold text-success-emphasis small">Đã Giải Ngân Về Ví</span>
+                    <i class="bi bi-check-circle fs-4 text-success"></i>
+                </div>
+                <h4 class="fw-bold text-dark mb-1" th:text="${#numbers.formatDecimal(thongKe.tongDaGiaiNgan, 0, 'COMMA', 0, 'POINT') + ' đ'}">0 đ</h4>
+                <small class="text-muted"><span class="fw-bold text-dark" th:text="${thongKe.countDaGiaiNgan}">0</span> đơn đã hoàn tất</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-stat bg-gradient-primary-subtle p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-uppercase fw-semibold text-primary-emphasis small">Phí Sàn Đã Thu (3%)</span>
+                    <i class="bi bi-piggy-bank fs-4 text-primary"></i>
+                </div>
+                <h4 class="fw-bold text-primary mb-1" th:text="${#numbers.formatDecimal(thongKe.tongPhiSan, 0, 'COMMA', 0, 'POINT') + ' đ'}">0 đ</h4>
+                <small class="text-muted">Doanh thu sàn FlexShop (US-43)</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-stat bg-gradient-danger-subtle p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-uppercase fw-semibold text-danger-emphasis small">Đơn Quá Hạn 3 Ngày</span>
+                    <i class="bi bi-alarm-fill fs-4 text-danger"></i>
+                </div>
+                <h4 class="fw-bold text-danger mb-1" th:text="${thongKe.countQuaHanChuaGiaiNgan}">0</h4>
+                <small class="text-muted">Đang chờ Quét tự động giải ngân</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bộ Lọc Nâng Cao & Tìm Kiếm Phân Trang -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form action="/ky-quy/danh-sach" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small">Từ khóa tìm kiếm:</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" name="keyword" th:value="${keyword}" class="form-control"
+                               placeholder="Mã đơn shop (DHS-...) hoặc tên shop...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small">Trạng thái Ký Quỹ:</label>
+                    <select name="trangThai" class="form-select">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        <option value="DANG_TAM_GIU" th:selected="${trangThai == 'DANG_TAM_GIU'}">Đang tạm giữ Escrow (3 ngày)</option>
+                        <option value="DA_GIAI_NGAN" th:selected="${trangThai == 'DA_GIAI_NGAN'}">Đã giải ngân về ví</option>
+                        <option value="DA_HOAN_TIEN" th:selected="${trangThai == 'DA_HOAN_TIEN'}">Đã hoàn tiền cho khách</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small">Lọc theo Gian Hàng:</label>
+                    <select name="maGianHang" class="form-select">
+                        <option value="">-- Tất cả gian hàng --</option>
+                        <option th:each="gh : ${listGianHang}"
+                                th:value="${gh.maGianHang}"
+                                th:text="${gh.tenGianHang}"
+                                th:selected="${maGianHang == gh.maGianHang}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                        <i class="bi bi-funnel-fill me-1"></i> Áp Dụng Lọc
+                    </button>
+                </div>
+                <div class="col-12 d-flex justify-content-between align-items-center pt-2 border-top">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="chiLayQuaHan" value="true" id="checkQuaHan"
+                               th:checked="${chiLayQuaHan == true}">
+                        <label class="form-check-label fw-semibold text-danger" for="checkQuaHan">
+                            <i class="bi bi-exclamation-circle me-1"></i> Chỉ hiển thị các đơn đã quá hạn 3 ngày bảo vệ (cần giải ngân ngay)
+                        </label>
+                    </div>
+                    <div>
+                        <a href="/ky-quy/danh-sach" class="btn btn-sm btn-link text-decoration-none text-muted">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Xóa bộ lọc
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bảng Danh Sách Giao Dịch Ký Quỹ Escrow -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <span class="fw-bold fs-5 text-dark">
+                <i class="bi bi-list-check me-2 text-primary"></i>Danh Sách Giao Dịch Ký Quỹ Escrow
+            </span>
+            <span class="badge bg-light text-dark border fs-6"
+                  th:text="'Hiển thị ' + ${#lists.size(listKyQuy)} + ' / Tổng số ' + ${totalElements} + ' giao dịch'"></span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Mã Ký Quỹ / Đơn Shop</th>
+                        <th>Gian Hàng (Người Bán)</th>
+                        <th>Doanh Thu Đơn</th>
+                        <th>Phí Sàn (3%)</th>
+                        <th>Thực Nhận Về Ví</th>
+                        <th>Hạn Shopee Guarantee</th>
+                        <th>Trạng Thái</th>
+                        <th class="text-center pe-3">Hành Động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${listKyQuy == null or #lists.isEmpty(listKyQuy)}">
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                            Không tìm thấy giao dịch ký quỹ nào phù hợp với bộ lọc.
+                        </td>
+                    </tr>
+                    <tr th:each="kq : ${listKyQuy}">
+                        <td class="ps-3">
+                            <span class="badge bg-light text-dark border me-1" th:text="'#' + ${kq.maKyQuy}"></span>
+                            <span class="fw-bold text-primary" th:text="${kq.donHangShop.maCodeDonShop}"></span>
+                            <div class="small text-muted" th:text="${#temporals.format(kq.ngayTao, 'dd/MM/yyyy HH:mm')}"></div>
+                        </td>
+                        <td>
+                            <a th:href="@{|/ky-quy/vi-nguoi-ban/${kq.gianHang.maGianHang}|}" class="text-decoration-none fw-semibold text-dark">
+                                <i class="bi bi-shop text-primary me-1"></i><span th:text="${kq.gianHang.tenGianHang}"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <span class="fw-bold text-dark"
+                                  th:text="${#numbers.formatDecimal(kq.tongTienDonHang, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+                        </td>
+                        <td>
+                            <span class="text-danger fw-semibold"
+                                  th:text="'-' + ${#numbers.formatDecimal(kq.tienPhiSan, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+                            <small class="text-muted d-block">(3%)</small>
+                        </td>
+                        <td>
+                            <span class="fw-bold text-success fs-6"
+                                  th:text="${#numbers.formatDecimal(kq.tienThucNhanVeVi, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+                        </td>
+                        <td>
+                            <div th:if="${kq.trangThai == 'DANG_TAM_GIU'}">
+                                <span class="small fw-semibold text-warning-emphasis">
+                                    <i class="bi bi-clock-history me-1"></i>
+                                    <span th:text="${#temporals.format(kq.ngayDuKienNhaTien, 'dd/MM/yyyy HH:mm')}"></span>
+                                </span>
+                                <div th:if="${kq.isDuDieuKienTuDongGiaiNgan()}" class="badge bg-danger text-white mt-1 badge-pulse">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Quá hạn 3 ngày!
+                                </div>
+                                <div th:unless="${kq.isDuDieuKienTuDongGiaiNgan()}" class="badge bg-warning text-dark mt-1">Đang bảo vệ</div>
+                            </div>
+                            <div th:if="${kq.trangThai == 'DA_GIAI_NGAN'}">
+                                <span class="small text-success">
+                                    <i class="bi bi-check2-all me-1"></i>
+                                    <span th:text="${#temporals.format(kq.ngayThucTeNhaTien, 'dd/MM/yyyy HH:mm')}"></span>
+                                </span>
+                            </div>
+                            <div th:if="${kq.trangThai == 'DA_HOAN_TIEN'}">
+                                <span class="small text-danger">Đã hoàn trả</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge px-2 py-1" th:classappend="${kq.badgeClass}"
+                                  th:text="${kq.tenTrangThaiTiengViet}"></span>
+                        </td>
+                        <td class="text-center pe-3">
+                            <div class="btn-group">
+                                <!-- Nút Xem Chi Tiết Bóc Tách Phí -->
+                                <a th:href="@{|/ky-quy/chi-tiet/${kq.maKyQuy}|}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-eye"></i> Chi tiết
+                                </a>
+
+                                <!-- Nút Khách Hàng Xác Nhận Đã Nhận Hàng (Giải Ngân Sớm) -->
+                                <form th:if="${kq.trangThai == 'DANG_TAM_GIU'}"
+                                      th:action="@{|/ky-quy/giai-ngan/${kq.maKyQuy}|}" method="post" class="d-inline"
+                                      onsubmit="return confirm('Xác nhận ĐÃ NHẬN ĐƯỢC HÀNG? Tiền sẽ lập tức được giải ngân từ Escrow vào Số Dư Khả Dụng của Shop.');">
+                                    <input type="hidden" name="lyDo" value="Khách hàng bấm xác nhận Đã nhận được hàng">
+                                    <button type="submit" class="btn btn-sm btn-success fw-semibold ms-1">
+                                        <i class="bi bi-box2-heart me-1"></i> Nhận Hàng (Giải Ngân)
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Phân trang chuyên nghiệp -->
+        <div class="card-footer bg-white py-3" th:if="${totalPages > 1}">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="text-muted small">
+                    Trang <strong th:text="${currentPage + 1}"></strong> / <strong th:text="${totalPages}"></strong>
+                    (Tổng cộng <span th:text="${totalElements}"></span> giao dịch)
+                </span>
+                <nav>
+                    <ul class="pagination pagination-sm justify-content-end mb-0">
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{/ky-quy/danh-sach(page=${currentPage - 1}, size=${pageSize}, keyword=${keyword}, trangThai=${trangThai}, maGianHang=${maGianHang}, chiLayQuaHan=${chiLayQuaHan})}">
+                                <i class="bi bi-chevron-left"></i> Trước
+                            </a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${currentPage == i} ? 'active'">
+                            <a class="page-link" th:text="${i + 1}"
+                               th:href="@{/ky-quy/danh-sach(page=${i}, size=${pageSize}, keyword=${keyword}, trangThai=${trangThai}, maGianHang=${maGianHang}, chiLayQuaHan=${chiLayQuaHan})}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                            <a class="page-link" th:href="@{/ky-quy/danh-sach(page=${currentPage + 1}, size=${pageSize}, keyword=${keyword}, trangThai=${trangThai}, maGianHang=${maGianHang}, chiLayQuaHan=${chiLayQuaHan})}">
+                                Sau <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

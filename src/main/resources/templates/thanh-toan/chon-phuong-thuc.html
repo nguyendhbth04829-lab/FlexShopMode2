@@ -1,0 +1,196 @@
+<!--
+  =====================================================================
+  DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+  PHÂN HỆ: TÀI CHÍNH & THANH TOÁN (DEV 5 - MINH)
+  USER STORY: US-26 - Màn hình lựa chọn phương thức thanh toán (COD / Online)
+  =====================================================================
+-->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexShop - Chọn Phương Thức Thanh Toán (US-26)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .payment-option-card { border: 2px solid #dee2e6; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+        .payment-option-card:hover { border-color: #0d6efd; background-color: #f0f7ff; }
+        .payment-option-card.selected { border-color: #0d6efd; background-color: #e8f2ff; box-shadow: 0 4px 10px rgba(13,110,253,0.15); }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/thanh-toan/danh-sach">
+            <i class="bi bi-wallet2 me-2 text-warning"></i>FlexShop Payment
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a href="/thanh-toan/danh-sach" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại đơn hàng
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+    <div class="row g-4">
+        <!-- Cột Trái: Chọn phương thức thanh toán -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-credit-card text-primary me-2"></i>Chọn Phương Thức Thanh Toán (US-26)
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+
+                    <form th:action="@{/thanh-toan/xac-nhan}" th:object="${thanhToanDTO}" method="post" id="formPayment">
+                        <input type="hidden" th:field="*{maDonHangTong}">
+
+                        <!-- Lựa chọn 1: COD -->
+                        <div class="payment-option-card p-3 mb-3 selected" id="cardCOD" onclick="selectMethod('COD')">
+                            <div class="form-check d-flex align-items-center">
+                                <input class="form-check-input me-3 fs-5" type="radio" th:field="*{phuongThuc}" value="COD" id="radioCOD" onchange="selectMethod('COD')">
+                                <label class="form-check-label flex-grow-1" for="radioCOD" style="cursor: pointer;">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="fw-bold text-dark fs-6">
+                                            <i class="bi bi-cash-stack text-success fs-4 me-2 align-middle"></i>Thanh toán khi nhận hàng (COD)
+                                        </span>
+                                        <span class="badge bg-success">Miễn phí</span>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">
+                                        Khách hàng thanh toán tiền mặt trực tiếp cho Shipper khi kiện hàng được giao tới nơi.
+                                    </small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Lựa chọn 2: Mock Online Payment Gateway -->
+                        <div class="payment-option-card p-3 mb-3" id="cardOnline" onclick="selectMethod('MOCK_ONLINE')">
+                            <div class="form-check d-flex align-items-center">
+                                <input class="form-check-input me-3 fs-5" type="radio" th:field="*{phuongThuc}" value="MOCK_ONLINE" id="radioOnline" onchange="selectMethod('MOCK_ONLINE')">
+                                <label class="form-check-label flex-grow-1" for="radioOnline" style="cursor: pointer;">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="fw-bold text-dark fs-6">
+                                             <i class="bi bi-qr-code-scan text-primary fs-4 me-2 align-middle"></i>Quét Mã QR Ngân Hàng (VietQR Banking)
+                                        </span>
+                                        <span class="badge bg-primary">Khuyên dùng</span>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">
+                                        Quét mã QR bằng App Ngân hàng bất kỳ chuyển tiền trực tuyến tức thì.
+                                    </small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Lựa chọn 3: SPayLater (Mua Trước Trả Sau - BNPL) -->
+                        <div class="payment-option-card p-3 mb-4" id="cardSPayLater" onclick="selectMethod('SPAYLATER')">
+                            <div class="form-check d-flex align-items-center">
+                                <input class="form-check-input me-3 fs-5" type="radio" th:field="*{phuongThuc}" value="SPAYLATER" id="radioSPayLater" onchange="selectMethod('SPAYLATER')">
+                                <label class="form-check-label flex-grow-1" for="radioSPayLater" style="cursor: pointer;">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="fw-bold text-dark fs-6">
+                                             <i class="bi bi-clock-history text-warning fs-4 me-2 align-middle"></i>Mua Trước Trả Sau (SPayLater - US-63)
+                                        </span>
+                                        <span class="badge bg-warning text-dark fw-bold">Trả góp 0% Lãi</span>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">
+                                        Chia nhỏ thanh toán thành 1, 3, 6, 12 kỳ linh hoạt bằng hạn mức tín dụng tiêu dùng FlexShop.
+                                    </small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-danger btn-lg fw-bold shadow">
+                                <i class="bi bi-check-circle me-1"></i> Tiến Hành Thanh Toán
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột Phải: Tóm tắt đơn hàng đa Shop -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-header bg-white py-3">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-receipt-cutoff me-2 text-primary"></i>Tóm Tắt Đơn Hàng Đa Shop
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Mã đơn tổng:</span>
+                        <span class="fw-bold text-primary" th:text="${donHang.maCodeDonTong}"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Khách hàng:</span>
+                        <span class="fw-semibold text-dark" th:text="${donHang.khachHang.hoVaTen}"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Số điện thoại:</span>
+                        <span class="text-dark" th:text="${donHang.khachHang.soDienThoai}"></span>
+                    </div>
+                    <hr>
+
+                    <!-- Danh sách các shopOrder con -->
+                    <div class="mb-3" th:each="so : ${donHang.danhSachShopOrder}">
+                        <div class="d-flex align-items-center justify-content-between bg-light p-2 rounded mb-2">
+                            <span class="fw-bold small text-dark">
+                                <i class="bi bi-shop me-1 text-danger"></i><span th:text="${so.gianHang.tenGianHang}"></span>
+                            </span>
+                            <span class="badge bg-secondary" th:text="${so.maCodeDonShop}"></span>
+                        </div>
+                        <ul class="list-unstyled ps-2 mb-2">
+                            <li class="small text-muted mb-1 d-flex justify-content-between" th:each="item : ${so.danhSachChiTiet}">
+                                <span><span th:text="${item.tenSanPham}"></span> (x<span th:text="${item.soLuong}"></span>)</span>
+                                <span class="fw-semibold text-dark" th:text="${#numbers.formatDecimal(item.tongTien, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <hr>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Tiền hàng:</span>
+                        <span class="fw-semibold text-dark" th:text="${#numbers.formatDecimal(donHang.tongTienHang, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Phí vận chuyển (Đa shop):</span>
+                        <span class="fw-semibold text-dark" th:text="${#numbers.formatDecimal(donHang.tongPhiVanChuyen, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                        <span class="fs-5 fw-bold text-dark">Tổng thanh toán:</span>
+                        <span class="fs-4 fw-bold text-danger"
+                              th:text="${#numbers.formatDecimal(donHang.tongThanhToanCuoi, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function selectMethod(method) {
+        document.querySelectorAll('.payment-option-card').forEach(c => c.classList.remove('selected'));
+        if (method === 'COD') {
+            document.getElementById('radioCOD').checked = true;
+            document.getElementById('cardCOD').classList.add('selected');
+        } else if (method === 'SPAYLATER') {
+            document.getElementById('radioSPayLater').checked = true;
+            document.getElementById('cardSPayLater').classList.add('selected');
+        } else if (method === 'MOCK_ONLINE') {
+            document.getElementById('radioOnline').checked = true;
+            document.getElementById('cardOnline').classList.add('selected');
+        }
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

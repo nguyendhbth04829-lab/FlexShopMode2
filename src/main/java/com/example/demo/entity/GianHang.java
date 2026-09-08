@@ -9,6 +9,13 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * =====================================================================
+ * DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+ * PHÂN HỆ: TÀI CHÍNH & THANH TOÁN (DEV 5 - MINH)
+ * USER STORY: US-26 - Thực thể Gian hàng (Người bán / Đối tác Shop)
+ * =====================================================================
+ */
 @Data
 
 @Entity
@@ -18,6 +25,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Entity
+@Table(name = "gian_hang")
 public class GianHang {
 
     @Id
@@ -27,6 +36,7 @@ public class GianHang {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ma_chu_so_huu", referencedColumnName = "ma_nguoi_dung", nullable = false)
+    @JoinColumn(name = "ma_chu_so_huu", nullable = false)
     private NguoiDung chuSoHuu;
 
 
@@ -57,6 +67,7 @@ public class GianHang {
     private String sdtKho;
 
     @Column(name = "trang_thai", length = 30)
+    private String trangThai = "HOAT_DONG";
     private String trangThai = "CHO_DUYET";
 
 
@@ -73,6 +84,7 @@ public class GianHang {
     @Column(name = "diem_danh_gia_tb", precision = 3, scale = 2)
     private BigDecimal diemDanhGiaTb = BigDecimal.ZERO;
 
+    private BigDecimal diemDanhGiaTb = BigDecimal.valueOf(5.0);
 
     @Column(name = "tong_danh_gia")
     private Integer tongDanhGia = 0;

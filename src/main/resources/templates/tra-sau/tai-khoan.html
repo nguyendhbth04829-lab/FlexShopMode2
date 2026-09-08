@@ -1,0 +1,346 @@
+<!--
+  =====================================================================
+  DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+  PHÂN HỆ: TÀI CHÍNH & TÍN DỤNG TIÊU DÙNG (DEV 5 - MINH)
+  USER STORY: US-63 - Màn hình Quản Lý Ví Trả Sau (SPayLater Dashboard)
+  =====================================================================
+-->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexShop - Ví Mua Trước Trả Sau SPayLater (US-63)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card-stat { border: none; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        .card-stat:hover { transform: translateY(-3px); }
+        .spaylater-card {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #ee4d2d 100%);
+            border-radius: 20px;
+            color: #ffffff;
+            box-shadow: 0 10px 25px rgba(30, 60, 114, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .spaylater-card::after {
+            content: "";
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 180px;
+            height: 180px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        .progress-bar-custom {
+            height: 10px;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.25);
+        }
+        .bg-gradient-orange { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); }
+        .bg-gradient-blue { background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); }
+        .bg-gradient-green { background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); }
+        .bg-gradient-purple { background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); }
+    </style>
+</head>
+<body>
+
+<!-- Header Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/tra-sau/tai-khoan">
+            <i class="bi bi-clock-history text-warning me-2"></i>FlexShop SPayLater
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/thanh-toan/danh-sach">
+                        <i class="bi bi-credit-card me-1"></i> US-26: Thanh Toán
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/ky-quy/danh-sach">
+                        <i class="bi bi-safe me-1"></i> US-42 & US-43: Ký Quỹ
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/rut-tien-nguoi-ban/danh-sach">
+                        <i class="bi bi-cash-stack me-1"></i> US-44: Rút Tiền
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/thong-ke-bao-cao/dashboard">
+                        <i class="bi bi-pie-chart me-1"></i> US-58: Báo Cáo & GMV
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active fw-bold text-warning" href="/tra-sau/tai-khoan">
+                        <i class="bi bi-clock-history me-1"></i> US-63: SPayLater
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="/quang-cao-ads/danh-sach">
+                        <i class="bi bi-badge-ad me-1"></i> US-64: Shopee Ads
+                    </a>
+                </li>
+            </ul>
+            <div class="d-flex align-items-center">
+                <a href="/tra-sau/danh-sach-hop-dong" class="btn btn-outline-light btn-sm me-2">
+                    <i class="bi bi-journal-text me-1"></i> Quản Lý Hợp Đồng
+                </a>
+                <span class="badge bg-warning text-dark px-3 py-2 fw-semibold">
+                    <i class="bi bi-person-check-fill me-1"></i> Minh (Dev 5)
+                </span>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    <!-- Alert Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${warningMessage}" class="alert alert-warning alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-circle-fill me-2"></i>
+        <span th:text="${warningMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Cảnh báo nợ quá hạn nếu có -->
+    <div th:if="${thongKe.soKyQuaHan > 0}" class="alert alert-danger shadow-sm d-flex align-items-center mb-4">
+        <i class="bi bi-shield-slash-fill fs-2 me-3"></i>
+        <div class="flex-grow-1">
+            <h6 class="fw-bold mb-1">CẢNH BÁO NỢ QUÁ HẠN!</h6>
+            <div>Bạn đang có <strong th:text="${thongKe.soKyQuaHan}"></strong> kỳ thanh toán quá hạn với tổng nợ <strong th:text="${#numbers.formatDecimal(thongKe.tongTienQuaHan, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></strong>. Tài khoản đang bị tạm khóa giao dịch vay mới.</div>
+        </div>
+        <a href="/tra-sau/danh-sach-hop-dong" class="btn btn-danger btn-sm fw-bold">Thanh Toán Nợ Ngay</a>
+    </div>
+
+    <!-- Hàng 1: Thẻ Ảo SPayLater & Thống Kê Nhanh -->
+    <div class="row g-4 mb-4">
+        <!-- Thẻ Ảo SPayLater -->
+        <div class="col-lg-5">
+            <div class="spaylater-card p-4 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-lightning-charge-fill fs-3 text-warning me-2"></i>
+                            <span class="fs-5 fw-bold tracking-wider">FlexShop SPayLater</span>
+                        </div>
+                        <span class="badge bg-light text-dark px-3 py-1 fw-bold" th:text="${thongKe.trangThaiTaiKhoan}"></span>
+                    </div>
+                    <div class="text-white-50 small mb-1">HẠN MỨC KHẢ DỤNG CÒN LẠI</div>
+                    <h2 class="fw-bold mb-3" th:text="${#numbers.formatDecimal(thongKe.hanMucConLai, 0, 'COMMA', 0, 'POINT')} + ' đ'"></h2>
+
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between small text-white-50 mb-1">
+                            <span>Đã dùng: <strong class="text-white" th:text="${#numbers.formatDecimal(thongKe.hanMucDaDung, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong></span>
+                            <span>Hạn mức: <strong class="text-white" th:text="${#numbers.formatDecimal(thongKe.tongHanMuc, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong></span>
+                        </div>
+                        <div class="progress progress-bar-custom">
+                            <div class="progress-bar bg-warning" role="progressbar" 
+                                 th:style="'width: ' + ${thongKe.tiLeSuDungPhanTram} + '%'" 
+                                 th:aria-valuenow="${thongKe.tiLeSuDungPhanTram}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-top border-white-50 d-flex justify-content-between align-items-end">
+                    <div>
+                        <div class="text-white-50 small">CHỦ TÀI KHOẢN</div>
+                        <div class="fw-bold text-uppercase" th:text="${thongKe.tenKhachHang}"></div>
+                    </div>
+                    <div class="text-end">
+                        <div class="text-white-50 small">ĐIỂM TÍN DỤNG</div>
+                        <div class="fw-bold fs-5 text-warning">
+                            <i class="bi bi-star-fill me-1"></i><span th:text="${thongKe.diemTinDung}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4 Khối Chỉ Số Tài Chính -->
+        <div class="col-lg-7">
+            <div class="row g-3">
+                <div class="col-sm-6">
+                    <div class="card card-stat bg-gradient-blue p-3 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted fw-semibold small">TỔNG HẠN MỨC CẤP</span>
+                            <i class="bi bi-shield-check text-primary fs-4"></i>
+                        </div>
+                        <h4 class="fw-bold text-primary mb-1" th:text="${#numbers.formatDecimal(thongKe.tongHanMuc, 0, 'COMMA', 0, 'POINT')} + ' đ'"></h4>
+                        <small class="text-muted">Cấp tự động cho khách hàng uy tín</small>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card card-stat bg-gradient-orange p-3 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted fw-semibold small">TỔNG DƯ NỢ HIỆN TẠI</span>
+                            <i class="bi bi-receipt text-danger fs-4"></i>
+                        </div>
+                        <h4 class="fw-bold text-danger mb-1" th:text="${#numbers.formatDecimal(thongKe.tongDuNoHienTai, 0, 'COMMA', 0, 'POINT')} + ' đ'"></h4>
+                        <small class="text-muted">Đang trả trong các kỳ hợp đồng</small>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card card-stat bg-gradient-purple p-3 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted fw-semibold small">CẦN TRẢ THÁNG NÀY</span>
+                            <i class="bi bi-calendar2-week text-purple fs-4 text-dark"></i>
+                        </div>
+                        <h4 class="fw-bold text-dark mb-1" th:text="${#numbers.formatDecimal(thongKe.tongTienCanTraThangNay, 0, 'COMMA', 0, 'POINT')} + ' đ'"></h4>
+                        <small class="text-muted">Gồm <span class="fw-bold text-dark" th:text="${thongKe.soKyCanTraThangNay}"></span> kỳ đến hạn thanh toán</small>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card card-stat bg-gradient-green p-3 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted fw-semibold small">HỢP ĐỒNG TRẢ GÓP</span>
+                            <i class="bi bi-file-earmark-check text-success fs-4"></i>
+                        </div>
+                        <h4 class="fw-bold text-success mb-1">
+                            <span th:text="${thongKe.soHopDongDangTra}"></span> <small class="fs-6 text-muted">/ <span th:text="${thongKe.tongSoHopDong}"></span> tất cả</small>
+                        </h4>
+                        <small class="text-muted"><span th:text="${thongKe.soHopDongDaTatToan}"></span> hợp đồng đã tất toán thành công</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thanh Hành Động Tiện Ích -->
+            <div class="mt-3 p-3 bg-white rounded-3 shadow-sm d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                <div>
+                    <span class="fw-bold text-dark me-2"><i class="bi bi-sliders me-1"></i>Hành động nhanh:</span>
+                    <button type="button" class="btn btn-outline-primary btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#modalKichHoat">
+                        <i class="bi bi-arrow-up-circle me-1"></i> Nâng / Kích Hoạt Hạn Mức
+                    </button>
+                    <a href="/tra-sau/danh-sach-hop-dong" class="btn btn-outline-secondary btn-sm fw-semibold">
+                        <i class="bi bi-list-check me-1"></i> Tra Cứu Hợp Đồng
+                    </a>
+                </div>
+                <form th:action="@{/tra-sau/quet-qua-han}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Hệ thống sẽ quét toàn bộ kỳ thanh toán và đánh dấu quá hạn nếu vượt hạn chót. Tiếp tục?');">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Quét Nợ Quá Hạn
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hàng 2: Hướng Dẫn Sử Dụng & Quy Trình BNPL -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-info-circle text-primary me-2"></i>Quy Trình Mua Trước Trả Sau (Buy Now Pay Later)
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <div class="row text-center g-4">
+                <div class="col-md-3">
+                    <div class="p-3 bg-light rounded-3 h-100">
+                        <div class="fs-1 text-primary mb-2"><i class="bi bi-cart4"></i></div>
+                        <h6 class="fw-bold">1. Mua Sắm Thỏa Thích</h6>
+                        <small class="text-muted">Chọn các sản phẩm từ đa gian hàng vào giỏ hàng và tiến hành thanh toán.</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 bg-light rounded-3 h-100">
+                        <div class="fs-1 text-warning mb-2"><i class="bi bi-calendar-check"></i></div>
+                        <h6 class="fw-bold">2. Chọn Kỳ Trả Góp</h6>
+                        <small class="text-muted">Linh hoạt chọn gói 1 tháng (0% lãi), 3 tháng, 6 tháng hoặc 12 tháng tùy nhu cầu.</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 bg-light rounded-3 h-100">
+                        <div class="fs-1 text-success mb-2"><i class="bi bi-box-seam"></i></div>
+                        <h6 class="fw-bold">3. Nhận Hàng Ngay</h6>
+                        <small class="text-muted">Đơn hàng được thanh toán tức thì, Shop giao hàng và tiền vào Ký Quỹ Escrow an toàn.</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 bg-light rounded-3 h-100">
+                        <div class="fs-1 text-info mb-2"><i class="bi bi-arrow-repeat"></i></div>
+                        <h6 class="fw-bold">4. Trả Nợ Phục Hồi Hạn Mức</h6>
+                        <small class="text-muted">Thanh toán từng kỳ đúng hạn giúp tăng điểm tín dụng và phục hồi ngay hạn mức mua sắm.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal Kích Hoạt / Nâng Hạn Mức Ví SPayLater -->
+<div class="modal fade" id="modalKichHoat" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-card-checklist me-2"></i>Đăng Ký / Nâng Hạn Mức SPayLater
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form th:action="@{/tra-sau/kich-hoat}" th:object="${dangKyDTO}" method="post">
+                <div class="modal-body p-4">
+                    <input type="hidden" th:field="*{maNguoiDung}">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Họ và tên chủ ví:</label>
+                        <input type="text" class="form-control" th:field="*{hoVaTen}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Số CCCD / CMND:</label>
+                        <input type="text" class="form-control" th:field="*{soCccd}" placeholder="Nhập 9-12 chữ số CCCD" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Số điện thoại liên kết:</label>
+                        <input type="text" class="form-control" th:field="*{soDienThoai}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mức thu nhập hàng tháng ước tính:</label>
+                        <select class="form-select" th:field="*{thuNhapThang}">
+                            <option value="5000000.00">Dưới 8,000,000 VNĐ (Cấp hạn mức: 5,000,000 VNĐ)</option>
+                            <option value="10000000.00">Từ 8,000,000 đến 15,000,000 VNĐ (Cấp hạn mức: 7,000,000 VNĐ)</option>
+                            <option value="20000000.00">Trên 15,000,000 VNĐ (Cấp hạn mức VIP: 10,000,000 VNĐ)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" th:field="*{dongYDieuKhoan}" id="chkDieuKhoan" checked required>
+                        <label class="form-check-label small text-muted" for="chkDieuKhoan">
+                            Tôi cam kết thông tin khai báo chính xác và đồng ý với các điều khoản tín dụng trả sau của FlexShop.
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary fw-bold">
+                        <i class="bi bi-check2-circle me-1"></i> Xác Nhận Kích Hoạt
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

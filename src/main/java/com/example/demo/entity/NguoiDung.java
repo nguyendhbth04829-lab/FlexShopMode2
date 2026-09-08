@@ -7,6 +7,13 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * =====================================================================
+ * DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+ * PHÂN HỆ: TÀI CHÍNH & THANH TOÁN (DEV 5 - MINH)
+ * USER STORY: US-26 - Thực thể Người dùng (Khách hàng / Chủ gian hàng)
+ * =====================================================================
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,6 +30,7 @@ public class NguoiDung {
     private String email;
 
     @Column(name = "so_dien_thoai", length = 20)
+    @Column(name = "so_dien_thoai", unique = true, length = 20)
     private String soDienThoai;
 
     @Column(name = "mat_khau_ma_hoa", nullable = false, length = 255)
