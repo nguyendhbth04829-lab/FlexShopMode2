@@ -2,6 +2,9 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.request.DangKyRequest;
 import com.example.demo.dto.request.DangNhapRequest;
+import com.example.demo.dto.request.GuiOtpDangKyRequest;
+import com.example.demo.dto.response.OtpResponse;
+import com.example.demo.service.OtpService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +28,9 @@ class XacThucApiControllerTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
+    @Autowired
+    private OtpService otpService;
+
     private MockMvc mockMvc;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -35,6 +41,24 @@ class XacThucApiControllerTest {
     }
 
     @Test
+    @DisplayName("API /api/v1/auth/register/gui-otp - Gửi mã OTP xác thực email khi đăng ký tài khoản")
+    void testGuiOtpDangKyApiThanhCong() throws Exception {
+        GuiOtpDangKyRequest request = GuiOtpDangKyRequest.builder()
+                .email("otp.api.test@flexshop.vn")
+                .soDienThoai("0977889900")
+                .hoVaTen("Người Dùng OTP")
+                .build();
+
+        mockMvc.perform(post("/api/v1/auth/register/gui-otp")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.thanhCong", is(true)))
+                .andExpect(jsonPath("$.duLieu.nguoiNhan", is("otp.api.test@flexshop.vn")))
+                .andExpect(jsonPath("$.duLieu.soGiayHieuLuc", is(300)));
+    }
+
+    @Test
     @DisplayName("US-01: API /api/v1/auth/register - Chặn đăng ký khi mật khẩu không đạt chuẩn (thiếu số, ký tự đặc biệt)")
     void testDangKyMatKhauYeuThatBai() throws Exception {
         DangKyRequest request = DangKyRequest.builder()
@@ -42,6 +66,7 @@ class XacThucApiControllerTest {
                 .soDienThoai("0912345678")
                 .matKhau("simplepass") // Không có hoa, số, ký tự đặc biệt
                 .hoVaTen("Test Weak")
+                .maOtp("123456")
                 .build();
 
         mockMvc.perform(post("/api/v1/auth/register")
@@ -53,13 +78,20 @@ class XacThucApiControllerTest {
     }
 
     @Test
-    @DisplayName("US-01: API /api/v1/auth/register - Đăng ký thành công với dữ liệu hợp lệ")
+    @DisplayName("US-01: API /api/v1/auth/register - Đăng ký thành công với dữ liệu hợp lệ và mã OTP chính xác")
     void testDangKyApiThanhCong() throws Exception {
+        OtpResponse otp = otpService.guiOtpDangKy(GuiOtpDangKyRequest.builder()
+                .email("api.reg.vn@flexshop.vn")
+                .soDienThoai("0944001122")
+                .hoVaTen("Nguyễn Văn API")
+                .build());
+
         DangKyRequest request = DangKyRequest.builder()
                 .email("api.reg.vn@flexshop.vn")
                 .soDienThoai("0944001122")
                 .matKhau("StrongPass@2026")
                 .hoVaTen("Nguyễn Văn API")
+                .maOtp(otp.getMaOtpDemo())
                 .build();
 
         mockMvc.perform(post("/api/v1/auth/register")

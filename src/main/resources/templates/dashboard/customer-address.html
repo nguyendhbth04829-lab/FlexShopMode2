@@ -293,13 +293,13 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label" for="txtTenNguoiNhan">Tên người nhận <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control rounded-3" id="txtTenNguoiNhan" required maxlength="100" placeholder="Ví dụ: Nguyễn Văn A">
-                            <div class="invalid-feedback">Vui lòng nhập họ tên người nhận (2 - 100 ký tự).</div>
+                            <input type="text" class="form-control rounded-3" id="txtTenNguoiNhan" maxlength="100" placeholder="Ví dụ: Nguyễn Văn A" oninput="xoaLoiDiaChi('txtTenNguoiNhan')">
+                            <div class="invalid-feedback" id="error-txtTenNguoiNhan">Vui lòng nhập họ tên người nhận (2 - 100 ký tự).</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" for="txtSoDienThoai">Số điện thoại liên hệ <span class="text-danger">*</span></label>
-                            <input type="tel" class="form-control rounded-3" id="txtSoDienThoai" required placeholder="Ví dụ: 0987654321 hoặc +84987654321">
-                            <div class="invalid-feedback">Số điện thoại Việt Nam không hợp lệ (10 số, đầu số 03, 05, 07, 08, 09).</div>
+                            <input type="tel" class="form-control rounded-3" id="txtSoDienThoai" placeholder="Ví dụ: 0987654321 hoặc +84987654321" oninput="xoaLoiDiaChi('txtSoDienThoai')">
+                            <div class="invalid-feedback" id="error-txtSoDienThoai">Số điện thoại Việt Nam không hợp lệ (10 số, đầu số 03, 05, 07, 08, 09).</div>
                         </div>
 
                         <!-- THANH TÌM KIẾM NHANH TỈNH / HUYỆN / XÃ -->
@@ -346,33 +346,36 @@
                             <label class="form-label" for="selectModalTinhThanh">
                                 Tỉnh / Thành phố <span class="text-danger">*</span>
                             </label>
-                            <select id="selectModalTinhThanh" class="form-select rounded-3" required>
+                            <select id="selectModalTinhThanh" class="form-select rounded-3" onchange="xoaLoiDiaChi('selectModalTinhThanh')">
                                 <option value="">-- Chọn hoặc gõ tìm Tỉnh/Thành --</option>
                             </select>
+                            <div class="invalid-feedback" id="error-selectModalTinhThanh">Vui lòng chọn Tỉnh / Thành phố.</div>
                         </div>
 
                         <div class="col-md-4">
                             <label class="form-label" for="selectModalQuanHuyen">
                                 Quận / Huyện <span class="text-danger">*</span>
                             </label>
-                            <select id="selectModalQuanHuyen" class="form-select rounded-3" required disabled>
+                            <select id="selectModalQuanHuyen" class="form-select rounded-3" disabled onchange="xoaLoiDiaChi('selectModalQuanHuyen')">
                                 <option value="">-- Chọn Tỉnh/Thành trước --</option>
                             </select>
+                            <div class="invalid-feedback" id="error-selectModalQuanHuyen">Vui lòng chọn Quận / Huyện.</div>
                         </div>
 
                         <div class="col-md-4">
                             <label class="form-label" for="selectModalXaPhuong">
                                 Xã / Phường / Thị trấn <span class="text-danger">*</span>
                             </label>
-                            <select id="selectModalXaPhuong" class="form-select rounded-3" required disabled>
+                            <select id="selectModalXaPhuong" class="form-select rounded-3" disabled onchange="xoaLoiDiaChi('selectModalXaPhuong')">
                                 <option value="">-- Chọn Quận/Huyện trước --</option>
                             </select>
+                            <div class="invalid-feedback" id="error-selectModalXaPhuong">Vui lòng chọn Xã / Phường.</div>
                         </div>
 
                         <div class="col-12">
                             <label class="form-label" for="txtDiaChiChiTiet">Địa chỉ cụ thể (Số nhà, tên đường, tòa nhà...) <span class="text-danger">*</span></label>
-                            <textarea class="form-control rounded-3" id="txtDiaChiChiTiet" rows="2" required maxlength="255" placeholder="Ví dụ: Số 123 đường Cầu Giấy, Tòa nhà Indochina, Tầng 5"></textarea>
-                            <div class="invalid-feedback">Vui lòng nhập địa chỉ cụ thể chi tiết.</div>
+                            <textarea class="form-control rounded-3" id="txtDiaChiChiTiet" rows="2" maxlength="255" placeholder="Ví dụ: Số 123 đường Cầu Giấy, Tòa nhà Indochina, Tầng 5" oninput="xoaLoiDiaChi('txtDiaChiChiTiet')"></textarea>
+                            <div class="invalid-feedback" id="error-txtDiaChiChiTiet">Vui lòng nhập địa chỉ cụ thể chi tiết.</div>
                         </div>
 
                         <div class="col-12">
@@ -483,13 +486,21 @@
     let searchQuickTimer = null;
 
     document.addEventListener('DOMContentLoaded', () => {
-        const modalEl = document.getElementById('modalDiaChi');
-        if (modalEl) {
-            modalDiaChiInstance = new bootstrap.Modal(modalEl);
+        try {
+            const modalEl = document.getElementById('modalDiaChi');
+            if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                modalDiaChiInstance = new bootstrap.Modal(modalEl);
+            }
+        } catch (err) {
+            console.warn('Lỗi khởi tạo bootstrap modal:', err);
         }
         
         // Khởi tạo 3 Combobox Tom Select
-        khoiTaoComboboxes();
+        try {
+            khoiTaoComboboxes();
+        } catch (err) {
+            console.warn('Lỗi khởi tạo Comboboxes:', err);
+        }
 
         // Tải dữ liệu trang
         taiThongKe();
@@ -507,54 +518,71 @@
 
     // Khởi tạo 3 combobox Tom Select tìm kiếm có thể lọc
     function khoiTaoComboboxes() {
-        if (typeof TomSelect !== 'undefined') {
-            tsTinh = new TomSelect('#selectModalTinhThanh', {
-                valueField: 'code',
-                labelField: 'name',
-                searchField: ['name', 'clean'],
-                placeholder: '🔍 Gõ hoặc chọn Tỉnh / Thành phố...',
-                maxOptions: 100,
-                onChange: function(val) {
-                    if (val) xuLyChonTinh(val);
-                    else datLaiComboboxHuyenXa();
+        try {
+            if (typeof TomSelect !== 'undefined') {
+                const elTinh = document.getElementById('selectModalTinhThanh');
+                const elHuyen = document.getElementById('selectModalQuanHuyen');
+                const elXa = document.getElementById('selectModalXaPhuong');
+
+                if (elTinh && !elTinh.tomselect) {
+                    tsTinh = new TomSelect('#selectModalTinhThanh', {
+                        valueField: 'code',
+                        labelField: 'name',
+                        searchField: ['name', 'clean'],
+                        placeholder: '🔍 Gõ hoặc chọn Tỉnh / Thành phố...',
+                        maxOptions: 100,
+                        onChange: function(val) {
+                            if (val) xuLyChonTinh(val);
+                            else datLaiComboboxHuyenXa();
+                        }
+                    });
+                    tsTinh.addOptions(DANH_SACH_63_TINH);
                 }
-            });
 
-            tsHuyen = new TomSelect('#selectModalQuanHuyen', {
-                valueField: 'code',
-                labelField: 'name',
-                searchField: ['name'],
-                placeholder: '🔍 Gõ hoặc chọn Quận / Huyện...',
-                maxOptions: 100,
-                onChange: function(val) {
-                    if (val) xuLyChonHuyen(val);
-                    else datLaiComboboxXa();
+                if (elHuyen && !elHuyen.tomselect) {
+                    tsHuyen = new TomSelect('#selectModalQuanHuyen', {
+                        valueField: 'code',
+                        labelField: 'name',
+                        searchField: ['name'],
+                        placeholder: '🔍 Gõ hoặc chọn Quận / Huyện...',
+                        maxOptions: 100,
+                        onChange: function(val) {
+                            if (val) xuLyChonHuyen(val);
+                            else datLaiComboboxXa();
+                        }
+                    });
+                    if (typeof tsHuyen.disable === 'function') tsHuyen.disable();
                 }
-            });
 
-            tsXa = new TomSelect('#selectModalXaPhuong', {
-                valueField: 'code',
-                labelField: 'name',
-                searchField: ['name'],
-                placeholder: '🔍 Gõ hoặc chọn Xã / Phường...',
-                maxOptions: 200
-            });
-
-            // Nạp 63 tỉnh thành vào combobox tỉnh
-            tsTinh.addOptions(DANH_SACH_63_TINH);
-            tsHuyen.disable();
-            tsXa.disable();
-        } else {
-            // Fallback nếu TomSelect không load được
-            const elTinh = document.getElementById('selectModalTinhThanh');
-            DANH_SACH_63_TINH.forEach(t => {
-                const opt = document.createElement('option');
-                opt.value = t.code;
-                opt.textContent = t.name;
-                elTinh.appendChild(opt);
-            });
-            elTinh.addEventListener('change', (e) => xuLyChonTinh(e.target.value));
-            document.getElementById('selectModalQuanHuyen').addEventListener('change', (e) => xuLyChonHuyen(e.target.value));
+                if (elXa && !elXa.tomselect) {
+                    tsXa = new TomSelect('#selectModalXaPhuong', {
+                        valueField: 'code',
+                        labelField: 'name',
+                        searchField: ['name'],
+                        placeholder: '🔍 Gõ hoặc chọn Xã / Phường...',
+                        maxOptions: 200
+                    });
+                    if (typeof tsXa.disable === 'function') tsXa.disable();
+                }
+            } else {
+                // Fallback nếu TomSelect không load được
+                const elTinh = document.getElementById('selectModalTinhThanh');
+                if (elTinh) {
+                    DANH_SACH_63_TINH.forEach(t => {
+                        const opt = document.createElement('option');
+                        opt.value = t.code;
+                        opt.textContent = t.name;
+                        elTinh.appendChild(opt);
+                    });
+                    elTinh.addEventListener('change', (e) => xuLyChonTinh(e.target.value));
+                }
+                const elHuyen = document.getElementById('selectModalQuanHuyen');
+                if (elHuyen) {
+                    elHuyen.addEventListener('change', (e) => xuLyChonHuyen(e.target.value));
+                }
+            }
+        } catch (err) {
+            console.warn('Lỗi khi thiết lập combobox:', err);
         }
     }
 
@@ -807,8 +835,14 @@
     }
 
     function getAuthHeaders() {
-        const token = localStorage.getItem('accessToken');
         const headers = { 'Content-Type': 'application/json' };
+        let token = null;
+        const match = document.cookie.match(new RegExp('(^| )ACCESS_TOKEN=([^;]+)'));
+        if (match && match[2]) {
+            token = match[2];
+        } else {
+            token = localStorage.getItem('accessToken');
+        }
         if (token) {
             headers['Authorization'] = 'Bearer ' + token;
         }
@@ -889,13 +923,14 @@
         }
     }
 
-    // Tải danh sách địa chỉ phân trang & tìm lọc
     async function taiDanhSachDiaChi(page = 0) {
         trangHienTai = page;
         const container = document.getElementById('addressListContainer');
-        const keyword = document.getElementById('inputKeyword').value.trim();
-        const tinhThanh = document.getElementById('selectTinhThanh').value;
-        const laMacDinh = document.getElementById('selectTrangThai').value;
+        if (!container) return;
+
+        const keyword = (document.getElementById('inputKeyword')?.value || '').trim();
+        const tinhThanh = document.getElementById('selectTinhThanh')?.value || '';
+        const laMacDinh = document.getElementById('selectTrangThai')?.value || '';
 
         const params = new URLSearchParams({
             page: page,
@@ -908,7 +943,7 @@
         try {
             const res = await fetch(`/api/v1/dia-chi?${params.toString()}`, { credentials: 'include', headers: getAuthHeaders() });
             if (!res.ok) {
-                container.innerHTML = `<div class="col-12 text-center text-danger py-4">Không thể tải danh sách địa chỉ!</div>`;
+                container.innerHTML = `<div class="col-12 text-center text-danger py-4"><i class="bi bi-exclamation-triangle-fill fs-3 d-block mb-2"></i>Không thể tải danh sách địa chỉ (Mã lỗi: ${res.status})!</div>`;
                 return;
             }
 
@@ -919,7 +954,7 @@
 
         } catch (e) {
             console.error('Lỗi kết nối API danh sách địa chỉ:', e);
-            container.innerHTML = `<div class="col-12 text-center text-danger py-4">Đã xảy ra lỗi kết nối!</div>`;
+            container.innerHTML = `<div class="col-12 text-center text-danger py-4"><i class="bi bi-wifi-off fs-3 d-block mb-2"></i>Đã xảy ra lỗi kết nối khi tải danh sách địa chỉ!</div>`;
         }
     }
 
@@ -1136,15 +1171,82 @@
         }
     }
 
-    // Submit form thêm hoặc cập nhật địa chỉ
+    // Quản lý hiển thị lỗi cụ thể tại từng ô trong modal địa chỉ
+    const diaChiFieldMap = {
+        'tenNguoiNhan': 'txtTenNguoiNhan',
+        'soDienThoai': 'txtSoDienThoai',
+        'tinhThanh': 'selectModalTinhThanh',
+        'quanHuyen': 'selectModalQuanHuyen',
+        'xaPhuong': 'selectModalXaPhuong',
+        'diaChiChiTiet': 'txtDiaChiChiTiet'
+    };
+
+    function hienThiLoiDiaChi(truong, thongBao) {
+        const id = diaChiFieldMap[truong] || truong;
+        const el = document.getElementById(id);
+        const feedback = document.getElementById('error-' + id) || (el ? el.parentNode.querySelector('.invalid-feedback') : null);
+        if (el) el.classList.add('is-invalid');
+        if (feedback) {
+            feedback.textContent = thongBao;
+            feedback.style.display = 'block';
+        }
+    }
+
+    function xoaLoiDiaChi(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('is-invalid');
+        const feedback = document.getElementById('error-' + id) || (el ? el.parentNode.querySelector('.invalid-feedback') : null);
+        if (feedback) {
+            feedback.textContent = '';
+            feedback.style.display = 'none';
+        }
+    }
+
+    function xoaTatCaLoiDiaChi() {
+        document.querySelectorAll('#formDiaChi .is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        document.querySelectorAll('#formDiaChi .invalid-feedback').forEach(el => {
+            el.textContent = '';
+            el.style.display = 'none';
+        });
+    }
+
+    // Submit form thêm hoặc cập nhật địa chỉ với kiểm tra từng ô
     async function xuLyLuuDiaChi(event) {
         event.preventDefault();
+        xoaTatCaLoiDiaChi();
+
+        let coLoi = false;
+        let truongDauTienBiLoi = null;
+
+        const danhDauLoi = (truong, thongBao) => {
+            hienThiLoiDiaChi(truong, thongBao);
+            coLoi = true;
+            if (!truongDauTienBiLoi) {
+                const id = diaChiFieldMap[truong] || truong;
+                truongDauTienBiLoi = document.getElementById(id);
+            }
+        };
 
         const maDiaChi = document.getElementById('formMaDiaChi').value;
         const tenNguoiNhan = document.getElementById('txtTenNguoiNhan').value.trim();
         const soDienThoai = document.getElementById('txtSoDienThoai').value.trim();
         const diaChiChiTiet = document.getElementById('txtDiaChiChiTiet').value.trim();
         const laMacDinh = document.getElementById('chkLaMacDinh').checked;
+
+        // 1. Kiểm tra Họ và tên
+        if (!tenNguoiNhan) {
+            danhDauLoi('tenNguoiNhan', 'Tên người nhận không được để trống!');
+        } else if (tenNguoiNhan.length < 2 || tenNguoiNhan.length > 100) {
+            danhDauLoi('tenNguoiNhan', 'Tên người nhận phải từ 2 đến 100 ký tự!');
+        }
+
+        // 2. Kiểm tra Số điện thoại
+        const phoneRegex = /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/;
+        if (!soDienThoai) {
+            danhDauLoi('soDienThoai', 'Số điện thoại nhận hàng không được để trống!');
+        } else if (!phoneRegex.test(soDienThoai)) {
+            danhDauLoi('soDienThoai', 'Số điện thoại không đúng định dạng di động Việt Nam (10 số, bắt đầu bằng 03, 05, 07, 08, 09)!');
+        }
 
         // Lấy tên Tỉnh, Huyện, Xã từ Comboboxes
         let tinhThanh = '';
@@ -1175,24 +1277,29 @@
             xaPhuong = el.options[el.selectedIndex] ? el.options[el.selectedIndex].text : '';
         }
 
-        // Validate 3 cấp địa chính
+        // 3. Validate 3 cấp địa chính
         if (!tinhThanh || tinhThanh.startsWith('--')) {
-            Swal.fire('Thiếu thông tin', 'Vui lòng chọn Tỉnh / Thành phố!', 'warning');
-            return;
+            danhDauLoi('tinhThanh', 'Vui lòng chọn Tỉnh / Thành phố!');
         }
         if (!quanHuyen || quanHuyen.startsWith('--')) {
-            Swal.fire('Thiếu thông tin', 'Vui lòng chọn Quận / Huyện!', 'warning');
-            return;
+            danhDauLoi('quanHuyen', 'Vui lòng chọn Quận / Huyện!');
         }
         if (!xaPhuong || xaPhuong.startsWith('--')) {
-            Swal.fire('Thiếu thông tin', 'Vui lòng chọn Xã / Phường / Thị trấn!', 'warning');
-            return;
+            danhDauLoi('xaPhuong', 'Vui lòng chọn Xã / Phường / Thị trấn!');
         }
 
-        // Client validation số điện thoại
-        const phoneRegex = /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/;
-        if (!phoneRegex.test(soDienThoai)) {
-            Swal.fire('Số điện thoại không hợp lệ', 'Vui lòng nhập số điện thoại di động Việt Nam hợp lệ (10 số, bắt đầu bằng 03, 05, 07, 08, 09).', 'warning');
+        // 4. Validate địa chỉ chi tiết
+        if (!diaChiChiTiet) {
+            danhDauLoi('diaChiChiTiet', 'Địa chỉ cụ thể (số nhà, tên đường...) không được để trống!');
+        } else if (diaChiChiTiet.length < 5 || diaChiChiTiet.length > 255) {
+            danhDauLoi('diaChiChiTiet', 'Địa chỉ cụ thể phải từ 5 đến 255 ký tự!');
+        }
+
+        if (coLoi) {
+            if (truongDauTienBiLoi) {
+                truongDauTienBiLoi.focus();
+                truongDauTienBiLoi.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             return;
         }
 
@@ -1224,7 +1331,7 @@
                 body: JSON.stringify(payload)
             });
 
-            const resJson = await res.json();
+            const resJson = await res.json().catch(() => null);
 
             if (res.ok) {
                 if (modalDiaChiInstance) {
@@ -1241,8 +1348,40 @@
                 taiThongKe();
                 taiDanhSachDiaChi(0); // Về trang 1 xem ngay địa chỉ mới
             } else {
-                const errorMsg = resJson.thongBao || resJson.message || 'Đã có lỗi xảy ra!';
-                Swal.fire('Thao tác không thành công', errorMsg, 'error');
+                let daHienThiLoi = false;
+                if (resJson && resJson.duLieu && typeof resJson.duLieu === 'object') {
+                    for (const [k, v] of Object.entries(resJson.duLieu)) {
+                        hienThiLoiDiaChi(k, v);
+                        daHienThiLoi = true;
+                        if (!truongDauTienBiLoi) {
+                            const id = diaChiFieldMap[k] || k;
+                            truongDauTienBiLoi = document.getElementById(id);
+                        }
+                    }
+                }
+
+                const errorMsg = (resJson && (resJson.thongBao || resJson.message)) || 'Đã có lỗi xảy ra!';
+                if (errorMsg.includes('Số điện thoại')) {
+                    hienThiLoiDiaChi('soDienThoai', errorMsg);
+                    if (!truongDauTienBiLoi) truongDauTienBiLoi = document.getElementById('txtSoDienThoai');
+                } else if (errorMsg.includes('người nhận')) {
+                    hienThiLoiDiaChi('tenNguoiNhan', errorMsg);
+                    if (!truongDauTienBiLoi) truongDauTienBiLoi = document.getElementById('txtTenNguoiNhan');
+                } else if (errorMsg.includes('chi tiết')) {
+                    hienThiLoiDiaChi('diaChiChiTiet', errorMsg);
+                    if (!truongDauTienBiLoi) truongDauTienBiLoi = document.getElementById('txtDiaChiChiTiet');
+                }
+
+                if (truongDauTienBiLoi) {
+                    truongDauTienBiLoi.focus();
+                    truongDauTienBiLoi.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Dữ liệu không hợp lệ',
+                    text: errorMsg
+                });
             }
         } catch (e) {
             Swal.fire('Lỗi', 'Không thể kết nối đến máy chủ!', 'error');

@@ -34,14 +34,26 @@ class XacThucServiceTest {
     @Autowired
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private OtpService otpService;
+
     @Test
-    @DisplayName("US-01: Đăng ký tài khoản thành công với email hợp lệ, mật khẩu mạnh và gán mặc định role KHACH_HANG")
+    @DisplayName("US-01: Đăng ký tài khoản thành công với email hợp lệ, mã OTP Gmail hợp lệ, mật khẩu mạnh và gán mặc định role KHACH_HANG")
     void testDangKyThanhCong() {
+        com.example.demo.dto.response.OtpResponse otp = otpService.guiOtpDangKy(
+                com.example.demo.dto.request.GuiOtpDangKyRequest.builder()
+                        .email("test.vietnam.user@flexshop.vn")
+                        .soDienThoai("0933111222")
+                        .hoVaTen("Người Dùng Việt Nam")
+                        .build()
+        );
+
         DangKyRequest request = DangKyRequest.builder()
                 .email("test.vietnam.user@flexshop.vn")
                 .soDienThoai("0933111222")
                 .matKhau("SecurePass@2026")
                 .hoVaTen("Người Dùng Việt Nam")
+                .maOtp(otp.getMaOtpDemo())
                 .build();
 
         NguoiDungResponse response = xacThucService.dangKy(request);
@@ -56,14 +68,46 @@ class XacThucServiceTest {
     }
 
     @Test
+    @DisplayName("US-01: Chặn đăng ký khi mã OTP không chính xác")
+    void testDangKySaiOtpThatBai() {
+        otpService.guiOtpDangKy(
+                com.example.demo.dto.request.GuiOtpDangKyRequest.builder()
+                        .email("test.sai.otp@flexshop.vn")
+                        .soDienThoai("0933999888")
+                        .hoVaTen("Người Dùng Sai OTP")
+                        .build()
+        );
+
+        DangKyRequest request = DangKyRequest.builder()
+                .email("test.sai.otp@flexshop.vn")
+                .soDienThoai("0933999888")
+                .matKhau("SecurePass@2026")
+                .hoVaTen("Người Dùng Sai OTP")
+                .maOtp("999999") // OTP sai
+                .build();
+
+        NgoaiLeUngDung exception = assertThrows(NgoaiLeUngDung.class, () -> xacThucService.dangKy(request));
+        assertTrue(exception.getMessage().contains("không chính xác"), "Phải báo lỗi mã OTP không chính xác");
+    }
+
+    @Test
     @DisplayName("US-01: Chặn đăng ký trùng Email không phân biệt chữ hoa, chữ thường (Case-insensitive)")
     void testDangKyTrungEmailKhongPhanBietHoaThuong() {
-        // Đăng ký lần 1 bằng chữ thường
+        // Đăng ký lần 1 bằng chữ thường kèm OTP
+        com.example.demo.dto.response.OtpResponse otp1 = otpService.guiOtpDangKy(
+                com.example.demo.dto.request.GuiOtpDangKyRequest.builder()
+                        .email("trung.email@flexshop.vn")
+                        .soDienThoai("0988001122")
+                        .hoVaTen("User Mot")
+                        .build()
+        );
+
         DangKyRequest request1 = DangKyRequest.builder()
                 .email("trung.email@flexshop.vn")
                 .soDienThoai("0988001122")
                 .matKhau("FlexShop@2026")
                 .hoVaTen("User Mot")
+                .maOtp(otp1.getMaOtpDemo())
                 .build();
         xacThucService.dangKy(request1);
 
@@ -73,6 +117,7 @@ class XacThucServiceTest {
                 .soDienThoai("0988001133")
                 .matKhau("FlexShop@2026")
                 .hoVaTen("User Hai")
+                .maOtp("123456")
                 .build();
 
         NgoaiLeUngDung exception = assertThrows(NgoaiLeUngDung.class, () -> xacThucService.dangKy(request2));

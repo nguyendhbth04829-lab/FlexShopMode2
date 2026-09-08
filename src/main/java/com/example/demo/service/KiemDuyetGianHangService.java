@@ -89,7 +89,7 @@ public class KiemDuyetGianHangService {
     @Transactional
     public GianHangResponse tuChoiGianHang(Long maGianHang, TuChoiGianHangRequest yeuCau) {
         if (yeuCau == null || yeuCau.getLyDoTuChoi() == null || yeuCau.getLyDoTuChoi().trim().length() < 5 || yeuCau.getLyDoTuChoi().trim().length() > 255) {
-            throw new NgoaiLeUngDung("Lý do từ chối bắt buộc và phải có độ dài từ 5 đến 255 ký tự!", HttpStatus.BAD_REQUEST);
+            throw new NgoaiLeUngDung("Lý do từ chối bắt buộc và phải có độ dài từ 5 đến 255 ký tự!", HttpStatus.BAD_REQUEST, "lyDoTuChoi");
         }
 
         GianHang gianHang = gianHangRepository.findById(maGianHang)

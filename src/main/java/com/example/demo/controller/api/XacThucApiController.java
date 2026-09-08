@@ -2,12 +2,15 @@ package com.example.demo.controller.api;
 
 import com.example.demo.dto.request.DangKyRequest;
 import com.example.demo.dto.request.DangNhapRequest;
+import com.example.demo.dto.request.GuiOtpDangKyRequest;
 import com.example.demo.dto.request.LamMoiTokenRequest;
 import com.example.demo.dto.response.NguoiDungResponse;
+import com.example.demo.dto.response.OtpResponse;
 import com.example.demo.dto.response.PhanHoiApi;
 import com.example.demo.dto.response.XacThucResponse;
 import com.example.demo.security.NguoiDungPrincipal;
 import com.example.demo.service.NguoiDungService;
+import com.example.demo.service.OtpService;
 import com.example.demo.service.XacThucService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -25,9 +28,19 @@ public class XacThucApiController {
 
     private final XacThucService xacThucService;
     private final NguoiDungService nguoiDungService;
+    private final OtpService otpService;
 
     /**
-     * US-01: API Đăng ký tài khoản người dùng
+     * US-01: Gửi mã OTP xác thực đăng ký tài khoản qua Gmail
+     */
+    @PostMapping("/register/gui-otp")
+    public ResponseEntity<PhanHoiApi<OtpResponse>> guiOtpDangKy(@Valid @RequestBody GuiOtpDangKyRequest yeuCau) {
+        OtpResponse phanHoi = otpService.guiOtpDangKy(yeuCau);
+        return ResponseEntity.ok(PhanHoiApi.thanhCong(phanHoi.getThongBao(), phanHoi));
+    }
+
+    /**
+     * US-01: API Đăng ký tài khoản người dùng (kèm mã OTP Gmail)
      */
     @PostMapping("/register")
     public ResponseEntity<PhanHoiApi<NguoiDungResponse>> dangKy(@Valid @RequestBody DangKyRequest yeuCau) {

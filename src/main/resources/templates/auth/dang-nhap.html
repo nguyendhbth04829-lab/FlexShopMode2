@@ -205,19 +205,21 @@
                 <label class="form-label fw-semibold small text-secondary">Tài khoản (Email hoặc Số điện thoại)</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-person text-secondary"></i></span>
-                    <input type="text" id="taiKhoan" class="form-control" placeholder="Nhập email hoặc SĐT..." required autofocus>
+                    <input type="text" id="taiKhoan" class="form-control" placeholder="Nhập email hoặc SĐT..." required autofocus oninput="xoaLoiLogin('taiKhoan', 'errTaiKhoan')">
                 </div>
+                <div class="invalid-feedback" id="errTaiKhoan" style="display: none;"></div>
             </div>
 
             <div class="mb-3">
                 <label class="form-label fw-semibold small text-secondary">Mật khẩu</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-lock text-secondary"></i></span>
-                    <input type="password" id="matKhau" class="form-control" placeholder="Nhập mật khẩu..." required>
+                    <input type="password" id="matKhau" class="form-control" placeholder="Nhập mật khẩu..." required oninput="xoaLoiLogin('matKhau', 'errMatKhau')">
                     <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('matKhau', this)">
                         <i class="bi bi-eye"></i>
                     </button>
                 </div>
+                <div class="invalid-feedback" id="errMatKhau" style="display: none;"></div>
                 <div class="d-flex justify-content-between">
                     <label class="form-label fw-semibold small text-secondary"></label>
                     <a href="/forgot-password" class="text-primary text-decoration-none small">Quên mật khẩu?</a>
@@ -396,16 +398,59 @@
         }
     }
 
+    // Helper hiển thị và xóa lỗi cụ thể từng ô nhập
+    function hienThiLoiLogin(inputId, errId, thongBao) {
+        const input = document.getElementById(inputId);
+        const feedback = document.getElementById(errId);
+        if (input) {
+            input.classList.add('is-invalid');
+        }
+        if (feedback) {
+            feedback.innerText = thongBao;
+            feedback.style.display = 'block';
+        }
+    }
+
+    function xoaLoiLogin(inputId, errId) {
+        const input = document.getElementById(inputId);
+        const feedback = document.getElementById(errId);
+        if (input) {
+            input.classList.remove('is-invalid');
+        }
+        if (feedback) {
+            feedback.style.display = 'none';
+        }
+    }
+
     function fillDemo(email, role) {
+        xoaLoiLogin('taiKhoan', 'errTaiKhoan');
+        xoaLoiLogin('matKhau', 'errMatKhau');
         document.getElementById('taiKhoan').value = email;
         document.getElementById('matKhau').value = '12345678';
     }
 
     async function handleLogin(event) {
         event.preventDefault();
-        const taiKhoan = document.getElementById('taiKhoan').value.trim();
-        const matKhau = document.getElementById('matKhau').value;
+        xoaLoiLogin('taiKhoan', 'errTaiKhoan');
+        xoaLoiLogin('matKhau', 'errMatKhau');
+
+        const taiKhoanInput = document.getElementById('taiKhoan');
+        const matKhauInput = document.getElementById('matKhau');
+        const taiKhoan = taiKhoanInput.value.trim();
+        const matKhau = matKhauInput.value;
         const ghiNho = document.getElementById('ghiNho').checked;
+
+        // Validate client
+        if (!taiKhoan) {
+            hienThiLoiLogin('taiKhoan', 'errTaiKhoan', 'Vui lòng nhập Email hoặc Số điện thoại của bạn!');
+            taiKhoanInput.focus();
+            return;
+        }
+        if (!matKhau) {
+            hienThiLoiLogin('matKhau', 'errMatKhau', 'Vui lòng nhập mật khẩu!');
+            matKhauInput.focus();
+            return;
+        }
 
         const btnText = document.getElementById('btnText');
         const btnLoading = document.getElementById('btnLoading');
@@ -424,8 +469,8 @@
 
             const result = await response.json();
 
-            if (response.ok && result.success) {
-                const data = result.data;
+            if (response.ok && (result.thanhCong || result.success)) {
+                const data = result.duLieu || result.data;
                 // Lưu token vào Cookie để trình duyệt gửi kèm các trang Dashboard Web UI
                 document.cookie = `ACCESS_TOKEN=${data.accessToken}; path=/; max-age=900; SameSite=Lax`;
                 document.cookie = `REFRESH_TOKEN=${data.refreshToken}; path=/; max-age=604800; SameSite=Lax`;
@@ -433,10 +478,11 @@
                 // Lưu vào LocalStorage cho các thư viện API Client
                 localStorage.setItem('accessToken', data.accessToken);
                 localStorage.setItem('refreshToken', data.refreshToken);
-                localStorage.setItem('currentUser', JSON.stringify(data.user));
+                localStorage.setItem('currentUser', JSON.stringify(data.user || data.thongTinNguoiDung));
 
                 // Tiêu chí US-02: Điều hướng đúng trang Bảng điều khiển theo 5 Vai trò
-                const targetUrl = data.user.targetDashboardUrl || '/customer/dashboard';
+                const userInfo = data.user || data.thongTinNguoiDung || {};
+                const targetUrl = userInfo.targetDashboardUrl || '/customer/dashboard';
                 const roleNameMap = {
                     'ADMIN': 'Quản Trị Viên',
                     'ROLE_ADMIN': 'Quản Trị Viên',
@@ -451,7 +497,7 @@
                     'CSKH': 'Chăm Sóc Khách Hàng',
                     'ROLE_CSKH': 'Chăm Sóc Khách Hàng'
                 };
-                const rawRoles = data.user.roles || [];
+                const rawRoles = userInfo.roles || [];
                 const uniqueRoleLabels = [...new Set(rawRoles.map(r => roleNameMap[r] || r))];
                 const roleLabels = uniqueRoleLabels.length > 0 ? uniqueRoleLabels.join(', ') : 'Thành viên';
 
@@ -459,7 +505,7 @@
                 hienThiThongBaoThanhCong(
                     'Đăng Nhập Thành Công! 🚀',
                     `<div class="py-1">
-                        <p class="mb-2 text-secondary">Chào mừng <strong class="text-primary">${data.user.hoVaTen}</strong> trở lại FlexShop Enterprise!</p>
+                        <p class="mb-2 text-secondary">Chào mừng <strong class="text-primary">${userInfo.hoVaTen || 'Bạn'}</strong> trở lại FlexShop Enterprise!</p>
                         <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-2">
                             <i class="bi bi-shield-check me-1"></i> Vai trò: <b>${roleLabels}</b>
                         </div>
@@ -468,7 +514,21 @@
                     targetUrl
                 );
             } else {
-                hienThiThongBaoLoi('Đăng Nhập Thất Bại', result.message || 'Tài khoản hoặc mật khẩu không chính xác!');
+                const msg = result.thongBao || result.message || 'Tài khoản hoặc mật khẩu không chính xác!';
+                if (msg.toLowerCase().includes('khóa') || msg.toLowerCase().includes('lý do')) {
+                    hienThiThongBaoLoi('Đăng Nhập Thất Bại', msg);
+                } else {
+                    // Thông báo lỗi cụ thể ở ô tài khoản và ô mật khẩu
+                    const fieldErrors = result.duLieu || result.data;
+                    if (fieldErrors && typeof fieldErrors === 'object' && (fieldErrors.taiKhoan || fieldErrors.matKhau)) {
+                        if (fieldErrors.taiKhoan) hienThiLoiLogin('taiKhoan', 'errTaiKhoan', fieldErrors.taiKhoan);
+                        if (fieldErrors.matKhau) hienThiLoiLogin('matKhau', 'errMatKhau', fieldErrors.matKhau);
+                    } else {
+                        hienThiLoiLogin('taiKhoan', 'errTaiKhoan', msg);
+                        hienThiLoiLogin('matKhau', 'errMatKhau', msg);
+                    }
+                    matKhauInput.focus();
+                }
             }
         } catch (error) {
             hienThiThongBaoLoi('Lỗi Kết Nối', 'Không thể kết nối đến máy chủ: ' + error.message);

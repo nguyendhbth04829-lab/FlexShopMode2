@@ -24,7 +24,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/dia-chi")
-@PreAuthorize("hasAnyRole('KHACH_HANG', 'NGUOI_BAN')")
+@PreAuthorize("hasAnyRole('KHACH_HANG', 'NGUOI_BAN', 'ADMIN')")
 @RequiredArgsConstructor
 public class DiaChiApiController {
 

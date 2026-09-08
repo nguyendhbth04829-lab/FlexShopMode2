@@ -40,6 +40,7 @@ public class XacThucService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenRedisService tokenRedisService;
+    private final OtpService otpService;
 
     @Value("${flexshop.jwt.access-token-expiration-ms:900000}")
     private long accessTokenExpirationMs;
@@ -48,7 +49,7 @@ public class XacThucService {
     private long refreshTokenExpirationMs;
 
     /**
-     * US-01: Đăng ký tài khoản người dùng mới
+     * US-01: Đăng ký tài khoản người dùng mới (Yêu cầu mã OTP qua Gmail)
      */
     @Transactional
     public NguoiDungResponse dangKy(DangKyRequest yeuCau) {
@@ -56,7 +57,7 @@ public class XacThucService {
 
         // 1. Kiểm tra Email duy nhất (Case-insensitive)
         if (nguoiDungRepository.existsByEmailIgnoreCase(emailChuan)) {
-            throw new NgoaiLeUngDung("Email '" + emailChuan + "' đã được đăng ký trong hệ thống. Vui lòng sử dụng email khác!", HttpStatus.CONFLICT);
+            throw new NgoaiLeUngDung("Email '" + emailChuan + "' đã được đăng ký trong hệ thống. Vui lòng sử dụng email khác!", HttpStatus.CONFLICT, "email");
         }
 
         // 2. Kiểm tra Số điện thoại duy nhất (nếu có cung cấp)
@@ -64,14 +65,17 @@ public class XacThucService {
         if (StringUtils.hasText(yeuCau.getSoDienThoai())) {
             sdtChuan = yeuCau.getSoDienThoai().trim();
             if (nguoiDungRepository.existsBySoDienThoai(sdtChuan)) {
-                throw new NgoaiLeUngDung("Số điện thoại '" + sdtChuan + "' đã được đăng ký trong hệ thống!", HttpStatus.CONFLICT);
+                throw new NgoaiLeUngDung("Số điện thoại '" + sdtChuan + "' đã được đăng ký trong hệ thống!", HttpStatus.CONFLICT, "soDienThoai");
             }
         }
 
-        // 3. Mã hóa mật khẩu bằng BCrypt (Salt round >= 10, cấu hình là 12)
+        // 3. Xác thực mã OTP gửi qua Gmail
+        otpService.xacThucVaSuDungOtpDangKy(emailChuan, yeuCau.getMaOtp());
+
+        // 4. Mã hóa mật khẩu bằng BCrypt (Salt round >= 10, cấu hình là 12)
         String matKhauMaHoa = passwordEncoder.encode(yeuCau.getMatKhau());
 
-        // 4. Gán vai trò mặc định: KHACH_HANG (Tiêu chí US-01)
+        // 5. Gán vai trò mặc định: KHACH_HANG (Tiêu chí US-01)
         VaiTro vaiTroMacDinh = vaiTroRepository.findByTenVaiTro("KHACH_HANG")
                 .orElseGet(() -> vaiTroRepository.save(new VaiTro("KHACH_HANG", "Khách hàng mua sắm mặc định")));
 

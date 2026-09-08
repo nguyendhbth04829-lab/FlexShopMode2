@@ -19,15 +19,28 @@ public class XuLyNgoaiLeToanCuc {
 
     @ExceptionHandler(NgoaiLeUngDung.class)
     public ResponseEntity<PhanHoiApi<Object>> handleNgoaiLeUngDung(NgoaiLeUngDung ex) {
+        if (ex.getTruongLoi() != null) {
+            Map<String, String> errors = new HashMap<>();
+            errors.put(ex.getTruongLoi(), ex.getMessage());
+            return ResponseEntity.status(ex.getMaTrangThai())
+                    .body(PhanHoiApi.builder()
+                            .thanhCong(false)
+                            .thongBao(ex.getMessage())
+                            .duLieu(errors)
+                            .build());
+        }
         return ResponseEntity.status(ex.getMaTrangThai())
                 .body(PhanHoiApi.thatBai(ex.getMessage()));
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler({MethodArgumentNotValidException.class, org.springframework.validation.BindException.class})
     public ResponseEntity<PhanHoiApi<Map<String, String>>> handleValidationExceptions(
-            MethodArgumentNotValidException ex) {
+            Exception ex) {
+        org.springframework.validation.BindingResult bindingResult = (ex instanceof MethodArgumentNotValidException manv)
+                ? manv.getBindingResult()
+                : ((org.springframework.validation.BindException) ex).getBindingResult();
         Map<String, String> errors = new HashMap<>();
-        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+        for (FieldError error : bindingResult.getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
         }
         PhanHoiApi<Map<String, String>> response = PhanHoiApi.<Map<String, String>>builder()
@@ -40,8 +53,15 @@ public class XuLyNgoaiLeToanCuc {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<PhanHoiApi<Object>> handleBadCredentials(BadCredentialsException ex) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("taiKhoan", "Tài khoản hoặc mật khẩu không chính xác");
+        errors.put("matKhau", "Tài khoản hoặc mật khẩu không chính xác");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(PhanHoiApi.thatBai("Tài khoản hoặc mật khẩu không chính xác"));
+                .body(PhanHoiApi.builder()
+                        .thanhCong(false)
+                        .thongBao("Tài khoản hoặc mật khẩu không chính xác")
+                        .duLieu(errors)
+                        .build());
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)

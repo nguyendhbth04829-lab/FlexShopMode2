@@ -101,7 +101,7 @@ public class ThietLapHoSoShopService {
         String tenMoi = yeuCau.getTenGianHang().trim();
         if (!gianHang.getTenGianHang().equalsIgnoreCase(tenMoi)) {
             if (gianHangRepository.existsByTenGianHangIgnoreCaseAndMaGianHangNotAndDaXoaFalse(tenMoi, gianHang.getMaGianHang())) {
-                throw new NgoaiLeUngDung("Tên gian hàng '" + tenMoi + "' đã được shop khác sử dụng. Vui lòng chọn tên khác!", HttpStatus.CONFLICT);
+                throw new NgoaiLeUngDung("Tên gian hàng '" + tenMoi + "' đã được shop khác sử dụng. Vui lòng chọn tên khác!", HttpStatus.CONFLICT, "tenGianHang");
             }
             gianHang.setTenGianHang(tenMoi);
             String slugMoi = dangKyGianHangService.taoDuongDanSlugTuTenShop(tenMoi, gianHang.getMaGianHang());
@@ -345,12 +345,12 @@ public class ThietLapHoSoShopService {
      */
     private String luuTepHinhAnh(MultipartFile file, Long maNguoiDung, String thuMucCon, String tienTo) {
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new NgoaiLeUngDung("Kích thước tệp tải lên vượt quá giới hạn 5MB!", HttpStatus.BAD_REQUEST);
+            throw new NgoaiLeUngDung("Kích thước tệp tải lên vượt quá giới hạn 5MB!", HttpStatus.BAD_REQUEST, tienTo.equals("logo") ? "fileLogo" : "fileBanner");
         }
 
         String contentType = file.getContentType();
         if (contentType == null || !MIME_ANH_HOP_LE.contains(contentType.toLowerCase(Locale.ROOT))) {
-            throw new NgoaiLeUngDung("Định dạng tệp không hợp lệ! Chỉ chấp nhận ảnh định dạng JPG, JPEG, PNG, WEBP.", HttpStatus.BAD_REQUEST);
+            throw new NgoaiLeUngDung("Định dạng tệp không hợp lệ! Chỉ chấp nhận ảnh định dạng JPG, JPEG, PNG, WEBP.", HttpStatus.BAD_REQUEST, tienTo.equals("logo") ? "fileLogo" : "fileBanner");
         }
 
         String tenGoc = StringUtils.cleanPath(file.getOriginalFilename() != null ? file.getOriginalFilename() : (tienTo + ".png"));

@@ -100,17 +100,17 @@ public class QuanLyNguoiDungService {
 
         // 1. Kiểm tra tính duy nhất của Email
         if (nguoiDungRepository.existsByEmailIgnoreCase(emailChuan)) {
-            throw new NgoaiLeUngDung("Email '" + emailChuan + "' đã tồn tại trong hệ thống. Vui lòng sử dụng email khác!", HttpStatus.CONFLICT);
+            throw new NgoaiLeUngDung("Email '" + emailChuan + "' đã tồn tại trong hệ thống. Vui lòng sử dụng email khác!", HttpStatus.CONFLICT, "email");
         }
 
         // 2. Kiểm tra tính duy nhất của Số điện thoại
         if (nguoiDungRepository.existsBySoDienThoai(sdtChuan)) {
-            throw new NgoaiLeUngDung("Số điện thoại '" + sdtChuan + "' đã được sử dụng bởi tài khoản khác!", HttpStatus.CONFLICT);
+            throw new NgoaiLeUngDung("Số điện thoại '" + sdtChuan + "' đã được sử dụng bởi tài khoản khác!", HttpStatus.CONFLICT, "soDienThoai");
         }
 
         // 3. Kiểm tra vai trò nội bộ hợp lệ
         if (!"TAI_XE".equals(vaiTroChon) && !"CSKH".equals(vaiTroChon)) {
-            throw new NgoaiLeUngDung("Chỉ được cấp tài khoản nhân viên với vai trò TAI_XE hoặc CSKH!", HttpStatus.BAD_REQUEST);
+            throw new NgoaiLeUngDung("Chỉ được cấp tài khoản nhân viên với vai trò TAI_XE hoặc CSKH!", HttpStatus.BAD_REQUEST, "vaiTro");
         }
 
         // 4. Lấy hoặc tạo vai trò tương ứng trong DB

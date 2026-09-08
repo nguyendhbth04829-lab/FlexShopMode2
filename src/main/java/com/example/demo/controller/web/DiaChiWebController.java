@@ -22,7 +22,7 @@ public class DiaChiWebController {
      * Chỉ dành cho Khách Hàng (KHACH_HANG) và Người Bán (NGUOI_BAN)
      */
     @GetMapping({"/customer/dia-chi", "/dia-chi"})
-    @PreAuthorize("hasAnyRole('KHACH_HANG', 'NGUOI_BAN')")
+    @PreAuthorize("hasAnyRole('KHACH_HANG', 'NGUOI_BAN', 'ADMIN')")
     public String trangSoDiaChi(Model model) {
         NguoiDungResponse nguoiDung = nguoiDungService.layNguoiDungHienTai();
         ThongKeDiaChiResponse thongKe = diaChiService.thongKeDiaChi(nguoiDung.getId());

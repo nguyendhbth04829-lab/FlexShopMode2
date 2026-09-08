@@ -94,7 +94,7 @@ public class HoSoService {
         if (!sdtMoi.equals(nguoiDung.getSoDienThoai())) {
             boolean daTonTai = nguoiDungRepository.existsBySoDienThoaiAndMaNguoiDungNot(sdtMoi, nguoiDung.getMaNguoiDung());
             if (daTonTai) {
-                throw new NgoaiLeUngDung("Số điện thoại '" + sdtMoi + "' đã được đăng ký bởi một tài khoản khác!", HttpStatus.CONFLICT);
+                throw new NgoaiLeUngDung("Số điện thoại '" + sdtMoi + "' đã được đăng ký bởi một tài khoản khác!", HttpStatus.CONFLICT, "soDienThoai");
             }
             nguoiDung.setSoDienThoai(sdtMoi);
         }
@@ -192,17 +192,17 @@ public class HoSoService {
 
         // 1. Kiểm tra mật khẩu hiện tại
         if (!passwordEncoder.matches(matKhauHienTai, nguoiDung.getMatKhauMaHoa())) {
-            throw new NgoaiLeUngDung("Mật khẩu hiện tại không chính xác!", HttpStatus.BAD_REQUEST);
+            throw new NgoaiLeUngDung("Mật khẩu hiện tại không chính xác!", HttpStatus.BAD_REQUEST, "matKhauHienTai");
         }
 
         // 2. Validate bắt buộc: Mật khẩu mới KHÔNG ĐƯỢC TRÙNG với mật khẩu hiện tại
         if (passwordEncoder.matches(matKhauMoi, nguoiDung.getMatKhauMaHoa())) {
-            throw new NgoaiLeUngDung("Mật khẩu mới không được trùng với mật khẩu cũ!", HttpStatus.BAD_REQUEST);
+            throw new NgoaiLeUngDung("Mật khẩu mới không được trùng với mật khẩu cũ!", HttpStatus.BAD_REQUEST, "matKhauMoi");
         }
 
         // 3. Kiểm tra xác nhận mật khẩu mới
         if (!matKhauMoi.equals(xacNhanMatKhauMoi)) {
-            throw new NgoaiLeUngDung("Mật khẩu xác nhận không khớp với mật khẩu mới!", HttpStatus.BAD_REQUEST);
+            throw new NgoaiLeUngDung("Mật khẩu xác nhận không khớp với mật khẩu mới!", HttpStatus.BAD_REQUEST, "xacNhanMatKhauMoi");
         }
 
         // 4. Mã hóa mật khẩu mới bằng BCrypt và lưu vào DB

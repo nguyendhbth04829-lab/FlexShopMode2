@@ -333,8 +333,10 @@
                                         <span class="input-group-text bg-white"><i class="bi bi-tag"></i></span>
                                         <input type="text" class="form-control" id="tenGianHang" name="tenGianHang"
                                                th:value="${gianHang != null ? gianHang.tenGianHang : ''}"
-                                               placeholder="Ví dụ: Flex Fashion Official" required minlength="3" maxlength="100">
+                                               placeholder="Ví dụ: Flex Fashion Official" minlength="3" maxlength="100"
+                                               oninput="xoaLoiTruongDangKy('tenGianHang')">
                                     </div>
+                                    <div class="invalid-feedback d-block" id="error-tenGianHang" style="display:none;"></div>
                                     <div class="d-flex justify-content-between align-items-center mt-1">
                                         <small class="text-muted">Từ 3 - 100 ký tự tiếng Việt hoặc chữ số</small>
                                         <span id="badgeTenShop" class="badge bg-light text-secondary" style="font-size: 11px;">Chờ nhập</span>
@@ -350,11 +352,13 @@
                                         <span class="input-group-text bg-white"><i class="bi bi-link-45deg"></i></span>
                                         <input type="text" class="form-control font-monospace" id="duongDanSlug" name="duongDanSlug"
                                                th:value="${gianHang != null ? gianHang.duongDanSlug : ''}"
-                                               placeholder="flex-fashion-official">
+                                               placeholder="flex-fashion-official"
+                                               oninput="xoaLoiTruongDangKy('duongDanSlug')">
                                         <button type="button" class="btn btn-outline-secondary" onclick="taiTaoSlug()" title="Sinh lại slug tự động">
                                             <i class="bi bi-arrow-repeat"></i>
                                         </button>
                                     </div>
+                                    <div class="invalid-feedback d-block" id="error-duongDanSlug" style="display:none;"></div>
                                     <div class="slug-preview mt-2">
                                         <span>Xem trước URL: </span>
                                         <strong class="text-primary">https://flexshop.vn/shop/<span id="previewSlugText" th:text="${gianHang != null ? gianHang.duongDanSlug : 'ten-shop'}">ten-shop</span></strong>
@@ -371,8 +375,10 @@
                                         <span class="input-group-text bg-white"><i class="bi bi-telephone"></i></span>
                                         <input type="tel" class="form-control" id="sdtKho" name="sdtKho"
                                                th:value="${gianHang != null ? gianHang.sdtKho : (user != null ? user.soDienThoai : '')}"
-                                               placeholder="0901234567" required pattern="^(0|\+84)(3|5|7|8|9)[0-9]{8}$">
+                                               placeholder="0901234567"
+                                               oninput="xoaLoiTruongDangKy('sdtKho')">
                                     </div>
+                                    <div class="invalid-feedback d-block" id="error-sdtKho" style="display:none;"></div>
                                     <small class="text-muted">Gồm 10 số di động Việt Nam (03, 05, 07, 08, 09)</small>
                                 </div>
 
@@ -463,7 +469,9 @@
                                         <textarea class="form-control bg-white font-monospace" id="diaChiKho" name="diaChiKho" rows="2"
                                                   th:text="${gianHang != null ? gianHang.diaChiKho : ''}"
                                                   placeholder="Địa chỉ hoàn chỉnh sẽ tự động hiển thị tại đây khi bạn chọn Tỉnh, Huyện, Xã..."
-                                                  required minlength="5" maxlength="255"></textarea>
+                                                  minlength="5" maxlength="255"
+                                                  oninput="xoaLoiTruongDangKy('diaChiKho')"></textarea>
+                                        <div class="invalid-feedback d-block" id="error-diaChiKho" style="display:none;"></div>
                                         <small class="text-muted d-block mt-1">
                                             <i class="bi bi-truck text-primary me-1"></i>Đơn vị vận chuyển (Shipper) sẽ đến địa chỉ này lấy hàng.
                                         </small>
@@ -475,13 +483,17 @@
                                     <label class="form-label fw-semibold" for="moTa">Mô tả ngắn gian hàng</label>
                                     <textarea class="form-control" id="moTa" name="moTa" rows="2"
                                               th:text="${gianHang != null ? gianHang.moTa : ''}"
-                                              placeholder="Giới thiệu các dòng sản phẩm bạn dự định kinh doanh..."></textarea>
+                                              placeholder="Giới thiệu các dòng sản phẩm bạn dự định kinh doanh..."
+                                              oninput="xoaLoiTruongDangKy('moTa')"></textarea>
+                                    <div class="invalid-feedback d-block" id="error-moTa" style="display:none;"></div>
                                 </div>
 
                                 <!-- Logo Gian Hàng (Tùy chọn) -->
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold" for="fileLogo">Logo gian hàng (Tùy chọn)</label>
-                                    <input type="file" class="form-control" id="fileLogo" name="fileLogo" accept="image/jpeg,image/png,image/webp">
+                                    <input type="file" class="form-control" id="fileLogo" name="fileLogo" accept="image/jpeg,image/png,image/webp"
+                                           onchange="xoaLoiTruongDangKy('fileLogo')">
+                                    <div class="invalid-feedback d-block" id="error-fileLogo" style="display:none;"></div>
                                     <small class="text-muted">Định dạng PNG, JPG &lt; 5MB. Kích thước khuyến nghị 200x200px</small>
                                 </div>
                             </div>
@@ -501,8 +513,10 @@
                                         <span class="input-group-text bg-white"><i class="bi bi-upc-scan"></i></span>
                                         <input type="text" class="form-control font-monospace text-uppercase" id="soGiayTo" name="soGiayTo"
                                                th:value="${gianHang != null ? gianHang.soGiayTo : ''}"
-                                               placeholder="Ví dụ: 0109887766" required minlength="5" maxlength="50">
+                                               placeholder="Ví dụ: 0109887766" minlength="5" maxlength="50"
+                                               oninput="xoaLoiTruongDangKy('soGiayTo')">
                                     </div>
+                                    <div class="invalid-feedback d-block" id="error-soGiayTo" style="display:none;"></div>
                                     <small class="text-muted">MST doanh nghiệp hoặc ĐKKD hộ kinh doanh cá thể</small>
                                 </div>
 
@@ -518,8 +532,10 @@
                                             Bắt buộc định dạng <b>PDF, JPEG, JPG, PNG</b> &bull; Dung lượng <b>&lt; 5MB</b>
                                         </p>
                                         <input type="file" id="fileGiayPhep" name="fileGiayPhep" class="d-none"
-                                               accept=".pdf,image/jpeg,image/png">
+                                               accept=".pdf,image/jpeg,image/png"
+                                               onchange="xoaLoiTruongDangKy('fileGiayPhep')">
                                     </div>
+                                    <div class="invalid-feedback d-block" id="error-fileGiayPhep" style="display:none;"></div>
 
                                     <!-- Hiển thị tệp đã chọn -->
                                     <div id="fileSelectedInfo" class="mt-3 p-3 bg-light rounded-3 border d-none">
@@ -743,15 +759,50 @@
         document.getElementById('khungFormDangKy').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // Submit Form Đăng Ký
+    // Hàm quản lý hiển thị lỗi cụ thể tại từng ô đăng ký
+    function hienThiLoiTruongDangKy(truong, thongBao) {
+        const el = document.getElementById(truong);
+        const feedback = document.getElementById('error-' + truong) || (el ? el.parentNode.querySelector('.invalid-feedback') : null);
+        if (el) el.classList.add('is-invalid');
+        if (feedback) {
+            feedback.textContent = thongBao;
+            feedback.style.display = 'block';
+        }
+    }
+
+    function xoaLoiTruongDangKy(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('is-invalid');
+        const feedback = document.getElementById('error-' + id) || (el ? el.parentNode.querySelector('.invalid-feedback') : null);
+        if (feedback) {
+            feedback.textContent = '';
+            feedback.style.display = 'none';
+        }
+    }
+
+    function xoaTatCaLoiDangKy() {
+        document.querySelectorAll('#formDangKyShop .is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        document.querySelectorAll('#formDangKyShop .invalid-feedback').forEach(el => {
+            el.textContent = '';
+            el.style.display = 'none';
+        });
+    }
+
+    // Submit Form Đăng Ký với kiểm tra cụ thể từng ô
     document.getElementById('formDangKyShop').addEventListener('submit', async function(e) {
         e.preventDefault();
+        xoaTatCaLoiDangKy();
 
-        const form = e.target;
-        if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
-        }
+        let coLoi = false;
+        let truongDauTienBiLoi = null;
+
+        const danhDauLoi = (truong, thongBao) => {
+            hienThiLoiTruongDangKy(truong, thongBao);
+            coLoi = true;
+            if (!truongDauTienBiLoi) {
+                truongDauTienBiLoi = document.getElementById(truong);
+            }
+        };
 
         const tenGianHang = document.getElementById('tenGianHang').value.trim();
         const sdtKho = document.getElementById('sdtKho').value.trim();
@@ -760,13 +811,58 @@
         const duongDanSlug = document.getElementById('duongDanSlug').value.trim();
         const moTa = document.getElementById('moTa').value.trim();
 
-        // Kiểm tra file giấy phép nếu đăng ký mới
+        // 1. Kiểm tra Tên Gian Hàng
+        if (!tenGianHang) {
+            danhDauLoi('tenGianHang', 'Tên gian hàng không được để trống!');
+        } else if (tenGianHang.length < 3 || tenGianHang.length > 100) {
+            danhDauLoi('tenGianHang', 'Tên gian hàng phải từ 3 đến 100 ký tự!');
+        }
+
+        // 2. Kiểm tra Slug (nếu nhập)
+        if (duongDanSlug && !/^[a-z0-9-]+$/.test(duongDanSlug)) {
+            danhDauLoi('duongDanSlug', 'Đường dẫn slug chỉ được chứa chữ thường không dấu, số và dấu gạch ngang (-)!');
+        }
+
+        // 3. Kiểm tra Số điện thoại
+        const phoneRegex = /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/;
+        if (!sdtKho) {
+            danhDauLoi('sdtKho', 'Số điện thoại kho không được để trống!');
+        } else if (!phoneRegex.test(sdtKho)) {
+            danhDauLoi('sdtKho', 'Số điện thoại kho phải là số di động Việt Nam hợp lệ (10 chữ số)!');
+        }
+
+        // 4. Kiểm tra Địa chỉ kho
+        if (!diaChiKho) {
+            danhDauLoi('diaChiKho', 'Địa chỉ kho không được để trống! Vui lòng chọn Tỉnh, Huyện, Xã và nhập số nhà.');
+        } else if (diaChiKho.length < 5 || diaChiKho.length > 255) {
+            danhDauLoi('diaChiKho', 'Địa chỉ kho phải từ 5 đến 255 ký tự!');
+        }
+
+        // 5. Kiểm tra Mã số thuế / Số giấy phép
+        if (!soGiayTo) {
+            danhDauLoi('soGiayTo', 'Mã số thuế / Số giấy phép không được để trống!');
+        } else if (soGiayTo.length < 5 || soGiayTo.length > 50) {
+            danhDauLoi('soGiayTo', 'Mã số thuế / Số giấy phép phải từ 5 đến 50 ký tự!');
+        }
+
+        // 6. Kiểm tra file giấy phép nếu đăng ký mới
         if (!isEditMode && (!fileInput.files || fileInput.files.length === 0)) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Thiếu Giấy phép kinh doanh',
-                text: 'Vui lòng tải lên tệp scan Giấy phép kinh doanh (PDF/Ảnh < 5MB) để nộp hồ sơ.'
-            });
+            danhDauLoi('fileGiayPhep', 'Bắt buộc tải lên tệp scan Giấy phép kinh doanh (PDF/Ảnh < 5MB)!');
+        } else if (fileInput.files && fileInput.files[0] && fileInput.files[0].size > 5 * 1024 * 1024) {
+            danhDauLoi('fileGiayPhep', 'Tệp giấy phép kinh doanh vượt quá 5MB!');
+        }
+
+        // 7. Kiểm tra file logo nếu có
+        const fileLogoInput = document.getElementById('fileLogo');
+        if (fileLogoInput.files && fileLogoInput.files[0] && fileLogoInput.files[0].size > 5 * 1024 * 1024) {
+            danhDauLoi('fileLogo', 'Ảnh logo không được vượt quá 5MB!');
+        }
+
+        if (coLoi) {
+            if (truongDauTienBiLoi) {
+                truongDauTienBiLoi.focus();
+                truongDauTienBiLoi.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             return;
         }
 
@@ -782,7 +878,6 @@
             formData.append('fileGiayPhep', fileInput.files[0]);
         }
 
-        const fileLogoInput = document.getElementById('fileLogo');
         if (fileLogoInput.files && fileLogoInput.files.length > 0) {
             formData.append('fileLogo', fileLogoInput.files[0]);
         }
@@ -807,9 +902,9 @@
                 body: formData
             });
 
-            const result = await res.json();
+            const result = await res.json().catch(() => null);
 
-            if (res.ok && result.thanhCong) {
+            if (res.ok && result && result.thanhCong) {
                 Swal.fire({
                     icon: 'success',
                     title: 'Gửi Đăng Ký Thành Công! 🎉',
@@ -825,10 +920,40 @@
                     window.location.reload();
                 });
             } else {
+                const thongBaoLoi = (result && (result.thongBao || result.thongDiep)) || 'Đã có lỗi xảy ra trong quá trình nộp hồ sơ!';
+                
+                // Ánh xạ lỗi server vào từng ô nhập liệu
+                if (result && result.duLieu && typeof result.duLieu === 'object') {
+                    for (const [k, v] of Object.entries(result.duLieu)) {
+                        hienThiLoiTruongDangKy(k, v);
+                        if (!truongDauTienBiLoi) truongDauTienBiLoi = document.getElementById(k);
+                    }
+                }
+
+                if (thongBaoLoi.includes('Tên gian hàng')) {
+                    hienThiLoiTruongDangKy('tenGianHang', thongBaoLoi);
+                    if (!truongDauTienBiLoi) truongDauTienBiLoi = document.getElementById('tenGianHang');
+                } else if (thongBaoLoi.includes('slug')) {
+                    hienThiLoiTruongDangKy('duongDanSlug', thongBaoLoi);
+                    if (!truongDauTienBiLoi) truongDauTienBiLoi = document.getElementById('duongDanSlug');
+                } else if (thongBaoLoi.includes('Số điện thoại')) {
+                    hienThiLoiTruongDangKy('sdtKho', thongBaoLoi);
+                    if (!truongDauTienBiLoi) truongDauTienBiLoi = document.getElementById('sdtKho');
+                } else if (thongBaoLoi.includes('Giấy phép') || thongBaoLoi.includes('giấy phép')) {
+                    hienThiLoiTruongDangKy('fileGiayPhep', thongBaoLoi);
+                } else if (thongBaoLoi.includes('logo') || thongBaoLoi.includes('Logo')) {
+                    hienThiLoiTruongDangKy('fileLogo', thongBaoLoi);
+                }
+
+                if (truongDauTienBiLoi) {
+                    truongDauTienBiLoi.focus();
+                    truongDauTienBiLoi.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Đăng ký không thành công',
-                    text: result.thongBao || 'Đã có lỗi xảy ra trong quá trình nộp hồ sơ. Vui lòng thử lại!'
+                    icon: 'warning',
+                    title: 'Dữ liệu không hợp lệ',
+                    text: thongBaoLoi
                 });
             }
         } catch (error) {

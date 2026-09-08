@@ -66,6 +66,7 @@ public class CauHinhBaoMat {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/seller/dang-ky", "/api/v1/seller/dang-ky-shop/**").hasAnyRole("KHACH_HANG", "NGUOI_BAN", "ADMIN")
                         .requestMatchers("/seller/**", "/api/v1/seller/**", "/ho-so-shop").hasAnyRole("NGUOI_BAN", "ADMIN")
+                        .requestMatchers("/customer/dia-chi", "/dia-chi", "/api/v1/dia-chi/**").hasAnyRole("KHACH_HANG", "NGUOI_BAN", "ADMIN")
                         .requestMatchers("/customer/**").hasAnyRole("KHACH_HANG", "ADMIN")
                         .requestMatchers("/shipper/**").hasAnyRole("TAI_XE", "SHIPPER", "ADMIN")
                         .requestMatchers("/cskh/**").hasAnyRole("CSKH", "ADMIN")

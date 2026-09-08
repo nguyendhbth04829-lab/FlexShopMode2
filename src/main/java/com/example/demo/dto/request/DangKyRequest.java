@@ -41,4 +41,9 @@ public class DangKyRequest {
 
     // Vai trò ban đầu: KHACH_HANG (mặc định) hoặc NGUOI_BAN
     private String vaiTroMongMuon;
+
+    // Mã xác thực OTP gửi qua Gmail
+    @NotBlank(message = "Mã OTP xác thực không được để trống")
+    @Pattern(regexp = "^[0-9]{6}$", message = "Mã OTP phải gồm đúng 6 chữ số")
+    private String maOtp;
 }

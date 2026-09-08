@@ -287,14 +287,13 @@
                     <label class="form-label fw-semibold small text-secondary">Email hoặc Số điện thoại đăng ký</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-envelope-at text-secondary"></i></span>
-                        <input type="text" id="taiKhoanInput" class="form-control" placeholder="Ví dụ: nguyenvana@gmail.com hoặc 0912345678" required autofocus>
+                        <input type="text" id="taiKhoanInput" class="form-control" placeholder="Ví dụ: nguyenvana@gmail.com hoặc 0912345678" required autofocus oninput="xoaLoiOtp('taiKhoanInput', 'errTaiKhoanInput')">
                     </div>
+                    <div class="invalid-feedback" id="errTaiKhoanInput" style="display: none;"></div>
                     <div class="form-text small text-muted mt-2">
                         <i class="bi bi-info-circle me-1"></i>Hệ thống sẽ gửi mã xác thực 6 chữ số đến hòm thư Gmail của bạn.
                     </div>
                 </div>
-
-
 
                 <button type="submit" id="btnGuiOtp" class="btn btn-primary-custom mb-3">
                     <span id="btnGuiOtpText"><i class="bi bi-send-fill me-2"></i>Gửi Mã Xác Thực OTP</span>
@@ -317,7 +316,8 @@
             <form id="formStep2" onsubmit="handleXacThucOtp(event)">
                 <div class="mb-3 text-center">
                     <label class="form-label fw-semibold small text-secondary mb-2">Nhập mã OTP gồm 6 chữ số</label>
-                    <input type="text" id="otpInput" class="form-control otp-input-field mx-auto" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" placeholder="------" autocomplete="one-time-code" required>
+                    <input type="text" id="otpInput" class="form-control otp-input-field mx-auto" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" placeholder="------" autocomplete="one-time-code" required oninput="xoaLoiOtp('otpInput', 'errOtpInput')">
+                    <div class="invalid-feedback" id="errOtpInput" style="display: none;"></div>
                     <div class="form-text small text-muted mt-2">
                         <i class="bi bi-shield-exclamation text-warning me-1"></i>Nhập sai quá <strong>5 lần</strong> tài khoản sẽ bị tạm khóa khôi phục 24 giờ.
                     </div>
@@ -346,11 +346,12 @@
                     <label class="form-label fw-semibold small text-secondary">Mật khẩu mới</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-lock text-secondary"></i></span>
-                        <input type="password" id="matKhauMoi" class="form-control" placeholder="Nhập mật khẩu mới..." required oninput="validatePasswordRules(this.value)">
+                        <input type="password" id="matKhauMoi" class="form-control" placeholder="Nhập mật khẩu mới..." required oninput="validatePasswordRules(this.value); xoaLoiOtp('matKhauMoi', 'errMatKhauMoi')">
                         <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('matKhauMoi', this)">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
+                    <div class="invalid-feedback" id="errMatKhauMoi" style="display: none;"></div>
                 </div>
 
                 <!-- Thanh đo độ mạnh mật khẩu -->
@@ -386,11 +387,12 @@
                     <label class="form-label fw-semibold small text-secondary">Xác nhận mật khẩu mới</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-lock-fill text-secondary"></i></span>
-                        <input type="password" id="xacNhanMatKhau" class="form-control" placeholder="Nhập lại mật khẩu mới..." required oninput="checkMatchPassword()">
+                        <input type="password" id="xacNhanMatKhau" class="form-control" placeholder="Nhập lại mật khẩu mới..." required oninput="checkMatchPassword(); xoaLoiOtp('xacNhanMatKhau', 'errXacNhanMatKhau')">
                         <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('xacNhanMatKhau', this)">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
+                    <div class="invalid-feedback" id="errXacNhanMatKhau" style="display: none;">Mật khẩu mới và xác nhận mật khẩu không trùng khớp!</div>
                     <div id="pwdMatchMsg" class="form-text small d-none"></div>
                 </div>
 
@@ -456,6 +458,30 @@
         box.classList.remove('d-none');
     }
 
+    // Helper hiển thị và xóa lỗi cụ thể từng ô nhập
+    function hienThiLoiOtp(inputId, errId, thongBao) {
+        const input = document.getElementById(inputId);
+        const feedback = document.getElementById(errId);
+        if (input) {
+            input.classList.add('is-invalid');
+        }
+        if (feedback) {
+            feedback.innerText = thongBao;
+            feedback.style.display = 'block';
+        }
+    }
+
+    function xoaLoiOtp(inputId, errId) {
+        const input = document.getElementById(inputId);
+        const feedback = document.getElementById(errId);
+        if (input) {
+            input.classList.remove('is-invalid');
+        }
+        if (feedback) {
+            feedback.style.display = 'none';
+        }
+    }
+
     function hideAlert() {
         document.getElementById('alertBox').classList.add('d-none');
     }
@@ -466,10 +492,13 @@
     async function handleGuiOtp(e) {
         e.preventDefault();
         hideAlert();
+        xoaLoiOtp('taiKhoanInput', 'errTaiKhoanInput');
 
-        const taiKhoan = document.getElementById('taiKhoanInput').value.trim();
+        const taiKhoanInput = document.getElementById('taiKhoanInput');
+        const taiKhoan = taiKhoanInput.value.trim();
         if (!taiKhoan) {
-            showAlert('Vui lòng nhập Email hoặc Số điện thoại!');
+            hienThiLoiOtp('taiKhoanInput', 'errTaiKhoanInput', 'Vui lòng nhập Email hoặc Số điện thoại!');
+            taiKhoanInput.focus();
             return;
         }
 
@@ -491,7 +520,10 @@
             const data = await resp.json();
 
             if (!resp.ok) {
-                showAlert(data.thongBao || data.message || 'Gửi mã OTP thất bại! Vui lòng thử lại.', resp.status === 429 ? 'warning' : 'danger');
+                const msg = data.thongBao || data.message || 'Gửi mã OTP thất bại! Vui lòng thử lại.';
+                hienThiLoiOtp('taiKhoanInput', 'errTaiKhoanInput', msg);
+                showAlert(msg, resp.status === 429 ? 'warning' : 'danger');
+                taiKhoanInput.focus();
                 return;
             }
 
@@ -525,10 +557,13 @@
     async function handleXacThucOtp(e) {
         e.preventDefault();
         hideAlert();
+        xoaLoiOtp('otpInput', 'errOtpInput');
 
-        const maOtp = document.getElementById('otpInput').value.trim();
+        const otpInputEl = document.getElementById('otpInput');
+        const maOtp = otpInputEl.value.trim();
         if (!/^\d{6}$/.test(maOtp)) {
-            showAlert('Mã OTP phải gồm đúng 6 chữ số!');
+            hienThiLoiOtp('otpInput', 'errOtpInput', 'Mã OTP phải gồm đúng 6 chữ số!');
+            otpInputEl.focus();
             return;
         }
 
@@ -550,11 +585,15 @@
             const data = await resp.json();
 
             if (!resp.ok) {
-                showAlert(data.thongBao || data.message || 'Mã OTP không hợp lệ!', resp.status === 403 ? 'danger' : 'warning');
+                const msg = data.thongBao || data.message || 'Mã OTP không hợp lệ!';
+                hienThiLoiOtp('otpInput', 'errOtpInput', msg);
+                showAlert(msg, resp.status === 403 ? 'danger' : 'warning');
                 // Nếu bị khóa 24h thì vô hiệu hóa nút
                 if (resp.status === 403) {
                     btn.disabled = true;
                     document.getElementById('otpInput').disabled = true;
+                } else {
+                    otpInputEl.focus();
                 }
                 return;
             }
@@ -579,6 +618,7 @@
 
     async function guiLaiOtp() {
         hideAlert();
+        xoaLoiOtp('otpInput', 'errOtpInput');
         const btn = document.getElementById('btnGuiLaiOtp');
         btn.disabled = true;
 
@@ -620,16 +660,22 @@
     async function handleDatLaiMatKhau(e) {
         e.preventDefault();
         hideAlert();
+        xoaLoiOtp('matKhauMoi', 'errMatKhauMoi');
+        xoaLoiOtp('xacNhanMatKhau', 'errXacNhanMatKhau');
 
-        const matKhauMoi = document.getElementById('matKhauMoi').value;
-        const xacNhan = document.getElementById('xacNhanMatKhau').value;
+        const inputMoi = document.getElementById('matKhauMoi');
+        const inputXacNhan = document.getElementById('xacNhanMatKhau');
+        const matKhauMoi = inputMoi.value;
+        const xacNhan = inputXacNhan.value;
 
-        if (matKhauMoi !== xacNhan) {
-            showAlert('Mật khẩu mới và xác nhận mật khẩu không trùng khớp!');
+        // 1. Kiểm tra mật khẩu mới
+        if (!matKhauMoi) {
+            hienThiLoiOtp('matKhauMoi', 'errMatKhauMoi', 'Vui lòng nhập mật khẩu mới!');
+            inputMoi.focus();
             return;
         }
 
-        // Kiểm tra độ mạnh theo US-01
+        // 2. Kiểm tra độ mạnh theo US-01
         const hasLen = matKhauMoi.length >= 8;
         const hasUpper = /[A-Z]/.test(matKhauMoi);
         const hasLower = /[a-z]/.test(matKhauMoi);
@@ -637,7 +683,20 @@
         const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(matKhauMoi);
 
         if (!hasLen || !hasUpper || !hasLower || !hasDigit || !hasSpecial) {
-            showAlert('Mật khẩu mới chưa đáp ứng đầy đủ tiêu chuẩn bảo mật!');
+            hienThiLoiOtp('matKhauMoi', 'errMatKhauMoi', 'Mật khẩu phải từ 8 ký tự, gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt!');
+            inputMoi.focus();
+            return;
+        }
+
+        // 3. Kiểm tra xác nhận mật khẩu
+        if (!xacNhan) {
+            hienThiLoiOtp('xacNhanMatKhau', 'errXacNhanMatKhau', 'Vui lòng xác nhận lại mật khẩu mới!');
+            inputXacNhan.focus();
+            return;
+        }
+        if (matKhauMoi !== xacNhan) {
+            hienThiLoiOtp('xacNhanMatKhau', 'errXacNhanMatKhau', 'Mật khẩu mới và xác nhận mật khẩu không trùng khớp!');
+            inputXacNhan.focus();
             return;
         }
 
@@ -664,7 +723,34 @@
             const data = await resp.json();
 
             if (!resp.ok) {
-                showAlert(data.thongBao || data.message || 'Đặt lại mật khẩu thất bại!');
+                let daHienThiLoi = false;
+                const fieldErrors = data.duLieu || data.data;
+                if (fieldErrors && typeof fieldErrors === 'object') {
+                    if (fieldErrors.matKhauMoi) {
+                        hienThiLoiOtp('matKhauMoi', 'errMatKhauMoi', fieldErrors.matKhauMoi);
+                        daHienThiLoi = true;
+                        inputMoi.focus();
+                    }
+                    if (fieldErrors.xacNhanMatKhau) {
+                        hienThiLoiOtp('xacNhanMatKhau', 'errXacNhanMatKhau', fieldErrors.xacNhanMatKhau);
+                        if (!daHienThiLoi) inputXacNhan.focus();
+                        daHienThiLoi = true;
+                    }
+                }
+
+                if (!daHienThiLoi) {
+                    const msg = data.thongBao || data.message || 'Đặt lại mật khẩu thất bại!';
+                    if (msg.toLowerCase().includes('trùng') || msg.toLowerCase().includes('mật khẩu mới')) {
+                        hienThiLoiOtp('matKhauMoi', 'errMatKhauMoi', msg);
+                        inputMoi.focus();
+                    } else if (msg.toLowerCase().includes('xác nhận') || msg.toLowerCase().includes('khớp')) {
+                        hienThiLoiOtp('xacNhanMatKhau', 'errXacNhanMatKhau', msg);
+                        inputXacNhan.focus();
+                    } else {
+                        showAlert(msg);
+                    }
+                }
+
                 btn.disabled = false;
                 btnText.classList.remove('d-none');
                 btnLoading.classList.add('d-none');

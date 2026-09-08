@@ -241,18 +241,18 @@
                                     <label class="form-label small fw-bold text-secondary">Họ và Tên <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                        <input type="text" class="form-control" id="txtHoVaTen" th:value="${user.hoVaTen}" required minlength="2" maxlength="100" placeholder="Nguyễn Văn A">
+                                        <input type="text" class="form-control" id="txtHoVaTen" th:value="${user.hoVaTen}" required minlength="2" maxlength="100" placeholder="Nguyễn Văn A" oninput="xoaLoiHoSo('txtHoVaTen', 'errHoVaTen')">
                                     </div>
-                                    <div class="invalid-feedback d-none" id="errHoVaTen">Vui lòng nhập họ và tên hợp lệ (2 - 100 ký tự).</div>
+                                    <div class="invalid-feedback" id="errHoVaTen" style="display: none;">Vui lòng nhập họ và tên hợp lệ (2 - 100 ký tự).</div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label small fw-bold text-secondary">Số Điện Thoại <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                                        <input type="tel" class="form-control" id="txtSoDienThoai" th:value="${user.soDienThoai}" required placeholder="0901234567">
+                                        <input type="tel" class="form-control" id="txtSoDienThoai" th:value="${user.soDienThoai}" required placeholder="0901234567" oninput="xoaLoiHoSo('txtSoDienThoai', 'errSoDienThoai')">
                                     </div>
-                                    <div class="invalid-feedback d-none" id="errSoDienThoai">Số điện thoại 10 số di động Việt Nam (03x, 05x, 07x, 08x, 09x).</div>
+                                    <div class="invalid-feedback" id="errSoDienThoai" style="display: none;">Số điện thoại 10 số di động Việt Nam (03x, 05x, 07x, 08x, 09x).</div>
                                 </div>
                             </div>
 
@@ -287,7 +287,7 @@
                             <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-geo-alt-fill text-success me-2"></i>Sổ Địa Chỉ Giao Hàng</h6>
                         </div>
                         <p class="text-muted small mb-3">Quản lý tới 20 địa chỉ giao hàng và địa chỉ nhận hàng mặc định theo tiêu chuẩn sàn.</p>
-                        <a href="/customer/dia-chi" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold w-100">
+                        <a href="/dia-chi" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold w-100">
                             <i class="bi bi-journal-bookmark-fill me-1"></i> Quản Lý Sổ Địa Chỉ &rarr;
                         </a>
                     </div>
@@ -308,37 +308,39 @@
                         <form id="formDoiMatKhau" onsubmit="xuLyDoiMatKhau(event)">
                             <!-- Mật khẩu hiện tại -->
                             <div class="mb-3">
-                                <label class="form-label small fw-bold text-secondary">Mật Khẩu Hiện Tại <span class="text-danger">*</span></label>
-                                <div class="position-relative">
-                                    <input type="password" class="form-control pe-5" id="txtMatKhauHienTai" required placeholder="Nhập mật khẩu hiện tại của bạn">
-                                    <i class="bi bi-eye password-toggle" onclick="togglePasswordVisibility('txtMatKhauHienTai', this)"></i>
-                                </div>
+                                 <label class="form-label small fw-bold text-secondary">Mật Khẩu Hiện Tại <span class="text-danger">*</span></label>
+                                 <div class="position-relative">
+                                     <input type="password" class="form-control pe-5" id="txtMatKhauHienTai" required placeholder="Nhập mật khẩu hiện tại của bạn" oninput="xoaLoiHoSo('txtMatKhauHienTai', 'errMatKhauHienTai')">
+                                     <i class="bi bi-eye password-toggle" onclick="togglePasswordVisibility('txtMatKhauHienTai', this)"></i>
+                                 </div>
+                                 <div class="invalid-feedback" id="errMatKhauHienTai" style="display: none;"></div>
                             </div>
 
                             <!-- Mật khẩu mới -->
                             <div class="mb-3">
-                                <label class="form-label small fw-bold text-secondary">Mật Khẩu Mới <span class="text-danger">*</span></label>
-                                <div class="position-relative">
-                                    <input type="password" class="form-control pe-5" id="txtMatKhauMoi" required placeholder="Nhập mật khẩu mới" oninput="kiemTraDoManhMatKhau(this.value)">
-                                    <i class="bi bi-eye password-toggle" onclick="togglePasswordVisibility('txtMatKhauMoi', this)"></i>
-                                </div>
-                                <div class="strength-meter">
-                                    <div id="strengthBar" class="strength-meter-bar bg-danger" style="width: 0%;"></div>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mt-1">
-                                    <small id="strengthText" class="text-muted" style="font-size: 12px;">Độ mạnh mật khẩu: Chưa nhập</small>
-                                    <small class="text-muted" style="font-size: 11px;">8-32 ký tự, 1 hoa, 1 thường, 1 số, 1 ký tự đặc biệt</small>
-                                </div>
+                                 <label class="form-label small fw-bold text-secondary">Mật Khẩu Mới <span class="text-danger">*</span></label>
+                                 <div class="position-relative">
+                                     <input type="password" class="form-control pe-5" id="txtMatKhauMoi" required placeholder="Nhập mật khẩu mới" oninput="kiemTraDoManhMatKhau(this.value); xoaLoiHoSo('txtMatKhauMoi', 'errMatKhauMoi');">
+                                     <i class="bi bi-eye password-toggle" onclick="togglePasswordVisibility('txtMatKhauMoi', this)"></i>
+                                 </div>
+                                 <div class="invalid-feedback" id="errMatKhauMoi" style="display: none;"></div>
+                                 <div class="strength-meter">
+                                     <div id="strengthBar" class="strength-meter-bar bg-danger" style="width: 0%;"></div>
+                                 </div>
+                                 <div class="d-flex justify-content-between align-items-center mt-1">
+                                     <small id="strengthText" class="text-muted" style="font-size: 12px;">Độ mạnh mật khẩu: Chưa nhập</small>
+                                     <small class="text-muted" style="font-size: 11px;">8-32 ký tự, 1 hoa, 1 thường, 1 số, 1 ký tự đặc biệt</small>
+                                 </div>
                             </div>
 
                             <!-- Xác nhận mật khẩu mới -->
                             <div class="mb-4">
                                 <label class="form-label small fw-bold text-secondary">Xác Nhận Mật Khẩu Mới <span class="text-danger">*</span></label>
                                 <div class="position-relative">
-                                    <input type="password" class="form-control pe-5" id="txtXacNhanMatKhauMoi" required placeholder="Nhập lại mật khẩu mới">
+                                    <input type="password" class="form-control pe-5" id="txtXacNhanMatKhauMoi" required placeholder="Nhập lại mật khẩu mới" oninput="xoaLoiHoSo('txtXacNhanMatKhauMoi', 'errXacNhanMatKhau')">
                                     <i class="bi bi-eye password-toggle" onclick="togglePasswordVisibility('txtXacNhanMatKhauMoi', this)"></i>
                                 </div>
-                                <div class="invalid-feedback d-none" id="errXacNhanMatKhau">Mật khẩu xác nhận không khớp!</div>
+                                <div class="invalid-feedback" id="errXacNhanMatKhau" style="display: none;">Mật khẩu xác nhận không khớp!</div>
                             </div>
 
                             <div class="alert alert-warning py-2 small d-flex align-items-center gap-2 mb-4">
@@ -560,20 +562,58 @@
         }
     }
 
+    // Helper hiển thị và xóa lỗi cụ thể từng ô nhập
+    function hienThiLoiHoSo(inputId, errId, thongBao) {
+        const input = document.getElementById(inputId);
+        const feedback = document.getElementById(errId);
+        if (input) {
+            input.classList.add('is-invalid');
+        }
+        if (feedback) {
+            feedback.innerText = thongBao;
+            feedback.style.display = 'block';
+        }
+    }
+
+    function xoaLoiHoSo(inputId, errId) {
+        const input = document.getElementById(inputId);
+        const feedback = document.getElementById(errId);
+        if (input) {
+            input.classList.remove('is-invalid');
+        }
+        if (feedback) {
+            feedback.style.display = 'none';
+        }
+    }
+
     // Cập nhật thông tin cá nhân (Họ tên, SĐT)
     async function xuLyCapNhatHoSo(e) {
         e.preventDefault();
-        const hoVaTen = document.getElementById('txtHoVaTen').value.trim();
-        const soDienThoai = document.getElementById('txtSoDienThoai').value.trim();
+        xoaLoiHoSo('txtHoVaTen', 'errHoVaTen');
+        xoaLoiHoSo('txtSoDienThoai', 'errSoDienThoai');
 
-        // Validate client
+        const hoVaTenInput = document.getElementById('txtHoVaTen');
+        const sdtInput = document.getElementById('txtSoDienThoai');
+        const hoVaTen = hoVaTenInput.value.trim();
+        const soDienThoai = sdtInput.value.trim();
+
+        // 1. Validate Họ và tên client
+        if (!hoVaTen || hoVaTen.length < 2 || hoVaTen.length > 100) {
+            hienThiLoiHoSo('txtHoVaTen', 'errHoVaTen', 'Họ và tên phải có độ dài từ 2 đến 100 ký tự!');
+            hoVaTenInput.focus();
+            return;
+        }
+
+        // 2. Validate Số điện thoại client
         const sdtRegex = /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/;
+        if (!soDienThoai) {
+            hienThiLoiHoSo('txtSoDienThoai', 'errSoDienThoai', 'Số điện thoại không được để trống!');
+            sdtInput.focus();
+            return;
+        }
         if (!sdtRegex.test(soDienThoai)) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Số điện thoại không hợp lệ',
-                text: 'Vui lòng nhập số điện thoại di động 10 số của Việt Nam (03x, 05x, 07x, 08x, 09x).'
-            });
+            hienThiLoiHoSo('txtSoDienThoai', 'errSoDienThoai', 'Số điện thoại phải gồm 10 số di động Việt Nam (03x, 05x, 07x, 08x, 09x)!');
+            sdtInput.focus();
             return;
         }
 
@@ -606,11 +646,38 @@
                     showConfirmButton: false
                 });
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Cập nhật thất bại',
-                    text: result.thongBao || result.message || 'Không thể cập nhật hồ sơ!'
-                });
+                // Hiển thị lỗi cụ thể ở ô đó
+                let daHienThiLoiCuThe = false;
+                const fieldErrors = result.duLieu || result.data;
+                if (fieldErrors && typeof fieldErrors === 'object') {
+                    if (fieldErrors.hoVaTen) {
+                        hienThiLoiHoSo('txtHoVaTen', 'errHoVaTen', fieldErrors.hoVaTen);
+                        daHienThiLoiCuThe = true;
+                        hoVaTenInput.focus();
+                    }
+                    if (fieldErrors.soDienThoai) {
+                        hienThiLoiHoSo('txtSoDienThoai', 'errSoDienThoai', fieldErrors.soDienThoai);
+                        if (!daHienThiLoiCuThe) sdtInput.focus();
+                        daHienThiLoiCuThe = true;
+                    }
+                }
+
+                if (!daHienThiLoiCuThe) {
+                    const msg = result.thongBao || result.message || 'Cập nhật thất bại';
+                    if (msg.toLowerCase().includes('số điện thoại') || msg.toLowerCase().includes('sđt')) {
+                        hienThiLoiHoSo('txtSoDienThoai', 'errSoDienThoai', msg);
+                        sdtInput.focus();
+                    } else if (msg.toLowerCase().includes('họ và tên') || msg.toLowerCase().includes('tên')) {
+                        hienThiLoiHoSo('txtHoVaTen', 'errHoVaTen', msg);
+                        hoVaTenInput.focus();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Cập nhật thất bại',
+                            text: msg
+                        });
+                    }
+                }
             }
         } catch (err) {
             Swal.fire({
@@ -624,41 +691,59 @@
         }
     }
 
-    // Đổi mật khẩu tài khoản (Validate không trùng mật khẩu cũ)
+    // Đổi mật khẩu tài khoản (Validate không trùng mật khẩu cũ, báo lỗi cụ thể tại từng ô)
     async function xuLyDoiMatKhau(e) {
         e.preventDefault();
-        const matKhauHienTai = document.getElementById('txtMatKhauHienTai').value;
-        const matKhauMoi = document.getElementById('txtMatKhauMoi').value;
-        const xacNhanMatKhauMoi = document.getElementById('txtXacNhanMatKhauMoi').value;
+        xoaLoiHoSo('txtMatKhauHienTai', 'errMatKhauHienTai');
+        xoaLoiHoSo('txtMatKhauMoi', 'errMatKhauMoi');
+        xoaLoiHoSo('txtXacNhanMatKhauMoi', 'errXacNhanMatKhau');
 
-        // 1. Kiểm tra không trùng mật khẩu cũ ngay tại client
-        if (matKhauHienTai === matKhauMoi) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Mật khẩu không hợp lệ',
-                text: 'Mật khẩu mới không được trùng với mật khẩu cũ hiện tại!'
-            });
+        const inputHienTai = document.getElementById('txtMatKhauHienTai');
+        const inputMoi = document.getElementById('txtMatKhauMoi');
+        const inputXacNhan = document.getElementById('txtXacNhanMatKhauMoi');
+
+        const matKhauHienTai = inputHienTai.value;
+        const matKhauMoi = inputMoi.value;
+        const xacNhanMatKhauMoi = inputXacNhan.value;
+
+        // 1. Kiểm tra mật khẩu hiện tại
+        if (!matKhauHienTai) {
+            hienThiLoiHoSo('txtMatKhauHienTai', 'errMatKhauHienTai', 'Vui lòng nhập mật khẩu hiện tại của bạn!');
+            inputHienTai.focus();
             return;
         }
 
-        // 2. Kiểm tra xác nhận mật khẩu khớp
-        if (matKhauMoi !== xacNhanMatKhauMoi) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Xác nhận không khớp',
-                text: 'Mật khẩu xác nhận không trùng khớp với mật khẩu mới!'
-            });
+        // 2. Kiểm tra mật khẩu mới
+        if (!matKhauMoi) {
+            hienThiLoiHoSo('txtMatKhauMoi', 'errMatKhauMoi', 'Vui lòng nhập mật khẩu mới!');
+            inputMoi.focus();
             return;
         }
 
         // 3. Kiểm tra độ phức tạp
         const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,32}$/;
         if (!strongPasswordRegex.test(matKhauMoi)) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Mật khẩu chưa đủ mạnh',
-                text: 'Mật khẩu phải từ 8 đến 32 ký tự, bao gồm ít nhất 1 chữ thường, 1 chữ hoa, 1 số và 1 ký tự đặc biệt (@$!%*?&).'
-            });
+            hienThiLoiHoSo('txtMatKhauMoi', 'errMatKhauMoi', 'Mật khẩu phải từ 8 đến 32 ký tự, bao gồm ít nhất 1 chữ thường, 1 chữ hoa, 1 số và 1 ký tự đặc biệt (@$!%*?&).');
+            inputMoi.focus();
+            return;
+        }
+
+        // 4. Kiểm tra không trùng mật khẩu cũ ngay tại client
+        if (matKhauHienTai === matKhauMoi) {
+            hienThiLoiHoSo('txtMatKhauMoi', 'errMatKhauMoi', 'Mật khẩu mới không được trùng với mật khẩu cũ hiện tại!');
+            inputMoi.focus();
+            return;
+        }
+
+        // 5. Kiểm tra xác nhận mật khẩu khớp
+        if (!xacNhanMatKhauMoi) {
+            hienThiLoiHoSo('txtXacNhanMatKhauMoi', 'errXacNhanMatKhau', 'Vui lòng xác nhận lại mật khẩu mới!');
+            inputXacNhan.focus();
+            return;
+        }
+        if (matKhauMoi !== xacNhanMatKhauMoi) {
+            hienThiLoiHoSo('txtXacNhanMatKhauMoi', 'errXacNhanMatKhau', 'Mật khẩu xác nhận không trùng khớp với mật khẩu mới!');
+            inputXacNhan.focus();
             return;
         }
 
@@ -690,11 +775,45 @@
                     confirmButtonText: 'Tuyệt vời!'
                 });
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Đổi mật khẩu thất bại',
-                    text: result.thongBao || result.message || 'Mật khẩu hiện tại không chính xác hoặc thông tin không hợp lệ!'
-                });
+                let daHienThiLoi = false;
+                const fieldErrors = result.duLieu || result.data;
+                if (fieldErrors && typeof fieldErrors === 'object') {
+                    if (fieldErrors.matKhauHienTai) {
+                        hienThiLoiHoSo('txtMatKhauHienTai', 'errMatKhauHienTai', fieldErrors.matKhauHienTai);
+                        daHienThiLoi = true;
+                        inputHienTai.focus();
+                    }
+                    if (fieldErrors.matKhauMoi) {
+                        hienThiLoiHoSo('txtMatKhauMoi', 'errMatKhauMoi', fieldErrors.matKhauMoi);
+                        if (!daHienThiLoi) inputMoi.focus();
+                        daHienThiLoi = true;
+                    }
+                    if (fieldErrors.xacNhanMatKhauMoi) {
+                        hienThiLoiHoSo('txtXacNhanMatKhauMoi', 'errXacNhanMatKhau', fieldErrors.xacNhanMatKhauMoi);
+                        if (!daHienThiLoi) inputXacNhan.focus();
+                        daHienThiLoi = true;
+                    }
+                }
+
+                if (!daHienThiLoi) {
+                    const msg = result.thongBao || result.message || 'Đổi mật khẩu thất bại';
+                    if (msg.toLowerCase().includes('hiện tại')) {
+                        hienThiLoiHoSo('txtMatKhauHienTai', 'errMatKhauHienTai', msg);
+                        inputHienTai.focus();
+                    } else if (msg.toLowerCase().includes('trùng') || msg.toLowerCase().includes('mật khẩu mới')) {
+                        hienThiLoiHoSo('txtMatKhauMoi', 'errMatKhauMoi', msg);
+                        inputMoi.focus();
+                    } else if (msg.toLowerCase().includes('xác nhận')) {
+                        hienThiLoiHoSo('txtXacNhanMatKhauMoi', 'errXacNhanMatKhau', msg);
+                        inputXacNhan.focus();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Đổi mật khẩu thất bại',
+                            text: msg
+                        });
+                    }
+                }
             }
         } catch (err) {
             Swal.fire({

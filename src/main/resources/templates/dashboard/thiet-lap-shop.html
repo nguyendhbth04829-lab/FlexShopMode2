@@ -281,7 +281,8 @@
                                             <div style="font-size: 11px;">Định dạng: JPG, PNG, WEBP &lt; 5MB</div>
                                         </div>
                                     </div>
-                                    <input type="file" id="inputBanner" name="fileBanner" accept=".jpg,.jpeg,.png,.webp" class="d-none" onchange="previewTepHinhAnh(this, 'banner')">
+                                    <input type="file" id="inputBanner" name="fileBanner" accept=".jpg,.jpeg,.png,.webp" class="d-none" onchange="xoaLoiTruong('inputBanner'); previewTepHinhAnh(this, 'banner')">
+                                    <div class="invalid-feedback d-block" id="error-inputBanner" style="display:none;"></div>
                                     <small class="text-muted d-block mt-1">Ảnh banner xuất hiện nổi bật tại đầu trang shop khi khách hàng truy cập.</small>
                                 </div>
 
@@ -299,7 +300,8 @@
                                                 <i class="bi bi-shop text-primary fs-3"></i>
                                             </div>
                                         </div>
-                                        <input type="file" id="inputLogo" name="fileLogo" accept=".jpg,.jpeg,.png,.webp" class="d-none" onchange="previewTepHinhAnh(this, 'logo')">
+                                        <input type="file" id="inputLogo" name="fileLogo" accept=".jpg,.jpeg,.png,.webp" class="d-none" onchange="xoaLoiTruong('inputLogo'); previewTepHinhAnh(this, 'logo')">
+                                        <div class="invalid-feedback d-block" id="error-inputLogo" style="display:none;"></div>
                                     </div>
                                     <div class="flex-grow-1">
                                         <div class="fw-bold small mb-1">Ảnh đại diện gian hàng</div>
@@ -320,8 +322,9 @@
                                 <div class="mb-3">
                                     <label for="inputTenShop" class="form-label fw-semibold small">Tên Gian Hàng <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="inputTenShop" name="tenGianHang"
-                                           th:value="${shop.tenGianHang}" required minlength="3" maxlength="100"
-                                           placeholder="Ví dụ: Flex Fashion Official Store" oninput="capNhatLivePreview()">
+                                           th:value="${shop.tenGianHang}" minlength="3" maxlength="100"
+                                           placeholder="Ví dụ: Flex Fashion Official Store" oninput="xoaLoiTruong('inputTenShop'); capNhatLivePreview()">
+                                    <div class="invalid-feedback" id="error-inputTenShop"></div>
                                     <small class="text-muted">Đường dẫn truy cập gian hàng: <code>https://flexshop.vn/shop/<span id="slugPreview" th:text="${shop.duongDanSlug}">slug</span></code></small>
                                 </div>
 
@@ -329,7 +332,8 @@
                                     <label for="inputMoTa" class="form-label fw-semibold small">Giới Thiệu / Mô Tả Shop</label>
                                     <textarea class="form-control" id="inputMoTa" name="moTa" rows="3" maxlength="2000"
                                               placeholder="Mô tả các sản phẩm chủ lực, cam kết chất lượng, bảo hành..."
-                                              oninput="capNhatLivePreview()" th:text="${shop.moTa}"></textarea>
+                                              oninput="xoaLoiTruong('inputMoTa'); capNhatLivePreview()" th:text="${shop.moTa}"></textarea>
+                                    <div class="invalid-feedback" id="error-inputMoTa"></div>
                                     <small class="text-muted">Mô tả rõ ràng giúp khách hàng tin tưởng và lựa chọn gian hàng của bạn.</small>
                                 </div>
                             </div>
@@ -356,12 +360,14 @@
                                     <div class="col-md-6">
                                         <label for="inputGioMoCua" class="form-label fw-semibold small">Giờ Mở Cửa (HH:mm) <span class="text-danger">*</span></label>
                                         <input type="time" class="form-control" id="inputGioMoCua" name="gioMoCua"
-                                               th:value="${shop.gioMoCua != null ? shop.gioMoCua : '08:00'}" required onchange="capNhatLivePreview()">
+                                               th:value="${shop.gioMoCua != null ? shop.gioMoCua : '08:00'}" onchange="xoaLoiTruong('inputGioMoCua'); capNhatLivePreview()">
+                                        <div class="invalid-feedback" id="error-inputGioMoCua"></div>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="inputGioDongCua" class="form-label fw-semibold small">Giờ Đóng Cửa (HH:mm) <span class="text-danger">*</span></label>
                                         <input type="time" class="form-control" id="inputGioDongCua" name="gioDongCua"
-                                               th:value="${shop.gioDongCua != null ? shop.gioDongCua : '22:00'}" required onchange="capNhatLivePreview()">
+                                               th:value="${shop.gioDongCua != null ? shop.gioDongCua : '22:00'}" onchange="xoaLoiTruong('inputGioDongCua'); capNhatLivePreview()">
+                                        <div class="invalid-feedback" id="error-inputGioDongCua"></div>
                                     </div>
                                 </div>
 
@@ -383,8 +389,9 @@
                                 <div class="mb-3">
                                     <label for="inputDiaChiKho" class="form-label fw-semibold small">Địa Chỉ Kho Lấy Hàng Cụ Thể <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="inputDiaChiKho" name="diaChiKho"
-                                           th:value="${shop.diaChiKho}" required minlength="5" maxlength="255"
-                                           placeholder="Số nhà, ngõ/ngách, tên đường, phường/xã, quận/huyện, tỉnh/thành" oninput="capNhatLivePreview()">
+                                           th:value="${shop.diaChiKho}" minlength="5" maxlength="255"
+                                           placeholder="Số nhà, ngõ/ngách, tên đường, phường/xã, quận/huyện, tỉnh/thành" oninput="xoaLoiTruong('inputDiaChiKho'); capNhatLivePreview()">
+                                    <div class="invalid-feedback" id="error-inputDiaChiKho"></div>
                                     <small class="text-muted">Đơn vị vận chuyển (GHN, GHTK, ViettelPost) sẽ đến địa chỉ này để lấy kiện hàng.</small>
                                 </div>
 
@@ -392,14 +399,16 @@
                                     <div class="col-md-6">
                                         <label for="inputSdtKho" class="form-label fw-semibold small">Số Điện Thoại Kho <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" id="inputSdtKho" name="sdtKho"
-                                               th:value="${shop.sdtKho}" required pattern="^(0|\+84)(3|5|7|8|9)[0-9]{8}$"
-                                               placeholder="0912345678" oninput="capNhatLivePreview()">
+                                               th:value="${shop.sdtKho}"
+                                               placeholder="0912345678" oninput="xoaLoiTruong('inputSdtKho'); capNhatLivePreview()">
+                                        <div class="invalid-feedback" id="error-inputSdtKho"></div>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="inputNguoiLienHe" class="form-label fw-semibold small">Người Phụ Trách Kho</label>
                                         <input type="text" class="form-control" id="inputNguoiLienHe" name="nguoiLienHeKho"
                                                th:value="${shop.nguoiLienHeKho != null ? shop.nguoiLienHeKho : user.hoVaTen}" maxlength="100"
-                                               placeholder="Tên người đại diện giao hàng cho shipper">
+                                               placeholder="Tên người đại diện giao hàng cho shipper" oninput="xoaLoiTruong('inputNguoiLienHe')">
+                                        <div class="invalid-feedback" id="error-inputNguoiLienHe"></div>
                                     </div>
                                 </div>
 
@@ -407,7 +416,8 @@
                                     <label for="inputGhiChuKho" class="form-label fw-semibold small">Ghi Chú Lấy Hàng (Cho Shipper)</label>
                                     <input type="text" class="form-control" id="inputGhiChuKho" name="ghiChuKho"
                                            th:value="${shop.ghiChuKho}" maxlength="255"
-                                           placeholder="Ví dụ: Kho ở cửa phụ bên phải, gọi trước khi đến lấy 15 phút...">
+                                           placeholder="Ví dụ: Kho ở cửa phụ bên phải, gọi trước khi đến lấy 15 phút..." oninput="xoaLoiTruong('inputGhiChuKho')">
+                                    <div class="invalid-feedback" id="error-inputGhiChuKho"></div>
                                 </div>
                             </div>
 
@@ -752,9 +762,132 @@
         });
     }
 
-    // Xử lý gửi Form thiết lập Shop
+    // Quản lý hiển thị lỗi cụ thể tại từng ô nhập liệu
+    const shopFieldMap = {
+        'tenGianHang': 'inputTenShop',
+        'moTa': 'inputMoTa',
+        'gioMoCua': 'inputGioMoCua',
+        'gioDongCua': 'inputGioDongCua',
+        'diaChiKho': 'inputDiaChiKho',
+        'sdtKho': 'inputSdtKho',
+        'nguoiLienHeKho': 'inputNguoiLienHe',
+        'ghiChuKho': 'inputGhiChuKho',
+        'fileBanner': 'inputBanner',
+        'fileLogo': 'inputLogo'
+    };
+
+    function hienThiLoiTruong(truong, thongBao) {
+        const id = shopFieldMap[truong] || truong;
+        const el = document.getElementById(id);
+        const feedback = document.getElementById('error-' + id) || (el ? el.parentNode.querySelector('.invalid-feedback') : null);
+        if (el) {
+            el.classList.add('is-invalid');
+        }
+        if (feedback) {
+            feedback.textContent = thongBao;
+            feedback.style.display = 'block';
+        }
+    }
+
+    function xoaLoiTruong(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('is-invalid');
+        const feedback = document.getElementById('error-' + id) || (el ? el.parentNode.querySelector('.invalid-feedback') : null);
+        if (feedback) {
+            feedback.textContent = '';
+            feedback.style.display = 'none';
+        }
+    }
+
+    function xoaTatCaLoi() {
+        document.querySelectorAll('#formThietLapShop .is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        document.querySelectorAll('#formThietLapShop .invalid-feedback').forEach(el => {
+            el.textContent = '';
+            el.style.display = 'none';
+        });
+    }
+
+    // Xử lý gửi Form thiết lập Shop với kiểm tra lỗi tại từng ô cụ thể
     function xuLyLuuThietLap(event) {
         event.preventDefault();
+        xoaTatCaLoi();
+
+        let coLoi = false;
+        let truongDauTienBiLoi = null;
+
+        const danhDauLoi = (truong, thongBao) => {
+            hienThiLoiTruong(truong, thongBao);
+            coLoi = true;
+            if (!truongDauTienBiLoi) {
+                const id = shopFieldMap[truong] || truong;
+                truongDauTienBiLoi = document.getElementById(id);
+            }
+        };
+
+        // 1. Kiểm tra Tên Gian Hàng
+        const tenGianHang = document.getElementById('inputTenShop').value.trim();
+        if (!tenGianHang) {
+            danhDauLoi('tenGianHang', 'Tên gian hàng không được để trống!');
+        } else if (tenGianHang.length < 3 || tenGianHang.length > 100) {
+            danhDauLoi('tenGianHang', 'Tên gian hàng phải từ 3 đến 100 ký tự!');
+        }
+
+        // 2. Kiểm tra Mô tả
+        const moTa = document.getElementById('inputMoTa').value.trim();
+        if (moTa && moTa.length > 2000) {
+            danhDauLoi('moTa', 'Giới thiệu shop không được vượt quá 2000 ký tự!');
+        }
+
+        // 3. Kiểm tra Giờ mở cửa & Giờ đóng cửa
+        const gioMoCua = document.getElementById('inputGioMoCua').value.trim();
+        const gioDongCua = document.getElementById('inputGioDongCua').value.trim();
+        const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
+        if (!gioMoCua) {
+            danhDauLoi('gioMoCua', 'Giờ mở cửa không được để trống!');
+        } else if (!timeRegex.test(gioMoCua)) {
+            danhDauLoi('gioMoCua', 'Giờ mở cửa phải đúng định dạng HH:mm (ví dụ: 08:00)!');
+        }
+
+        if (!gioDongCua) {
+            danhDauLoi('gioDongCua', 'Giờ đóng cửa không được để trống!');
+        } else if (!timeRegex.test(gioDongCua)) {
+            danhDauLoi('gioDongCua', 'Giờ đóng cửa phải đúng định dạng HH:mm (ví dụ: 22:00)!');
+        }
+
+        // 4. Kiểm tra Địa chỉ kho
+        const diaChiKho = document.getElementById('inputDiaChiKho').value.trim();
+        if (!diaChiKho) {
+            danhDauLoi('diaChiKho', 'Địa chỉ kho lấy hàng không được để trống!');
+        } else if (diaChiKho.length < 5 || diaChiKho.length > 255) {
+            danhDauLoi('diaChiKho', 'Địa chỉ kho lấy hàng phải từ 5 đến 255 ký tự!');
+        }
+
+        // 5. Kiểm tra Số điện thoại kho
+        const sdtKho = document.getElementById('inputSdtKho').value.trim();
+        const phoneRegex = /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/;
+        if (!sdtKho) {
+            danhDauLoi('sdtKho', 'Số điện thoại kho không được để trống!');
+        } else if (!phoneRegex.test(sdtKho)) {
+            danhDauLoi('sdtKho', 'Số điện thoại kho phải là số di động Việt Nam hợp lệ (10 chữ số, ví dụ 0912345678)!');
+        }
+
+        // 6. Kiểm tra kích thước tệp tải lên nếu có
+        const inputBanner = document.getElementById('inputBanner');
+        if (inputBanner.files && inputBanner.files[0] && inputBanner.files[0].size > 5 * 1024 * 1024) {
+            danhDauLoi('fileBanner', 'Ảnh banner không được vượt quá 5MB!');
+        }
+        const inputLogo = document.getElementById('inputLogo');
+        if (inputLogo.files && inputLogo.files[0] && inputLogo.files[0].size > 5 * 1024 * 1024) {
+            danhDauLoi('fileLogo', 'Ảnh logo không được vượt quá 5MB!');
+        }
+
+        if (coLoi) {
+            if (truongDauTienBiLoi) {
+                truongDauTienBiLoi.focus();
+                truongDauTienBiLoi.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return;
+        }
 
         const form = document.getElementById('formThietLapShop');
         const formData = new FormData(form);
@@ -772,12 +905,15 @@
             method: 'POST',
             body: formData
         })
-        .then(res => res.json())
-        .then(data => {
+        .then(async res => {
+            const data = await res.json().catch(() => null);
+            return { ok: res.ok, status: res.status, data: data };
+        })
+        .then(({ ok, status, data }) => {
             btn.disabled = false;
             btn.innerHTML = textGoc;
 
-            if (data.thanhCong) {
+            if (ok && data && data.thanhCong) {
                 Swal.fire({
                     icon: 'success',
                     title: 'Lưu Thành Công!',
@@ -787,7 +923,48 @@
                     window.location.reload();
                 });
             } else {
-                Swal.fire('Lỗi cập nhật', data.thongDiep || 'Có lỗi xảy ra trong quá trình lưu hồ sơ', 'error');
+                let daHienThiLoiO = false;
+                // Nếu server trả về danh sách lỗi cụ thể từng trường trong duLieu
+                if (data && data.duLieu && typeof data.duLieu === 'object') {
+                    for (const [k, v] of Object.entries(data.duLieu)) {
+                        hienThiLoiTruong(k, v);
+                        daHienThiLoiO = true;
+                        if (!truongDauTienBiLoi) {
+                            const id = shopFieldMap[k] || k;
+                            truongDauTienBiLoi = document.getElementById(id);
+                        }
+                    }
+                }
+
+                // Nếu có thông điệp lỗi chứa tên trường cụ thể
+                const thongDiep = (data && (data.thongDiep || data.thongBao)) || 'Dữ liệu không hợp lệ!';
+                if (thongDiep.includes('Tên gian hàng')) {
+                    hienThiLoiTruong('tenGianHang', thongDiep);
+                    daHienThiLoiO = true;
+                    if (!truongDauTienBiLoi) truongDauTienBiLoi = document.getElementById('inputTenShop');
+                } else if (thongDiep.includes('Số điện thoại')) {
+                    hienThiLoiTruong('sdtKho', thongDiep);
+                    daHienThiLoiO = true;
+                    if (!truongDauTienBiLoi) truongDauTienBiLoi = document.getElementById('inputSdtKho');
+                } else if (thongDiep.toLowerCase().includes('banner')) {
+                    hienThiLoiTruong('fileBanner', thongDiep);
+                    daHienThiLoiO = true;
+                } else if (thongDiep.toLowerCase().includes('logo')) {
+                    hienThiLoiTruong('fileLogo', thongDiep);
+                    daHienThiLoiO = true;
+                }
+
+                if (truongDauTienBiLoi) {
+                    truongDauTienBiLoi.focus();
+                    truongDauTienBiLoi.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Dữ liệu không hợp lệ',
+                    text: thongDiep,
+                    confirmButtonColor: '#4338ca'
+                });
             }
         })
         .catch(err => {

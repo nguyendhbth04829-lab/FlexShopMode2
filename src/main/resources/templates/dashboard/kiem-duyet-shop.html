@@ -322,8 +322,8 @@
                     <textarea class="form-control" id="lyDoTuChoiInput" rows="4" 
                               placeholder="Nhập lý do cụ thể (tối thiểu 5 ký tự, tối đa 255 ký tự)..."
                               maxlength="255" oninput="capNhatDemKyTuTuChoi()"></textarea>
-                    <div class="d-flex justify-content-between mt-1">
-                        <small class="text-danger d-none" id="lyDoTuChoiError">Vui lòng nhập lý do từ chối (5 - 255 ký tự).</small>
+                    <div class="invalid-feedback" id="lyDoTuChoiError"></div>
+                    <div class="d-flex justify-content-end mt-1">
                         <small class="text-muted ms-auto" id="kyTuTuChoiCount">0/255 ký tự</small>
                     </div>
                 </div>
@@ -768,32 +768,52 @@
     // Xử lý Từ Chối
     function moModalTuChoi(id, tenShop) {
         document.getElementById('tuChoiShopId').value = id;
-        document.getElementById('lyDoTuChoiInput').value = '';
-        document.getElementById('lyDoTuChoiError').classList.add('d-none');
+        const input = document.getElementById('lyDoTuChoiInput');
+        input.value = '';
+        input.classList.remove('is-invalid');
+        const errorEl = document.getElementById('lyDoTuChoiError');
+        errorEl.textContent = '';
+        errorEl.style.display = 'none';
         document.getElementById('kyTuTuChoiCount').textContent = '0/255 ký tự';
         document.getElementById('modalTuChoiLabel').innerHTML = `<i class="bi bi-x-circle-fill me-2"></i>Từ Chối: ${escapeHtml(tenShop)}`;
         modalTuChoiInstance.show();
     }
 
     function capNhatDemKyTuTuChoi() {
-        const val = document.getElementById('lyDoTuChoiInput').value;
+        const input = document.getElementById('lyDoTuChoiInput');
+        const val = input.value;
         document.getElementById('kyTuTuChoiCount').textContent = `${val.length}/255 ký tự`;
         if (val.trim().length >= 5 && val.trim().length <= 255) {
-            document.getElementById('lyDoTuChoiError').classList.add('d-none');
+            input.classList.remove('is-invalid');
+            const errorEl = document.getElementById('lyDoTuChoiError');
+            errorEl.textContent = '';
+            errorEl.style.display = 'none';
         }
     }
 
     async function guiTuChoiGianHang() {
         const id = document.getElementById('tuChoiShopId').value;
-        const lyDo = document.getElementById('lyDoTuChoiInput').value.trim();
+        const input = document.getElementById('lyDoTuChoiInput');
+        const lyDo = input.value.trim();
         const errorEl = document.getElementById('lyDoTuChoiError');
 
-        if (!lyDo || lyDo.length < 5 || lyDo.length > 255) {
-            errorEl.classList.remove('d-none');
-            errorEl.textContent = 'Lý do từ chối bắt buộc và phải từ 5 đến 255 ký tự.';
+        if (!lyDo) {
+            input.classList.add('is-invalid');
+            errorEl.textContent = 'Lý do từ chối không được để trống!';
+            errorEl.style.display = 'block';
+            input.focus();
+            return;
+        } else if (lyDo.length < 5 || lyDo.length > 255) {
+            input.classList.add('is-invalid');
+            errorEl.textContent = 'Lý do từ chối phải từ 5 đến 255 ký tự!';
+            errorEl.style.display = 'block';
+            input.focus();
             return;
         }
-        errorEl.classList.add('d-none');
+
+        input.classList.remove('is-invalid');
+        errorEl.textContent = '';
+        errorEl.style.display = 'none';
 
         const btn = document.getElementById('btnXacNhanTuChoi');
         btn.disabled = true;
@@ -806,24 +826,23 @@
                 body: JSON.stringify({ lyDoTuChoi: lyDo })
             });
 
-            const data = await res.json();
-            modalTuChoiInstance.hide();
+            const data = await res.json().catch(() => null);
 
-            if (res.ok) {
+            if (res.ok && data && (data.thanhCong !== false)) {
+                modalTuChoiInstance.hide();
                 Swal.fire({
                     title: 'Đã Từ Chối!',
-                    text: data.message || data.thongBao || 'Đã ghi nhận từ chối và lý do thành công.',
+                    text: (data && (data.message || data.thongBao || data.thongDiep)) || 'Đã ghi nhận từ chối và lý do thành công.',
                     icon: 'warning',
                     confirmButtonColor: '#f59e0b'
                 });
                 taiLaiDuLieu();
             } else {
-                Swal.fire({
-                    title: 'Thao tác thất bại!',
-                    text: data.message || data.thongBao || 'Không thể từ chối gian hàng',
-                    icon: 'error',
-                    confirmButtonColor: '#ef4444'
-                });
+                const thongBao = (data && (data.duLieu && data.duLieu.lyDoTuChoi)) || (data && (data.message || data.thongBao || data.thongDiep)) || 'Không thể từ chối gian hàng';
+                input.classList.add('is-invalid');
+                errorEl.textContent = thongBao;
+                errorEl.style.display = 'block';
+                input.focus();
             }
         } catch (err) {
             Swal.fire({

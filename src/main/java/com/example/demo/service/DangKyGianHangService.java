@@ -107,7 +107,7 @@ public class DangKyGianHangService {
         // 3. Kiểm tra tính duy nhất của Tên gian hàng
         String tenGianHang = yeuCau.getTenGianHang().trim();
         if (gianHangRepository.existsByTenGianHangIgnoreCaseAndDaXoaFalse(tenGianHang)) {
-            throw new NgoaiLeUngDung("Tên gian hàng '" + tenGianHang + "' đã được sử dụng. Vui lòng chọn tên khác!", HttpStatus.CONFLICT);
+            throw new NgoaiLeUngDung("Tên gian hàng '" + tenGianHang + "' đã được sử dụng. Vui lòng chọn tên khác!", HttpStatus.CONFLICT, "tenGianHang");
         }
 
         // 4. Sinh & Kiểm tra Slug tự động
@@ -115,7 +115,7 @@ public class DangKyGianHangService {
 
         // 5. Kiểm tra và tải lên tệp Giấy phép kinh doanh (< 5MB, PDF/JPEG/PNG)
         if (fileGiayPhep == null || fileGiayPhep.isEmpty()) {
-            throw new NgoaiLeUngDung("Bắt buộc tải lên tệp Giấy phép kinh doanh (PDF/JPEG/PNG < 5MB)!", HttpStatus.BAD_REQUEST);
+            throw new NgoaiLeUngDung("Bắt buộc tải lên tệp Giấy phép kinh doanh (PDF/JPEG/PNG < 5MB)!", HttpStatus.BAD_REQUEST, "fileGiayPhep");
         }
         String linkGiayPhep = luuTepGiayPhepKinhDoanh(fileGiayPhep, maNguoiDung);
 
@@ -185,7 +185,7 @@ public class DangKyGianHangService {
 
         String tenGianHangMoi = yeuCau.getTenGianHang().trim();
         if (gianHangRepository.existsByTenGianHangIgnoreCaseAndMaGianHangNotAndDaXoaFalse(tenGianHangMoi, gianHang.getMaGianHang())) {
-            throw new NgoaiLeUngDung("Tên gian hàng '" + tenGianHangMoi + "' đã được sử dụng bởi gian hàng khác!", HttpStatus.CONFLICT);
+            throw new NgoaiLeUngDung("Tên gian hàng '" + tenGianHangMoi + "' đã được sử dụng bởi gian hàng khác!", HttpStatus.CONFLICT, "tenGianHang");
         }
 
         // Tự động sinh hoặc xác thực slug mới
@@ -331,10 +331,10 @@ public class DangKyGianHangService {
         if (StringUtils.hasText(slugNguoiDung)) {
             String slugTrim = slugNguoiDung.trim().toLowerCase(Locale.ROOT);
             if (!slugTrim.matches("^[a-z0-9-]+$")) {
-                throw new NgoaiLeUngDung("Đường dẫn slug chỉ được chứa chữ thường không dấu, số và dấu gạch ngang (-)", HttpStatus.BAD_REQUEST);
+                throw new NgoaiLeUngDung("Đường dẫn slug chỉ được chứa chữ thường không dấu, số và dấu gạch ngang (-)", HttpStatus.BAD_REQUEST, "duongDanSlug");
             }
             if (!kiemTraSlugKhaDung(slugTrim, maGianHangHienTai)) {
-                throw new NgoaiLeUngDung("Đường dẫn slug '" + slugTrim + "' đã tồn tại! Vui lòng chọn slug khác.", HttpStatus.CONFLICT);
+                throw new NgoaiLeUngDung("Đường dẫn slug '" + slugTrim + "' đã tồn tại! Vui lòng chọn slug khác.", HttpStatus.CONFLICT, "duongDanSlug");
             }
             return slugTrim;
         }
@@ -348,7 +348,7 @@ public class DangKyGianHangService {
     private String luuTepGiayPhepKinhDoanh(MultipartFile file, Long maNguoiDung) {
         // 1. Kiểm tra kích thước < 5MB
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new NgoaiLeUngDung("Kích thước tệp giấy phép kinh doanh vượt quá giới hạn cho phép (tối đa 5MB)!", HttpStatus.BAD_REQUEST);
+            throw new NgoaiLeUngDung("Kích thước tệp giấy phép kinh doanh vượt quá giới hạn cho phép (tối đa 5MB)!", HttpStatus.BAD_REQUEST, "fileGiayPhep");
         }
 
         // 2. Kiểm tra phần mở rộng tệp
@@ -360,13 +360,13 @@ public class DangKyGianHangService {
         }
 
         if (!EXT_GIAY_PHEP_HOP_LE.contains(duoiTep)) {
-            throw new NgoaiLeUngDung("Phần mở rộng tệp giấy phép kinh doanh không hợp lệ (" + duoiTep + ")! Chỉ chấp nhận .pdf, .jpeg, .jpg, .png.", HttpStatus.BAD_REQUEST);
+            throw new NgoaiLeUngDung("Phần mở rộng tệp giấy phép kinh doanh không hợp lệ (" + duoiTep + ")! Chỉ chấp nhận .pdf, .jpeg, .jpg, .png.", HttpStatus.BAD_REQUEST, "fileGiayPhep");
         }
 
         // 3. Kiểm tra Content-Type MIME
         String contentType = file.getContentType();
         if (contentType == null || !MIME_GIAY_PHEP_HOP_LE.contains(contentType.toLowerCase(Locale.ROOT))) {
-            throw new NgoaiLeUngDung("Định dạng tệp không hợp lệ! Vui lòng tải lên tệp PDF, JPEG, JPG hoặc PNG.", HttpStatus.BAD_REQUEST);
+            throw new NgoaiLeUngDung("Định dạng tệp không hợp lệ! Vui lòng tải lên tệp PDF, JPEG, JPG hoặc PNG.", HttpStatus.BAD_REQUEST, "fileGiayPhep");
         }
 
         try {
@@ -397,12 +397,12 @@ public class DangKyGianHangService {
      */
     private String luuTepLogoGianHang(MultipartFile file, Long maNguoiDung) {
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new NgoaiLeUngDung("Kích thước tệp logo không được vượt quá 5MB!", HttpStatus.BAD_REQUEST);
+            throw new NgoaiLeUngDung("Kích thước tệp logo không được vượt quá 5MB!", HttpStatus.BAD_REQUEST, "fileLogo");
         }
 
         String contentType = file.getContentType();
         if (contentType == null || !MIME_ANH_HOP_LE.contains(contentType.toLowerCase(Locale.ROOT))) {
-            throw new NgoaiLeUngDung("Định dạng ảnh logo không hợp lệ! Chỉ chấp nhận JPG, JPEG, PNG, WEBP.", HttpStatus.BAD_REQUEST);
+            throw new NgoaiLeUngDung("Định dạng ảnh logo không hợp lệ! Chỉ chấp nhận JPG, JPEG, PNG, WEBP.", HttpStatus.BAD_REQUEST, "fileLogo");
         }
 
         String tenGoc = StringUtils.cleanPath(file.getOriginalFilename() != null ? file.getOriginalFilename() : "logo.png");

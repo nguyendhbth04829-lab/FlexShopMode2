@@ -133,7 +133,7 @@ public class HoSoGianHangService {
         // 1. Kiểm tra trùng tên shop nếu tên thay đổi
         if (!gianHang.getTenGianHang().equalsIgnoreCase(tenMoi)) {
             if (gianHangRepository.existsByTenGianHangIgnoreCaseAndMaGianHangNotAndDaXoaFalse(tenMoi, gianHang.getMaGianHang())) {
-                throw new NgoaiLeUngDung("Tên gian hàng '" + tenMoi + "' đã có shop khác sử dụng. Vui lòng chọn tên khác!", HttpStatus.CONFLICT);
+                throw new NgoaiLeUngDung("Tên gian hàng '" + tenMoi + "' đã có shop khác sử dụng. Vui lòng chọn tên khác!", HttpStatus.CONFLICT, "tenGianHang");
             }
             gianHang.setTenGianHang(tenMoi);
             // Tự động sinh lại slug mới theo tên shop đã đổi
@@ -172,14 +172,14 @@ public class HoSoGianHangService {
                 .orElseThrow(() -> new NgoaiLeUngDung("Không tìm thấy gian hàng của bạn để nộp chứng chỉ!", HttpStatus.NOT_FOUND));
 
         if (fileGiayTo == null || fileGiayTo.isEmpty()) {
-            throw new NgoaiLeUngDung("Bắt buộc phải tải lên tệp chứng chỉ / giấy phép (PDF, JPG, PNG < 5MB)!", HttpStatus.BAD_REQUEST);
+            throw new NgoaiLeUngDung("Bắt buộc phải tải lên tệp chứng chỉ / giấy phép (PDF, JPG, PNG < 5MB)!", HttpStatus.BAD_REQUEST, "fileGiayTo");
         }
 
         String soGiayTo = yeuCau.getSoGiayTo().trim();
 
         // Kiểm tra số giấy tờ có trùng với gian hàng khác không
         if (chungChiGianHangRepository.existsBySoGiayToAndMaGianHangNot(soGiayTo, gianHang.getMaGianHang())) {
-            throw new NgoaiLeUngDung("Số giấy tờ / Mã số thuế '" + soGiayTo + "' đã được đăng ký bởi gian hàng khác!", HttpStatus.CONFLICT);
+            throw new NgoaiLeUngDung("Số giấy tờ / Mã số thuế '" + soGiayTo + "' đã được đăng ký bởi gian hàng khác!", HttpStatus.CONFLICT, "soGiayTo");
         }
 
         // Lưu tệp an toàn
@@ -249,7 +249,7 @@ public class HoSoGianHangService {
      */
     private String luuTepGiayTo(MultipartFile file, Long maNguoiDung) {
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new NgoaiLeUngDung("Kích thước tệp chứng chỉ vượt quá giới hạn tối đa (5MB)!", HttpStatus.BAD_REQUEST);
+            throw new NgoaiLeUngDung("Kích thước tệp chứng chỉ vượt quá giới hạn tối đa (5MB)!", HttpStatus.BAD_REQUEST, "fileGiayTo");
         }
 
         String tenGoc = StringUtils.cleanPath(file.getOriginalFilename() != null ? file.getOriginalFilename() : "document.pdf");
@@ -260,12 +260,12 @@ public class HoSoGianHangService {
         }
 
         if (!EXT_GIAY_TO_HOP_LE.contains(duoiTep)) {
-            throw new NgoaiLeUngDung("Phần mở rộng tệp không hợp lệ (" + duoiTep + ")! Chỉ chấp nhận .pdf, .jpeg, .jpg, .png.", HttpStatus.BAD_REQUEST);
+            throw new NgoaiLeUngDung("Phần mở rộng tệp không hợp lệ (" + duoiTep + ")! Chỉ chấp nhận .pdf, .jpeg, .jpg, .png.", HttpStatus.BAD_REQUEST, "fileGiayTo");
         }
 
         String contentType = file.getContentType();
         if (contentType == null || !MIME_GIAY_TO_HOP_LE.contains(contentType.toLowerCase(Locale.ROOT))) {
-            throw new NgoaiLeUngDung("Định dạng tệp không hợp lệ! Vui lòng tải lên tệp PDF, JPEG, JPG hoặc PNG.", HttpStatus.BAD_REQUEST);
+            throw new NgoaiLeUngDung("Định dạng tệp không hợp lệ! Vui lòng tải lên tệp PDF, JPEG, JPG hoặc PNG.", HttpStatus.BAD_REQUEST, "fileGiayTo");
         }
 
         try {
@@ -294,12 +294,12 @@ public class HoSoGianHangService {
      */
     private String luuTepLogo(MultipartFile file, Long maNguoiDung) {
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new NgoaiLeUngDung("Kích thước tệp ảnh logo không được vượt quá 5MB!", HttpStatus.BAD_REQUEST);
+            throw new NgoaiLeUngDung("Kích thước tệp ảnh logo không được vượt quá 5MB!", HttpStatus.BAD_REQUEST, "fileLogo");
         }
 
         String contentType = file.getContentType();
         if (contentType == null || !MIME_ANH_HOP_LE.contains(contentType.toLowerCase(Locale.ROOT))) {
-            throw new NgoaiLeUngDung("Định dạng ảnh logo không hợp lệ! Chỉ chấp nhận JPG, JPEG, PNG, WEBP.", HttpStatus.BAD_REQUEST);
+            throw new NgoaiLeUngDung("Định dạng ảnh logo không hợp lệ! Chỉ chấp nhận JPG, JPEG, PNG, WEBP.", HttpStatus.BAD_REQUEST, "fileLogo");
         }
 
         String tenGoc = StringUtils.cleanPath(file.getOriginalFilename() != null ? file.getOriginalFilename() : "logo.png");
