@@ -184,4 +184,11 @@ public class SanPhamService {
         // Trả về danh sách thuộc tính động của sản phẩm
         return thuocTinhSanPhamRepository.findBySanPham_MaSanPham(maSanPham);
     }
+
+    @Transactional
+    public void xoaSanPham(Long id) {
+        SanPham sp = timTheoId(id);
+        sp.setDaXoa(true);
+        sanPhamRepository.save(sp);
+    }
 }

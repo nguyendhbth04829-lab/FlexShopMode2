@@ -11,7 +11,7 @@ public class SanPhamForm {
     private Long maSanPham;
 
     @NotNull(message = "Gian hàng không được để trống")
-    private Long maGianHang;
+    private Long maGianHang = 1L;
 
     @NotNull(message = "Danh mục không được để trống")
     private Long maDanhMuc;

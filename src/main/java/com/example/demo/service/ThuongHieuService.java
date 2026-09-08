@@ -57,6 +57,12 @@ public class ThuongHieuService {
     public ThuongHieu capNhat(Long id, ThuongHieuForm form) {
         ThuongHieu th = thuongHieuRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy thương hiệu"));
+        
+        java.util.Optional<ThuongHieu> trung = thuongHieuRepository.findByTenThuongHieuAndDaXoaFalse(form.getTenThuongHieu().trim());
+        if (trung.isPresent() && !trung.get().getMaThuongHieu().equals(id)) {
+            throw new RuntimeException("Tên thương hiệu đã tồn tại!");
+        }
+
         th.setTenThuongHieu(form.getTenThuongHieu().trim());
         
         // Cập nhật file logo nếu có tải lên file mới

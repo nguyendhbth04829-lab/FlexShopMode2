@@ -24,4 +24,8 @@ public interface DanhMucRepository extends JpaRepository<DanhMuc, Long> {
     
     // Tìm các danh mục con trực tiếp
     List<DanhMuc> findByDanhMucCha_MaDanhMucAndDaXoaFalse(Long maDanhMucCha);
+
+    boolean existsByTenDanhMucAndDaXoaFalse(String tenDanhMuc);
+
+    boolean existsByTenDanhMucAndMaDanhMucNotAndDaXoaFalse(String tenDanhMuc, Long maDanhMuc);
 }

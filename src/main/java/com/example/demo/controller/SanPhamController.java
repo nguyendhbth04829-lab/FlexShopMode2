@@ -60,7 +60,8 @@ public class SanPhamController {
             RedirectAttributes redirectAttributes
     ) {
         if (bindingResult.hasErrors()) {
-            redirectAttributes.addFlashAttribute("thongBaoLoi", "Dữ liệu sản phẩm không hợp lệ.");
+            String msg = bindingResult.getFieldError() != null ? bindingResult.getFieldError().getDefaultMessage() : "Dữ liệu sản phẩm không hợp lệ.";
+            redirectAttributes.addFlashAttribute("thongBaoLoi", msg);
             return "redirect:/seller/san-pham";
         }
         try {
@@ -81,7 +82,8 @@ public class SanPhamController {
             RedirectAttributes redirectAttributes
     ) {
         if (bindingResult.hasErrors()) {
-            redirectAttributes.addFlashAttribute("thongBaoLoi", "Dữ liệu biến thể không hợp lệ.");
+            String msg = bindingResult.getFieldError() != null ? bindingResult.getFieldError().getDefaultMessage() : "Dữ liệu biến thể không hợp lệ.";
+            redirectAttributes.addFlashAttribute("thongBaoLoi", msg);
             return "redirect:/seller/san-pham"; // Quay lại trang danh sách hoặc chi tiết
         }
         try {
@@ -105,6 +107,17 @@ public class SanPhamController {
             redirectAttributes.addFlashAttribute("thongBaoThanhCong", "Cập nhật giá và lưu lịch sử thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("thongBaoLoi", "Lỗi cập nhật giá: " + e.getMessage());
+        }
+        return "redirect:/seller/san-pham";
+    }
+
+    @PostMapping("/xoa/{id}")
+    public String xoaSanPham(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+        try {
+            sanPhamService.xoaSanPham(id);
+            redirectAttributes.addFlashAttribute("thongBaoThanhCong", "Xóa sản phẩm thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("thongBaoLoi", "Lỗi: " + e.getMessage());
         }
         return "redirect:/seller/san-pham";
     }

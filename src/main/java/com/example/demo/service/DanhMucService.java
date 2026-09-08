@@ -49,8 +49,12 @@ public class DanhMucService {
 
     @Transactional
     public DanhMuc themMoi(DanhMucForm form) {
+        if (danhMucRepository.existsByTenDanhMucAndDaXoaFalse(form.getTenDanhMuc().trim())) {
+            throw new RuntimeException("Tên danh mục '" + form.getTenDanhMuc().trim() + "' đã tồn tại trong hệ thống.");
+        }
+
         DanhMuc d = new DanhMuc();
-        d.setTenDanhMuc(form.getTenDanhMuc());
+        d.setTenDanhMuc(form.getTenDanhMuc().trim());
         
         // Tự động sinh Slug duy nhất
         String slug = taoSlug(form.getTenDanhMuc());
@@ -83,10 +87,14 @@ public class DanhMucService {
 
     @Transactional
     public DanhMuc capNhat(Long id, DanhMucForm form) {
+        if (danhMucRepository.existsByTenDanhMucAndMaDanhMucNotAndDaXoaFalse(form.getTenDanhMuc().trim(), id)) {
+            throw new RuntimeException("Tên danh mục '" + form.getTenDanhMuc().trim() + "' đã tồn tại trong hệ thống.");
+        }
+
         DanhMuc d = danhMucRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục"));
         
-        d.setTenDanhMuc(form.getTenDanhMuc());
+        d.setTenDanhMuc(form.getTenDanhMuc().trim());
         d.setLinkIcon(form.getLinkIcon());
         d.setThuTuHienThi(form.getThuTuHienThi() != null ? form.getThuTuHienThi() : 0);
         d.setDangHoatDong(form.getDangHoatDong() != null ? form.getDangHoatDong() : true);

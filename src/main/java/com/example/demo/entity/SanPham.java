@@ -117,4 +117,25 @@ public class SanPham {
 
     public Boolean getDaXoa() { return daXoa; }
     public void setDaXoa(Boolean daXoa) { this.daXoa = daXoa; }
+
+    public String getTrangThai() { return trangThai; }
+    public void setTrangThai(String trangThai) { this.trangThai = trangThai; }
+
+    public Boolean getBiKhoa() { return biKhoa; }
+    public void setBiKhoa(Boolean biKhoa) { this.biKhoa = biKhoa; }
+
+    public String getLyDoKhoa() { return lyDoKhoa; }
+    public void setLyDoKhoa(String lyDoKhoa) { this.lyDoKhoa = lyDoKhoa; }
+
+    public BigDecimal getDanhGiaTb() { return danhGiaTb; }
+    public void setDanhGiaTb(BigDecimal danhGiaTb) { this.danhGiaTb = danhGiaTb; }
+
+    public Integer getTongDaBan() { return tongDaBan; }
+    public void setTongDaBan(Integer tongDaBan) { this.tongDaBan = tongDaBan; }
+
+    public Integer getTongLuotXem() { return tongLuotXem; }
+    public void setTongLuotXem(Integer tongLuotXem) { this.tongLuotXem = tongLuotXem; }
+
+    public LocalDateTime getNgayTao() { return ngayTao; }
+    public void setNgayTao(LocalDateTime ngayTao) { this.ngayTao = ngayTao; }
 }
