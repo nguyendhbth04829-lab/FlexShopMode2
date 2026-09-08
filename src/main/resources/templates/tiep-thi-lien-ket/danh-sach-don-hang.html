@@ -1,0 +1,228 @@
+<!--
+  =====================================================================
+  DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+  PHÂN HỆ: TÀI CHÍNH & TIẾP THỊ NỘI SÀN (DEV 5 - MINH)
+  USER STORY: US-65 - Quản Lý Đơn Hàng Tiếp Thị & Đối Soát Hoa Hồng
+  =====================================================================
+-->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexShop - Quản Lý Đơn Hàng Tiếp Thị & Đối Soát (US-65)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card-custom { border: none; border-radius: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.05); }
+        .table-hover tbody tr:hover { background-color: #f8f9fa; }
+    </style>
+</head>
+<body>
+
+<!-- Header Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/tiep-thi-lien-ket/dashboard">
+            <i class="bi bi-link-45deg text-warning me-2"></i>FlexShop Affiliate (US-65)
+        </a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/tiep-thi-lien-ket/dashboard">
+                        <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tiep-thi-lien-ket/tao-link">
+                        <i class="bi bi-plus-circle me-1"></i> Tạo Link
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active fw-bold text-warning" href="/tiep-thi-lien-ket/don-hang">
+                        <i class="bi bi-receipt-cutoff me-1"></i> Đơn Hàng Tiếp Thị
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="/tiep-thi-lien-ket/mo-phong">
+                        <i class="bi bi-cart-check me-1"></i> Mô Phỏng Mua
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/tiep-thi-lien-ket/dashboard" class="text-decoration-none">Affiliate Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Quản Lý Đơn Hàng & Đối Soát</li>
+        </ol>
+    </nav>
+
+    <!-- Thông báo kết quả thao tác -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert">
+        <i class="bi bi-check-circle-fill me-2 fs-5 align-middle"></i>
+        <span th:text="${successMessage}" class="fw-semibold"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${warningMessage}" class="alert alert-warning alert-dismissible fade show shadow-sm border-0" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2 fs-5 align-middle"></i>
+        <span th:text="${warningMessage}" class="fw-semibold"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm border-0" role="alert">
+        <i class="bi bi-x-circle-fill me-2 fs-5 align-middle"></i>
+        <span th:text="${errorMessage}" class="fw-semibold"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Thanh Lọc & Tìm Kiếm -->
+    <div class="card card-custom bg-white p-3 mb-4">
+        <form action="/tiep-thi-lien-ket/don-hang" method="get" class="row g-3 align-items-center">
+            <div class="col-md-5">
+                <label class="form-label small fw-bold text-muted mb-1">Lọc theo Đối Tác KOC:</label>
+                <select name="maKoc" class="form-select" onchange="this.form.submit()">
+                    <option value="" th:selected="${maKocHienTai == null}">-- Tất Cả KOC --</option>
+                    <option th:each="k : ${danhSachKoc}" 
+                            th:value="${k.maNguoiDung}" 
+                            th:text="${k.hoVaTen} + ' (' + ${k.email} + ')'"
+                            th:selected="${maKocHienTai != null and maKocHienTai == k.maNguoiDung}">
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-muted mb-1">Trạng Thái Đối Soát:</label>
+                <select name="trangThai" class="form-select" onchange="this.form.submit()">
+                    <option value="ALL" th:selected="${trangThaiHienTai == 'ALL'}">Tất Cả Trạng Thái</option>
+                    <option value="CHO_DOI_SOAT" th:selected="${trangThaiHienTai == 'CHO_DOI_SOAT'}">Chờ đối soát</option>
+                    <option value="DA_DUYET" th:selected="${trangThaiHienTai == 'DA_DUYET'}">Đã duyệt (Thực nhận)</option>
+                    <option value="DA_HUY" th:selected="${trangThaiHienTai == 'DA_HUY'}">Đã hủy (Đổi trả / Gian lận)</option>
+                </select>
+            </div>
+            <div class="col-md-3 text-end d-flex align-items-end justify-content-end">
+                <a href="/tiep-thi-lien-ket/mo-phong" class="btn btn-outline-primary">
+                    <i class="bi bi-cart-plus me-1"></i>Mô Phỏng Đơn Mới
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bảng Danh Sách Đơn Tiếp Thị -->
+    <div class="card card-custom bg-white">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-table text-primary me-2"></i>Danh Sách Đơn Hàng Ghi Nhận Tiếp Thị
+            </h5>
+            <span class="badge bg-light text-dark border">
+                Tổng: <strong th:text="${#lists.size(danhSachDon)}">0</strong> đơn hàng
+            </span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-muted small text-uppercase">
+                        <tr>
+                            <th class="ps-4">Mã Đơn Affiliate</th>
+                            <th>Đơn Hàng Shop</th>
+                            <th>Đối Tác KOC</th>
+                            <th>Mã Link Tiếp Thị</th>
+                            <th class="text-end">Tiền Hàng</th>
+                            <th class="text-center">Tỷ Lệ</th>
+                            <th class="text-end">Hoa Hồng</th>
+                            <th class="text-center">Trạng Thái</th>
+                            <th class="text-center">Thời Gian</th>
+                            <th class="text-center pe-4">Hành Động Đối Soát</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(danhSachDon)}">
+                            <td colspan="10" class="text-center py-5 text-muted">
+                                <i class="bi bi-file-earmark-x fs-1 d-block mb-2 text-secondary"></i>
+                                Không tìm thấy đơn hàng tiếp thị nào phù hợp với điều kiện lọc.
+                            </td>
+                        </tr>
+                        <tr th:each="don : ${danhSachDon}">
+                            <td class="ps-4 fw-bold text-dark">
+                                #<span th:text="${don.maDonAffiliate}">1</span>
+                            </td>
+                            <td>
+                                <strong class="text-primary d-block" th:text="${don.donHangShop.maCodeDonShop}">DHS-01</strong>
+                                <small class="text-muted" th:text="${don.tiepThiLienKet.sanPham.tenSanPham}">Tên sản phẩm</small>
+                            </td>
+                            <td>
+                                <span class="fw-semibold text-dark" th:text="${don.tiepThiLienKet.koc.hoVaTen}">Nguyễn Văn Khách</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border" th:text="${don.tiepThiLienKet.maLinkAffiliate}">AFF-XXX</span>
+                            </td>
+                            <td class="text-end">
+                                <span th:text="${#numbers.formatDecimal(don.donHangShop.tienHangShop, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-danger" th:text="${don.tiepThiLienKet.tyLeHoaHongPhanTram} + '%'">10%</span>
+                            </td>
+                            <td class="text-end fw-bold text-success fs-6">
+                                +<span th:text="${#numbers.formatDecimal(don.hoaHongDuocNhan, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge px-2 py-1" 
+                                      th:classappend="${don.badgeClass}"
+                                      th:text="${don.tenTrangThaiTiengViet}">
+                                    Chờ đối soát
+                                </span>
+                            </td>
+                            <td class="text-center small text-muted" 
+                                th:text="${#temporals.format(don.ngayGhiNhan, 'dd/MM/yyyy HH:mm')}">
+                                08/09/2026
+                            </td>
+                            <td class="text-center pe-4">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <!-- Nút Duyệt Hoa Hồng (chỉ hiện khi CHO_DOI_SOAT) -->
+                                    <form th:if="${don.trangThai == 'CHO_DOI_SOAT'}" 
+                                          th:action="@{/tiep-thi-lien-ket/duyet-hoa-hong}" method="post" class="d-inline">
+                                        <input type="hidden" name="maDonAffiliate" th:value="${don.maDonAffiliate}">
+                                        <input type="hidden" name="maKoc" th:value="${maKocHienTai}">
+                                        <button type="submit" class="btn btn-success btn-sm fw-bold" 
+                                                title="Duyệt hoa hồng và giải ngân vào thu nhập KOC">
+                                            <i class="bi bi-check-lg me-1"></i>Duyệt
+                                        </button>
+                                    </form>
+
+                                    <!-- Nút Hủy Hoa Hồng (hiện khi chưa DA_HUY) -->
+                                    <form th:if="${don.trangThai != 'DA_HUY'}" 
+                                          th:action="@{/tiep-thi-lien-ket/huy-hoa-hong}" method="post" class="d-inline ms-1">
+                                        <input type="hidden" name="maDonAffiliate" th:value="${don.maDonAffiliate}">
+                                        <input type="hidden" name="maKoc" th:value="${maKocHienTai}">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm" 
+                                                onclick="return confirm('Bạn có chắc chắn muốn hủy hoa hồng cho đơn tiếp thị này?')"
+                                                title="Hủy hoa hồng do trả hàng hoặc gian lận">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </form>
+                                    
+                                    <span th:if="${don.trangThai == 'DA_HUY'}" class="text-muted small">
+                                        <em>Đã đóng</em>
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-light p-3 small text-muted">
+            <i class="bi bi-shield-check text-success me-1"></i>
+            <strong>Đối soát an toàn:</strong> Hoa hồng được phê duyệt sẽ lập tức cộng dồn vào tổng thu nhập của liên kết tiếp thị, cho phép KOC tích lũy và thực hiện các nghiệp vụ tài chính.
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

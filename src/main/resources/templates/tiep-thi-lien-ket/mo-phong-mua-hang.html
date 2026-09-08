@@ -1,0 +1,208 @@
+<!--
+  =====================================================================
+  DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+  PHÂN HỆ: TÀI CHÍNH & TIẾP THỊ NỘI SÀN (DEV 5 - MINH)
+  USER STORY: US-65 - Mô Phỏng Khách Mua Hàng Qua Link Affiliate
+  =====================================================================
+-->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexShop - Mô Phỏng Mua Hàng Qua Link Tiếp Thị (US-65)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card-custom { border: none; border-radius: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.06); }
+        .step-circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<!-- Header Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/tiep-thi-lien-ket/dashboard">
+            <i class="bi bi-link-45deg text-warning me-2"></i>FlexShop Affiliate (US-65)
+        </a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/tiep-thi-lien-ket/dashboard">
+                        <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tiep-thi-lien-ket/tao-link">
+                        <i class="bi bi-plus-circle me-1"></i> Tạo Link
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tiep-thi-lien-ket/don-hang">
+                        <i class="bi bi-receipt-cutoff me-1"></i> Đơn Hàng Tiếp Thị
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active fw-bold text-warning" href="/tiep-thi-lien-ket/mo-phong">
+                        <i class="bi bi-cart-check me-1"></i> Mô Phỏng Mua
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/tiep-thi-lien-ket/dashboard" class="text-decoration-none">Affiliate Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Mô Phỏng Mua Hàng Qua Link</li>
+                </ol>
+            </nav>
+
+            <!-- Alert Thông Báo -->
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm border-0" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Hướng dẫn hành trình 3 bước -->
+            <div class="card card-custom bg-white p-4 mb-4">
+                <h5 class="fw-bold mb-3 text-dark">
+                    <i class="bi bi-diagram-3-fill text-primary me-2"></i>Quy Trình Phân Bổ Tiếp Thị (Attribution Engine)
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3 h-100 border">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="step-circle bg-primary text-white me-2">1</div>
+                                <strong class="text-dark">Click Vào Link</strong>
+                            </div>
+                            <small class="text-muted">Khách hàng nhấp vào link giới thiệu độc quyền của KOC trên TikTok/Facebook.</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3 h-100 border">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="step-circle bg-warning text-dark me-2">2</div>
+                                <strong class="text-dark">Khách Đặt Mua</strong>
+                            </div>
+                            <small class="text-muted">Khách hàng hoàn tất thanh toán cho đơn hàng shop trên hệ thống FlexShop.</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3 h-100 border">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="step-circle bg-success text-white me-2">3</div>
+                                <strong class="text-dark">Ghi Nhận Hoa Hồng</strong>
+                            </div>
+                            <small class="text-muted">Hệ thống tính hoa hồng và ghi nhận trạng thái Chờ đối soát cho KOC.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Mô Phỏng Đơn Mua -->
+            <div class="card card-custom overflow-hidden">
+                <div class="card-header bg-primary text-white p-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-cart-plus me-2"></i>Mô Phỏng Gán Đơn Hàng Vào Link Affiliate
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/tiep-thi-lien-ket/mo-phong-mua}" th:object="${ghiNhanDTO}" method="post">
+
+                        <!-- Chọn Link Tiếp Thị -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="bi bi-link-45deg text-purple me-1"></i>1. Chọn Liên Kết Tiếp Thị Của KOC:
+                            </label>
+                            <select class="form-select form-select-lg" th:field="*{maLinkAffiliate}" id="selectLink" required onchange="tinhToanMoPhong()">
+                                <option th:each="l : ${danhSachLink}" 
+                                        th:value="${l.maLinkAffiliate}"
+                                        th:data-koc="${l.koc.hoVaTen}"
+                                        th:data-tyle="${l.tyLeHoaHongPhanTram}"
+                                        th:data-sp="${l.sanPham.tenSanPham}"
+                                        th:text="${l.maLinkAffiliate} + ' (KOC: ' + ${l.koc.hoVaTen} + ' - ' + ${l.tyLeHoaHongPhanTram} + '%)'">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Chọn Đơn Hàng Shop -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="bi bi-receipt text-primary me-1"></i>2. Chọn Đơn Hàng Shop Phát Sinh:
+                            </label>
+                            <select class="form-select form-select-lg" th:field="*{maDonHangShop}" id="selectDonShop" required onchange="tinhToanMoPhong()">
+                                <option th:each="dh : ${danhSachDonHangShop}" 
+                                        th:value="${dh.maDonHangShop}"
+                                        th:data-tien="${dh.tienHangShop}"
+                                        th:text="${dh.maCodeDonShop} + ' - Tiền hàng: ' + ${#numbers.formatDecimal(dh.tienHangShop, 0, 'COMMA', 0, 'POINT')} + ' VNĐ (' + ${dh.trangThai} + ')'">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Kết Quả Tính Toán Tự Động -->
+                        <div class="p-3 bg-light rounded-3 border mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small fw-semibold">CÔNG THỨC & HOA HỒNG DỰ KIẾN:</span>
+                                <span class="badge bg-warning text-dark">Chờ đối soát</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-dark" id="displayCongThuc">Tiền hàng × Tỷ lệ hoa hồng</span>
+                                <strong class="fs-4 text-success fw-bold" id="displayHoaHong">0 đ</strong>
+                            </div>
+                        </div>
+
+                        <!-- Nút Thao Tác -->
+                        <div class="d-flex justify-content-between pt-2">
+                            <a href="/tiep-thi-lien-ket/dashboard" class="btn btn-light px-4">
+                                <i class="bi bi-arrow-left me-1"></i>Quay Lại
+                            </a>
+                            <button type="submit" class="btn btn-success fw-bold px-5 shadow-sm">
+                                <i class="bi bi-check-circle me-1"></i>Kích Hoạt Ghi Nhận Đơn Mua
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function tinhToanMoPhong() {
+        const selectLink = document.getElementById('selectLink');
+        const selectDon = document.getElementById('selectDonShop');
+
+        if (!selectLink || !selectDon || selectLink.selectedIndex < 0 || selectDon.selectedIndex < 0) return;
+
+        const linkOpt = selectLink.options[selectLink.selectedIndex];
+        const donOpt = selectDon.options[selectDon.selectedIndex];
+
+        const tyLe = parseFloat(linkOpt.getAttribute('data-tyle')) || 0;
+        const tienHang = parseFloat(donOpt.getAttribute('data-tien')) || 0;
+        const hoaHong = Math.round(tienHang * tyLe / 100);
+
+        document.getElementById('displayCongThuc').innerText = 
+            tienHang.toLocaleString('vi-VN') + ' đ × ' + tyLe + '% =';
+        document.getElementById('displayHoaHong').innerText = 
+            '+' + hoaHong.toLocaleString('vi-VN') + ' đ';
+    }
+
+    document.addEventListener('DOMContentLoaded', tinhToanMoPhong);
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

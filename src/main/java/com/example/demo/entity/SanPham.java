@@ -1,0 +1,69 @@
+package com.example.demo.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+/**
+ * =====================================================================
+ * DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+ * PHÂN HỆ: QUẢN LÝ SẢN PHẨM & MARKETING NỘI SÀN (DEV 5 - MINH)
+ * USER STORY: US-64 - Thực thể Sản Phẩm (san_pham)
+ * =====================================================================
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "san_pham")
+public class SanPham {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ma_san_pham")
+    private Long maSanPham;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ma_gian_hang", nullable = false)
+    private GianHang gianHang;
+
+    @Column(name = "ten_san_pham", nullable = false, length = 255)
+    private String tenSanPham;
+
+    @Column(name = "duong_dan_slug", nullable = false, length = 280)
+    private String duongDanSlug;
+
+    @Column(name = "mo_ta_ngan", length = 500)
+    private String moTaNgan;
+
+    @Column(name = "gia_co_ban", nullable = false, precision = 18, scale = 2)
+    private BigDecimal giaCoBan;
+
+    @Column(name = "trang_thai", length = 30)
+    private String trangThai = "HOAT_DONG";
+
+    @Column(name = "danh_gia_tb", precision = 3, scale = 2)
+    private BigDecimal danhGiaTb = new BigDecimal("4.8");
+
+    @Column(name = "tong_da_ban")
+    private Integer tongDaBan = 0;
+
+    @Column(name = "tong_luot_xem")
+    private Integer tongLuotXem = 0;
+
+    @Column(name = "da_xoa")
+    private Boolean daXoa = false;
+
+    @Column(name = "ngay_tao")
+    private LocalDateTime ngayTao = LocalDateTime.now();
+
+    @Transient
+    public String getHienThiGia() {
+        if (giaCoBan == null) return "0 đ";
+        return String.format("%,.0f đ", giaCoBan);
+    }
+}

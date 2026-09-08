@@ -1,0 +1,187 @@
+<!--
+  =====================================================================
+  DỰ ÁN: FLEXSHOP ENTERPRISE V2 - SÀN THƯƠNG MẠI ĐIỆN TỬ ĐA GIAN HÀNG
+  PHÂN HỆ: TÀI CHÍNH & TIẾP THỊ NỘI SÀN (DEV 5 - MINH)
+  USER STORY: US-65 - Giao Diện Tạo Mới Liên Kết Tiếp Thị Cho KOC
+  =====================================================================
+-->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexShop - Tạo Link Tiếp Thị Liên Kết (US-65)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card-custom { border: none; border-radius: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.06); }
+        .bg-gradient-header { background: linear-gradient(135deg, #6f42c1 0%, #a259ff 100%); color: white; }
+    </style>
+</head>
+<body>
+
+<!-- Header Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/tiep-thi-lien-ket/dashboard">
+            <i class="bi bi-link-45deg text-warning me-2"></i>FlexShop Affiliate (US-65)
+        </a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/tiep-thi-lien-ket/dashboard">
+                        <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active fw-bold text-warning" href="/tiep-thi-lien-ket/tao-link">
+                        <i class="bi bi-plus-circle me-1"></i> Tạo Link
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="/tiep-thi-lien-ket/don-hang">
+                        <i class="bi bi-receipt-cutoff me-1"></i> Đơn Hàng Tiếp Thị
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/tiep-thi-lien-ket/dashboard" class="text-decoration-none">Affiliate Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Tạo Liên Kết Mới</li>
+                </ol>
+            </nav>
+
+            <!-- Alert Thông Báo -->
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm border-0" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Form Card -->
+            <div class="card card-custom overflow-hidden">
+                <div class="card-header bg-gradient-header p-4">
+                    <h4 class="fw-bold mb-1">
+                        <i class="bi bi-magic me-2"></i>Khởi Tạo Liên Kết Tiếp Thị Độc Quyền
+                    </h4>
+                    <p class="mb-0 small opacity-75">Hệ thống sẽ sinh mã tracking định danh độc quyền cho KOC để ghi nhận doanh số và hoa hồng khi có khách mua.</p>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/tiep-thi-lien-ket/tao-link}" th:object="${taoDTO}" method="post">
+
+                        <!-- Chọn Đối Tác KOC -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="bi bi-person-badge text-purple me-1"></i>1. Đối tác KOC / Nhà Sáng Tạo Nội Dung:
+                            </label>
+                            <select class="form-select form-select-lg" th:field="*{maKoc}" required>
+                                <option th:each="k : ${danhSachKoc}" 
+                                        th:value="${k.maNguoiDung}" 
+                                        th:text="${k.hoVaTen} + ' - ' + ${k.email}">
+                                </option>
+                            </select>
+                            <div class="form-text">Hoa hồng sẽ được chuyển và tích lũy vào tài khoản của KOC này.</div>
+                        </div>
+
+                        <!-- Chọn Sản Phẩm Tiếp Thị -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="bi bi-box-seam text-primary me-1"></i>2. Chọn Sản Phẩm Tiếp Thị:
+                            </label>
+                            <select class="form-select form-select-lg" th:field="*{maSanPham}" id="selectSanPham" required onchange="capNhatDuTinh()">
+                                <option th:each="sp : ${danhSachSanPham}" 
+                                        th:value="${sp.maSanPham}" 
+                                        th:data-gia="${sp.giaCoBan}"
+                                        th:text="${sp.tenSanPham} + ' (' + ${#numbers.formatDecimal(sp.giaCoBan, 0, 'COMMA', 0, 'POINT')} + ' VNĐ)'">
+                                </option>
+                            </select>
+                            <div class="form-text">Sản phẩm đối tác sẽ nhận link quảng bá trên mạng xã hội.</div>
+                        </div>
+
+                        <!-- Tỷ Lệ Hoa Hồng (%) -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="bi bi-percent text-danger me-1"></i>3. Tỷ Lệ Hoa Hồng Đề Xuất (%):
+                            </label>
+                            <div class="input-group input-group-lg mb-2">
+                                <input type="number" step="0.5" min="1" max="50" 
+                                       class="form-control fw-bold text-danger text-center" 
+                                       th:field="*{tyLeHoaHongPhanTram}" id="inputTyLe" required oninput="capNhatDuTinh()">
+                                <span class="input-group-text fw-bold">%</span>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="chonNhanhTyLe(5)">5%</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="chonNhanhTyLe(8)">8%</button>
+                                <button type="button" class="btn btn-outline-danger btn-sm active" onclick="chonNhanhTyLe(10)">10% (Phổ biến)</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="chonNhanhTyLe(15)">15%</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="chonNhanhTyLe(20)">20%</button>
+                            </div>
+                            <div class="form-text">Mức hoa hồng chi trả cho KOC tính trên giá trị thực tế của tiền hàng.</div>
+                        </div>
+
+                        <!-- Khối Dự Tính Hoa Hồng Mỗi Đơn -->
+                        <div class="p-3 bg-light rounded-3 border mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="text-muted small fw-semibold">DỰ TÍNH HOA HỒNG MỖI ĐƠN HÀNG:</span>
+                                <span class="badge bg-success">Công thức chuẩn</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="small text-muted" id="previewCongThuc">850,000 đ × 10% =</span>
+                                <strong class="fs-5 text-danger fw-bold" id="previewHoaHong">85,000 đ</strong>
+                            </div>
+                        </div>
+
+                        <!-- Nút Thao Tác -->
+                        <div class="d-flex justify-content-between pt-2">
+                            <a href="/tiep-thi-lien-ket/dashboard" class="btn btn-light px-4">
+                                <i class="bi bi-arrow-left me-1"></i>Quay Lại
+                            </a>
+                            <button type="submit" class="btn btn-primary fw-bold px-5">
+                                <i class="bi bi-check2-circle me-1"></i>Tạo Link Tiếp Thị Ngay
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function chonNhanhTyLe(val) {
+        document.getElementById('inputTyLe').value = val;
+        capNhatDuTinh();
+    }
+
+    function capNhatDuTinh() {
+        const select = document.getElementById('selectSanPham');
+        const opt = select.options[select.selectedIndex];
+        const gia = parseFloat(opt.getAttribute('data-gia')) || 0;
+        const tyLe = parseFloat(document.getElementById('inputTyLe').value) || 0;
+        const hoaHong = Math.round(gia * tyLe / 100);
+
+        document.getElementById('previewCongThuc').innerText = 
+            gia.toLocaleString('vi-VN') + ' đ × ' + tyLe + '% =';
+        document.getElementById('previewHoaHong').innerText = 
+            hoaHong.toLocaleString('vi-VN') + ' đ';
+    }
+
+    document.addEventListener('DOMContentLoaded', capNhatDuTinh);
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
