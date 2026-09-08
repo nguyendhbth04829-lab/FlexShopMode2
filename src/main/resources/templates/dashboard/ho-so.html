@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Hồ Sơ Cá Nhân & Bảo Mật - Sàn FlexShop</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.6/dist/sweetalert2.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bs-font-sans-serif: 'Plus Jakarta Sans', sans-serif;
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-body: #f8fafc;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+        body {
+            font-family: var(--bs-font-sans-serif);
+            background-color: var(--bg-body);
+            color: #1e293b;
+            min-height: 100vh;
+        }
+        .navbar-custom {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0.75rem 1.5rem;
+        }
+        .profile-card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+        .profile-banner {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%);
+            height: 140px;
+            position: relative;
+        }
+        .avatar-container {
+            position: relative;
+            margin-top: -65px;
+            display: inline-block;
+        }
+        .avatar-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            background-color: #f1f5f9;
+        }
+        .avatar-edit-btn {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: var(--primary-color);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+        }
+        .avatar-edit-btn:hover {
+            background: var(--primary-hover);
+            transform: scale(1.08);
+        }
+        .nav-tabs .nav-link {
+            font-weight: 600;
+            color: #64748b;
+            border: none;
+            border-bottom: 3px solid transparent;
+            padding: 0.85rem 1.25rem;
+            transition: all 0.2s;
+        }
+        .nav-tabs .nav-link:hover {
+            color: var(--primary-color);
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            background: transparent;
+        }
+        .stat-badge {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s ease;
+        }
+        .stat-badge:hover {
+            transform: translateY(-2px);
+        }
+        .form-floating > .form-control:focus ~ label {
+            color: var(--primary-color);
+        }
+        .password-toggle {
+            cursor: pointer;
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            z-index: 10;
+        }
+        .strength-meter {
+            height: 6px;
+            border-radius: 3px;
+            background-color: #e2e8f0;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+        .strength-meter-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<nav class="navbar navbar-custom sticky-top">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <a th:href="${user.targetDashboardUrl != null ? user.targetDashboardUrl : '/'}" class="d-flex align-items-center gap-2 text-decoration-none text-dark">
+            <span class="fs-4 fw-black text-primary"><i class="bi bi-bag-check-fill me-1"></i>FlexShop</span>
+            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2.5 py-1 small fw-semibold">Hồ Sơ Cá Nhân</span>
+        </a>
+
+        <div class="d-flex align-items-center gap-2">
+            <a th:href="${user.targetDashboardUrl != null ? user.targetDashboardUrl : '/customer/dashboard'}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại Bảng điều khiển
+            </a>
+            <a href="/logout" onclick="handleLogout(event)" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Container -->
+<div class="container py-4">
+    <!-- Profile Card Header -->
+    <div class="profile-card mb-4">
+        <div class="profile-banner"></div>
+        <div class="px-4 pb-4">
+            <div class="d-flex flex-column flex-md-row align-items-md-end justify-content-between gap-3">
+                <div class="d-flex flex-column flex-sm-row align-items-center align-items-sm-end gap-3 text-center text-sm-start">
+                    <!-- Avatar With Upload Button -->
+                    <div class="avatar-container">
+                        <img id="avatarImage" th:src="${user.anhDaiDien != null ? user.anhDaiDien : 'https://ui-avatars.com/api/?name=User&background=2563eb&color=fff'}"
+                             alt="Avatar" class="avatar-img">
+                        <label for="avatarFileInput" class="avatar-edit-btn" title="Thay đổi ảnh đại diện">
+                            <i class="bi bi-camera-fill"></i>
+                        </label>
+                        <input type="file" id="avatarFileInput" accept="image/jpeg,image/png,image/webp,image/gif" class="d-none" onchange="xuLyChonAvatar(this)">
+                    </div>
+
+                    <div class="mb-2">
+                        <h4 class="fw-bold mb-1" id="headerHoVaTen" th:text="${user.hoVaTen}">Nguyễn Văn Khách</h4>
+                        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-sm-start gap-2">
+                            <span class="text-muted small"><i class="bi bi-envelope me-1"></i><span th:text="${user.email}">user@flexshop.vn</span></span>
+                            <span class="text-muted small">•</span>
+                            <span class="text-muted small"><i class="bi bi-telephone me-1"></i><span id="headerSoDienThoai" th:text="${user.soDienThoai != null ? user.soDienThoai : 'Chưa cập nhật'}">0900000001</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Roles Badge List -->
+                <div class="d-flex flex-wrap gap-1 justify-content-center justify-content-md-end mb-2">
+                    <span th:each="r : ${user.roles}" class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 rounded-pill fw-semibold"
+                          th:text="${r == 'ROLE_ADMIN' or r == 'ADMIN' ? 'Quản Trị Viên' :
+                                   (r == 'ROLE_NGUOI_BAN' or r == 'NGUOI_BAN' ? 'Người Bán Hàng' :
+                                   (r == 'ROLE_TAI_XE' or r == 'TAI_XE' or r == 'SHIPPER' or r == 'ROLE_SHIPPER' ? 'Tài Xế Giao Hàng' :
+                                   (r == 'ROLE_CSKH' or r == 'CSKH' ? 'Chăm Sóc Khách Hàng' : 'Khách Hàng')))}">
+                        Khách Hàng
+                    </span>
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill fw-semibold">
+                        <i class="bi bi-shield-check me-1"></i> Đang hoạt động
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs px-4" id="profileTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#tabThongTin" type="button" role="tab">
+                    <i class="bi bi-person-gear me-1"></i> Thông Tin Cá Nhân
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="password-tab" data-bs-toggle="tab" data-bs-target="#tabDoiMatKhau" type="button" role="tab">
+                    <i class="bi bi-key-fill me-1"></i> Đổi Mật Khẩu
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#tabThongKe" type="button" role="tab">
+                    <i class="bi bi-graph-up-arrow me-1"></i> Tổng Quan & Thống Kê
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Tab Contents -->
+    <div class="tab-content" id="profileTabContent">
+        <!-- TAB 1: THÔNG TIN CÁ NHÂN -->
+        <div class="tab-pane fade show active" id="tabThongTin" role="tabpanel">
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="profile-card p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-pencil-square text-primary me-2"></i>Chỉnh Sửa Thông Tin Cá Nhân</h5>
+                        </div>
+                        <p class="text-muted small mb-4">Cập nhật họ tên hiển thị và số điện thoại di động Việt Nam để nhận thông báo đơn hàng và dịch vụ.</p>
+
+                        <form id="formCapNhatHoSo" onsubmit="xuLyCapNhatHoSo(event)">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-secondary">Địa Chỉ Email <span class="badge bg-secondary bg-opacity-10 text-secondary ms-1">Cố định</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-envelope-at"></i></span>
+                                    <input type="email" class="form-control bg-light border-start-0 text-muted" th:value="${user.email}" readonly disabled>
+                                </div>
+                                <small class="text-muted" style="font-size: 12px;">Email dùng làm định danh đăng nhập và nhận mã xác thực OTP bảo mật.</small>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-secondary">Họ và Tên <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                        <input type="text" class="form-control" id="txtHoVaTen" th:value="${user.hoVaTen}" required minlength="2" maxlength="100" placeholder="Nguyễn Văn A" oninput="xoaLoiHoSo('txtHoVaTen', 'errHoVaTen')">
+                                    </div>
+                                    <div class="invalid-feedback" id="errHoVaTen" style="display: none;">Vui lòng nhập họ và tên hợp lệ (2 - 100 ký tự).</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-secondary">Số Điện Thoại <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                        <input type="tel" class="form-control" id="txtSoDienThoai" th:value="${user.soDienThoai}" required placeholder="0901234567" oninput="xoaLoiHoSo('txtSoDienThoai', 'errSoDienThoai')">
+                                    </div>
+                                    <div class="invalid-feedback" id="errSoDienThoai" style="display: none;">Số điện thoại 10 số di động Việt Nam (03x, 05x, 07x, 08x, 09x).</div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                                <button type="reset" class="btn btn-light rounded-pill px-4 fw-semibold text-secondary">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i> Khôi phục
+                                </button>
+                                <button type="submit" id="btnLuuHoSo" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
+                                    <span class="spinner-border spinner-border-sm d-none me-1" id="loadingLuuHoSo"></span>
+                                    <i class="bi bi-check2-circle me-1"></i> Lưu Thay Đổi
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="profile-card p-4 mb-4">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-image text-primary me-2"></i>Ảnh Đại Diện Trực Quan</h6>
+                        <div class="text-center py-2">
+                            <img id="avatarPreviewSide" th:src="${user.anhDaiDien != null ? user.anhDaiDien : 'https://ui-avatars.com/api/?name=User&background=2563eb&color=fff'}"
+                                 alt="Avatar Preview" class="rounded-circle shadow-sm mb-3 border border-3 border-primary border-opacity-25" width="100" height="100" style="object-fit: cover;">
+                            <p class="text-muted small mb-3">Định dạng hỗ trợ: JPG, PNG, WEBP, GIF. Dung lượng tối đa: 5MB.</p>
+                            <label for="avatarFileInput" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold w-100">
+                                <i class="bi bi-upload me-1"></i> Chọn Ảnh Từ Máy Tính
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="profile-card p-4" th:if="${user.coQuyenDiaChi}">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-geo-alt-fill text-success me-2"></i>Sổ Địa Chỉ Giao Hàng</h6>
+                        </div>
+                        <p class="text-muted small mb-3">Quản lý tới 20 địa chỉ giao hàng và địa chỉ nhận hàng mặc định theo tiêu chuẩn sàn.</p>
+                        <a href="/dia-chi" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold w-100">
+                            <i class="bi bi-journal-bookmark-fill me-1"></i> Quản Lý Sổ Địa Chỉ &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: ĐỔI MẬT KHẨU -->
+        <div class="tab-pane fade" id="tabDoiMatKhau" role="tabpanel">
+            <div class="row justify-content-center">
+                <div class="col-lg-7">
+                    <div class="profile-card p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-shield-lock-fill text-danger me-2"></i>Đổi Mật Khẩu Tài Khoản</h5>
+                        </div>
+                        <p class="text-muted small mb-4">Để đảm bảo an toàn, mật khẩu mới phải mạnh và <strong>tuyệt đối không được trùng với mật khẩu cũ</strong>.</p>
+
+                        <form id="formDoiMatKhau" onsubmit="xuLyDoiMatKhau(event)">
+                            <!-- Mật khẩu hiện tại -->
+                            <div class="mb-3">
+                                 <label class="form-label small fw-bold text-secondary">Mật Khẩu Hiện Tại <span class="text-danger">*</span></label>
+                                 <div class="position-relative">
+                                     <input type="password" class="form-control pe-5" id="txtMatKhauHienTai" required placeholder="Nhập mật khẩu hiện tại của bạn" oninput="xoaLoiHoSo('txtMatKhauHienTai', 'errMatKhauHienTai')">
+                                     <i class="bi bi-eye password-toggle" onclick="togglePasswordVisibility('txtMatKhauHienTai', this)"></i>
+                                 </div>
+                                 <div class="invalid-feedback" id="errMatKhauHienTai" style="display: none;"></div>
+                            </div>
+
+                            <!-- Mật khẩu mới -->
+                            <div class="mb-3">
+                                 <label class="form-label small fw-bold text-secondary">Mật Khẩu Mới <span class="text-danger">*</span></label>
+                                 <div class="position-relative">
+                                     <input type="password" class="form-control pe-5" id="txtMatKhauMoi" required placeholder="Nhập mật khẩu mới" oninput="kiemTraDoManhMatKhau(this.value); xoaLoiHoSo('txtMatKhauMoi', 'errMatKhauMoi');">
+                                     <i class="bi bi-eye password-toggle" onclick="togglePasswordVisibility('txtMatKhauMoi', this)"></i>
+                                 </div>
+                                 <div class="invalid-feedback" id="errMatKhauMoi" style="display: none;"></div>
+                                 <div class="strength-meter">
+                                     <div id="strengthBar" class="strength-meter-bar bg-danger" style="width: 0%;"></div>
+                                 </div>
+                                 <div class="d-flex justify-content-between align-items-center mt-1">
+                                     <small id="strengthText" class="text-muted" style="font-size: 12px;">Độ mạnh mật khẩu: Chưa nhập</small>
+                                     <small class="text-muted" style="font-size: 11px;">8-32 ký tự, 1 hoa, 1 thường, 1 số, 1 ký tự đặc biệt</small>
+                                 </div>
+                            </div>
+
+                            <!-- Xác nhận mật khẩu mới -->
+                            <div class="mb-4">
+                                <label class="form-label small fw-bold text-secondary">Xác Nhận Mật Khẩu Mới <span class="text-danger">*</span></label>
+                                <div class="position-relative">
+                                    <input type="password" class="form-control pe-5" id="txtXacNhanMatKhauMoi" required placeholder="Nhập lại mật khẩu mới" oninput="xoaLoiHoSo('txtXacNhanMatKhauMoi', 'errXacNhanMatKhau')">
+                                    <i class="bi bi-eye password-toggle" onclick="togglePasswordVisibility('txtXacNhanMatKhauMoi', this)"></i>
+                                </div>
+                                <div class="invalid-feedback" id="errXacNhanMatKhau" style="display: none;">Mật khẩu xác nhận không khớp!</div>
+                            </div>
+
+                            <div class="alert alert-warning py-2 small d-flex align-items-center gap-2 mb-4">
+                                <i class="bi bi-exclamation-triangle-fill fs-5 text-warning"></i>
+                                <span>Tiêu chí bảo mật: Mật khẩu mới phải khác hoàn toàn mật khẩu cũ. Sau khi đổi, phiên làm việc sẽ được bảo vệ an toàn.</span>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                                <button type="reset" class="btn btn-light rounded-pill px-4 fw-semibold text-secondary">Hủy bỏ</button>
+                                <button type="submit" id="btnDoiMatKhau" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">
+                                    <span class="spinner-border spinner-border-sm d-none me-1" id="loadingDoiMatKhau"></span>
+                                    <i class="bi bi-shield-check me-1"></i> Cập Nhật Mật Khẩu Mới
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: TỔNG QUAN & THỐNG KÊ -->
+        <div class="tab-pane fade" id="tabThongKe" role="tabpanel">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="stat-badge text-center p-4">
+                        <div class="display-6 fw-bold text-primary mb-1" th:text="${thongKe.soNgayThamGia} + ' Ngày'">1 Ngày</div>
+                        <div class="text-muted small fw-semibold">Thời Gian Đồng Hành Cùng Sàn</div>
+                        <small class="text-secondary d-block mt-2" th:text="'Ngày gia nhập: ' + ${#temporals.format(thongKe.ngayTao, 'dd/MM/yyyy HH:mm')}">01/01/2026</small>
+                    </div>
+                </div>
+
+                <div class="col-md-4" th:if="${user.coQuyenDiaChi}">
+                    <div class="stat-badge text-center p-4">
+                        <div class="display-6 fw-bold text-success mb-1" th:text="${thongKe.tongSoDiaChi} + ' / ' + ${thongKe.gioiHanDiaChi}">1 / 20</div>
+                        <div class="text-muted small fw-semibold">Sổ Địa Chỉ Giao Hàng</div>
+                        <small class="text-secondary d-block mt-2">Mỗi tài khoản lưu tối đa 20 địa chỉ</small>
+                    </div>
+                </div>
+                <div class="col-md-4" th:unless="${user.coQuyenDiaChi}">
+                    <div class="stat-badge text-center p-4">
+                        <div class="display-6 fw-bold text-info mb-1"><i class="bi bi-person-badge"></i> Vận Hành</div>
+                        <div class="text-muted small fw-semibold">Vai Trò Hệ Thống Chuyên Biệt</div>
+                        <small class="text-secondary d-block mt-2">Không yêu cầu địa chỉ giao hàng</small>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="stat-badge text-center p-4">
+                        <div class="display-6 fw-bold text-danger mb-1"><i class="bi bi-shield-check"></i> 100%</div>
+                        <div class="text-muted small fw-semibold">Mức Độ An Toàn Tài Khoản</div>
+                        <small class="text-secondary d-block mt-2" th:text="${thongKe.trangThaiBaoMat}">BCrypt salt 12</small>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="profile-card p-4">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-info-circle text-primary me-2"></i>Quyền Hạn & Vai Trò Trong Hệ Thống FlexShop</h6>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Mã Người Dùng</th>
+                                        <th>Vai Trò Được Cấp Phép</th>
+                                        <th>Trạng Thái Tài Khoản</th>
+                                        <th>Lần Cập Nhật Gần Nhất</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong th:text="'#' + ${user.id}">#1</strong></td>
+                                        <td>
+                                            <span th:each="r : ${user.roles}" class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1 me-1"
+                                                  th:text="${r == 'ROLE_ADMIN' or r == 'ADMIN' ? 'Quản Trị Viên' :
+                                                           (r == 'ROLE_NGUOI_BAN' or r == 'NGUOI_BAN' ? 'Người Bán Hàng' :
+                                                           (r == 'ROLE_TAI_XE' or r == 'TAI_XE' or r == 'SHIPPER' or r == 'ROLE_SHIPPER' ? 'Tài Xế Giao Hàng' :
+                                                           (r == 'ROLE_CSKH' or r == 'CSKH' ? 'Chăm Sóc Khách Hàng' : 'Khách Hàng')))}">
+                                                Khách Hàng
+                                            </span>
+                                        </td>
+                                        <td><span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>HOẠT ĐỘNG</span></td>
+                                        <td th:text="${user.ngayTao != null ? #temporals.format(user.ngayTao, 'dd/MM/yyyy HH:mm') : 'Hôm nay'}">06/09/2026</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.6/dist/sweetalert2.all.min.js"></script>
+<script>
+    // Lấy token từ Cookie hoặc LocalStorage
+    function getAuthToken() {
+        const match = document.cookie.match(new RegExp('(^| )ACCESS_TOKEN=([^;]+)'));
+        if (match) return match[2];
+        return localStorage.getItem('accessToken') || '';
+    }
+
+    // Toggle hiển thị mật khẩu
+    function togglePasswordVisibility(inputId, iconElement) {
+        const input = document.getElementById(inputId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            iconElement.classList.replace('bi-eye', 'bi-eye-slash');
+        } else {
+            input.type = 'password';
+            iconElement.classList.replace('bi-eye-slash', 'bi-eye');
+        }
+    }
+
+    // Kiểm tra độ mạnh mật khẩu trực quan
+    function kiemTraDoManhMatKhau(val) {
+        const bar = document.getElementById('strengthBar');
+        const text = document.getElementById('strengthText');
+        if (!val) {
+            bar.style.width = '0%';
+            text.innerText = 'Độ mạnh mật khẩu: Chưa nhập';
+            return;
+        }
+
+        let score = 0;
+        if (val.length >= 8) score++;
+        if (/[A-Z]/.test(val)) score++;
+        if (/[a-z]/.test(val)) score++;
+        if (/\d/.test(val)) score++;
+        if (/[@$!%*?&]/.test(val)) score++;
+
+        if (score <= 2) {
+            bar.style.width = '33%';
+            bar.className = 'strength-meter-bar bg-danger';
+            text.innerText = 'Độ mạnh mật khẩu: Yếu (Cần thêm chữ hoa, số, ký tự đặc biệt)';
+        } else if (score <= 4) {
+            bar.style.width = '66%';
+            bar.className = 'strength-meter-bar bg-warning';
+            text.innerText = 'Độ mạnh mật khẩu: Khá (Bổ sung thêm ký tự để tối ưu)';
+        } else {
+            bar.style.width = '100%';
+            bar.className = 'strength-meter-bar bg-success';
+            text.innerText = 'Độ mạnh mật khẩu: Rất Mạnh 🛡️';
+        }
+    }
+
+    // Xử lý khi chọn file ảnh đại diện (Upload Avatar)
+    async function xuLyChonAvatar(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+
+        // Validate dung lượng client (<= 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Tệp quá lớn!',
+                text: 'Dung lượng ảnh đại diện không được vượt quá 5MB.'
+            });
+            input.value = '';
+            return;
+        }
+
+        // Preview ảnh ngay lập tức
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('avatarImage').src = e.target.result;
+            document.getElementById('avatarPreviewSide').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+
+        // Upload lên server
+        const formData = new FormData();
+        formData.append('file', file);
+
+        Swal.fire({
+            title: 'Đang tải lên ảnh đại diện...',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
+
+        try {
+            const token = getAuthToken();
+            const response = await fetch('/api/v1/ho-so/avatar', {
+                method: 'POST',
+                headers: {
+                    'Authorization': token ? `Bearer ${token}` : ''
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+            if (response.ok && result.thanhCong) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành Công! 📸',
+                    text: 'Ảnh đại diện mới đã được cập nhật đồng bộ.',
+                    timer: 1800,
+                    showConfirmButton: false
+                });
+
+                if (result.duLieu && result.duLieu.anhDaiDien) {
+                    document.getElementById('avatarImage').src = result.duLieu.anhDaiDien;
+                    document.getElementById('avatarPreviewSide').src = result.duLieu.anhDaiDien;
+                }
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Tải ảnh thất bại',
+                    text: result.thongBao || result.message || 'Không thể tải lên ảnh đại diện!'
+                });
+            }
+        } catch (err) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi kết nối',
+                text: 'Không thể kết nối đến máy chủ: ' + err.message
+            });
+        }
+    }
+
+    // Helper hiển thị và xóa lỗi cụ thể từng ô nhập
+    function hienThiLoiHoSo(inputId, errId, thongBao) {
+        const input = document.getElementById(inputId);
+        const feedback = document.getElementById(errId);
+        if (input) {
+            input.classList.add('is-invalid');
+        }
+        if (feedback) {
+            feedback.innerText = thongBao;
+            feedback.style.display = 'block';
+        }
+    }
+
+    function xoaLoiHoSo(inputId, errId) {
+        const input = document.getElementById(inputId);
+        const feedback = document.getElementById(errId);
+        if (input) {
+            input.classList.remove('is-invalid');
+        }
+        if (feedback) {
+            feedback.style.display = 'none';
+        }
+    }
+
+    // Cập nhật thông tin cá nhân (Họ tên, SĐT)
+    async function xuLyCapNhatHoSo(e) {
+        e.preventDefault();
+        xoaLoiHoSo('txtHoVaTen', 'errHoVaTen');
+        xoaLoiHoSo('txtSoDienThoai', 'errSoDienThoai');
+
+        const hoVaTenInput = document.getElementById('txtHoVaTen');
+        const sdtInput = document.getElementById('txtSoDienThoai');
+        const hoVaTen = hoVaTenInput.value.trim();
+        const soDienThoai = sdtInput.value.trim();
+
+        // 1. Validate Họ và tên client
+        if (!hoVaTen || hoVaTen.length < 2 || hoVaTen.length > 100) {
+            hienThiLoiHoSo('txtHoVaTen', 'errHoVaTen', 'Họ và tên phải có độ dài từ 2 đến 100 ký tự!');
+            hoVaTenInput.focus();
+            return;
+        }
+
+        // 2. Validate Số điện thoại client
+        const sdtRegex = /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/;
+        if (!soDienThoai) {
+            hienThiLoiHoSo('txtSoDienThoai', 'errSoDienThoai', 'Số điện thoại không được để trống!');
+            sdtInput.focus();
+            return;
+        }
+        if (!sdtRegex.test(soDienThoai)) {
+            hienThiLoiHoSo('txtSoDienThoai', 'errSoDienThoai', 'Số điện thoại phải gồm 10 số di động Việt Nam (03x, 05x, 07x, 08x, 09x)!');
+            sdtInput.focus();
+            return;
+        }
+
+        const btn = document.getElementById('btnLuuHoSo');
+        const loading = document.getElementById('loadingLuuHoSo');
+        btn.disabled = true;
+        loading.classList.remove('d-none');
+
+        try {
+            const token = getAuthToken();
+            const response = await fetch('/api/v1/ho-so', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token ? `Bearer ${token}` : ''
+                },
+                body: JSON.stringify({ hoVaTen, soDienThoai })
+            });
+
+            const result = await response.json();
+            if (response.ok && result.thanhCong) {
+                document.getElementById('headerHoVaTen').innerText = hoVaTen;
+                document.getElementById('headerSoDienThoai').innerText = soDienThoai;
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Lưu Hồ Sơ Thành Công! ✨',
+                    text: 'Thông tin cá nhân đã được cập nhật đồng bộ vào cơ sở dữ liệu.',
+                    timer: 1800,
+                    showConfirmButton: false
+                });
+            } else {
+                // Hiển thị lỗi cụ thể ở ô đó
+                let daHienThiLoiCuThe = false;
+                const fieldErrors = result.duLieu || result.data;
+                if (fieldErrors && typeof fieldErrors === 'object') {
+                    if (fieldErrors.hoVaTen) {
+                        hienThiLoiHoSo('txtHoVaTen', 'errHoVaTen', fieldErrors.hoVaTen);
+                        daHienThiLoiCuThe = true;
+                        hoVaTenInput.focus();
+                    }
+                    if (fieldErrors.soDienThoai) {
+                        hienThiLoiHoSo('txtSoDienThoai', 'errSoDienThoai', fieldErrors.soDienThoai);
+                        if (!daHienThiLoiCuThe) sdtInput.focus();
+                        daHienThiLoiCuThe = true;
+                    }
+                }
+
+                if (!daHienThiLoiCuThe) {
+                    const msg = result.thongBao || result.message || 'Cập nhật thất bại';
+                    if (msg.toLowerCase().includes('số điện thoại') || msg.toLowerCase().includes('sđt')) {
+                        hienThiLoiHoSo('txtSoDienThoai', 'errSoDienThoai', msg);
+                        sdtInput.focus();
+                    } else if (msg.toLowerCase().includes('họ và tên') || msg.toLowerCase().includes('tên')) {
+                        hienThiLoiHoSo('txtHoVaTen', 'errHoVaTen', msg);
+                        hoVaTenInput.focus();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Cập nhật thất bại',
+                            text: msg
+                        });
+                    }
+                }
+            }
+        } catch (err) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi kết nối',
+                text: 'Không thể kết nối đến máy chủ: ' + err.message
+            });
+        } finally {
+            btn.disabled = false;
+            loading.classList.add('d-none');
+        }
+    }
+
+    // Đổi mật khẩu tài khoản (Validate không trùng mật khẩu cũ, báo lỗi cụ thể tại từng ô)
+    async function xuLyDoiMatKhau(e) {
+        e.preventDefault();
+        xoaLoiHoSo('txtMatKhauHienTai', 'errMatKhauHienTai');
+        xoaLoiHoSo('txtMatKhauMoi', 'errMatKhauMoi');
+        xoaLoiHoSo('txtXacNhanMatKhauMoi', 'errXacNhanMatKhau');
+
+        const inputHienTai = document.getElementById('txtMatKhauHienTai');
+        const inputMoi = document.getElementById('txtMatKhauMoi');
+        const inputXacNhan = document.getElementById('txtXacNhanMatKhauMoi');
+
+        const matKhauHienTai = inputHienTai.value;
+        const matKhauMoi = inputMoi.value;
+        const xacNhanMatKhauMoi = inputXacNhan.value;
+
+        // 1. Kiểm tra mật khẩu hiện tại
+        if (!matKhauHienTai) {
+            hienThiLoiHoSo('txtMatKhauHienTai', 'errMatKhauHienTai', 'Vui lòng nhập mật khẩu hiện tại của bạn!');
+            inputHienTai.focus();
+            return;
+        }
+
+        // 2. Kiểm tra mật khẩu mới
+        if (!matKhauMoi) {
+            hienThiLoiHoSo('txtMatKhauMoi', 'errMatKhauMoi', 'Vui lòng nhập mật khẩu mới!');
+            inputMoi.focus();
+            return;
+        }
+
+        // 3. Kiểm tra độ phức tạp
+        const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,32}$/;
+        if (!strongPasswordRegex.test(matKhauMoi)) {
+            hienThiLoiHoSo('txtMatKhauMoi', 'errMatKhauMoi', 'Mật khẩu phải từ 8 đến 32 ký tự, bao gồm ít nhất 1 chữ thường, 1 chữ hoa, 1 số và 1 ký tự đặc biệt (@$!%*?&).');
+            inputMoi.focus();
+            return;
+        }
+
+        // 4. Kiểm tra không trùng mật khẩu cũ ngay tại client
+        if (matKhauHienTai === matKhauMoi) {
+            hienThiLoiHoSo('txtMatKhauMoi', 'errMatKhauMoi', 'Mật khẩu mới không được trùng với mật khẩu cũ hiện tại!');
+            inputMoi.focus();
+            return;
+        }
+
+        // 5. Kiểm tra xác nhận mật khẩu khớp
+        if (!xacNhanMatKhauMoi) {
+            hienThiLoiHoSo('txtXacNhanMatKhauMoi', 'errXacNhanMatKhau', 'Vui lòng xác nhận lại mật khẩu mới!');
+            inputXacNhan.focus();
+            return;
+        }
+        if (matKhauMoi !== xacNhanMatKhauMoi) {
+            hienThiLoiHoSo('txtXacNhanMatKhauMoi', 'errXacNhanMatKhau', 'Mật khẩu xác nhận không trùng khớp với mật khẩu mới!');
+            inputXacNhan.focus();
+            return;
+        }
+
+        const btn = document.getElementById('btnDoiMatKhau');
+        const loading = document.getElementById('loadingDoiMatKhau');
+        btn.disabled = true;
+        loading.classList.remove('d-none');
+
+        try {
+            const token = getAuthToken();
+            const response = await fetch('/api/v1/ho-so/doi-mat-khau', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token ? `Bearer ${token}` : ''
+                },
+                body: JSON.stringify({ matKhauHienTai, matKhauMoi, xacNhanMatKhauMoi })
+            });
+
+            const result = await response.json();
+            if (response.ok && result.thanhCong) {
+                document.getElementById('formDoiMatKhau').reset();
+                kiemTraDoManhMatKhau('');
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Đổi Mật Khẩu Thành Công! 🔐',
+                    text: 'Mật khẩu tài khoản đã được thay đổi an toàn với chuẩn mã hóa BCrypt salt 12.',
+                    confirmButtonText: 'Tuyệt vời!'
+                });
+            } else {
+                let daHienThiLoi = false;
+                const fieldErrors = result.duLieu || result.data;
+                if (fieldErrors && typeof fieldErrors === 'object') {
+                    if (fieldErrors.matKhauHienTai) {
+                        hienThiLoiHoSo('txtMatKhauHienTai', 'errMatKhauHienTai', fieldErrors.matKhauHienTai);
+                        daHienThiLoi = true;
+                        inputHienTai.focus();
+                    }
+                    if (fieldErrors.matKhauMoi) {
+                        hienThiLoiHoSo('txtMatKhauMoi', 'errMatKhauMoi', fieldErrors.matKhauMoi);
+                        if (!daHienThiLoi) inputMoi.focus();
+                        daHienThiLoi = true;
+                    }
+                    if (fieldErrors.xacNhanMatKhauMoi) {
+                        hienThiLoiHoSo('txtXacNhanMatKhauMoi', 'errXacNhanMatKhau', fieldErrors.xacNhanMatKhauMoi);
+                        if (!daHienThiLoi) inputXacNhan.focus();
+                        daHienThiLoi = true;
+                    }
+                }
+
+                if (!daHienThiLoi) {
+                    const msg = result.thongBao || result.message || 'Đổi mật khẩu thất bại';
+                    if (msg.toLowerCase().includes('hiện tại')) {
+                        hienThiLoiHoSo('txtMatKhauHienTai', 'errMatKhauHienTai', msg);
+                        inputHienTai.focus();
+                    } else if (msg.toLowerCase().includes('trùng') || msg.toLowerCase().includes('mật khẩu mới')) {
+                        hienThiLoiHoSo('txtMatKhauMoi', 'errMatKhauMoi', msg);
+                        inputMoi.focus();
+                    } else if (msg.toLowerCase().includes('xác nhận')) {
+                        hienThiLoiHoSo('txtXacNhanMatKhauMoi', 'errXacNhanMatKhau', msg);
+                        inputXacNhan.focus();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Đổi mật khẩu thất bại',
+                            text: msg
+                        });
+                    }
+                }
+            }
+        } catch (err) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi kết nối',
+                text: 'Không thể kết nối đến máy chủ: ' + err.message
+            });
+        } finally {
+            btn.disabled = false;
+            loading.classList.add('d-none');
+        }
+    }
+
+    // Xử lý đăng xuất
+    function handleLogout(e) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('currentUser');
+        document.cookie = "ACCESS_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        document.cookie = "REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    }
+</script>
+</body>
+</html>

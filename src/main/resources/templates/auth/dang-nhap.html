@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập - Sàn Thương Mại Điện Tử FlexShop</title>
+    <!-- Bootstrap 5 CSS & Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            color: #1e293b;
+        }
+        .auth-card {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            width: 100%;
+            max-width: 1050px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .auth-sidebar {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+        .auth-sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at top right, rgba(255,255,255,0.15), transparent 70%);
+        }
+        .auth-main {
+            padding: 48px 40px;
+        }
+        .form-control {
+            border-radius: 12px;
+            padding: 12px 16px;
+            border: 1.5px solid #e2e8f0;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+        }
+        .input-group-text {
+            border-radius: 12px;
+            border: 1.5px solid #e2e8f0;
+            background-color: #f8fafc;
+        }
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            width: 100%;
+            transition: all 0.3s;
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+        }
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 20px -3px rgba(79, 70, 229, 0.4);
+            color: white;
+        }
+        .demo-chip {
+            cursor: pointer;
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .demo-chip:hover {
+            background: #ede9fe;
+            border-color: #a78bfa;
+            color: #5b21b6;
+        }
+        .role-badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+        /* Modal thông báo nổi bật trước màn hình */
+        .custom-modal-backdrop {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: modalFadeIn 0.25s ease-out;
+        }
+        .custom-modal-dialog {
+            background: white;
+            border-radius: 24px;
+            padding: 36px 30px;
+            max-width: 440px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            animation: modalZoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .custom-modal-icon {
+            font-size: 64px;
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+        @keyframes modalZoomIn {
+            from { opacity: 0; transform: scale(0.85); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-card row g-0">
+    <!-- Cột giới thiệu bên trái -->
+    <div class="col-lg-5 auth-sidebar d-none d-lg-flex">
+        <div style="position: relative; z-index: 2;">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="bg-white text-primary rounded-4 p-2 px-3 fw-bold fs-3 shadow-sm">
+                    <i class="bi bi-shop-window"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0 text-white">FlexShop</h3>
+                    <span class="badge bg-white bg-opacity-25 text-white"></span>
+                </div>
+            </div>
+            <h2 class="fw-extrabold mb-3 lh-base">Sàn Thương Mại Điện Tử Đa Gian Hàng</h2>
+            <p class="text-white text-opacity-75 fs-6">
+                Nền tảng thương mại điện tử đa gian hàng, kết nối người mua và nhiều nhà bán hàng trên cùng một nền tảng, hỗ trợ quản lý gian hàng, sản phẩm, đơn hàng, kho, vận chuyển, thanh toán và phân quyền người dùng.
+            </p>
+        </div>
+
+        <div style="position: relative; z-index: 2;">
+
+            <div class="d-flex justify-content-between text-white text-opacity-75 small">
+                <span>© 2026 Hệ thống FlexShop</span>
+                <span>Phiên bản 2.0.0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cột Form Đăng nhập bên phải -->
+    <div class="col-lg-7 auth-main">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold text-dark mb-1">Chào mừng trở lại! 👋</h3>
+                <p class="text-muted small mb-0">Đăng nhập để truy cập tài khoản và bảng điều khiển của bạn</p>
+            </div>
+            <a href="/register" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-semibold">
+                Đăng ký <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+
+        <!-- Thông báo từ Server (nếu có) -->
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show rounded-3 py-2 small" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close py-2" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-3 py-2 small" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i><span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close py-2" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Form Đăng nhập -->
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="mb-3">
+                <label class="form-label fw-semibold small text-secondary">Tài khoản (Email hoặc Số điện thoại)</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person text-secondary"></i></span>
+                    <input type="text" id="taiKhoan" class="form-control" placeholder="Nhập email hoặc SĐT..." required autofocus oninput="xoaLoiLogin('taiKhoan', 'errTaiKhoan')">
+                </div>
+                <div class="invalid-feedback" id="errTaiKhoan" style="display: none;"></div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold small text-secondary">Mật khẩu</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-lock text-secondary"></i></span>
+                    <input type="password" id="matKhau" class="form-control" placeholder="Nhập mật khẩu..." required oninput="xoaLoiLogin('matKhau', 'errMatKhau')">
+                    <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('matKhau', this)">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                <div class="invalid-feedback" id="errMatKhau" style="display: none;"></div>
+                <div class="d-flex justify-content-between">
+                    <label class="form-label fw-semibold small text-secondary"></label>
+                    <a href="/forgot-password" class="text-primary text-decoration-none small">Quên mật khẩu?</a>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="ghiNho" checked>
+                    <label class="form-check-label small text-secondary" for="ghiNho">
+                        Ghi nhớ phiên đăng nhập
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn btn-primary-custom mb-4">
+                <span id="btnText"><i class="bi bi-box-arrow-in-right me-2"></i>Đăng Nhập Ngay</span>
+                <span id="btnLoading" class="spinner-border spinner-border-sm d-none" role="status"></span>
+            </button>
+        </form>
+
+        <!-- Khối Đăng nhập nhanh cho 5 Vai Trò (Hỗ trợ Kiểm thử & Trình chiếu DATN) -->
+        <div class="p-3 bg-light rounded-4 border">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold small text-secondary"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Chọn nhanh tài khoản kiểm thử 5 Vai Trò:</span>
+                <span class="badge bg-secondary">Mật khẩu: 12345678</span>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <div class="demo-chip" onclick="fillDemo('admin@flexshop.vn', 'ADMIN')">
+                    <span class="role-badge bg-danger text-white me-1">QUẢN TRỊ</span> Quản trị viên
+                </div>
+                <div class="demo-chip" onclick="fillDemo('seller@flexshop.vn', 'NGUOI_BAN')">
+                    <span class="role-badge bg-primary text-white me-1">NGƯỜI BÁN</span> Chủ gian hàng
+                </div>
+                <div class="demo-chip" onclick="fillDemo('customer@flexshop.vn', 'KHACH_HANG')">
+                    <span class="role-badge bg-success text-white me-1">KHÁCH HÀNG</span> Khách hàng
+                </div>
+                <div class="demo-chip" onclick="fillDemo('shipper@flexshop.vn', 'SHIPPER')">
+                    <span class="role-badge bg-warning text-dark me-1">GIAO HÀNG</span> Tài xế giao vận
+                </div>
+                <div class="demo-chip" onclick="fillDemo('cskh@flexshop.vn', 'CSKH')">
+                    <span class="role-badge bg-info text-white me-1">CSKH</span> Hỗ trợ 24/7
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <span class="text-muted small">Chưa có tài khoản FlexShop?</span>
+            <a href="/register" class="fw-bold text-primary text-decoration-none ms-1">Đăng ký tham gia ngay</a>
+        </div>
+    </div>
+</div>
+
+<!-- Modal thông báo nổi bật trước màn hình (Fallback khi không có CDN) -->
+<div id="customModalOverlay" class="custom-modal-backdrop d-none">
+    <div class="custom-modal-dialog">
+        <div id="customModalIcon" class="custom-modal-icon text-success">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <h4 id="customModalTitle" class="fw-bold mb-2 text-dark">Thành Công!</h4>
+        <div id="customModalBody" class="text-secondary small mb-3">Thông báo</div>
+        <button id="customModalActionBtn" type="button" class="btn btn-primary-custom w-100 py-2">
+            Vào ngay <i class="bi bi-arrow-right ms-1"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Tự động dọn dẹp LocalStorage và Cookie khi có tham số logout
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('logout')) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('currentUser');
+        document.cookie = "ACCESS_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        document.cookie = "REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    }
+
+    // Hàm hiển thị thông báo thành công nổi bật ngay trước màn hình (không tự động chuyển hướng)
+    function hienThiThongBaoThanhCong(tieuDe, noiDungHtml, urlChuyenHuong) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'success',
+                title: `<span style="font-size: 22px; font-weight: 800; color: #1e1b4b;">${tieuDe}</span>`,
+                html: noiDungHtml,
+                showConfirmButton: true,
+                confirmButtonText: 'Vào ngay <i class="bi bi-arrow-right ms-1"></i>',
+                confirmButtonColor: '#4f46e5',
+                allowOutsideClick: false,
+                customClass: {
+                    popup: 'rounded-4 shadow-lg border-0'
+                }
+            }).then((res) => {
+                if (res.isConfirmed && urlChuyenHuong) {
+                    window.location.href = urlChuyenHuong;
+                }
+            });
+        } else {
+            const overlay = document.getElementById('customModalOverlay');
+            const icon = document.getElementById('customModalIcon');
+            const title = document.getElementById('customModalTitle');
+            const body = document.getElementById('customModalBody');
+            const btn = document.getElementById('customModalActionBtn');
+
+            icon.className = 'custom-modal-icon text-success';
+            icon.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
+            title.textContent = tieuDe;
+            body.innerHTML = noiDungHtml;
+            overlay.classList.remove('d-none');
+
+            btn.onclick = () => {
+                if (urlChuyenHuong) window.location.href = urlChuyenHuong;
+            };
+        }
+    }
+
+    // Hàm hiển thị thông báo lỗi nổi bật
+    function hienThiThongBaoLoi(tieuDe, noiDung) {
+        if (typeof Swal !== 'undefined') {
+            let htmlContent = noiDung;
+            if (noiDung && (noiDung.includes('khóa') || noiDung.includes('Lý do'))) {
+                htmlContent = `
+                    <div class="text-start py-2">
+                        <div class="p-3 bg-danger bg-opacity-10 border border-danger border-opacity-25 rounded-3 mb-3">
+                            <div class="text-danger fw-bold mb-1"><i class="bi bi-exclamation-octagon-fill me-1"></i> Thông Báo Khóa Tài Khoản:</div>
+                            <div class="text-dark small">${noiDung}</div>
+                        </div>
+                        <div class="small text-muted"><i class="bi bi-headset me-1"></i>Liên hệ hỗ trợ CSKH: <b>cskh@flexshop.vn</b></div>
+                    </div>
+                `;
+            }
+            Swal.fire({
+                icon: 'error',
+                title: `<span style="font-size: 20px; font-weight: 700; color: #991b1b;">${tieuDe}</span>`,
+                html: htmlContent,
+                confirmButtonText: 'Thử lại',
+                confirmButtonColor: '#4f46e5',
+                customClass: {
+                    popup: 'rounded-4 shadow-lg border-0'
+                }
+            });
+        } else {
+            const overlay = document.getElementById('customModalOverlay');
+            const icon = document.getElementById('customModalIcon');
+            const title = document.getElementById('customModalTitle');
+            const body = document.getElementById('customModalBody');
+            const btn = document.getElementById('customModalActionBtn');
+
+            icon.className = 'custom-modal-icon text-danger';
+            icon.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i>';
+            title.textContent = tieuDe;
+            body.textContent = noiDung;
+            btn.textContent = 'Đóng';
+            overlay.classList.remove('d-none');
+
+            btn.onclick = () => {
+                overlay.classList.add('d-none');
+            };
+        }
+    }
+
+    function togglePasswordVisibility(inputId, button) {
+        const input = document.getElementById(inputId);
+        const icon = button.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    }
+
+    // Helper hiển thị và xóa lỗi cụ thể từng ô nhập
+    function hienThiLoiLogin(inputId, errId, thongBao) {
+        const input = document.getElementById(inputId);
+        const feedback = document.getElementById(errId);
+        if (input) {
+            input.classList.add('is-invalid');
+        }
+        if (feedback) {
+            feedback.innerText = thongBao;
+            feedback.style.display = 'block';
+        }
+    }
+
+    function xoaLoiLogin(inputId, errId) {
+        const input = document.getElementById(inputId);
+        const feedback = document.getElementById(errId);
+        if (input) {
+            input.classList.remove('is-invalid');
+        }
+        if (feedback) {
+            feedback.style.display = 'none';
+        }
+    }
+
+    function fillDemo(email, role) {
+        xoaLoiLogin('taiKhoan', 'errTaiKhoan');
+        xoaLoiLogin('matKhau', 'errMatKhau');
+        document.getElementById('taiKhoan').value = email;
+        document.getElementById('matKhau').value = '12345678';
+    }
+
+    async function handleLogin(event) {
+        event.preventDefault();
+        xoaLoiLogin('taiKhoan', 'errTaiKhoan');
+        xoaLoiLogin('matKhau', 'errMatKhau');
+
+        const taiKhoanInput = document.getElementById('taiKhoan');
+        const matKhauInput = document.getElementById('matKhau');
+        const taiKhoan = taiKhoanInput.value.trim();
+        const matKhau = matKhauInput.value;
+        const ghiNho = document.getElementById('ghiNho').checked;
+
+        // Validate client
+        if (!taiKhoan) {
+            hienThiLoiLogin('taiKhoan', 'errTaiKhoan', 'Vui lòng nhập Email hoặc Số điện thoại của bạn!');
+            taiKhoanInput.focus();
+            return;
+        }
+        if (!matKhau) {
+            hienThiLoiLogin('matKhau', 'errMatKhau', 'Vui lòng nhập mật khẩu!');
+            matKhauInput.focus();
+            return;
+        }
+
+        const btnText = document.getElementById('btnText');
+        const btnLoading = document.getElementById('btnLoading');
+        const submitBtn = document.getElementById('submitBtn');
+
+        btnText.classList.add('d-none');
+        btnLoading.classList.remove('d-none');
+        submitBtn.disabled = true;
+
+        try {
+            const response = await fetch('/api/v1/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ taiKhoan, matKhau, ghiNho })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && (result.thanhCong || result.success)) {
+                const data = result.duLieu || result.data;
+                // Lưu token vào Cookie để trình duyệt gửi kèm các trang Dashboard Web UI
+                document.cookie = `ACCESS_TOKEN=${data.accessToken}; path=/; max-age=900; SameSite=Lax`;
+                document.cookie = `REFRESH_TOKEN=${data.refreshToken}; path=/; max-age=604800; SameSite=Lax`;
+
+                // Lưu vào LocalStorage cho các thư viện API Client
+                localStorage.setItem('accessToken', data.accessToken);
+                localStorage.setItem('refreshToken', data.refreshToken);
+                localStorage.setItem('currentUser', JSON.stringify(data.user || data.thongTinNguoiDung));
+
+                // Tiêu chí US-02: Điều hướng đúng trang Bảng điều khiển theo 5 Vai trò
+                const userInfo = data.user || data.thongTinNguoiDung || {};
+                const targetUrl = userInfo.targetDashboardUrl || '/customer/dashboard';
+                const roleNameMap = {
+                    'ADMIN': 'Quản Trị Viên',
+                    'ROLE_ADMIN': 'Quản Trị Viên',
+                    'NGUOI_BAN': 'Người Bán Hàng',
+                    'ROLE_NGUOI_BAN': 'Người Bán Hàng',
+                    'KHACH_HANG': 'Khách Hàng',
+                    'ROLE_KHACH_HANG': 'Khách Hàng',
+                    'TAI_XE': 'Tài Xế Giao Hàng',
+                    'ROLE_TAI_XE': 'Tài Xế Giao Hàng',
+                    'SHIPPER': 'Tài Xế Giao Hàng',
+                    'ROLE_SHIPPER': 'Tài Xế Giao Hàng',
+                    'CSKH': 'Chăm Sóc Khách Hàng',
+                    'ROLE_CSKH': 'Chăm Sóc Khách Hàng'
+                };
+                const rawRoles = userInfo.roles || [];
+                const uniqueRoleLabels = [...new Set(rawRoles.map(r => roleNameMap[r] || r))];
+                const roleLabels = uniqueRoleLabels.length > 0 ? uniqueRoleLabels.join(', ') : 'Thành viên';
+
+                // Hiển thị thông báo thành công nổi bật ngay trước màn hình trước khi chuyển trang
+                hienThiThongBaoThanhCong(
+                    'Đăng Nhập Thành Công! 🚀',
+                    `<div class="py-1">
+                        <p class="mb-2 text-secondary">Chào mừng <strong class="text-primary">${userInfo.hoVaTen || 'Bạn'}</strong> trở lại FlexShop Enterprise!</p>
+                        <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-2">
+                            <i class="bi bi-shield-check me-1"></i> Vai trò: <b>${roleLabels}</b>
+                        </div>
+                        <div class="small text-muted"><i class="bi bi-arrow-repeat me-1"></i>Đang chuyển hướng đến Bảng điều khiển...</div>
+                    </div>`,
+                    targetUrl
+                );
+            } else {
+                const msg = result.thongBao || result.message || 'Tài khoản hoặc mật khẩu không chính xác!';
+                if (msg.toLowerCase().includes('khóa') || msg.toLowerCase().includes('lý do')) {
+                    hienThiThongBaoLoi('Đăng Nhập Thất Bại', msg);
+                } else {
+                    // Thông báo lỗi cụ thể ở ô tài khoản và ô mật khẩu
+                    const fieldErrors = result.duLieu || result.data;
+                    if (fieldErrors && typeof fieldErrors === 'object' && (fieldErrors.taiKhoan || fieldErrors.matKhau)) {
+                        if (fieldErrors.taiKhoan) hienThiLoiLogin('taiKhoan', 'errTaiKhoan', fieldErrors.taiKhoan);
+                        if (fieldErrors.matKhau) hienThiLoiLogin('matKhau', 'errMatKhau', fieldErrors.matKhau);
+                    } else {
+                        hienThiLoiLogin('taiKhoan', 'errTaiKhoan', msg);
+                        hienThiLoiLogin('matKhau', 'errMatKhau', msg);
+                    }
+                    matKhauInput.focus();
+                }
+            }
+        } catch (error) {
+            hienThiThongBaoLoi('Lỗi Kết Nối', 'Không thể kết nối đến máy chủ: ' + error.message);
+        } finally {
+            btnText.classList.remove('d-none');
+            btnLoading.classList.add('d-none');
+            submitBtn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>

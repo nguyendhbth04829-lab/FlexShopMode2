@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Đăng Ký Mở Gian Hàng - FlexShop</title>
+    <!-- Bootstrap 5 CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Tom Select for Searchable Comboboxes -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        /* Tom Select Custom Styling */
+        .ts-wrapper .ts-control {
+            border-radius: 10px !important;
+            padding: 8px 12px !important;
+            font-size: 13.5px;
+            border-color: #cbd5e1;
+            background-color: #ffffff;
+        }
+        .ts-wrapper.focus .ts-control {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.15) !important;
+        }
+        .ts-dropdown {
+            z-index: 1070 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 15px 30px -5px rgba(0,0,0,0.15) !important;
+            border: 1px solid #e2e8f0 !important;
+            padding: 6px !important;
+        }
+        .ts-dropdown .option {
+            border-radius: 8px;
+            padding: 7px 10px;
+            font-size: 13px;
+        }
+        .ts-dropdown .active {
+            background-color: #eff6ff !important;
+            color: #1d4ed8 !important;
+            font-weight: 600;
+        }
+        /* Gợi ý tìm kiếm nhanh */
+        .quick-item {
+            cursor: pointer;
+            padding: 9px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            transition: all 0.15s ease;
+        }
+        .quick-item:hover {
+            background-color: #f8fafc;
+            color: #2563eb;
+        }
+        .navbar-shop {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .stepper-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+        .stepper-item::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            width: 100%;
+            height: 3px;
+            background-color: #e2e8f0;
+            z-index: 1;
+        }
+        .stepper-item:last-child::after {
+            display: none;
+        }
+        .stepper-item.completed::after,
+        .stepper-item.active::after {
+            background-color: #3b82f6;
+        }
+        .stepper-circle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background-color: #f1f5f9;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-bottom: 8px;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+        .stepper-item.completed .stepper-circle {
+            background-color: #10b981;
+            color: white;
+        }
+        .stepper-item.active .stepper-circle {
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.2);
+        }
+        .card-custom {
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            background: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -2px rgba(0,0,0,0.02);
+        }
+        .upload-dropzone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            background-color: #f8fafc;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .upload-dropzone:hover, .upload-dropzone.dragover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .slug-preview {
+            background-color: #f1f5f9;
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #475569;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation Header -->
+<nav class="navbar navbar-expand-lg navbar-light navbar-shop px-4 py-3 sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/customer/dashboard">
+            <div class="bg-primary text-white rounded-3 px-2 py-1 fs-5 fw-bold">
+                <i class="bi bi-shop-window"></i>
+            </div>
+            <div>
+                <span class="fw-bold tracking-tight text-dark">FlexShop</span>
+                <span class="badge bg-warning text-dark ms-1">ĐĂNG KÝ SHOP</span>
+            </div>
+        </a>
+
+        <div class="d-flex align-items-center gap-3">
+            <a href="/customer/dashboard" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại Mua sắm
+            </a>
+            <div class="d-flex align-items-center gap-2 border-start ps-3">
+                <img th:src="${user != null and user.anhDaiDien != null ? user.anhDaiDien : '/images/default-avatar.png'}"
+                     onerror="this.src='https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff'"
+                     alt="Avatar" class="rounded-circle border" width="36" height="36">
+                <div class="d-none d-md-block text-start">
+                    <div class="fw-bold small text-dark" th:text="${user != null ? user.hoVaTen : 'Người Dùng'}">Khách Hàng</div>
+                    <div class="text-muted" style="font-size: 11px;" th:text="${user != null ? user.email : ''}">user@flexshop.vn</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Container -->
+<div class="container py-4">
+
+    <!-- Page Header Banner -->
+    <div class="text-center mb-5">
+        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-bold mb-2">
+            <i class="bi bi-patch-check-fill me-1"></i> Cổng Đăng Ký Đối Tác Kinh Doanh FlexShop
+        </span>
+        <h2 class="fw-extrabold text-dark tracking-tight mb-2">Gửi Yêu Cầu Đăng Ký Mở Gian Hàng</h2>
+        <p class="text-muted max-w-2xl mx-auto mb-0" style="max-width: 650px;">
+            Trở thành Người Bán (Seller) chính thức tại FlexShop để tiếp cận hàng triệu khách hàng tiềm năng.
+            Vui lòng điền thông tin gian hàng và tải lên <b>Giấy phép kinh doanh hợp lệ</b> để Ban Quản Trị xét duyệt.
+        </p>
+    </div>
+
+    <!-- Stepper Tiến Trình -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-10">
+            <div class="d-flex justify-content-between text-center">
+                <!-- Bước 1 -->
+                <div class="stepper-item"
+                     th:classappend="${gianHang == null or gianHang.trangThai == 'TU_CHOI' ? 'active' : 'completed'}">
+                    <div class="stepper-circle">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+                    <div class="fw-bold small">Bước 1: Nộp hồ sơ</div>
+                    <div class="text-muted" style="font-size: 11px;">Thông tin Shop & Giấy phép</div>
+                </div>
+                <!-- Bước 2 -->
+                <div class="stepper-item"
+                     th:classappend="${gianHang != null and gianHang.trangThai == 'CHO_DUYET' ? 'active' : (gianHang != null and gianHang.trangThai == 'HOAT_DONG' ? 'completed' : '')}">
+                    <div class="stepper-circle">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div class="fw-bold small">Bước 2: Chờ xét duyệt</div>
+                    <div class="text-muted" style="font-size: 11px;">Admin thẩm định</div>
+                </div>
+                <!-- Bước 3 -->
+                <div class="stepper-item"
+                     th:classappend="${gianHang != null and gianHang.trangThai == 'HOAT_DONG' ? 'completed' : ''}">
+                    <div class="stepper-circle">
+                        <i class="bi bi-rocket-takeoff"></i>
+                    </div>
+                    <div class="fw-bold small">Bước 3: Mở bán</div>
+                    <div class="text-muted" style="font-size: 11px;">Kích hoạt kênh Người Bán</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TH1: HỒ SƠ ĐANG CHỜ DUYỆT (CHO_DUYET) -->
+    <div th:if="${gianHang != null and gianHang.trangThai == 'CHO_DUYET'}" class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card card-custom p-4 p-md-5 border-warning border-2 shadow-sm mb-4">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex p-3 rounded-circle bg-warning bg-opacity-10 text-warning mb-3">
+                        <i class="bi bi-hourglass-split display-4"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-1">Hồ Sơ Đang Trong Trạng Thái CHỜ DUYỆT ⏳</h3>
+                    <p class="text-muted small">Mã gian hàng: <strong class="text-primary" th:text="'#' + ${gianHang.maGianHang}">#1</strong> | Ngày gửi: <span th:text="${gianHang.ngayTao != null ? #temporals.format(gianHang.ngayTao, 'dd/MM/yyyy HH:mm') : 'Hôm nay'}"></span></p>
+                </div>
+
+                <div class="alert alert-warning border-warning border-opacity-50 py-3 rounded-4 mb-4">
+                    <div class="d-flex gap-3 align-items-center">
+                        <i class="bi bi-info-circle-fill fs-3 text-warning"></i>
+                        <div>
+                            <div class="fw-bold">Yêu cầu mở Shop của bạn đã được chuyển về trạng thái CHỜ DUYỆT!</div>
+                            <div class="small">Ban Quản Trị Sàn FlexShop đang kiểm tra tính xác thực của Giấy phép kinh doanh và mã số thuế. Kết quả sẽ được phản hồi sớm nhất.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bảng chi tiết đơn đăng ký -->
+                <div class="bg-light p-4 rounded-4 mb-4">
+                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-clipboard-check text-primary me-2"></i>Thông Tin Đã Đăng Ký:</h6>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">Tên gian hàng:</small>
+                            <strong class="text-dark" th:text="${gianHang.tenGianHang}">Shop Demo</strong>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">Đường dẫn định danh (Slug):</small>
+                            <span class="badge bg-secondary text-white font-monospace" th:text="${gianHang.duongDanSlug}">shop-demo</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">Số điện thoại kho hàng:</small>
+                            <strong class="text-dark" th:text="${gianHang.sdtKho}">0987654321</strong>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">Số Giấy phép kinh doanh / MST:</small>
+                            <strong class="text-primary font-monospace" th:text="${gianHang.soGiayTo}">0109988776</strong>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted d-block">Địa chỉ kho lấy hàng:</small>
+                            <span class="text-dark" th:text="${gianHang.diaChiKho}">Hà Nội, Việt Nam</span>
+                        </div>
+                        <div class="col-12" th:if="${gianHang.linkAnhGiayTo != null}">
+                            <small class="text-muted d-block mb-1">Tệp Giấy phép kinh doanh đã tải lên:</small>
+                            <a th:href="${gianHang.linkAnhGiayTo}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                <i class="bi bi-file-earmark-check me-1"></i> Xem tệp giấy phép đã nộp <i class="bi bi-box-arrow-up-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" onclick="batCheDoCapNhat()">
+                        <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa & Nộp lại hồ sơ
+                    </button>
+                    <a href="/customer/dashboard" class="btn btn-primary rounded-pill px-4">
+                        <i class="bi bi-house-door me-1"></i> Về trang Khách hàng
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TH2: HỒ SƠ BỊ TỪ CHỐI (TU_CHOI) -->
+    <div th:if="${gianHang != null and gianHang.trangThai == 'TU_CHOI'}" class="row justify-content-center mb-4">
+        <div class="col-lg-8">
+            <div class="alert alert-danger border-2 border-danger rounded-4 p-4 shadow-sm">
+                <div class="d-flex align-items-start gap-3">
+                    <i class="bi bi-exclamation-octagon-fill fs-1 text-danger"></i>
+                    <div>
+                        <h4 class="alert-heading fw-bold mb-2">Hồ Sơ Đăng Ký Shop Bị Từ Chối!</h4>
+                        <p class="mb-2">Rất tiếc, yêu cầu mở gian hàng <b><span th:text="${gianHang.tenGianHang}"></span></b> của bạn chưa đáp ứng đủ tiêu chuẩn xét duyệt của FlexShop.</p>
+                        <div class="p-3 bg-white rounded-3 border border-danger border-opacity-50 text-dark mb-3">
+                            <strong><i class="bi bi-chat-left-dots text-danger me-1"></i> Lý do từ Ban Quản Trị:</strong>
+                            <div class="mt-1 text-danger fw-semibold" th:text="${gianHang.lyDoTuChoi != null ? gianHang.lyDoTuChoi : 'Giấy tờ kinh doanh chưa hợp lệ hoặc mờ không rõ nét.'}">Lý do từ chối</div>
+                        </div>
+                        <p class="small text-muted mb-0">👉 Bạn vui lòng kiểm tra lại thông tin và chụp lại bản scan Giấy phép kinh doanh sắc nét, sau đó cập nhật và nộp lại hồ sơ bên dưới.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FORM ĐĂNG KÝ / CẬP NHẬT GIAN HÀNG -->
+    <div id="khungFormDangKy"
+         th:style="${gianHang != null and gianHang.trangThai == 'CHO_DUYET'} ? 'display: none;' : 'display: block;'">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card card-custom p-4 p-md-5">
+                    <form id="formDangKyShop" enctype="multipart/form-data" novalidate>
+                        <div class="row g-4">
+
+                            <!-- Cột 1: Thông tin thương hiệu & gian hàng -->
+                            <div class="col-md-6 border-end-md">
+                                <h5 class="fw-bold text-dark mb-3">
+                                    <i class="bi bi-shop text-primary me-2"></i>1. Thông Tin Gian Hàng
+                                </h5>
+
+                                <!-- Tên Gian Hàng -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="tenGianHang">
+                                        Tên gian hàng <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white"><i class="bi bi-tag"></i></span>
+                                        <input type="text" class="form-control" id="tenGianHang" name="tenGianHang"
+                                               th:value="${gianHang != null ? gianHang.tenGianHang : ''}"
+                                               placeholder="Ví dụ: Flex Fashion Official" minlength="3" maxlength="100"
+                                               oninput="xoaLoiTruongDangKy('tenGianHang')">
+                                    </div>
+                                    <div class="invalid-feedback d-block" id="error-tenGianHang" style="display:none;"></div>
+                                    <div class="d-flex justify-content-between align-items-center mt-1">
+                                        <small class="text-muted">Từ 3 - 100 ký tự tiếng Việt hoặc chữ số</small>
+                                        <span id="badgeTenShop" class="badge bg-light text-secondary" style="font-size: 11px;">Chờ nhập</span>
+                                    </div>
+                                </div>
+
+                                <!-- Đường Dẫn Định Danh (Slug) Tự Động Sinh -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="duongDanSlug">
+                                        Đường dẫn định danh (Slug URL) <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white"><i class="bi bi-link-45deg"></i></span>
+                                        <input type="text" class="form-control font-monospace" id="duongDanSlug" name="duongDanSlug"
+                                               th:value="${gianHang != null ? gianHang.duongDanSlug : ''}"
+                                               placeholder="flex-fashion-official"
+                                               oninput="xoaLoiTruongDangKy('duongDanSlug')">
+                                        <button type="button" class="btn btn-outline-secondary" onclick="taiTaoSlug()" title="Sinh lại slug tự động">
+                                            <i class="bi bi-arrow-repeat"></i>
+                                        </button>
+                                    </div>
+                                    <div class="invalid-feedback d-block" id="error-duongDanSlug" style="display:none;"></div>
+                                    <div class="slug-preview mt-2">
+                                        <span>Xem trước URL: </span>
+                                        <strong class="text-primary">https://flexshop.vn/shop/<span id="previewSlugText" th:text="${gianHang != null ? gianHang.duongDanSlug : 'ten-shop'}">ten-shop</span></strong>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">Tự động sinh từ Tên shop, không dấu, không ký tự đặc biệt.</small>
+                                </div>
+
+                                <!-- Số Điện Thoại Kho -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="sdtKho">
+                                        Số điện thoại kho / hotline <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white"><i class="bi bi-telephone"></i></span>
+                                        <input type="tel" class="form-control" id="sdtKho" name="sdtKho"
+                                               th:value="${gianHang != null ? gianHang.sdtKho : (user != null ? user.soDienThoai : '')}"
+                                               placeholder="0901234567"
+                                               oninput="xoaLoiTruongDangKy('sdtKho')">
+                                    </div>
+                                    <div class="invalid-feedback d-block" id="error-sdtKho" style="display:none;"></div>
+                                    <small class="text-muted">Gồm 10 số di động Việt Nam (03, 05, 07, 08, 09)</small>
+                                </div>
+
+                                <!-- ĐỊA CHỈ KHO LẤY HÀNG (3 COMBOBOX TỈNH/HUYỆN/XÃ & TÌM KIẾM NHANH) -->
+                                <div class="mb-4 p-3 bg-light rounded-4 border">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="form-label fw-bold text-dark mb-0">
+                                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>Địa chỉ kho lấy hàng / gửi hàng <span class="text-danger">*</span>
+                                        </label>
+                                        <small class="text-primary fw-semibold"><i class="bi bi-check2-circle me-1"></i>63 Tỉnh Thành VN</small>
+                                    </div>
+
+                                    <!-- THANH TÌM KIẾM NHANH TỈNH / HUYỆN / XÃ -->
+                                    <div class="mb-3">
+                                        <div class="position-relative">
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white border-end-0 text-primary">
+                                                    <i class="bi bi-search"></i>
+                                                </span>
+                                                <input type="text" id="inputTimKiemDiaChiNhanh" class="form-control border-start-0" 
+                                                       placeholder="🔍 Tìm nhanh Tỉnh, Huyện, Xã (VD: Cầu Giấy, Bến Nghé, Đà Nẵng)..." 
+                                                       autocomplete="off" oninput="xuLyTimKiemNhanh(event)">
+                                                <button class="btn btn-outline-secondary" type="button" onclick="xoaTimKiemNhanh()" title="Xóa tìm kiếm">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            </div>
+                                            <!-- Dropdown gợi ý tìm kiếm nhanh -->
+                                            <div id="quickSearchResults" class="list-group shadow-lg position-absolute w-100 mt-1 d-none bg-white rounded-3 border" 
+                                                 style="z-index: 1080; max-height: 220px; overflow-y: auto;">
+                                            </div>
+                                        </div>
+
+                                        <!-- Phím bấm chọn nhanh các Tỉnh/Thành phố lớn -->
+                                        <div class="d-flex flex-wrap align-items-center gap-1 mt-2">
+                                            <span class="small text-muted me-1" style="font-size: 11px;">Chọn nhanh:</span>
+                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2" style="font-size: 11px;" onclick="chonNhanhTinh(1)">Hà Nội</button>
+                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2" style="font-size: 11px;" onclick="chonNhanhTinh(79)">TP. HCM</button>
+                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2" style="font-size: 11px;" onclick="chonNhanhTinh(48)">Đà Nẵng</button>
+                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2" style="font-size: 11px;" onclick="chonNhanhTinh(31)">Hải Phòng</button>
+                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2" style="font-size: 11px;" onclick="chonNhanhTinh(92)">Cần Thơ</button>
+                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2" style="font-size: 11px;" onclick="chonNhanhTinh(74)">Bình Dương</button>
+                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2" style="font-size: 11px;" onclick="chonNhanhTinh(75)">Đồng Nai</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- 3 COMBOBOX TỈNH -> HUYỆN -> XÃ -->
+                                    <div class="row g-2 mb-2">
+                                        <div class="col-12">
+                                            <label class="form-label small text-muted mb-1" for="selectModalTinhThanh">
+                                                Tỉnh / Thành phố <span class="text-danger">*</span>
+                                            </label>
+                                            <select id="selectModalTinhThanh" class="form-select form-select-sm" required>
+                                                <option value="">-- Chọn hoặc gõ tìm Tỉnh / Thành phố --</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <label class="form-label small text-muted mb-1" for="selectModalQuanHuyen">
+                                                Quận / Huyện <span class="text-danger">*</span>
+                                            </label>
+                                            <select id="selectModalQuanHuyen" class="form-select form-select-sm" required disabled>
+                                                <option value="">-- Chọn Quận / Huyện --</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <label class="form-label small text-muted mb-1" for="selectModalXaPhuong">
+                                                Phường / Xã <span class="text-danger">*</span>
+                                            </label>
+                                            <select id="selectModalXaPhuong" class="form-select form-select-sm" required disabled>
+                                                <option value="">-- Chọn Phường / Xã --</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- SỐ NHÀ, TÊN ĐƯỜNG CỤ THỂ -->
+                                    <div class="mb-3">
+                                        <label class="form-label small text-muted mb-1" for="txtSoNhaTenDuong">
+                                            Số nhà, tên đường, ngõ ngách, tòa nhà... <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control form-control-sm rounded-3" id="txtSoNhaTenDuong"
+                                               placeholder="Ví dụ: Số 128 Cầu Giấy, Tòa nhà Indochina, Tầng 3" oninput="dongBoDiaChiKho()">
+                                    </div>
+
+                                    <!-- ĐỊA CHỈ KHO HOÀN CHỈNH (TỰ ĐỘNG TỔNG HỢP VÀ SUBMIT) -->
+                                    <div>
+                                        <label class="form-label small fw-bold text-dark mb-1" for="diaChiKho">
+                                            <i class="bi bi-pin-map-fill text-success me-1"></i>Địa chỉ kho hoàn chỉnh (tổng hợp tự động):
+                                        </label>
+                                        <textarea class="form-control bg-white font-monospace" id="diaChiKho" name="diaChiKho" rows="2"
+                                                  th:text="${gianHang != null ? gianHang.diaChiKho : ''}"
+                                                  placeholder="Địa chỉ hoàn chỉnh sẽ tự động hiển thị tại đây khi bạn chọn Tỉnh, Huyện, Xã..."
+                                                  minlength="5" maxlength="255"
+                                                  oninput="xoaLoiTruongDangKy('diaChiKho')"></textarea>
+                                        <div class="invalid-feedback d-block" id="error-diaChiKho" style="display:none;"></div>
+                                        <small class="text-muted d-block mt-1">
+                                            <i class="bi bi-truck text-primary me-1"></i>Đơn vị vận chuyển (Shipper) sẽ đến địa chỉ này lấy hàng.
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <!-- Mô Tả Gian Hàng -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="moTa">Mô tả ngắn gian hàng</label>
+                                    <textarea class="form-control" id="moTa" name="moTa" rows="2"
+                                              th:text="${gianHang != null ? gianHang.moTa : ''}"
+                                              placeholder="Giới thiệu các dòng sản phẩm bạn dự định kinh doanh..."
+                                              oninput="xoaLoiTruongDangKy('moTa')"></textarea>
+                                    <div class="invalid-feedback d-block" id="error-moTa" style="display:none;"></div>
+                                </div>
+
+                                <!-- Logo Gian Hàng (Tùy chọn) -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="fileLogo">Logo gian hàng (Tùy chọn)</label>
+                                    <input type="file" class="form-control" id="fileLogo" name="fileLogo" accept="image/jpeg,image/png,image/webp"
+                                           onchange="xoaLoiTruongDangKy('fileLogo')">
+                                    <div class="invalid-feedback d-block" id="error-fileLogo" style="display:none;"></div>
+                                    <small class="text-muted">Định dạng PNG, JPG &lt; 5MB. Kích thước khuyến nghị 200x200px</small>
+                                </div>
+                            </div>
+
+                            <!-- Cột 2: Hồ sơ pháp lý & Giấy phép KD -->
+                            <div class="col-md-6">
+                                <h5 class="fw-bold text-dark mb-3">
+                                    <i class="bi bi-file-earmark-check text-success me-2"></i>2. Giấy Phép Kinh Doanh & Pháp Lý
+                                </h5>
+
+                                <!-- Mã Số Thuế / Giấy Phép -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="soGiayTo">
+                                        Mã số thuế / Số giấy phép kinh doanh <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white"><i class="bi bi-upc-scan"></i></span>
+                                        <input type="text" class="form-control font-monospace text-uppercase" id="soGiayTo" name="soGiayTo"
+                                               th:value="${gianHang != null ? gianHang.soGiayTo : ''}"
+                                               placeholder="Ví dụ: 0109887766" minlength="5" maxlength="50"
+                                               oninput="xoaLoiTruongDangKy('soGiayTo')">
+                                    </div>
+                                    <div class="invalid-feedback d-block" id="error-soGiayTo" style="display:none;"></div>
+                                    <small class="text-muted">MST doanh nghiệp hoặc ĐKKD hộ kinh doanh cá thể</small>
+                                </div>
+
+                                <!-- Upload Tệp Giấy Phép Kinh Doanh (BẮT BUỘC, < 5MB) -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">
+                                        Tệp scan Giấy phép kinh doanh <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="upload-dropzone" id="dropzoneGiayPhep" onclick="document.getElementById('fileGiayPhep').click()">
+                                        <i class="bi bi-cloud-arrow-up display-5 text-primary mb-2"></i>
+                                        <h6 class="fw-bold mb-1">Nhấp để chọn tệp hoặc kéo thả vào đây</h6>
+                                        <p class="text-muted small mb-0">
+                                            Bắt buộc định dạng <b>PDF, JPEG, JPG, PNG</b> &bull; Dung lượng <b>&lt; 5MB</b>
+                                        </p>
+                                        <input type="file" id="fileGiayPhep" name="fileGiayPhep" class="d-none"
+                                               accept=".pdf,image/jpeg,image/png"
+                                               onchange="xoaLoiTruongDangKy('fileGiayPhep')">
+                                    </div>
+                                    <div class="invalid-feedback d-block" id="error-fileGiayPhep" style="display:none;"></div>
+
+                                    <!-- Hiển thị tệp đã chọn -->
+                                    <div id="fileSelectedInfo" class="mt-3 p-3 bg-light rounded-3 border d-none">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i id="fileIconType" class="bi bi-file-earmark-pdf text-danger fs-3"></i>
+                                                <div>
+                                                    <div id="fileNameText" class="fw-bold small text-truncate" style="max-width: 250px;">ten-tep.pdf</div>
+                                                    <div id="fileSizeText" class="text-muted" style="font-size: 11px;">1.2 MB</div>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="huyChonFile(event)">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Đã có tệp cũ khi cập nhật -->
+                                    <div th:if="${gianHang != null and gianHang.linkAnhGiayTo != null}" class="mt-2 small text-muted">
+                                        <i class="bi bi-info-circle text-primary me-1"></i> Tệp hiện tại:
+                                        <a th:href="${gianHang.linkAnhGiayTo}" target="_blank" class="text-primary fw-semibold">Xem tệp đã tải lên</a>
+                                        (Nếu không chọn tệp mới, hệ thống sẽ giữ nguyên tệp này).
+                                    </div>
+                                </div>
+
+                                <!-- Chính Sách & Cam Kết -->
+                                <div class="card bg-light border-0 p-3 rounded-3 mb-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="dongYDieuKhoan" required checked>
+                                        <label class="form-check-label small text-muted" for="dongYDieuKhoan">
+                                            Tôi cam kết thông tin và Giấy phép kinh doanh cung cấp là hoàn toàn chính xác, tuân thủ theo
+                                            <a href="#" class="text-decoration-none">Chính sách kinh doanh</a> và
+                                            <a href="#" class="text-decoration-none">Quy chuẩn cộng đồng</a> của sàn FlexShop.
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Nút Submit -->
+                                <div class="d-grid">
+                                    <button type="submit" id="btnSubmitForm" class="btn btn-primary btn-lg rounded-pill fw-bold py-3 shadow-sm">
+                                        <span id="submitSpinner" class="spinner-border spinner-border-sm me-2 d-none"></span>
+                                        <i class="bi bi-send-check-fill me-1"></i>
+                                        <span id="submitBtnText" th:text="${gianHang != null and gianHang.trangThai == 'TU_CHOI' ? 'Cập Nhật & Nộp Lại Hồ Sơ' : 'Gửi Yêu Cầu Đăng Ký Shop'}">Gửi Yêu Cầu Đăng Ký Shop</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script th:inline="javascript">
+    const isEditMode = /*[[${gianHang != null and (gianHang.trangThai == 'TU_CHOI' or gianHang.trangThai == 'CHO_DUYET')}]]*/ false;
+    const currentShopId = /*[[${gianHang != null ? gianHang.maGianHang : null}]]*/ null;
+
+    let debounceTimer = null;
+
+    // Lắng nghe sự kiện gõ tên shop để sinh slug và kiểm tra tự động
+    document.getElementById('tenGianHang').addEventListener('input', function(e) {
+        clearTimeout(debounceTimer);
+        const tenShop = e.target.value.trim();
+
+        if (tenShop.length < 3) {
+            capNhatBadgeTenShop('error', 'Quá ngắn (< 3 ký tự)');
+            return;
+        }
+
+        debounceTimer = setTimeout(() => {
+            kiemTraTenVaSinhSlug(tenShop);
+        }, 350);
+    });
+
+    // Lắng nghe chỉnh sửa slug thủ công
+    document.getElementById('duongDanSlug').addEventListener('input', function(e) {
+        let slug = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/^-+|-+$/g, '');
+        e.target.value = slug;
+        document.getElementById('previewSlugText').innerText = slug || 'ten-shop';
+    });
+
+    // Hàm gọi API kiểm tra slug và tên shop
+    async function kiemTraTenVaSinhSlug(tenShop) {
+        try {
+            capNhatBadgeTenShop('loading', 'Đang kiểm tra...');
+            const params = new URLSearchParams({
+                tenGianHang: tenShop
+            });
+            if (currentShopId) {
+                params.append('maGianHang', currentShopId);
+            }
+
+            const res = await fetch(`/api/v1/seller/dang-ky-shop/kiem-tra-slug?${params.toString()}`);
+            const data = await res.json();
+
+            if (data.thanhCong && data.duLieu) {
+                const { tenKhaDung, slugGoiY } = data.duLieu;
+                if (tenKhaDung) {
+                    capNhatBadgeTenShop('success', 'Tên hợp lệ ✓');
+                    document.getElementById('duongDanSlug').value = slugGoiY;
+                    document.getElementById('previewSlugText').innerText = slugGoiY;
+                } else {
+                    capNhatBadgeTenShop('error', 'Tên đã tồn tại ✗');
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            capNhatBadgeTenShop('secondary', 'Không thể kiểm tra');
+        }
+    }
+
+    function taiTaoSlug() {
+        const tenShop = document.getElementById('tenGianHang').value.trim();
+        if (tenShop) {
+            kiemTraTenVaSinhSlug(tenShop);
+        }
+    }
+
+    function capNhatBadgeTenShop(type, text) {
+        const badge = document.getElementById('badgeTenShop');
+        badge.innerText = text;
+        badge.className = 'badge ' + (
+            type === 'success' ? 'bg-success' :
+            type === 'error' ? 'bg-danger' :
+            type === 'loading' ? 'bg-warning text-dark' : 'bg-light text-secondary'
+        );
+    }
+
+    // Xử lý File Upload Giấy Phép Kinh Doanh
+    const fileInput = document.getElementById('fileGiayPhep');
+    const dropzone = document.getElementById('dropzoneGiayPhep');
+    const fileInfoBox = document.getElementById('fileSelectedInfo');
+    const fileNameText = document.getElementById('fileNameText');
+    const fileSizeText = document.getElementById('fileSizeText');
+    const fileIconType = document.getElementById('fileIconType');
+
+    // Drag and drop events
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+        }, false);
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files && files.length > 0) {
+            fileInput.files = files;
+            kiemTraVaHienThiFile(files[0]);
+        }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+            kiemTraVaHienThiFile(e.target.files[0]);
+        }
+    });
+
+    function kiemTraVaHienThiFile(file) {
+        const maxBytes = 5 * 1024 * 1024; // 5MB
+        const validExtensions = ['.pdf', '.jpeg', '.jpg', '.png'];
+        const fileName = file.name.toLowerCase();
+        const isValidExt = validExtensions.some(ext => fileName.endsWith(ext));
+
+        if (!isValidExt) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Định dạng tệp không hợp lệ',
+                text: 'Hệ thống chỉ chấp nhận tệp Giấy phép kinh doanh định dạng PDF, JPEG, JPG, PNG.'
+            });
+            fileInput.value = '';
+            fileInfoBox.classList.add('d-none');
+            return;
+        }
+
+        if (file.size > maxBytes) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Tệp vượt quá dung lượng',
+                text: `Kích thước tệp là ${(file.size / (1024 * 1024)).toFixed(2)}MB. Giới hạn tối đa là 5MB!`
+            });
+            fileInput.value = '';
+            fileInfoBox.classList.add('d-none');
+            return;
+        }
+
+        // Cập nhật thông tin file
+        fileNameText.innerText = file.name;
+        fileSizeText.innerText = (file.size / 1024).toFixed(1) + ' KB';
+
+        if (fileName.endsWith('.pdf')) {
+            fileIconType.className = 'bi bi-file-earmark-pdf text-danger fs-3';
+        } else {
+            fileIconType.className = 'bi bi-file-earmark-image text-primary fs-3';
+        }
+
+        fileInfoBox.classList.remove('d-none');
+    }
+
+    function huyChonFile(e) {
+        e.stopPropagation();
+        fileInput.value = '';
+        fileInfoBox.classList.add('d-none');
+    }
+
+    function batCheDoCapNhat() {
+        document.getElementById('khungFormDangKy').style.display = 'block';
+        document.getElementById('khungFormDangKy').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Hàm quản lý hiển thị lỗi cụ thể tại từng ô đăng ký
+    function hienThiLoiTruongDangKy(truong, thongBao) {
+        const el = document.getElementById(truong);
+        const feedback = document.getElementById('error-' + truong) || (el ? el.parentNode.querySelector('.invalid-feedback') : null);
+        if (el) el.classList.add('is-invalid');
+        if (feedback) {
+            feedback.textContent = thongBao;
+            feedback.style.display = 'block';
+        }
+    }
+
+    function xoaLoiTruongDangKy(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('is-invalid');
+        const feedback = document.getElementById('error-' + id) || (el ? el.parentNode.querySelector('.invalid-feedback') : null);
+        if (feedback) {
+            feedback.textContent = '';
+            feedback.style.display = 'none';
+        }
+    }
+
+    function xoaTatCaLoiDangKy() {
+        document.querySelectorAll('#formDangKyShop .is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        document.querySelectorAll('#formDangKyShop .invalid-feedback').forEach(el => {
+            el.textContent = '';
+            el.style.display = 'none';
+        });
+    }
+
+    // Submit Form Đăng Ký với kiểm tra cụ thể từng ô
+    document.getElementById('formDangKyShop').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        xoaTatCaLoiDangKy();
+
+        let coLoi = false;
+        let truongDauTienBiLoi = null;
+
+        const danhDauLoi = (truong, thongBao) => {
+            hienThiLoiTruongDangKy(truong, thongBao);
+            coLoi = true;
+            if (!truongDauTienBiLoi) {
+                truongDauTienBiLoi = document.getElementById(truong);
+            }
+        };
+
+        const tenGianHang = document.getElementById('tenGianHang').value.trim();
+        const sdtKho = document.getElementById('sdtKho').value.trim();
+        const diaChiKho = document.getElementById('diaChiKho').value.trim();
+        const soGiayTo = document.getElementById('soGiayTo').value.trim();
+        const duongDanSlug = document.getElementById('duongDanSlug').value.trim();
+        const moTa = document.getElementById('moTa').value.trim();
+
+        // 1. Kiểm tra Tên Gian Hàng
+        if (!tenGianHang) {
+            danhDauLoi('tenGianHang', 'Tên gian hàng không được để trống!');
+        } else if (tenGianHang.length < 3 || tenGianHang.length > 100) {
+            danhDauLoi('tenGianHang', 'Tên gian hàng phải từ 3 đến 100 ký tự!');
+        }
+
+        // 2. Kiểm tra Slug (nếu nhập)
+        if (duongDanSlug && !/^[a-z0-9-]+$/.test(duongDanSlug)) {
+            danhDauLoi('duongDanSlug', 'Đường dẫn slug chỉ được chứa chữ thường không dấu, số và dấu gạch ngang (-)!');
+        }
+
+        // 3. Kiểm tra Số điện thoại
+        const phoneRegex = /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/;
+        if (!sdtKho) {
+            danhDauLoi('sdtKho', 'Số điện thoại kho không được để trống!');
+        } else if (!phoneRegex.test(sdtKho)) {
+            danhDauLoi('sdtKho', 'Số điện thoại kho phải là số di động Việt Nam hợp lệ (10 chữ số)!');
+        }
+
+        // 4. Kiểm tra Địa chỉ kho
+        if (!diaChiKho) {
+            danhDauLoi('diaChiKho', 'Địa chỉ kho không được để trống! Vui lòng chọn Tỉnh, Huyện, Xã và nhập số nhà.');
+        } else if (diaChiKho.length < 5 || diaChiKho.length > 255) {
+            danhDauLoi('diaChiKho', 'Địa chỉ kho phải từ 5 đến 255 ký tự!');
+        }
+
+        // 5. Kiểm tra Mã số thuế / Số giấy phép
+        if (!soGiayTo) {
+            danhDauLoi('soGiayTo', 'Mã số thuế / Số giấy phép không được để trống!');
+        } else if (soGiayTo.length < 5 || soGiayTo.length > 50) {
+            danhDauLoi('soGiayTo', 'Mã số thuế / Số giấy phép phải từ 5 đến 50 ký tự!');
+        }
+
+        // 6. Kiểm tra file giấy phép nếu đăng ký mới
+        if (!isEditMode && (!fileInput.files || fileInput.files.length === 0)) {
+            danhDauLoi('fileGiayPhep', 'Bắt buộc tải lên tệp scan Giấy phép kinh doanh (PDF/Ảnh < 5MB)!');
+        } else if (fileInput.files && fileInput.files[0] && fileInput.files[0].size > 5 * 1024 * 1024) {
+            danhDauLoi('fileGiayPhep', 'Tệp giấy phép kinh doanh vượt quá 5MB!');
+        }
+
+        // 7. Kiểm tra file logo nếu có
+        const fileLogoInput = document.getElementById('fileLogo');
+        if (fileLogoInput.files && fileLogoInput.files[0] && fileLogoInput.files[0].size > 5 * 1024 * 1024) {
+            danhDauLoi('fileLogo', 'Ảnh logo không được vượt quá 5MB!');
+        }
+
+        if (coLoi) {
+            if (truongDauTienBiLoi) {
+                truongDauTienBiLoi.focus();
+                truongDauTienBiLoi.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('tenGianHang', tenGianHang);
+        formData.append('sdtKho', sdtKho);
+        formData.append('diaChiKho', diaChiKho);
+        formData.append('soGiayTo', soGiayTo);
+        if (duongDanSlug) formData.append('duongDanSlug', duongDanSlug);
+        if (moTa) formData.append('moTa', moTa);
+
+        if (fileInput.files && fileInput.files.length > 0) {
+            formData.append('fileGiayPhep', fileInput.files[0]);
+        }
+
+        if (fileLogoInput.files && fileLogoInput.files.length > 0) {
+            formData.append('fileLogo', fileLogoInput.files[0]);
+        }
+
+        const btnSubmit = document.getElementById('btnSubmitForm');
+        const spinner = document.getElementById('submitSpinner');
+        const btnText = document.getElementById('submitBtnText');
+
+        btnSubmit.disabled = true;
+        spinner.classList.remove('d-none');
+        btnText.innerText = 'Đang gửi hồ sơ...';
+
+        try {
+            const url = isEditMode
+                ? '/api/v1/seller/dang-ky-shop/cap-nhat'
+                : '/api/v1/seller/dang-ky-shop';
+
+            const method = isEditMode ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method: method,
+                body: formData
+            });
+
+            const result = await res.json().catch(() => null);
+
+            if (res.ok && result && result.thanhCong) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Gửi Đăng Ký Thành Công! 🎉',
+                    html: `
+                        <div class="text-start py-2">
+                            <p class="mb-2">Hồ sơ mở gian hàng <b>${tenGianHang}</b> đã được chuyển về trạng thái <b>CHỜ DUYỆT</b>.</p>
+                            <p class="small text-muted mb-0">Ban Quản Trị FlexShop sẽ tiến hành xác thực Giấy phép kinh doanh của bạn trong thời gian sớm nhất.</p>
+                        </div>
+                    `,
+                    confirmButtonText: 'Xem Tiến Trình Hồ Sơ',
+                    confirmButtonColor: '#3b82f6'
+                }).then(() => {
+                    window.location.reload();
+                });
+            } else {
+                const thongBaoLoi = (result && (result.thongBao || result.thongDiep)) || 'Đã có lỗi xảy ra trong quá trình nộp hồ sơ!';
+                
+                // Ánh xạ lỗi server vào từng ô nhập liệu
+                if (result && result.duLieu && typeof result.duLieu === 'object') {
+                    for (const [k, v] of Object.entries(result.duLieu)) {
+                        hienThiLoiTruongDangKy(k, v);
+                        if (!truongDauTienBiLoi) truongDauTienBiLoi = document.getElementById(k);
+                    }
+                }
+
+                if (thongBaoLoi.includes('Tên gian hàng')) {
+                    hienThiLoiTruongDangKy('tenGianHang', thongBaoLoi);
+                    if (!truongDauTienBiLoi) truongDauTienBiLoi = document.getElementById('tenGianHang');
+                } else if (thongBaoLoi.includes('slug')) {
+                    hienThiLoiTruongDangKy('duongDanSlug', thongBaoLoi);
+                    if (!truongDauTienBiLoi) truongDauTienBiLoi = document.getElementById('duongDanSlug');
+                } else if (thongBaoLoi.includes('Số điện thoại')) {
+                    hienThiLoiTruongDangKy('sdtKho', thongBaoLoi);
+                    if (!truongDauTienBiLoi) truongDauTienBiLoi = document.getElementById('sdtKho');
+                } else if (thongBaoLoi.includes('Giấy phép') || thongBaoLoi.includes('giấy phép')) {
+                    hienThiLoiTruongDangKy('fileGiayPhep', thongBaoLoi);
+                } else if (thongBaoLoi.includes('logo') || thongBaoLoi.includes('Logo')) {
+                    hienThiLoiTruongDangKy('fileLogo', thongBaoLoi);
+                }
+
+                if (truongDauTienBiLoi) {
+                    truongDauTienBiLoi.focus();
+                    truongDauTienBiLoi.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Dữ liệu không hợp lệ',
+                    text: thongBaoLoi
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi kết nối',
+                text: 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại đường truyền mạng!'
+            });
+        } finally {
+            btnSubmit.disabled = false;
+            spinner.classList.add('d-none');
+            btnText.innerText = isEditMode ? 'Cập Nhật & Nộp Lại Hồ Sơ' : 'Gửi Yêu Cầu Đăng Ký Shop';
+        }
+    });
+
+    // =========================================================================
+    // MODULE ĐỊA CHỈ: 63 TỈNH THÀNH VIỆT NAM, 3 COMBOBOX LIÊN HOÀN & TÌM KIẾM NHANH
+    // =========================================================================
+    const DANH_SACH_63_TINH = [
+        { code: 1, name: "Thành phố Hà Nội", clean: "Hà Nội" },
+        { code: 79, name: "Thành phố Hồ Chí Minh", clean: "Hồ Chí Minh" },
+        { code: 48, name: "Thành phố Đà Nẵng", clean: "Đà Nẵng" },
+        { code: 31, name: "Thành phố Hải Phòng", clean: "Hải Phòng" },
+        { code: 92, name: "Thành phố Cần Thơ", clean: "Cần Thơ" },
+        { code: 46, name: "Tỉnh Thừa Thiên Huế", clean: "Thừa Thiên Huế" },
+        { code: 74, name: "Tỉnh Bình Dương", clean: "Bình Dương" },
+        { code: 75, name: "Tỉnh Đồng Nai", clean: "Đồng Nai" },
+        { code: 27, name: "Tỉnh Bắc Ninh", clean: "Bắc Ninh" },
+        { code: 22, name: "Tỉnh Quảng Ninh", clean: "Quảng Ninh" },
+        { code: 77, name: "Tỉnh Bà Rịa - Vũng Tàu", clean: "Bà Rịa - Vũng Tàu" },
+        { code: 2, name: "Tỉnh Hà Giang", clean: "Hà Giang" },
+        { code: 4, name: "Tỉnh Cao Bằng", clean: "Cao Bằng" },
+        { code: 6, name: "Tỉnh Bắc Kạn", clean: "Bắc Kạn" },
+        { code: 8, name: "Tỉnh Tuyên Quang", clean: "Tuyên Quang" },
+        { code: 10, name: "Tỉnh Lào Cai", clean: "Lào Cai" },
+        { code: 11, name: "Tỉnh Điện Biên", clean: "Điện Biên" },
+        { code: 12, name: "Tỉnh Lai Châu", clean: "Lai Châu" },
+        { code: 14, name: "Tỉnh Sơn La", clean: "Sơn La" },
+        { code: 15, name: "Tỉnh Yên Bái", clean: "Yên Bái" },
+        { code: 17, name: "Tỉnh Hoà Bình", clean: "Hoà Bình" },
+        { code: 19, name: "Tỉnh Thái Nguyên", clean: "Thái Nguyên" },
+        { code: 20, name: "Tỉnh Lạng Sơn", clean: "Lạng Sơn" },
+        { code: 24, name: "Tỉnh Bắc Giang", clean: "Bắc Giang" },
+        { code: 25, name: "Tỉnh Phú Thọ", clean: "Phú Thọ" },
+        { code: 26, name: "Tỉnh Vĩnh Phúc", clean: "Vĩnh Phúc" },
+        { code: 30, name: "Tỉnh Hải Dương", clean: "Hải Dương" },
+        { code: 33, name: "Tỉnh Hưng Yên", clean: "Hưng Yên" },
+        { code: 34, name: "Tỉnh Thái Bình", clean: "Thái Bình" },
+        { code: 35, name: "Tỉnh Hà Nam", clean: "Hà Nam" },
+        { code: 36, name: "Tỉnh Nam Định", clean: "Nam Định" },
+        { code: 37, name: "Tỉnh Ninh Bình", clean: "Ninh Bình" },
+        { code: 38, name: "Tỉnh Thanh Hóa", clean: "Thanh Hóa" },
+        { code: 40, name: "Tỉnh Nghệ An", clean: "Nghệ An" },
+        { code: 42, name: "Tỉnh Hà Tĩnh", clean: "Hà Tĩnh" },
+        { code: 44, name: "Tỉnh Quảng Bình", clean: "Quảng Bình" },
+        { code: 45, name: "Tỉnh Quảng Trị", clean: "Quảng Trị" },
+        { code: 49, name: "Tỉnh Quảng Nam", clean: "Quảng Nam" },
+        { code: 51, name: "Tỉnh Quảng Ngãi", clean: "Quảng Ngãi" },
+        { code: 52, name: "Tỉnh Bình Định", clean: "Bình Định" },
+        { code: 54, name: "Tỉnh Phú Yên", clean: "Phú Yên" },
+        { code: 56, name: "Tỉnh Khánh Hòa", clean: "Khánh Hòa" },
+        { code: 58, name: "Tỉnh Ninh Thuận", clean: "Ninh Thuận" },
+        { code: 60, name: "Tỉnh Bình Thuận", clean: "Bình Thuận" },
+        { code: 62, name: "Tỉnh Kon Tum", clean: "Kon Tum" },
+        { code: 64, name: "Tỉnh Gia Lai", clean: "Gia Lai" },
+        { code: 66, name: "Tỉnh Đắk Lắk", clean: "Đắk Lắk" },
+        { code: 67, name: "Tỉnh Đắk Nông", clean: "Đắk Nông" },
+        { code: 68, name: "Tỉnh Lâm Đồng", clean: "Lâm Đồng" },
+        { code: 70, name: "Tỉnh Bình Phước", clean: "Bình Phước" },
+        { code: 72, name: "Tỉnh Tây Ninh", clean: "Tây Ninh" },
+        { code: 80, name: "Tỉnh Long An", clean: "Long An" },
+        { code: 82, name: "Tỉnh Tiền Giang", clean: "Tiền Giang" },
+        { code: 83, name: "Tỉnh Bến Tre", clean: "Bến Tre" },
+        { code: 84, name: "Tỉnh Trà Vinh", clean: "Trà Vinh" },
+        { code: 86, name: "Tỉnh Vĩnh Long", clean: "Vĩnh Long" },
+        { code: 87, name: "Tỉnh Đồng Tháp", clean: "Đồng Tháp" },
+        { code: 89, name: "Tỉnh An Giang", clean: "An Giang" },
+        { code: 91, name: "Tỉnh Kiên Giang", clean: "Kiên Giang" },
+        { code: 93, name: "Tỉnh Hậu Giang", clean: "Hậu Giang" },
+        { code: 94, name: "Tỉnh Sóc Trăng", clean: "Sóc Trăng" },
+        { code: 95, name: "Tỉnh Bạc Liêu", clean: "Bạc Liêu" },
+        { code: 96, name: "Tỉnh Cà Mau", clean: "Cà Mau" }
+    ];
+
+    // Dữ liệu dự phòng mẫu khi ngoại tuyến (offline fallback)
+    const DU_LIEU_HUYEN_MAU = {
+        1: [ // Hà Nội
+            { code: 1, name: "Quận Ba Đình" }, { code: 2, name: "Quận Hoàn Kiếm" },
+            { code: 3, name: "Quận Tây Hồ" }, { code: 4, name: "Quận Long Biên" },
+            { code: 5, name: "Quận Cầu Giấy" }, { code: 6, name: "Quận Đống Đa" },
+            { code: 7, name: "Quận Hai Bà Trưng" }, { code: 8, name: "Quận Hoàng Mai" },
+            { code: 9, name: "Quận Thanh Xuân" }, { code: 16, name: "Huyện Sóc Sơn" },
+            { code: 19, name: "Quận Nam Từ Liêm" }, { code: 21, name: "Quận Bắc Từ Liêm" },
+            { code: 268, name: "Quận Hà Đông" }
+        ],
+        79: [ // TP. HCM
+            { code: 760, name: "Quận 1" }, { code: 761, name: "Quận 12" },
+            { code: 764, name: "Quận Gò Vấp" }, { code: 765, name: "Quận Bình Thạnh" },
+            { code: 766, name: "Quận Tân Bình" }, { code: 767, name: "Quận Tân Phú" },
+            { code: 768, name: "Quận Phú Nhuận" }, { code: 769, name: "Thành phố Thủ Đức" },
+            { code: 770, name: "Quận 3" }, { code: 771, name: "Quận 10" },
+            { code: 772, name: "Quận 11" }, { code: 773, name: "Quận 4" },
+            { code: 774, name: "Quận 5" }, { code: 775, name: "Quận 6" },
+            { code: 776, name: "Quận 8" }, { code: 777, name: "Quận 7" },
+            { code: 778, name: "Quận Bình Tân" }
+        ],
+        48: [ // Đà Nẵng
+            { code: 490, name: "Quận Hải Châu" }, { code: 491, name: "Quận Thanh Khê" },
+            { code: 492, name: "Quận Sơn Trà" }, { code: 493, name: "Quận Ngũ Hành Sơn" },
+            { code: 494, name: "Quận Liên Chiểu" }, { code: 495, name: "Quận Cẩm Lệ" },
+            { code: 497, name: "Huyện Hòa Vang" }
+        ],
+        31: [ // Hải Phòng
+            { code: 303, name: "Quận Hồng Bàng" }, { code: 304, name: "Quận Ngô Quyền" },
+            { code: 305, name: "Quận Lê Chân" }, { code: 306, name: "Quận Hải An" },
+            { code: 307, name: "Quận Kiến An" }, { code: 309, name: "Quận Dương Kinh" }
+        ],
+        92: [ // Cần Thơ
+            { code: 916, name: "Quận Ninh Kiều" }, { code: 917, name: "Quận Ô Môn" },
+            { code: 918, name: "Quận Bình Thủy" }, { code: 919, name: "Quận Cái Răng" },
+            { code: 923, name: "Quận Thốt Nốt" }
+        ],
+        74: [ // Bình Dương
+            { code: 718, name: "Thành phố Thủ Dầu Một" }, { code: 721, name: "Thành phố Thuận An" },
+            { code: 722, name: "Thành phố Dĩ An" }, { code: 723, name: "Thị xã Bến Cát" },
+            { code: 724, name: "Thị xã Tân Uyên" }
+        ],
+        75: [ // Đồng Nai
+            { code: 731, name: "Thành phố Biên Hòa" }, { code: 732, name: "Thành phố Long Khánh" },
+            { code: 734, name: "Huyện Long Thành" }, { code: 735, name: "Huyện Nhơn Trạch" }
+        ]
+    };
+
+    const cacheDistricts = {};
+    const cacheWards = {};
+
+    let tsTinh = null;
+    let tsHuyen = null;
+    let tsXa = null;
+    let searchQuickTimer = null;
+
+    // Khởi tạo các Combobox TomSelect và sự kiện địa chỉ
+    document.addEventListener('DOMContentLoaded', () => {
+        khoiTaoComboboxesDiaChi();
+
+        // Ẩn dropdown gợi ý khi bấm ra ngoài
+        document.addEventListener('click', (e) => {
+            const resultsBox = document.getElementById('quickSearchResults');
+            const searchInput = document.getElementById('inputTimKiemDiaChiNhanh');
+            if (resultsBox && !resultsBox.contains(e.target) && e.target !== searchInput) {
+                resultsBox.classList.add('d-none');
+            }
+        });
+    });
+
+    function khoiTaoComboboxesDiaChi() {
+        if (typeof TomSelect !== 'undefined') {
+            tsTinh = new TomSelect('#selectModalTinhThanh', {
+                valueField: 'code',
+                labelField: 'name',
+                searchField: ['name', 'clean'],
+                placeholder: '🔍 Gõ hoặc chọn Tỉnh / Thành phố...',
+                maxOptions: 100,
+                onChange: function(val) {
+                    if (val) xuLyChonTinh(val);
+                    else datLaiComboboxHuyenXa();
+                    dongBoDiaChiKho();
+                }
+            });
+
+            tsHuyen = new TomSelect('#selectModalQuanHuyen', {
+                valueField: 'code',
+                labelField: 'name',
+                searchField: ['name'],
+                placeholder: '🔍 Gõ hoặc chọn Quận / Huyện...',
+                maxOptions: 100,
+                onChange: function(val) {
+                    if (val) xuLyChonHuyen(val);
+                    else datLaiComboboxXa();
+                    dongBoDiaChiKho();
+                }
+            });
+
+            tsXa = new TomSelect('#selectModalXaPhuong', {
+                valueField: 'code',
+                labelField: 'name',
+                searchField: ['name'],
+                placeholder: '🔍 Gõ hoặc chọn Phường / Xã...',
+                maxOptions: 200,
+                onChange: function() {
+                    dongBoDiaChiKho();
+                }
+            });
+
+            // Nạp danh sách 63 tỉnh thành vào combobox tỉnh
+            tsTinh.addOptions(DANH_SACH_63_TINH);
+            tsHuyen.disable();
+            tsXa.disable();
+        } else {
+            // Fallback native select nếu thư viện chưa tải xong
+            const elTinh = document.getElementById('selectModalTinhThanh');
+            DANH_SACH_63_TINH.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.code;
+                opt.textContent = t.name;
+                elTinh.appendChild(opt);
+            });
+            elTinh.addEventListener('change', (e) => {
+                xuLyChonTinh(e.target.value);
+                dongBoDiaChiKho();
+            });
+            document.getElementById('selectModalQuanHuyen').addEventListener('change', (e) => {
+                xuLyChonHuyen(e.target.value);
+                dongBoDiaChiKho();
+            });
+            document.getElementById('selectModalXaPhuong').addEventListener('change', () => {
+                dongBoDiaChiKho();
+            });
+        }
+    }
+
+    // Xử lý khi chọn Tỉnh -> Tự động tải & lọc danh sách Quận/Huyện
+    async function xuLyChonTinh(tinhCode, callbackSauKhiLoad) {
+        if (!tinhCode) {
+            datLaiComboboxHuyenXa();
+            return;
+        }
+
+        let districts = cacheDistricts[tinhCode];
+        if (!districts) {
+            try {
+                const res = await fetch(`https://provinces.open-api.vn/api/p/${tinhCode}?depth=2`);
+                if (res.ok) {
+                    const data = await res.json();
+                    districts = (data.districts || []).map(d => ({ code: d.code, name: d.name }));
+                    cacheDistricts[tinhCode] = districts;
+                }
+            } catch (err) {
+                console.warn('Không thể tải huyện online, dùng fallback mẫu:', err);
+                districts = DU_LIEU_HUYEN_MAU[tinhCode] || [];
+            }
+        }
+
+        if (!districts || districts.length === 0) {
+            districts = DU_LIEU_HUYEN_MAU[tinhCode] || [];
+        }
+
+        if (tsHuyen) {
+            tsHuyen.clear();
+            tsHuyen.clearOptions();
+            tsHuyen.addOptions(districts);
+            tsHuyen.enable();
+            datLaiComboboxXa();
+        } else {
+            const elHuyen = document.getElementById('selectModalQuanHuyen');
+            elHuyen.innerHTML = '<option value="">-- Chọn Quận / Huyện --</option>';
+            districts.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d.code;
+                opt.textContent = d.name;
+                elHuyen.appendChild(opt);
+            });
+            elHuyen.disabled = false;
+            datLaiComboboxXa();
+        }
+
+        if (callbackSauKhiLoad && typeof callbackSauKhiLoad === 'function') {
+            callbackSauKhiLoad();
+        }
+    }
+
+    // Xử lý khi chọn Quận/Huyện -> Tự động tải & lọc danh sách Phường/Xã
+    async function xuLyChonHuyen(huyenCode, callbackSauKhiLoad) {
+        if (!huyenCode) {
+            datLaiComboboxXa();
+            return;
+        }
+
+        let wards = cacheWards[huyenCode];
+        if (!wards) {
+            try {
+                const res = await fetch(`https://provinces.open-api.vn/api/d/${huyenCode}?depth=2`);
+                if (res.ok) {
+                    const data = await res.json();
+                    wards = (data.wards || []).map(w => ({ code: w.code, name: w.name }));
+                    cacheWards[huyenCode] = wards;
+                }
+            } catch (err) {
+                console.warn('Không thể tải xã online:', err);
+                wards = [];
+            }
+        }
+
+        if (!wards) wards = [];
+
+        if (tsXa) {
+            tsXa.clear();
+            tsXa.clearOptions();
+            tsXa.addOptions(wards);
+            tsXa.enable();
+        } else {
+            const elXa = document.getElementById('selectModalXaPhuong');
+            elXa.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>';
+            wards.forEach(w => {
+                const opt = document.createElement('option');
+                opt.value = w.code;
+                opt.textContent = w.name;
+                elXa.appendChild(opt);
+            });
+            elXa.disabled = false;
+        }
+
+        if (callbackSauKhiLoad && typeof callbackSauKhiLoad === 'function') {
+            callbackSauKhiLoad();
+        }
+    }
+
+    function datLaiComboboxHuyenXa() {
+        if (tsHuyen) {
+            tsHuyen.clear();
+            tsHuyen.clearOptions();
+            tsHuyen.disable();
+        }
+        datLaiComboboxXa();
+    }
+
+    function datLaiComboboxXa() {
+        if (tsXa) {
+            tsXa.clear();
+            tsXa.clearOptions();
+            tsXa.disable();
+        }
+    }
+
+    // Phím tắt chọn nhanh các Tỉnh/Thành phố lớn
+    function chonNhanhTinh(code) {
+        if (tsTinh) {
+            tsTinh.setValue(code);
+            tsHuyen.focus();
+        } else {
+            const el = document.getElementById('selectModalTinhThanh');
+            el.value = code;
+            xuLyChonTinh(code);
+        }
+        dongBoDiaChiKho();
+    }
+
+    // Tự động đồng bộ và tổng hợp thành Địa chỉ kho hoàn chỉnh
+    function dongBoDiaChiKho() {
+        const soNha = (document.getElementById('txtSoNhaTenDuong').value || '').trim();
+
+        let tenTinh = '';
+        let tenHuyen = '';
+        let tenXa = '';
+
+        if (tsTinh && tsTinh.getValue()) {
+            const opt = tsTinh.options[tsTinh.getValue()];
+            if (opt) tenTinh = opt.name;
+        } else {
+            const elTinh = document.getElementById('selectModalTinhThanh');
+            if (elTinh && elTinh.selectedIndex > 0) tenTinh = elTinh.options[elTinh.selectedIndex].text;
+        }
+
+        if (tsHuyen && tsHuyen.getValue()) {
+            const opt = tsHuyen.options[tsHuyen.getValue()];
+            if (opt) tenHuyen = opt.name;
+        } else {
+            const elHuyen = document.getElementById('selectModalQuanHuyen');
+            if (elHuyen && elHuyen.selectedIndex > 0) tenHuyen = elHuyen.options[elHuyen.selectedIndex].text;
+        }
+
+        if (tsXa && tsXa.getValue()) {
+            const opt = tsXa.options[tsXa.getValue()];
+            if (opt) tenXa = opt.name;
+        } else {
+            const elXa = document.getElementById('selectModalXaPhuong');
+            if (elXa && elXa.selectedIndex > 0) tenXa = elXa.options[elXa.selectedIndex].text;
+        }
+
+        const phanDiaChi = [];
+        if (soNha) phanDiaChi.push(soNha);
+        if (tenXa && !tenXa.startsWith('--')) phanDiaChi.push(tenXa);
+        if (tenHuyen && !tenHuyen.startsWith('--')) phanDiaChi.push(tenHuyen);
+        if (tenTinh && !tenTinh.startsWith('--')) phanDiaChi.push(tenTinh);
+
+        const diaChiTongHop = phanDiaChi.join(', ');
+        if (diaChiTongHop) {
+            document.getElementById('diaChiKho').value = diaChiTongHop;
+        }
+    }
+
+    // Xử lý tìm kiếm nhanh Tỉnh / Huyện / Xã tức thì
+    function xuLyTimKiemNhanh(event) {
+        const query = event.target.value.trim();
+        const resultsBox = document.getElementById('quickSearchResults');
+
+        clearTimeout(searchQuickTimer);
+        if (!query || query.length < 2) {
+            resultsBox.classList.add('d-none');
+            resultsBox.innerHTML = '';
+            return;
+        }
+
+        searchQuickTimer = setTimeout(async () => {
+            let html = '';
+            const lowerQ = query.toLowerCase();
+
+            // 1. Tìm trong 63 Tỉnh Thành
+            const matchTinh = DANH_SACH_63_TINH.filter(t => 
+                t.name.toLowerCase().includes(lowerQ) || t.clean.toLowerCase().includes(lowerQ)
+            );
+            matchTinh.slice(0, 3).forEach(t => {
+                html += `
+                    <div class="quick-item d-flex align-items-center justify-content-between" onclick="chonGoiY('tinh', ${t.code})">
+                        <div>
+                            <span class="badge bg-primary me-2">Tỉnh/Thành</span>
+                            <strong class="text-dark">${escapeHtml(t.name)}</strong>
+                        </div>
+                        <small class="text-muted"><i class="bi bi-arrow-right"></i></small>
+                    </div>
+                `;
+            });
+
+            // 2. Tìm Quận/Huyện qua API Open API
+            try {
+                const resD = await fetch(`https://provinces.open-api.vn/api/d/search/?q=${encodeURIComponent(query)}`);
+                if (resD.ok) {
+                    const dataD = await resD.json();
+                    dataD.slice(0, 4).forEach(d => {
+                        html += `
+                            <div class="quick-item d-flex align-items-center justify-content-between" onclick="chonGoiY('huyen', ${d.code})">
+                                <div>
+                                    <span class="badge bg-success me-2">Quận/Huyện</span>
+                                    <strong class="text-dark">${escapeHtml(d.name)}</strong>
+                                </div>
+                                <small class="text-muted"><i class="bi bi-arrow-right"></i></small>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (e) {}
+
+            // 3. Tìm Xã/Phường qua API Open API
+            try {
+                const resW = await fetch(`https://provinces.open-api.vn/api/w/search/?q=${encodeURIComponent(query)}`);
+                if (resW.ok) {
+                    const dataW = await resW.json();
+                    dataW.slice(0, 4).forEach(w => {
+                        html += `
+                            <div class="quick-item d-flex align-items-center justify-content-between" onclick="chonGoiY('xa', ${w.code})">
+                                <div>
+                                    <span class="badge bg-info text-dark me-2">Xã/Phường</span>
+                                    <strong class="text-dark">${escapeHtml(w.name)}</strong>
+                                </div>
+                                <small class="text-muted"><i class="bi bi-arrow-right"></i></small>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (e) {}
+
+            if (!html) {
+                html = `<div class="p-3 text-center text-muted small">Không tìm thấy địa danh phù hợp với "${escapeHtml(query)}"</div>`;
+            }
+
+            resultsBox.innerHTML = html;
+            resultsBox.classList.remove('d-none');
+        }, 250);
+    }
+
+    // Khi người dùng click chọn 1 gợi ý từ thanh tìm kiếm nhanh
+    async function chonGoiY(loai, code) {
+        document.getElementById('quickSearchResults').classList.add('d-none');
+        document.getElementById('inputTimKiemDiaChiNhanh').value = '';
+
+        if (loai === 'tinh') {
+            if (tsTinh) tsTinh.setValue(code);
+            dongBoDiaChiKho();
+        } else if (loai === 'huyen') {
+            try {
+                const res = await fetch(`https://provinces.open-api.vn/api/d/${code}`);
+                if (res.ok) {
+                    const d = await res.json();
+                    if (tsTinh) tsTinh.setValue(d.province_code);
+                    await xuLyChonTinh(d.province_code, () => {
+                        if (tsHuyen) tsHuyen.setValue(d.code);
+                        dongBoDiaChiKho();
+                    });
+                }
+            } catch (e) {}
+        } else if (loai === 'xa') {
+            try {
+                const resW = await fetch(`https://provinces.open-api.vn/api/w/${code}`);
+                if (resW.ok) {
+                    const w = await resW.json();
+                    const resD = await fetch(`https://provinces.open-api.vn/api/d/${w.district_code}`);
+                    if (resD.ok) {
+                        const d = await resD.json();
+                        if (tsTinh) tsTinh.setValue(d.province_code);
+                        await xuLyChonTinh(d.province_code, async () => {
+                            if (tsHuyen) tsHuyen.setValue(d.code);
+                            await xuLyChonHuyen(d.code, () => {
+                                if (tsXa) tsXa.setValue(w.code);
+                                dongBoDiaChiKho();
+                            });
+                        });
+                    }
+                }
+            } catch (e) {}
+        }
+    }
+
+    function xoaTimKiemNhanh() {
+        const input = document.getElementById('inputTimKiemDiaChiNhanh');
+        input.value = '';
+        document.getElementById('quickSearchResults').classList.add('d-none');
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+</script>
+
+</body>
+</html>

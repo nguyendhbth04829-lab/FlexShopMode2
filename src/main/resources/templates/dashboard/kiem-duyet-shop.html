@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiểm Duyệt Gian Hàng Shop - FlexShop Admin</title>
+    <!-- Bootstrap 5 CSS & Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .navbar-custom {
+            background: #0f172a;
+            border-bottom: 1px solid #1e293b;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            transition: all 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.06);
+        }
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f1f5f9;
+        }
+        .shop-logo-img {
+            width: 44px;
+            height: 44px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+        .badge-cho-duyet {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+            animation: pulse-badge 2s infinite;
+        }
+        .badge-hoat-dong {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        .badge-tu-choi {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        .badge-tam-khoa {
+            background-color: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+        @keyframes pulse-badge {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .loading-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+        .file-preview-box {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px dashed #cbd5e1;
+            border-radius: 10px;
+            background: #f8fafc;
+            padding: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-white" href="/admin/dashboard">
+            <div class="bg-primary text-white rounded-3 p-1 px-2">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <span>FlexShop <span class="badge bg-warning text-dark fs-6 ms-1">Admin</span></span>
+        </a>
+        <div class="d-flex align-items-center gap-3 ms-auto">
+            <a href="/admin/dashboard" class="btn btn-sm btn-outline-light rounded-pill px-3 py-1 fw-semibold d-flex align-items-center gap-1">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a href="/ho-so" class="d-flex align-items-center gap-2 text-white text-decoration-none" title="Xem & Chỉnh sửa hồ sơ cá nhân">
+                <img th:src="${user != null and user.anhDaiDien != null ? user.anhDaiDien : '/images/default-avatar.png'}" 
+                     onerror="this.src='https://ui-avatars.com/api/?name=Admin&background=ef4444&color=fff'"
+                     alt="Avatar" class="rounded-circle border border-2 border-primary" width="36" height="36">
+                <div class="d-none d-md-block text-start">
+                    <div class="fw-bold small text-light" th:text="${user != null ? user.hoVaTen : 'Quản trị viên'}">Quản trị viên</div>
+                    <div class="text-white-50" style="font-size: 11px;" th:text="${user != null ? user.email : 'admin@flexshop.vn'}">admin@flexshop.vn</div>
+                </div>
+            </a>
+            <a href="/logout" onclick="handleLogout(event)" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 fw-semibold d-flex align-items-center gap-1">
+                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Container -->
+<div class="container-fluid px-4 py-4">
+    <!-- Breadcrumb & Welcome -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="/admin/dashboard" class="text-decoration-none">Trang chủ Admin</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Kiểm duyệt Gian hàng</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold mb-1">Kiểm Duyệt Gian Hàng Mở Shop 🏪</h3>
+            <p class="text-muted small mb-0">Thẩm định hồ sơ, giấy phép kinh doanh của Người bán. Phê duyệt sẽ tự động kích hoạt gian hàng và cấp quyền Người Bán (NGUOI_BAN).</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-outline-primary btn-sm px-3 py-2 rounded-pill shadow-sm" onclick="taiLaiDuLieu()">
+                <i class="bi bi-arrow-clockwise me-1"></i> Làm Mới Dữ Liệu
+            </button>
+            <a href="/admin/dashboard" class="btn btn-light btn-sm px-3 py-2 rounded-pill border shadow-sm">
+                <i class="bi bi-arrow-left me-1"></i> Quay Lại
+            </a>
+        </div>
+    </div>
+
+    <!-- KPI Statistics -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card d-flex align-items-center gap-3">
+                <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-shop"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-semibold">Tổng Gian Hàng</div>
+                    <div class="fs-4 fw-bold" id="stat-tong">0</div>
+                    <small class="text-muted">Tất cả yêu cầu mở shop</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card d-flex align-items-center gap-3 border-warning border-opacity-50">
+                <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-semibold">Chờ Phê Duyệt</div>
+                    <div class="fs-4 fw-bold text-warning" id="stat-cho-duyet">0</div>
+                    <small class="text-warning fw-medium"><i class="bi bi-exclamation-circle me-1"></i>Cần thẩm duyệt ngay</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card d-flex align-items-center gap-3">
+                <div class="stat-icon bg-success bg-opacity-10 text-success">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-semibold">Đang Hoạt Động</div>
+                    <div class="fs-4 fw-bold text-success" id="stat-hoat-dong">0</div>
+                    <small class="text-success fw-medium">Đã duyệt & cấp role Seller</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card d-flex align-items-center gap-3">
+                <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+                    <i class="bi bi-x-circle-fill"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-semibold">Bị Từ Chối</div>
+                    <div class="fs-4 fw-bold text-danger" id="stat-tu-choi">0</div>
+                    <small class="text-muted">Hồ sơ không đạt tiêu chuẩn</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter & Search Card -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-3">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="searchInput" class="form-control bg-light border-start-0" 
+                               placeholder="Tìm theo tên shop, slug, chủ sở hữu, email, SĐT..." 
+                               onkeypress="if(event.key === 'Enter') timKiemGianHang()">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select id="filterTrangThai" class="form-select bg-light" onchange="timKiemGianHang()">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        <option value="CHO_DUYET" selected>⏳ Chờ phê duyệt (CHO_DUYET)</option>
+                        <option value="HOAT_DONG">✅ Đang hoạt động (HOAT_DONG)</option>
+                        <option value="TU_CHOI">❌ Bị từ chối (TU_CHOI)</option>
+                        <option value="TAM_KHOA">🔒 Tạm khóa (TAM_KHOA)</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex gap-2 justify-content-md-end">
+                    <button type="button" class="btn btn-primary px-3" onclick="timKiemGianHang()">
+                        <i class="bi bi-funnel-fill me-1"></i> Lọc dữ liệu
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary px-3" onclick="datLaiBoLoc()">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Đặt lại
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Table Card -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden position-relative">
+        <div id="tableLoading" class="loading-overlay d-none">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải dữ liệu...</span>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" class="ps-4">Mã / Logo</th>
+                        <th scope="col">Gian Hàng</th>
+                        <th scope="col">Chủ Sở Hữu</th>
+                        <th scope="col">Địa Chỉ Kho</th>
+                        <th scope="col">Giấy Phép KD</th>
+                        <th scope="col">Ngày Nộp</th>
+                        <th scope="col">Trạng Thái</th>
+                        <th scope="col" class="text-end pe-4">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody id="shopTableBody">
+                    <!-- Dữ liệu render bằng JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Footer -->
+        <div class="card-footer bg-white border-top-0 py-3 d-flex flex-wrap justify-content-between align-items-center">
+            <div class="text-muted small" id="paginationInfo">
+                Đang tải thông tin trang...
+            </div>
+            <nav aria-label="Phân trang">
+                <ul class="pagination pagination-sm mb-0 gap-1" id="paginationList">
+                    <!-- Nút phân trang render bằng JavaScript -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Chi Tiết Gian Hàng -->
+<div class="modal fade" id="modalChiTiet" tabindex="-1" aria-labelledby="modalChiTietLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold" id="modalChiTietLabel">
+                    <i class="bi bi-shop text-primary me-2"></i>Chi Tiết Hồ Sơ Đăng Ký Gian Hàng
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" id="modalChiTietBody">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <div class="mt-2 text-muted">Đang tải chi tiết hồ sơ...</div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light" id="modalChiTietFooter">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Từ Chối Gian Hàng -->
+<div class="modal fade" id="modalTuChoi" tabindex="-1" aria-labelledby="modalTuChoiLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold" id="modalTuChoiLabel">
+                    <i class="bi bi-x-circle-fill me-2"></i>Từ Chối Duyệt Gian Hàng
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="tuChoiShopId">
+                <div class="alert alert-warning py-2 small mb-3">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    Hồ sơ gian hàng sẽ chuyển sang trạng thái <b>TỪ CHỐI</b>. Vui lòng nêu rõ lý do để Người bán nắm rõ và bổ sung lại hồ sơ.
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-dark">Lý do từ chối <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="lyDoTuChoiInput" rows="4" 
+                              placeholder="Nhập lý do cụ thể (tối thiểu 5 ký tự, tối đa 255 ký tự)..."
+                              maxlength="255" oninput="capNhatDemKyTuTuChoi()"></textarea>
+                    <div class="invalid-feedback" id="lyDoTuChoiError"></div>
+                    <div class="d-flex justify-content-end mt-1">
+                        <small class="text-muted ms-auto" id="kyTuTuChoiCount">0/255 ký tự</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-danger rounded-pill px-4" id="btnXacNhanTuChoi" onclick="guiTuChoiGianHang()">
+                    <i class="bi bi-x-circle me-1"></i> Xác Nhận Từ Chối
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    let currentPage = 0;
+    const pageSize = 10;
+    let modalChiTietInstance = null;
+    let modalTuChoiInstance = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        modalChiTietInstance = new bootstrap.Modal(document.getElementById('modalChiTiet'));
+        modalTuChoiInstance = new bootstrap.Modal(document.getElementById('modalTuChoi'));
+        taiLaiDuLieu();
+    });
+
+    function batTatLoading(hienThi) {
+        const loading = document.getElementById('tableLoading');
+        if (hienThi) {
+            loading.classList.remove('d-none');
+        } else {
+            loading.classList.add('d-none');
+        }
+    }
+
+    async function taiLaiDuLieu() {
+        await Promise.all([
+            taiThongKe(),
+            taiDanhSachShop(currentPage)
+        ]);
+    }
+
+    async function taiThongKe() {
+        try {
+            const res = await fetch('/api/v1/admin/kiem-duyet-shop/thong-ke');
+            if (res.ok) {
+                const resJson = await res.json();
+                const data = (resJson && (resJson.data !== undefined ? resJson.data : (resJson.duLieu !== undefined ? resJson.duLieu : resJson))) || {};
+                document.getElementById('stat-tong').textContent = data.tongSo || 0;
+                document.getElementById('stat-cho-duyet').textContent = data.choDuyet || 0;
+                document.getElementById('stat-hoat-dong').textContent = data.hoatDong || 0;
+                document.getElementById('stat-tu-choi').textContent = data.tuChoi || 0;
+            }
+        } catch (err) {
+            console.error('Lỗi khi tải thống kê kiểm duyệt:', err);
+        }
+    }
+
+    async function taiDanhSachShop(page = 0) {
+        currentPage = page;
+        batTatLoading(true);
+        const keyword = document.getElementById('searchInput').value.trim();
+        const trangThai = document.getElementById('filterTrangThai').value;
+
+        const params = new URLSearchParams({
+            page: page,
+            size: pageSize
+        });
+        if (keyword) params.append('keyword', keyword);
+        if (trangThai) params.append('trangThai', trangThai);
+
+        try {
+            const res = await fetch(`/api/v1/admin/kiem-duyet-shop?${params.toString()}`);
+            if (res.ok) {
+                const resJson = await res.json();
+                const pageData = (resJson && (resJson.data !== undefined ? resJson.data : (resJson.duLieu !== undefined ? resJson.duLieu : resJson))) || {};
+                renderTable(pageData);
+                renderPagination(pageData);
+            } else {
+                hienThiLoi('Không thể tải danh sách gian hàng. Mã phản hồi: ' + res.status);
+            }
+        } catch (err) {
+            console.error('Lỗi khi tải danh sách gian hàng:', err);
+            hienThiLoi('Đã xảy ra lỗi khi kết nối máy chủ!');
+        } finally {
+            batTatLoading(false);
+        }
+    }
+
+    function renderTable(pageData) {
+        const tbody = document.getElementById('shopTableBody');
+        tbody.innerHTML = '';
+
+        const shops = pageData.content || [];
+        if (shops.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                        Không tìm thấy gian hàng nào phù hợp với điều kiện tìm kiếm.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        shops.forEach(shop => {
+            const tr = document.createElement('tr');
+            
+            // Render Badge Trạng Thái
+            let badgeHtml = '';
+            if (shop.trangThai === 'CHO_DUYET') {
+                badgeHtml = `<span class="badge badge-cho-duyet px-2 py-1"><i class="bi bi-clock-history me-1"></i>Chờ Duyệt</span>`;
+            } else if (shop.trangThai === 'HOAT_DONG') {
+                badgeHtml = `<span class="badge badge-hoat-dong px-2 py-1"><i class="bi bi-check-circle-fill me-1"></i>Hoạt Động</span>`;
+            } else if (shop.trangThai === 'TU_CHOI') {
+                badgeHtml = `<span class="badge badge-tu-choi px-2 py-1" title="${shop.lyDoTuChoi ? 'Lý do: ' + shop.lyDoTuChoi : ''}"><i class="bi bi-x-circle-fill me-1"></i>Từ Chối</span>`;
+            } else {
+                badgeHtml = `<span class="badge badge-tam-khoa px-2 py-1">${shop.trangThai}</span>`;
+            }
+
+            // Logo default or URL
+            const logoSrc = shop.linkLogo ? shop.linkLogo : 'https://placehold.co/100x100?text=SHOP';
+
+            // Giấy phép KD
+            let chungChiHtml = '<span class="text-muted small">Chưa có</span>';
+            if (shop.linkAnhGiayTo) {
+                chungChiHtml = `
+                    <div>
+                        <a href="${shop.linkAnhGiayTo}" target="_blank" class="badge bg-light text-primary border text-decoration-none py-1 px-2 d-inline-flex align-items-center gap-1" title="Mở xem giấy phép KD">
+                            <i class="bi bi-file-earmark-pdf"></i> Xem tệp
+                        </a>
+                        <div class="small text-muted" style="font-size: 11px;">${shop.soGiayTo || 'N/A'}</div>
+                    </div>
+                `;
+            }
+
+            // Buttons
+            let actionBtns = `
+                <button class="btn btn-sm btn-outline-info rounded-pill px-2 py-1 me-1" onclick="xemChiTietShop(${shop.maGianHang})" title="Xem chi tiết">
+                    <i class="bi bi-eye"></i> Chi tiết
+                </button>
+            `;
+
+            if (shop.trangThai === 'CHO_DUYET') {
+                actionBtns += `
+                    <button class="btn btn-sm btn-success rounded-pill px-2 py-1 me-1" onclick="xacNhanPheDuyet(${shop.maGianHang}, '${escapeHtml(shop.tenGianHang)}')" title="Phê duyệt gian hàng">
+                        <i class="bi bi-check-lg"></i> Duyệt
+                    </button>
+                    <button class="btn btn-sm btn-danger rounded-pill px-2 py-1" onclick="moModalTuChoi(${shop.maGianHang}, '${escapeHtml(shop.tenGianHang)}')" title="Từ chối gian hàng">
+                        <i class="bi bi-x-lg"></i> Từ chối
+                    </button>
+                `;
+            } else if (shop.trangThai === 'TU_CHOI') {
+                actionBtns += `
+                    <button class="btn btn-sm btn-outline-success rounded-pill px-2 py-1" onclick="xacNhanPheDuyet(${shop.maGianHang}, '${escapeHtml(shop.tenGianHang)}')" title="Duyệt lại hồ sơ">
+                        <i class="bi bi-arrow-repeat"></i> Duyệt lại
+                    </button>
+                `;
+            }
+
+            tr.innerHTML = `
+                <td class="ps-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="${logoSrc}" alt="${escapeHtml(shop.tenGianHang)}" class="shop-logo-img" onerror="this.src='https://placehold.co/100x100?text=SHOP'">
+                        <div>
+                            <span class="badge bg-dark">#${shop.maGianHang}</span>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="fw-bold text-dark">${escapeHtml(shop.tenGianHang)}</div>
+                    <div class="text-muted small"><code>/${escapeHtml(shop.duongDanSlug)}</code></div>
+                </td>
+                <td>
+                    <div class="fw-semibold">${escapeHtml(shop.tenChuSoHuu || 'N/A')}</div>
+                    <div class="text-muted small">${escapeHtml(shop.emailChuSoHuu || '')}</div>
+                    <div class="text-muted small">${escapeHtml(shop.sdtChuSoHuu || '')}</div>
+                </td>
+                <td>
+                    <div class="small text-truncate" style="max-width: 200px;" title="${escapeHtml(shop.diaChiKho || '')}">
+                        ${escapeHtml(shop.diaChiKho || 'Chưa cập nhật')}
+                    </div>
+                </td>
+                <td>${chungChiHtml}</td>
+                <td class="small text-muted">${dinhDangNgay(shop.ngayTao)}</td>
+                <td>${badgeHtml}</td>
+                <td class="text-end pe-4">${actionBtns}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderPagination(pageData) {
+        const info = document.getElementById('paginationInfo');
+        const list = document.getElementById('paginationList');
+        list.innerHTML = '';
+
+        const totalElements = pageData.totalElements || 0;
+        const totalPages = pageData.totalPages || 0;
+        const current = pageData.number || 0;
+
+        if (totalElements === 0) {
+            info.textContent = 'Không có bản ghi nào.';
+            return;
+        }
+
+        const from = current * pageSize + 1;
+        const to = Math.min((current + 1) * pageSize, totalElements);
+        info.innerHTML = `Hiển thị <b>${from}-${to}</b> trên tổng số <b>${totalElements}</b> gian hàng (Trang <b>${current + 1}/${totalPages}</b>)`;
+
+        if (totalPages <= 1) return;
+
+        // Nút Trước
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${current === 0 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<button class="page-link" onclick="taiDanhSachShop(${current - 1})"><i class="bi bi-chevron-left"></i></button>`;
+        list.appendChild(prevLi);
+
+        // Các nút số trang
+        for (let i = 0; i < totalPages; i++) {
+            if (i === 0 || i === totalPages - 1 || (i >= current - 1 && i <= current + 1)) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === current ? 'active' : ''}`;
+                li.innerHTML = `<button class="page-link" onclick="taiDanhSachShop(${i})">${i + 1}</button>`;
+                list.appendChild(li);
+            } else if (i === current - 2 || i === current + 2) {
+                const li = document.createElement('li');
+                li.className = 'page-item disabled';
+                li.innerHTML = `<span class="page-link">...</span>`;
+                list.appendChild(li);
+            }
+        }
+
+        // Nút Sau
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${current === totalPages - 1 ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<button class="page-link" onclick="taiDanhSachShop(${current + 1})"><i class="bi bi-chevron-right"></i></button>`;
+        list.appendChild(nextLi);
+    }
+
+    function timKiemGianHang() {
+        taiDanhSachShop(0);
+    }
+
+    function datLaiBoLoc() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('filterTrangThai').value = '';
+        taiDanhSachShop(0);
+    }
+
+    // Modal Xem Chi Tiết
+    async function xemChiTietShop(id) {
+        modalChiTietInstance.show();
+        const body = document.getElementById('modalChiTietBody');
+        const footer = document.getElementById('modalChiTietFooter');
+        body.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status"></div>
+                <div class="mt-2 text-muted">Đang tải chi tiết hồ sơ...</div>
+            </div>
+        `;
+        footer.innerHTML = `<button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>`;
+
+        try {
+            const res = await fetch(`/api/v1/admin/kiem-duyet-shop/${id}`);
+            if (!res.ok) throw new Error('Không thể tải chi tiết gian hàng: ' + res.status);
+            const resJson = await res.json();
+            const shop = (resJson && (resJson.data !== undefined ? resJson.data : (resJson.duLieu !== undefined ? resJson.duLieu : resJson))) || {};
+
+            // Trạng thái badge
+            let badgeClass = 'bg-secondary';
+            if (shop.trangThai === 'CHO_DUYET') badgeClass = 'bg-warning text-dark';
+            if (shop.trangThai === 'HOAT_DONG') badgeClass = 'bg-success';
+            if (shop.trangThai === 'TU_CHOI') badgeClass = 'bg-danger';
+
+            // License Preview
+            let filePreviewHtml = '<div class="text-muted small">Không có tệp giấy phép kinh doanh nào.</div>';
+            if (shop.linkAnhGiayTo) {
+                const url = shop.linkAnhGiayTo;
+                const isImg = url.match(/\.(jpeg|jpg|png|gif|webp)$/i);
+                if (isImg) {
+                    filePreviewHtml = `
+                        <div class="file-preview-box">
+                            <img src="${url}" alt="Giấy phép KD" class="img-fluid rounded shadow-sm" style="max-height: 350px;">
+                            <div class="mt-2">
+                                <a href="${url}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="bi bi-box-arrow-up-right me-1"></i>Xem ảnh gốc kích thước đầy đủ</a>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    filePreviewHtml = `
+                        <div class="file-preview-box py-4">
+                            <i class="bi bi-file-earmark-pdf-fill text-danger fs-1 d-block mb-2"></i>
+                            <div class="fw-bold mb-2">Tệp Giấy phép Kinh doanh (${escapeHtml(shop.loaiGiayTo || 'Tài liệu')})</div>
+                            <a href="${url}" target="_blank" class="btn btn-primary rounded-pill px-4"><i class="bi bi-download me-1"></i> Mở xem tệp đính kèm</a>
+                        </div>
+                    `;
+                }
+            }
+
+            let lyDoTuChoiHtml = '';
+            if (shop.lyDoTuChoi) {
+                lyDoTuChoiHtml = `
+                    <div class="alert alert-danger py-2 mb-3">
+                        <div class="fw-bold"><i class="bi bi-exclamation-octagon-fill me-1"></i> Lý do từ chối:</div>
+                        <div>${escapeHtml(shop.lyDoTuChoi)}</div>
+                    </div>
+                `;
+            }
+
+            body.innerHTML = `
+                ${lyDoTuChoiHtml}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 h-100">
+                            <h6 class="fw-bold text-primary mb-3"><i class="bi bi-shop me-2"></i>Thông Tin Gian Hàng</h6>
+                            <div class="mb-2"><small class="text-muted d-block">Tên gian hàng:</small><strong class="fs-6">${escapeHtml(shop.tenGianHang)}</strong></div>
+                            <div class="mb-2"><small class="text-muted d-block">Đường dẫn Slug:</small><code>/${escapeHtml(shop.duongDanSlug)}</code></div>
+                            <div class="mb-2"><small class="text-muted d-block">Địa chỉ kho hàng:</small><span>${escapeHtml(shop.diaChiKho || 'Chưa cung cấp')}</span></div>
+                            <div class="mb-2"><small class="text-muted d-block">Số điện thoại kho:</small><span>${escapeHtml(shop.sdtKho || 'Chưa cung cấp')}</span></div>
+                            <div class="mb-2"><small class="text-muted d-block">Mô tả shop:</small><p class="small text-muted mb-0">${escapeHtml(shop.moTa || 'Không có mô tả')}</p></div>
+                            <div class="mb-2"><small class="text-muted d-block">Trạng thái hiện tại:</small><span class="badge ${badgeClass} fs-6">${shop.trangThai}</span></div>
+                            <div><small class="text-muted d-block">Ngày nộp hồ sơ:</small><span>${dinhDangNgay(shop.ngayTao)}</span></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 h-100">
+                            <h6 class="fw-bold text-success mb-3"><i class="bi bi-person-badge me-2"></i>Thông Tin Chủ Sở Hữu</h6>
+                            <div class="mb-2"><small class="text-muted d-block">Mã người dùng:</small><strong>#${shop.maChuSoHuu || 'N/A'}</strong></div>
+                            <div class="mb-2"><small class="text-muted d-block">Họ và tên:</small><strong>${escapeHtml(shop.tenChuSoHuu || 'N/A')}</strong></div>
+                            <div class="mb-2"><small class="text-muted d-block">Email:</small><span>${escapeHtml(shop.emailChuSoHuu || 'N/A')}</span></div>
+                            <div class="mb-2"><small class="text-muted d-block">Số điện thoại:</small><span>${escapeHtml(shop.sdtChuSoHuu || 'Chưa có')}</span></div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="p-3 bg-light rounded-3">
+                            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-award me-2"></i>Chứng Chỉ / Giấy Phép Kinh Doanh</h6>
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-4">
+                                    <small class="text-muted d-block">Số giấy tờ / Mã số thuế:</small>
+                                    <strong>${escapeHtml(shop.soGiayTo || 'N/A')}</strong>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted d-block">Loại giấy tờ:</small>
+                                    <span>${escapeHtml(shop.loaiGiayTo || 'N/A')}</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted d-block">Trạng thái duyệt giấy phép:</small>
+                                    <span class="badge bg-secondary">${escapeHtml(shop.trangThaiGiayTo || 'N/A')}</span>
+                                </div>
+                            </div>
+                            ${filePreviewHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Setup footer buttons
+            if (shop.trangThai === 'CHO_DUYET') {
+                footer.innerHTML = `
+                    <button type="button" class="btn btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-danger rounded-pill px-4" onclick="modalChiTietInstance.hide(); moModalTuChoi(${shop.maGianHang}, '${escapeHtml(shop.tenGianHang)}')">
+                        <i class="bi bi-x-circle me-1"></i> Từ chối
+                    </button>
+                    <button type="button" class="btn btn-success rounded-pill px-4" onclick="modalChiTietInstance.hide(); xacNhanPheDuyet(${shop.maGianHang}, '${escapeHtml(shop.tenGianHang)}')">
+                        <i class="bi bi-check-circle me-1"></i> Phê Duyệt & Gán Role Seller
+                    </button>
+                `;
+            } else if (shop.trangThai === 'TU_CHOI') {
+                footer.innerHTML = `
+                    <button type="button" class="btn btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-success rounded-pill px-4" onclick="modalChiTietInstance.hide(); xacNhanPheDuyet(${shop.maGianHang}, '${escapeHtml(shop.tenGianHang)}')">
+                        <i class="bi bi-arrow-repeat me-1"></i> Xem xét & Duyệt lại
+                    </button>
+                `;
+            }
+
+        } catch (err) {
+            body.innerHTML = `<div class="alert alert-danger mb-0">${escapeHtml(err.message)}</div>`;
+        }
+    }
+
+    // Xử lý Phê Duyệt
+    function xacNhanPheDuyet(id, tenShop) {
+        Swal.fire({
+            title: 'Xác nhận Phê Duyệt?',
+            html: `Bạn có chắc chắn muốn phê duyệt gian hàng <b>"${tenShop}"</b>?<br><br>
+                   <small class="text-muted">Hệ thống sẽ chuyển trạng thái shop sang <b>HOẠT ĐỘNG</b>, duyệt chứng chỉ kinh doanh và tự động gán vai trò <b>NGƯỜI BÁN (NGUOI_BAN)</b> cho chủ tài khoản.</small>`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: '<i class="bi bi-check-circle me-1"></i> Đồng ý Phê duyệt',
+            cancelButtonText: 'Hủy'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    Swal.fire({
+                        title: 'Đang xử lý...',
+                        text: 'Vui lòng chờ hệ thống cập nhật cơ sở dữ liệu',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+
+                    const res = await fetch(`/api/v1/admin/kiem-duyet-shop/${id}/phe-duyet`, {
+                        method: 'PUT'
+                    });
+
+                    const data = await res.json();
+                    if (res.ok) {
+                        Swal.fire({
+                            title: 'Thành Công! 🎉',
+                            text: data.message || data.thongBao || 'Đã phê duyệt gian hàng và cấp vai trò Người Bán thành công!',
+                            icon: 'success',
+                            confirmButtonColor: '#10b981'
+                        });
+                        taiLaiDuLieu();
+                    } else {
+                        Swal.fire({
+                            title: 'Thao tác thất bại!',
+                            text: data.message || data.thongBao || 'Có lỗi xảy ra khi phê duyệt',
+                            icon: 'error',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
+                } catch (err) {
+                    Swal.fire({
+                        title: 'Lỗi mạng!',
+                        text: 'Không thể kết nối đến máy chủ: ' + err.message,
+                        icon: 'error',
+                        confirmButtonColor: '#ef4444'
+                    });
+                }
+            }
+        });
+    }
+
+    // Xử lý Từ Chối
+    function moModalTuChoi(id, tenShop) {
+        document.getElementById('tuChoiShopId').value = id;
+        const input = document.getElementById('lyDoTuChoiInput');
+        input.value = '';
+        input.classList.remove('is-invalid');
+        const errorEl = document.getElementById('lyDoTuChoiError');
+        errorEl.textContent = '';
+        errorEl.style.display = 'none';
+        document.getElementById('kyTuTuChoiCount').textContent = '0/255 ký tự';
+        document.getElementById('modalTuChoiLabel').innerHTML = `<i class="bi bi-x-circle-fill me-2"></i>Từ Chối: ${escapeHtml(tenShop)}`;
+        modalTuChoiInstance.show();
+    }
+
+    function capNhatDemKyTuTuChoi() {
+        const input = document.getElementById('lyDoTuChoiInput');
+        const val = input.value;
+        document.getElementById('kyTuTuChoiCount').textContent = `${val.length}/255 ký tự`;
+        if (val.trim().length >= 5 && val.trim().length <= 255) {
+            input.classList.remove('is-invalid');
+            const errorEl = document.getElementById('lyDoTuChoiError');
+            errorEl.textContent = '';
+            errorEl.style.display = 'none';
+        }
+    }
+
+    async function guiTuChoiGianHang() {
+        const id = document.getElementById('tuChoiShopId').value;
+        const input = document.getElementById('lyDoTuChoiInput');
+        const lyDo = input.value.trim();
+        const errorEl = document.getElementById('lyDoTuChoiError');
+
+        if (!lyDo) {
+            input.classList.add('is-invalid');
+            errorEl.textContent = 'Lý do từ chối không được để trống!';
+            errorEl.style.display = 'block';
+            input.focus();
+            return;
+        } else if (lyDo.length < 5 || lyDo.length > 255) {
+            input.classList.add('is-invalid');
+            errorEl.textContent = 'Lý do từ chối phải từ 5 đến 255 ký tự!';
+            errorEl.style.display = 'block';
+            input.focus();
+            return;
+        }
+
+        input.classList.remove('is-invalid');
+        errorEl.textContent = '';
+        errorEl.style.display = 'none';
+
+        const btn = document.getElementById('btnXacNhanTuChoi');
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Đang xử lý...`;
+
+        try {
+            const res = await fetch(`/api/v1/admin/kiem-duyet-shop/${id}/tu-choi`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ lyDoTuChoi: lyDo })
+            });
+
+            const data = await res.json().catch(() => null);
+
+            if (res.ok && data && (data.thanhCong !== false)) {
+                modalTuChoiInstance.hide();
+                Swal.fire({
+                    title: 'Đã Từ Chối!',
+                    text: (data && (data.message || data.thongBao || data.thongDiep)) || 'Đã ghi nhận từ chối và lý do thành công.',
+                    icon: 'warning',
+                    confirmButtonColor: '#f59e0b'
+                });
+                taiLaiDuLieu();
+            } else {
+                const thongBao = (data && (data.duLieu && data.duLieu.lyDoTuChoi)) || (data && (data.message || data.thongBao || data.thongDiep)) || 'Không thể từ chối gian hàng';
+                input.classList.add('is-invalid');
+                errorEl.textContent = thongBao;
+                errorEl.style.display = 'block';
+                input.focus();
+            }
+        } catch (err) {
+            Swal.fire({
+                title: 'Lỗi mạng!',
+                text: 'Không thể kết nối đến máy chủ: ' + err.message,
+                icon: 'error',
+                confirmButtonColor: '#ef4444'
+            });
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="bi bi-x-circle me-1"></i> Xác Nhận Từ Chối`;
+        }
+    }
+
+    // Helper functions
+    function dinhDangNgay(dateStr) {
+        if (!dateStr) return 'N/A';
+        try {
+            const d = new Date(dateStr);
+            return d.toLocaleString('vi-VN', {
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit'
+            });
+        } catch (e) {
+            return dateStr;
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function hienThiLoi(msg) {
+        Swal.fire({
+            title: 'Lỗi',
+            text: msg,
+            icon: 'error',
+            confirmButtonColor: '#ef4444'
+        });
+    }
+
+    function handleLogout(e) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('currentUser');
+        document.cookie = "ACCESS_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        document.cookie = "REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    }
+</script>
+</body>
+</html>

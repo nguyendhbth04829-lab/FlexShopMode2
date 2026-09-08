@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Thiết Lập Hồ Sơ Gian Hàng - FlexShop Seller</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .navbar-seller {
+            background: linear-gradient(135deg, #4338ca 0%, #312e81 100%);
+            border-bottom: 1px solid #3730a3;
+        }
+        .card-custom {
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1px solid #edf2f7;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            transition: all 0.2s ease-in-out;
+        }
+        .card-custom:hover {
+            box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+        }
+        .banner-preview-box {
+            width: 100%;
+            height: 180px;
+            border-radius: 12px;
+            background-color: #e2e8f0;
+            background-size: cover;
+            background-position: center;
+            border: 2px dashed #cbd5e1;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.2s ease;
+        }
+        .banner-preview-box:hover {
+            border-color: #6366f1;
+        }
+        .logo-preview-box {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            background-size: cover;
+            background-position: center;
+            border: 3px solid #6366f1;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+        }
+        .logo-preview-box:hover {
+            transform: scale(1.03);
+        }
+        .upload-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .banner-preview-box:hover .upload-overlay,
+        .logo-preview-box:hover .upload-overlay {
+            opacity: 1;
+        }
+        .live-preview-card {
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            box-shadow: 0 8px 24px rgba(148, 163, 184, 0.15);
+            position: sticky;
+            top: 90px;
+        }
+        .live-banner-cover {
+            height: 140px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        .live-logo-avatar {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            border: 3px solid #ffffff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            position: absolute;
+            bottom: -38px;
+            left: 20px;
+            background-color: #ffffff;
+            background-size: cover;
+            background-position: center;
+        }
+        .badge-mall {
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+        .nav-pills .nav-link {
+            border-radius: 10px;
+            font-weight: 600;
+            color: #475569;
+            padding: 0.6rem 1.2rem;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #4f46e5;
+            color: #ffffff;
+        }
+        .preset-btn {
+            font-size: 12px;
+            border-radius: 8px;
+            padding: 4px 10px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark navbar-seller px-4 py-3 sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/seller/dashboard">
+            <div class="bg-white text-primary rounded-3 px-2 py-1 fs-5 fw-bold">
+                <i class="bi bi-shop"></i>
+            </div>
+            <div>
+                <span class="fw-bold tracking-tight text-white">FlexShop</span>
+                <span class="badge bg-warning text-dark ms-1">KÊNH NGƯỜI BÁN</span>
+            </div>
+        </a>
+
+        <div class="d-flex align-items-center gap-3">
+            <a href="/ho-so" class="d-flex align-items-center gap-2 text-white text-decoration-none" title="Hồ sơ cá nhân">
+                <img th:src="${user.anhDaiDien != null ? user.anhDaiDien : 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'}"
+                     alt="Avatar" class="rounded-circle border border-2 border-warning" width="38" height="38">
+                <div class="d-none d-md-block text-start">
+                    <div class="fw-bold small" th:text="${user.hoVaTen}">Chủ Gian Hàng</div>
+                    <div class="text-white-50" style="font-size: 11px;" th:text="${user.email}">seller@flexshop.com</div>
+                </div>
+            </a>
+            <a href="/seller/ho-so-shop" class="btn btn-sm btn-outline-warning rounded-pill px-3 py-1 fw-semibold text-white">
+                <i class="bi bi-file-earmark-check me-1"></i> Giấy phép KD
+            </a>
+            <a href="/logout" onclick="handleLogout(event)" class="btn btn-sm btn-outline-light rounded-pill px-3 py-1 fw-semibold">
+                <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Container -->
+<div class="container-fluid px-4 py-4">
+
+    <!-- Top Action & Breadcrumb Bar -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="/seller/dashboard" class="text-decoration-none text-muted">Kênh Người Bán</a></li>
+                    <li class="breadcrumb-item active fw-semibold text-primary" aria-current="page">Thiết Lập Hồ Sơ Shop</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold mb-1">Thiết Lập Hồ Sơ Gian Hàng Hoàn Chỉnh 🏪</h3>
+            <p class="text-muted small mb-0">Cập nhật Banner quảng bá, Logo nhận diện, Khung giờ đón khách và Địa chỉ kho giao nhận.</p>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <a href="/seller/dashboard" class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i> Về Dashboard
+            </a>
+            <a href="/seller/ho-so-shop" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold">
+                <i class="bi bi-shield-check me-1"></i> Hồ sơ pháp lý & Giấy phép
+            </a>
+            <!-- Nút chuyển đổi nhanh trạng thái nhận đơn -->
+            <div th:if="${shop != null and shop.trangThai == 'HOAT_DONG'}" class="ms-2">
+                <button id="btnQuickToggleStatus"
+                        class="btn rounded-pill px-3 py-2 fw-bold"
+                        th:classappend="${shop.dangMoCua} ? 'btn-success' : 'btn-outline-danger'"
+                        onclick="chuyenNhanhTrangThaiNhanDon()">
+                    <i class="bi" th:classappend="${shop.dangMoCua} ? 'bi-shop' : 'bi-pause-circle'"></i>
+                    <span id="quickStatusText" th:text="${shop.dangMoCua} ? ' Đang mở cửa nhận đơn' : ' Tạm nghỉ nhận đơn'"> Đang mở cửa nhận đơn</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cảnh báo nếu Shop chưa được Admin phê duyệt (US-10 Requirement Check) -->
+    <div th:if="${shop != null and shop.trangThai != 'HOAT_DONG'}" class="alert alert-warning border-0 shadow-sm rounded-4 p-4 mb-4">
+        <div class="d-flex align-items-start gap-3">
+            <div class="fs-1 text-warning"><i class="bi bi-exclamation-triangle-fill"></i></div>
+            <div class="flex-grow-1">
+                <h5 class="fw-bold text-dark mb-1">Gian Hàng Chưa Được Quản Trị Viên Kích Hoạt!</h5>
+                <p class="text-muted mb-2">
+                    Trạng thái hiện tại:
+                    <span class="badge bg-warning text-dark fw-bold" th:text="${shop.trangThai}">CHO_DUYET</span>.
+                    Theo quy chuẩn của FlexShop, gian hàng <strong>bắt buộc phải được Ban Quản Trị phê duyệt (HOẠT ĐỘNG)</strong> mới có thể cập nhật thiết lập hồ sơ và mở bán công khai.
+                </p>
+                <div th:if="${shop.lyDoTuChoi != null and !shop.lyDoTuChoi.isEmpty()}" class="p-3 bg-danger bg-opacity-10 border border-danger border-opacity-25 rounded-3 mb-3 text-danger">
+                    <strong><i class="bi bi-x-circle-fill me-1"></i>Lý do từ chối trước đó:</strong> <span th:text="${shop.lyDoTuChoi}"></span>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="/seller/ho-so-shop" class="btn btn-warning text-dark fw-bold rounded-pill px-4">
+                        <i class="bi bi-file-earmark-arrow-up me-1"></i> Xem hồ sơ & Nộp bổ sung giấy phép
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Tabs chuyển đổi giữa Thiết Lập Hồ Sơ và Lịch Sử / Thống Kê -->
+    <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active d-flex align-items-center gap-2" id="pills-thietlap-tab" data-bs-toggle="pill" data-bs-target="#pills-thietlap" type="button" role="tab">
+                <i class="bi bi-sliders2-vertical"></i> Thiết Lập Thông Tin Shop
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link d-flex align-items-center gap-2" id="pills-lichsu-tab" data-bs-toggle="pill" data-bs-target="#pills-lichsu" type="button" role="tab" onclick="taiLichSuThayDoi(0)">
+                <i class="bi bi-clock-history"></i> Lịch Sử Thiết Lập & Thống Kê
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="pills-tabContent">
+
+        <!-- TAB 1: THIẾT LẬP HỒ SƠ & LIVE PREVIEW -->
+        <div class="tab-pane fade show active" id="pills-thietlap" role="tabpanel">
+            <div class="row g-4">
+
+                <!-- Cột Form Nhập Liệu (Col-lg-7) -->
+                <div class="col-lg-7">
+                    <div class="card-custom p-4">
+                        <form id="formThietLapShop" onsubmit="xuLyLuuThietLap(event)">
+
+                            <!-- PHẦN 1: BANNER & LOGO -->
+                            <div class="mb-4">
+                                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-image text-primary me-2"></i>1. Hình Ảnh Nhận Diện Thương Hiệu</h5>
+
+                                <!-- Upload Banner -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold small">Ảnh Bìa / Banner Gian Hàng (Khuyến nghị 1200x350px, tối đa 5MB)</label>
+                                    <div class="banner-preview-box" id="bannerPreviewContainer"
+                                         th:style="${shop.linkBanner != null ? 'background-image: url(' + shop.linkBanner + ');' : ''}"
+                                         onclick="document.getElementById('inputBanner').click()">
+                                        <div class="upload-overlay">
+                                            <i class="bi bi-camera-fill fs-3 mb-1"></i>
+                                            <span class="small fw-semibold">Click hoặc kéo thả ảnh để đổi Banner</span>
+                                        </div>
+                                        <div th:if="${shop.linkBanner == null}" class="text-center text-muted" id="bannerPlaceholder">
+                                            <i class="bi bi-cloud-arrow-up fs-2 text-primary"></i>
+                                            <div class="small fw-semibold">Bấm để tải lên ảnh Banner</div>
+                                            <div style="font-size: 11px;">Định dạng: JPG, PNG, WEBP &lt; 5MB</div>
+                                        </div>
+                                    </div>
+                                    <input type="file" id="inputBanner" name="fileBanner" accept=".jpg,.jpeg,.png,.webp" class="d-none" onchange="xoaLoiTruong('inputBanner'); previewTepHinhAnh(this, 'banner')">
+                                    <div class="invalid-feedback d-block" id="error-inputBanner" style="display:none;"></div>
+                                    <small class="text-muted d-block mt-1">Ảnh banner xuất hiện nổi bật tại đầu trang shop khi khách hàng truy cập.</small>
+                                </div>
+
+                                <!-- Upload Logo -->
+                                <div class="mb-3 d-flex align-items-center gap-4">
+                                    <div>
+                                        <label class="form-label fw-semibold small d-block">Ảnh Logo Shop (1:1 Vuông, &lt; 5MB)</label>
+                                        <div class="logo-preview-box" id="logoPreviewContainer"
+                                             th:style="${shop.linkLogo != null ? 'background-image: url(' + shop.linkLogo + ');' : ''}"
+                                             onclick="document.getElementById('inputLogo').click()">
+                                            <div class="upload-overlay">
+                                                <i class="bi bi-camera fs-5"></i>
+                                            </div>
+                                            <div th:if="${shop.linkLogo == null}" class="text-center text-muted" id="logoPlaceholder">
+                                                <i class="bi bi-shop text-primary fs-3"></i>
+                                            </div>
+                                        </div>
+                                        <input type="file" id="inputLogo" name="fileLogo" accept=".jpg,.jpeg,.png,.webp" class="d-none" onchange="xoaLoiTruong('inputLogo'); previewTepHinhAnh(this, 'logo')">
+                                        <div class="invalid-feedback d-block" id="error-inputLogo" style="display:none;"></div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold small mb-1">Ảnh đại diện gian hàng</div>
+                                        <p class="text-muted small mb-2">Được hiển thị trên kết quả tìm kiếm, trang chi tiết sản phẩm và danh mục gian hàng uy tín.</p>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="document.getElementById('inputLogo').click()">
+                                            <i class="bi bi-upload me-1"></i> Chọn ảnh đại diện
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4 text-muted">
+
+                            <!-- PHẦN 2: THÔNG TIN GIAN HÀNG -->
+                            <div class="mb-4">
+                                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-card-text text-primary me-2"></i>2. Thông Tin Chung & Giới Thiệu</h5>
+
+                                <div class="mb-3">
+                                    <label for="inputTenShop" class="form-label fw-semibold small">Tên Gian Hàng <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="inputTenShop" name="tenGianHang"
+                                           th:value="${shop.tenGianHang}" minlength="3" maxlength="100"
+                                           placeholder="Ví dụ: Flex Fashion Official Store" oninput="xoaLoiTruong('inputTenShop'); capNhatLivePreview()">
+                                    <div class="invalid-feedback" id="error-inputTenShop"></div>
+                                    <small class="text-muted">Đường dẫn truy cập gian hàng: <code>https://flexshop.vn/shop/<span id="slugPreview" th:text="${shop.duongDanSlug}">slug</span></code></small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="inputMoTa" class="form-label fw-semibold small">Giới Thiệu / Mô Tả Shop</label>
+                                    <textarea class="form-control" id="inputMoTa" name="moTa" rows="3" maxlength="2000"
+                                              placeholder="Mô tả các sản phẩm chủ lực, cam kết chất lượng, bảo hành..."
+                                              oninput="xoaLoiTruong('inputMoTa'); capNhatLivePreview()" th:text="${shop.moTa}"></textarea>
+                                    <div class="invalid-feedback" id="error-inputMoTa"></div>
+                                    <small class="text-muted">Mô tả rõ ràng giúp khách hàng tin tưởng và lựa chọn gian hàng của bạn.</small>
+                                </div>
+                            </div>
+
+                            <hr class="my-4 text-muted">
+
+                            <!-- PHẦN 3: GIỜ HOẠT ĐỘNG & TRẠNG THÁI NHẬN ĐƠN -->
+                            <div class="mb-4">
+                                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-clock text-primary me-2"></i>3. Khung Giờ Hoạt Động & Nhận Đơn</h5>
+
+                                <!-- Toggle Đang mở cửa / Tạm nghỉ -->
+                                <div class="p-3 bg-light rounded-3 mb-3 border d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-bold small">Trạng Thái Mở Cửa Nhận Đơn Hàng</div>
+                                        <div class="text-muted small">Bật chế độ này để gian hàng hiển thị mở bán và khách có thể bấm đặt hàng.</div>
+                                    </div>
+                                    <div class="form-check form-switch fs-4 mb-0">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="switchDangMoCua" name="dangMoCua"
+                                               th:checked="${shop.dangMoCua}" onchange="capNhatLivePreview()">
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="inputGioMoCua" class="form-label fw-semibold small">Giờ Mở Cửa (HH:mm) <span class="text-danger">*</span></label>
+                                        <input type="time" class="form-control" id="inputGioMoCua" name="gioMoCua"
+                                               th:value="${shop.gioMoCua != null ? shop.gioMoCua : '08:00'}" onchange="xoaLoiTruong('inputGioMoCua'); capNhatLivePreview()">
+                                        <div class="invalid-feedback" id="error-inputGioMoCua"></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="inputGioDongCua" class="form-label fw-semibold small">Giờ Đóng Cửa (HH:mm) <span class="text-danger">*</span></label>
+                                        <input type="time" class="form-control" id="inputGioDongCua" name="gioDongCua"
+                                               th:value="${shop.gioDongCua != null ? shop.gioDongCua : '22:00'}" onchange="xoaLoiTruong('inputGioDongCua'); capNhatLivePreview()">
+                                        <div class="invalid-feedback" id="error-inputGioDongCua"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Presets nhanh -->
+                                <div class="d-flex gap-2 mt-2 align-items-center">
+                                    <span class="text-muted small me-1">Chọn nhanh:</span>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" onclick="datGioNhanh('08:00', '22:00')">Tiêu chuẩn (08:00 - 22:00)</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" onclick="datGioNhanh('08:00', '17:30')">Hành chính (08:00 - 17:30)</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" onclick="datGioNhanh('00:00', '23:59')">Cả ngày 24/7 (00:00 - 23:59)</button>
+                                </div>
+                            </div>
+
+                            <hr class="my-4 text-muted">
+
+                            <!-- PHẦN 4: ĐỊA CHỈ KHO LẤY HÀNG & GIAO NHẬN -->
+                            <div class="mb-4">
+                                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-geo-alt text-primary me-2"></i>4. Địa Chỉ Kho Lấy Hàng & Đơn Vị Vận Chuyển</h5>
+
+                                <div class="mb-3">
+                                    <label for="inputDiaChiKho" class="form-label fw-semibold small">Địa Chỉ Kho Lấy Hàng Cụ Thể <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="inputDiaChiKho" name="diaChiKho"
+                                           th:value="${shop.diaChiKho}" minlength="5" maxlength="255"
+                                           placeholder="Số nhà, ngõ/ngách, tên đường, phường/xã, quận/huyện, tỉnh/thành" oninput="xoaLoiTruong('inputDiaChiKho'); capNhatLivePreview()">
+                                    <div class="invalid-feedback" id="error-inputDiaChiKho"></div>
+                                    <small class="text-muted">Đơn vị vận chuyển (GHN, GHTK, ViettelPost) sẽ đến địa chỉ này để lấy kiện hàng.</small>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label for="inputSdtKho" class="form-label fw-semibold small">Số Điện Thoại Kho <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="inputSdtKho" name="sdtKho"
+                                               th:value="${shop.sdtKho}"
+                                               placeholder="0912345678" oninput="xoaLoiTruong('inputSdtKho'); capNhatLivePreview()">
+                                        <div class="invalid-feedback" id="error-inputSdtKho"></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="inputNguoiLienHe" class="form-label fw-semibold small">Người Phụ Trách Kho</label>
+                                        <input type="text" class="form-control" id="inputNguoiLienHe" name="nguoiLienHeKho"
+                                               th:value="${shop.nguoiLienHeKho != null ? shop.nguoiLienHeKho : user.hoVaTen}" maxlength="100"
+                                               placeholder="Tên người đại diện giao hàng cho shipper" oninput="xoaLoiTruong('inputNguoiLienHe')">
+                                        <div class="invalid-feedback" id="error-inputNguoiLienHe"></div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="inputGhiChuKho" class="form-label fw-semibold small">Ghi Chú Lấy Hàng (Cho Shipper)</label>
+                                    <input type="text" class="form-control" id="inputGhiChuKho" name="ghiChuKho"
+                                           th:value="${shop.ghiChuKho}" maxlength="255"
+                                           placeholder="Ví dụ: Kho ở cửa phụ bên phải, gọi trước khi đến lấy 15 phút..." oninput="xoaLoiTruong('inputGhiChuKho')">
+                                    <div class="invalid-feedback" id="error-inputGhiChuKho"></div>
+                                </div>
+                            </div>
+
+                            <!-- Nút Thao Tác -->
+                            <div class="d-flex gap-3 pt-3 border-top">
+                                <button type="submit" id="btnSubmitThietLap" class="btn btn-primary rounded-pill px-4 py-2 fw-bold"
+                                        th:disabled="${shop.trangThai != 'HOAT_DONG'}">
+                                    <i class="bi bi-floppy-fill me-1"></i> Lưu Thiết Lập Hồ Sơ
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-semibold" onclick="setTimeout(capNhatLivePreview, 100)">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i> Khôi phục
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Cột Khung Xem Trước Trực Tiếp (Col-lg-5 - Live Public Preview) -->
+                <div class="col-lg-5">
+                    <div class="live-preview-card">
+                        <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                            <span class="fw-bold small text-muted"><i class="bi bi-eye text-primary me-1"></i> Giao Diện Người Mua Nhìn Thấy (Live Preview)</span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary small">Trực quan thời gian thực</span>
+                        </div>
+
+                        <!-- Live Banner Cover -->
+                        <div class="live-banner-cover" id="liveCoverBanner"
+                             th:style="${shop.linkBanner != null ? 'background-image: url(' + shop.linkBanner + ');' : ''}">
+                            <!-- Live Logo Avatar -->
+                            <div class="live-logo-avatar" id="liveAvatarLogo"
+                                 th:style="${shop.linkLogo != null ? 'background-image: url(' + shop.linkLogo + ');' : 'background-image: url(https://cdn-icons-png.flaticon.com/512/3135/3135715.png);'}">
+                            </div>
+                        </div>
+
+                        <!-- Shop Info Live Body -->
+                        <div class="p-3 pt-5 mt-2">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h5 class="fw-bold mb-0 text-dark" id="liveTenShop" th:text="${shop.tenGianHang}">Tên Gian Hàng</h5>
+                                    <div class="d-flex align-items-center gap-2 mt-1">
+                                        <span class="badge-mall"><i class="bi bi-shield-check me-1"></i>MALL</span>
+                                        <span class="badge bg-success" id="liveTrangThaiNhanDon">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Đang mở cửa
+                                        </span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="alert('Đây là bản xem trước mô phỏng giao diện người mua')">
+                                    <i class="bi bi-plus"></i> Theo dõi
+                                </button>
+                            </div>
+
+                            <p class="text-muted small mb-3" id="liveMoTa" style="min-height: 40px; max-height: 80px; overflow: hidden;"
+                               th:text="${shop.moTa != null and !shop.moTa.isEmpty() ? shop.moTa : 'Chưa có mô tả gian hàng. Hãy nhập mô tả để thu hút khách hàng!'}">
+                                Mô tả gian hàng...
+                            </p>
+
+                            <!-- Khung Giờ Hoạt Động & Địa Chỉ -->
+                            <div class="p-3 rounded-3 bg-light border mb-3 small">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-clock text-primary"></i>
+                                    <span class="fw-semibold">Giờ hoạt động:</span>
+                                    <span id="liveKhungGio" class="text-dark fw-bold"
+                                          th:text="${(shop.gioMoCua != null ? shop.gioMoCua : '08:00') + ' - ' + (shop.gioDongCua != null ? shop.gioDongCua : '22:00')}">
+                                        08:00 - 22:00
+                                    </span>
+                                </div>
+                                <div class="d-flex align-items-start gap-2 mb-2">
+                                    <i class="bi bi-geo-alt text-danger mt-1"></i>
+                                    <div>
+                                        <span class="fw-semibold">Kho lấy hàng:</span>
+                                        <div id="liveDiaChiKho" class="text-muted" th:text="${shop.diaChiKho}">Hà Nội</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-telephone text-success"></i>
+                                    <span class="fw-semibold">Hotline kho:</span>
+                                    <span id="liveSdtKho" class="text-dark fw-semibold" th:text="${shop.sdtKho}">0987654321</span>
+                                </div>
+                            </div>
+
+                            <!-- Chỉ Số Uy Tín Khách Hàng Thấy -->
+                            <div class="row g-2 text-center small border-top pt-3">
+                                <div class="col-4 border-end">
+                                    <div class="text-warning fw-bold fs-6"><i class="bi bi-star-fill"></i> 5.0</div>
+                                    <div class="text-muted" style="font-size: 11px;">Đánh Giá Shop</div>
+                                </div>
+                                <div class="col-4 border-end">
+                                    <div class="text-primary fw-bold fs-6">100%</div>
+                                    <div class="text-muted" style="font-size: 11px;">Phản Hồi Chat</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="text-success fw-bold fs-6">0</div>
+                                    <div class="text-muted" style="font-size: 11px;">Sao Quả Tạ</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- TAB 2: LỊCH SỬ THAY ĐỔI & THỐNG KÊ THIẾT LẬP -->
+        <div class="tab-pane fade" id="pills-lichsu" role="tabpanel">
+
+            <!-- Thẻ Thống Kê Nhanh -->
+            <div class="row g-3 mb-4" th:if="${thongKe != null}">
+                <div class="col-md-3">
+                    <div class="card-custom p-3 border-start border-4 border-primary">
+                        <div class="text-muted small fw-semibold">Tổng Số Lần Cập Nhật</div>
+                        <div class="fs-4 fw-bold text-dark" id="statTongCapNhat" th:text="${thongKe.tongSoLanCapNhat}">0</div>
+                        <small class="text-primary"><i class="bi bi-clock-history"></i> Lịch sử nhật ký</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card-custom p-3 border-start border-4 border-success">
+                        <div class="text-muted small fw-semibold">Trạng Thái Nhận Đơn</div>
+                        <div class="fs-4 fw-bold text-success" id="statDangMoCua" th:text="${thongKe.dangMoCua ? 'Đang Mở Cửa' : 'Tạm Nghỉ'}">Đang Mở Cửa</div>
+                        <small class="text-muted">Chế độ vận hành shop</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card-custom p-3 border-start border-4 border-warning">
+                        <div class="text-muted small fw-semibold">Tỷ Lệ Hoàn Thiện</div>
+                        <div class="fs-4 fw-bold text-warning" id="statPhanTram" th:text="${thongKe.phanTramHoanThien + '%'}">80%</div>
+                        <small class="text-muted">Chỉ số chất lượng hồ sơ</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card-custom p-3 border-start border-4 border-info">
+                        <div class="text-muted small fw-semibold">Hạng Gian Hàng</div>
+                        <div class="fs-4 fw-bold text-info" th:text="${thongKe.hangGianHang}">TIEM_NANG</div>
+                        <small class="text-muted">Cấp độ bán hàng</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bảng Lịch Sử Có Tìm Kiếm, Lọc và Phân Trang -->
+            <div class="card-custom p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-3">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-journal-text text-primary me-2"></i>Nhật Ký Thay Đổi Cấu Hình Hồ Sơ</h5>
+
+                    <!-- Bộ lọc & Tìm kiếm -->
+                    <div class="d-flex flex-wrap gap-2">
+                        <select id="filterLoaiThayDoi" class="form-select form-select-sm" style="width: 180px;" onchange="taiLichSuThayDoi(0)">
+                            <option value="">-- Tất cả loại thay đổi --</option>
+                            <option value="THIET_LAP_TONG_THE">Thiết lập tổng thể</option>
+                            <option value="DOI_LOGO">Cập nhật Logo</option>
+                            <option value="DOI_BANNER">Cập nhật Banner</option>
+                            <option value="BAT_TAT_NHAN_DON">Trạng thái nhận đơn</option>
+                            <option value="DOI_GIO_HOAT_DONG">Cập nhật giờ hoạt động</option>
+                            <option value="DOI_DIA_CHI_KHO">Cập nhật địa chỉ kho</option>
+                        </select>
+                        <div class="input-group input-group-sm" style="width: 250px;">
+                            <input type="text" id="inputSearchLichSu" class="form-control" placeholder="Tìm nội dung / người thực hiện..." onkeyup="if(event.key === 'Enter') taiLichSuThayDoi(0)">
+                            <button class="btn btn-outline-secondary" type="button" onclick="taiLichSuThayDoi(0)">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bảng Dữ Liệu -->
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 70px;">STT</th>
+                                <th style="width: 180px;">Thời Gian</th>
+                                <th style="width: 180px;">Loại Thay Đổi</th>
+                                <th>Nội Dung Chi Tiết</th>
+                                <th style="width: 180px;">Người Thực Hiện</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bodyBangLichSu">
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div> Đang tải dữ liệu nhật ký...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Phân Trang -->
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                    <div class="text-muted small" id="infoPhanTrang">Hiển thị 0 bản ghi</div>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0" id="paginationLichSu">
+                            <!-- Render bằng JS -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Bootstrap 5 & SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    // Hàm đăng xuất
+    function handleLogout(event) {
+        if (event) event.preventDefault();
+        Swal.fire({
+            title: 'Xác nhận đăng xuất?',
+            text: 'Bạn có chắc chắn muốn đăng xuất khỏi Kênh Người Bán?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#4338ca',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Đăng xuất',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/dang-xuat';
+            }
+        });
+    }
+
+    // Thiết lập giờ nhanh
+    function datGioNhanh(gioMo, gioDong) {
+        document.getElementById('inputGioMoCua').value = gioMo;
+        document.getElementById('inputGioDongCua').value = gioDong;
+        capNhatLivePreview();
+    }
+
+    // Xem trước ảnh khi chọn file
+    function previewTepHinhAnh(input, loai) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            if (file.size > 5 * 1024 * 1024) {
+                Swal.fire('Tệp quá lớn', 'Kích thước tệp không được vượt quá 5MB!', 'warning');
+                input.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (loai === 'banner') {
+                    const box = document.getElementById('bannerPreviewContainer');
+                    box.style.backgroundImage = 'url(' + e.target.result + ')';
+                    const ph = document.getElementById('bannerPlaceholder');
+                    if (ph) ph.style.display = 'none';
+
+                    // Cập nhật live preview card
+                    document.getElementById('liveCoverBanner').style.backgroundImage = 'url(' + e.target.result + ')';
+                } else if (loai === 'logo') {
+                    const box = document.getElementById('logoPreviewContainer');
+                    box.style.backgroundImage = 'url(' + e.target.result + ')';
+                    const ph = document.getElementById('logoPlaceholder');
+                    if (ph) ph.style.display = 'none';
+
+                    // Cập nhật live preview card
+                    document.getElementById('liveAvatarLogo').style.backgroundImage = 'url(' + e.target.result + ')';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Cập nhật real-time các giá trị từ form sang khung Live Preview
+    function capNhatLivePreview() {
+        const tenShop = document.getElementById('inputTenShop').value.trim() || 'Tên Gian Hàng';
+        document.getElementById('liveTenShop').textContent = tenShop;
+
+        const moTa = document.getElementById('inputMoTa').value.trim() || 'Chưa có mô tả gian hàng. Hãy nhập mô tả để thu hút khách hàng!';
+        document.getElementById('liveMoTa').textContent = moTa;
+
+        const gioMo = document.getElementById('inputGioMoCua').value || '08:00';
+        const gioDong = document.getElementById('inputGioDongCua').value || '22:00';
+        document.getElementById('liveKhungGio').textContent = gioMo + ' - ' + gioDong;
+
+        const diaChiKho = document.getElementById('inputDiaChiKho').value.trim() || 'Chưa cập nhật địa chỉ';
+        document.getElementById('liveDiaChiKho').textContent = diaChiKho;
+
+        const sdtKho = document.getElementById('inputSdtKho').value.trim() || 'Chưa cập nhật';
+        document.getElementById('liveSdtKho').textContent = sdtKho;
+
+        const dangMoCua = document.getElementById('switchDangMoCua').checked;
+        const badgeTrangThai = document.getElementById('liveTrangThaiNhanDon');
+        if (dangMoCua) {
+            badgeTrangThai.className = 'badge bg-success';
+            badgeTrangThai.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Đang mở cửa';
+        } else {
+            badgeTrangThai.className = 'badge bg-danger';
+            badgeTrangThai.innerHTML = '<i class="bi bi-pause-circle-fill me-1"></i>Tạm nghỉ nhận đơn';
+        }
+    }
+
+    // Bật tắt nhanh trạng thái nhận đơn qua nút top bar
+    function chuyenNhanhTrangThaiNhanDon() {
+        const switchEl = document.getElementById('switchDangMoCua');
+        const trangThaiHienTai = switchEl ? switchEl.checked : true;
+        const trangThaiMoi = !trangThaiHienTai;
+
+        const textXacNhan = trangThaiMoi ?
+            'Bạn có chắc chắn muốn MỞ CỬA nhận đơn hàng mới?' :
+            'Bạn có chắc chắn muốn TẠM NGHỈ nhận đơn? Khách hàng sẽ không thể bấm đặt đơn mới.';
+
+        Swal.fire({
+            title: trangThaiMoi ? 'Mở cửa nhận đơn?' : 'Tạm nghỉ nhận đơn?',
+            text: textXacNhan,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: trangThaiMoi ? '#10b981' : '#ef4444',
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Hủy'
+        }).then((res) => {
+            if (res.isConfirmed) {
+                fetch('/api/v1/seller/thiet-lap-shop/trang-thai-mo-cua?dangMoCua=' + trangThaiMoi, {
+                    method: 'PATCH'
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.thanhCong) {
+                        if (switchEl) switchEl.checked = trangThaiMoi;
+                        const btn = document.getElementById('btnQuickToggleStatus');
+                        const txt = document.getElementById('quickStatusText');
+                        if (trangThaiMoi) {
+                            btn.className = 'btn rounded-pill px-3 py-2 fw-bold btn-success';
+                            txt.textContent = ' Đang mở cửa nhận đơn';
+                        } else {
+                            btn.className = 'btn rounded-pill px-3 py-2 fw-bold btn-outline-danger';
+                            txt.textContent = ' Tạm nghỉ nhận đơn';
+                        }
+                        capNhatLivePreview();
+                        Swal.fire('Thành công', data.thongDiep, 'success');
+                    } else {
+                        Swal.fire('Lỗi', data.thongDiep || 'Không thể chuyển trạng thái', 'error');
+                    }
+                })
+                .catch(err => {
+                    Swal.fire('Lỗi', 'Không thể kết nối đến máy chủ: ' + err.message, 'error');
+                });
+            }
+        });
+    }
+
+    // Quản lý hiển thị lỗi cụ thể tại từng ô nhập liệu
+    const shopFieldMap = {
+        'tenGianHang': 'inputTenShop',
+        'moTa': 'inputMoTa',
+        'gioMoCua': 'inputGioMoCua',
+        'gioDongCua': 'inputGioDongCua',
+        'diaChiKho': 'inputDiaChiKho',
+        'sdtKho': 'inputSdtKho',
+        'nguoiLienHeKho': 'inputNguoiLienHe',
+        'ghiChuKho': 'inputGhiChuKho',
+        'fileBanner': 'inputBanner',
+        'fileLogo': 'inputLogo'
+    };
+
+    function hienThiLoiTruong(truong, thongBao) {
+        const id = shopFieldMap[truong] || truong;
+        const el = document.getElementById(id);
+        const feedback = document.getElementById('error-' + id) || (el ? el.parentNode.querySelector('.invalid-feedback') : null);
+        if (el) {
+            el.classList.add('is-invalid');
+        }
+        if (feedback) {
+            feedback.textContent = thongBao;
+            feedback.style.display = 'block';
+        }
+    }
+
+    function xoaLoiTruong(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('is-invalid');
+        const feedback = document.getElementById('error-' + id) || (el ? el.parentNode.querySelector('.invalid-feedback') : null);
+        if (feedback) {
+            feedback.textContent = '';
+            feedback.style.display = 'none';
+        }
+    }
+
+    function xoaTatCaLoi() {
+        document.querySelectorAll('#formThietLapShop .is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        document.querySelectorAll('#formThietLapShop .invalid-feedback').forEach(el => {
+            el.textContent = '';
+            el.style.display = 'none';
+        });
+    }
+
+    // Xử lý gửi Form thiết lập Shop với kiểm tra lỗi tại từng ô cụ thể
+    function xuLyLuuThietLap(event) {
+        event.preventDefault();
+        xoaTatCaLoi();
+
+        let coLoi = false;
+        let truongDauTienBiLoi = null;
+
+        const danhDauLoi = (truong, thongBao) => {
+            hienThiLoiTruong(truong, thongBao);
+            coLoi = true;
+            if (!truongDauTienBiLoi) {
+                const id = shopFieldMap[truong] || truong;
+                truongDauTienBiLoi = document.getElementById(id);
+            }
+        };
+
+        // 1. Kiểm tra Tên Gian Hàng
+        const tenGianHang = document.getElementById('inputTenShop').value.trim();
+        if (!tenGianHang) {
+            danhDauLoi('tenGianHang', 'Tên gian hàng không được để trống!');
+        } else if (tenGianHang.length < 3 || tenGianHang.length > 100) {
+            danhDauLoi('tenGianHang', 'Tên gian hàng phải từ 3 đến 100 ký tự!');
+        }
+
+        // 2. Kiểm tra Mô tả
+        const moTa = document.getElementById('inputMoTa').value.trim();
+        if (moTa && moTa.length > 2000) {
+            danhDauLoi('moTa', 'Giới thiệu shop không được vượt quá 2000 ký tự!');
+        }
+
+        // 3. Kiểm tra Giờ mở cửa & Giờ đóng cửa
+        const gioMoCua = document.getElementById('inputGioMoCua').value.trim();
+        const gioDongCua = document.getElementById('inputGioDongCua').value.trim();
+        const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
+        if (!gioMoCua) {
+            danhDauLoi('gioMoCua', 'Giờ mở cửa không được để trống!');
+        } else if (!timeRegex.test(gioMoCua)) {
+            danhDauLoi('gioMoCua', 'Giờ mở cửa phải đúng định dạng HH:mm (ví dụ: 08:00)!');
+        }
+
+        if (!gioDongCua) {
+            danhDauLoi('gioDongCua', 'Giờ đóng cửa không được để trống!');
+        } else if (!timeRegex.test(gioDongCua)) {
+            danhDauLoi('gioDongCua', 'Giờ đóng cửa phải đúng định dạng HH:mm (ví dụ: 22:00)!');
+        }
+
+        // 4. Kiểm tra Địa chỉ kho
+        const diaChiKho = document.getElementById('inputDiaChiKho').value.trim();
+        if (!diaChiKho) {
+            danhDauLoi('diaChiKho', 'Địa chỉ kho lấy hàng không được để trống!');
+        } else if (diaChiKho.length < 5 || diaChiKho.length > 255) {
+            danhDauLoi('diaChiKho', 'Địa chỉ kho lấy hàng phải từ 5 đến 255 ký tự!');
+        }
+
+        // 5. Kiểm tra Số điện thoại kho
+        const sdtKho = document.getElementById('inputSdtKho').value.trim();
+        const phoneRegex = /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/;
+        if (!sdtKho) {
+            danhDauLoi('sdtKho', 'Số điện thoại kho không được để trống!');
+        } else if (!phoneRegex.test(sdtKho)) {
+            danhDauLoi('sdtKho', 'Số điện thoại kho phải là số di động Việt Nam hợp lệ (10 chữ số, ví dụ 0912345678)!');
+        }
+
+        // 6. Kiểm tra kích thước tệp tải lên nếu có
+        const inputBanner = document.getElementById('inputBanner');
+        if (inputBanner.files && inputBanner.files[0] && inputBanner.files[0].size > 5 * 1024 * 1024) {
+            danhDauLoi('fileBanner', 'Ảnh banner không được vượt quá 5MB!');
+        }
+        const inputLogo = document.getElementById('inputLogo');
+        if (inputLogo.files && inputLogo.files[0] && inputLogo.files[0].size > 5 * 1024 * 1024) {
+            danhDauLoi('fileLogo', 'Ảnh logo không được vượt quá 5MB!');
+        }
+
+        if (coLoi) {
+            if (truongDauTienBiLoi) {
+                truongDauTienBiLoi.focus();
+                truongDauTienBiLoi.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return;
+        }
+
+        const form = document.getElementById('formThietLapShop');
+        const formData = new FormData(form);
+
+        // Đảm bảo dangMoCua được gửi đúng boolean
+        const switchDangMoCua = document.getElementById('switchDangMoCua');
+        formData.set('dangMoCua', switchDangMoCua.checked ? 'true' : 'false');
+
+        const btn = document.getElementById('btnSubmitThietLap');
+        const textGoc = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Đang lưu...';
+
+        fetch('/api/v1/seller/thiet-lap-shop', {
+            method: 'POST',
+            body: formData
+        })
+        .then(async res => {
+            const data = await res.json().catch(() => null);
+            return { ok: res.ok, status: res.status, data: data };
+        })
+        .then(({ ok, status, data }) => {
+            btn.disabled = false;
+            btn.innerHTML = textGoc;
+
+            if (ok && data && data.thanhCong) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Lưu Thành Công!',
+                    text: data.thongDiep || 'Hồ sơ gian hàng của bạn đã được cập nhật hoàn tất.',
+                    confirmButtonColor: '#4338ca'
+                }).then(() => {
+                    window.location.reload();
+                });
+            } else {
+                let daHienThiLoiO = false;
+                // Nếu server trả về danh sách lỗi cụ thể từng trường trong duLieu
+                if (data && data.duLieu && typeof data.duLieu === 'object') {
+                    for (const [k, v] of Object.entries(data.duLieu)) {
+                        hienThiLoiTruong(k, v);
+                        daHienThiLoiO = true;
+                        if (!truongDauTienBiLoi) {
+                            const id = shopFieldMap[k] || k;
+                            truongDauTienBiLoi = document.getElementById(id);
+                        }
+                    }
+                }
+
+                // Nếu có thông điệp lỗi chứa tên trường cụ thể
+                const thongDiep = (data && (data.thongDiep || data.thongBao)) || 'Dữ liệu không hợp lệ!';
+                if (thongDiep.includes('Tên gian hàng')) {
+                    hienThiLoiTruong('tenGianHang', thongDiep);
+                    daHienThiLoiO = true;
+                    if (!truongDauTienBiLoi) truongDauTienBiLoi = document.getElementById('inputTenShop');
+                } else if (thongDiep.includes('Số điện thoại')) {
+                    hienThiLoiTruong('sdtKho', thongDiep);
+                    daHienThiLoiO = true;
+                    if (!truongDauTienBiLoi) truongDauTienBiLoi = document.getElementById('inputSdtKho');
+                } else if (thongDiep.toLowerCase().includes('banner')) {
+                    hienThiLoiTruong('fileBanner', thongDiep);
+                    daHienThiLoiO = true;
+                } else if (thongDiep.toLowerCase().includes('logo')) {
+                    hienThiLoiTruong('fileLogo', thongDiep);
+                    daHienThiLoiO = true;
+                }
+
+                if (truongDauTienBiLoi) {
+                    truongDauTienBiLoi.focus();
+                    truongDauTienBiLoi.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Dữ liệu không hợp lệ',
+                    text: thongDiep,
+                    confirmButtonColor: '#4338ca'
+                });
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = textGoc;
+            Swal.fire('Lỗi hệ thống', 'Không thể gửi yêu cầu: ' + err.message, 'error');
+        });
+    }
+
+    // Tải danh sách lịch sử thay đổi thiết lập
+    let trangHienTai = 0;
+    function taiLichSuThayDoi(trang) {
+        trangHienTai = trang;
+        const loaiThayDoi = document.getElementById('filterLoaiThayDoi').value;
+        const tuKhoa = document.getElementById('inputSearchLichSu').value.trim();
+
+        const url = `/api/v1/seller/thiet-lap-shop/lich-su?page=${trang}&size=10` +
+            (loaiThayDoi ? `&loaiThayDoi=${encodeURIComponent(loaiThayDoi)}` : '') +
+            (tuKhoa ? `&tuKhoa=${encodeURIComponent(tuKhoa)}` : '');
+
+        const tbody = document.getElementById('bodyBangLichSu');
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-primary me-2"></div> Đang tải dữ liệu...</td></tr>`;
+
+        fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            if (data.thanhCong && data.duLieu) {
+                renderBangLichSu(data.duLieu);
+            } else {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-danger">Không thể tải lịch sử thiết lập</td></tr>`;
+            }
+        })
+        .catch(err => {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-danger">Lỗi kết nối: ${err.message}</td></tr>`;
+        });
+    }
+
+    function renderBangLichSu(pageData) {
+        const tbody = document.getElementById('bodyBangLichSu');
+        const content = pageData.content || [];
+
+        if (content.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted"><i class="bi bi-inbox fs-4 d-block mb-2"></i>Chưa có lịch sử thay đổi cấu hình nào phù hợp</td></tr>`;
+            document.getElementById('infoPhanTrang').textContent = 'Hiển thị 0 bản ghi';
+            document.getElementById('paginationLichSu').innerHTML = '';
+            return;
+        }
+
+        let html = '';
+        content.forEach((item, index) => {
+            const stt = pageData.number * pageData.size + index + 1;
+            const thoiGian = item.thoiGian ? new Date(item.thoiGian).toLocaleString('vi-VN') : '---';
+
+            let badgeClass = 'bg-secondary';
+            if (item.loaiThayDoi === 'THIET_LAP_TONG_THE') badgeClass = 'bg-primary';
+            else if (item.loaiThayDoi === 'DOI_LOGO' || item.loaiThayDoi === 'DOI_BANNER') badgeClass = 'bg-info text-dark';
+            else if (item.loaiThayDoi === 'BAT_TAT_NHAN_DON') badgeClass = 'bg-warning text-dark';
+            else if (item.loaiThayDoi === 'DOI_GIO_HOAT_DONG') badgeClass = 'bg-success';
+            else if (item.loaiThayDoi === 'DOI_DIA_CHI_KHO') badgeClass = 'bg-danger';
+
+            html += `
+                <tr>
+                    <td class="fw-bold text-muted">${stt}</td>
+                    <td class="small"><i class="bi bi-calendar3 me-1 text-muted"></i>${thoiGian}</td>
+                    <td><span class="badge ${badgeClass}">${item.tenLoaiThayDoi || item.loaiThayDoi}</span></td>
+                    <td class="small fw-medium text-dark">${item.noiDungThayDoi || '---'}</td>
+                    <td class="small"><i class="bi bi-person me-1 text-muted"></i>${item.nguoiThucHien || 'Seller'}</td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+
+        // Phân trang
+        document.getElementById('infoPhanTrang').textContent = `Hiển thị ${content.length} / tổng số ${pageData.totalElements} bản ghi (Trang ${pageData.number + 1} / ${pageData.totalPages})`;
+        renderPhanTrang(pageData.number, pageData.totalPages);
+    }
+
+    function renderPhanTrang(trangHienTai, tongSoTrang) {
+        const ul = document.getElementById('paginationLichSu');
+        if (tongSoTrang <= 1) {
+            ul.innerHTML = '';
+            return;
+        }
+
+        let html = '';
+        html += `<li class="page-item ${trangHienTai === 0 ? 'disabled' : ''}">
+                    <button class="page-link" onclick="taiLichSuThayDoi(${trangHienTai - 1})">Trước</button>
+                 </li>`;
+
+        for (let i = 0; i < tongSoTrang; i++) {
+            if (i === 0 || i === tongSoTrang - 1 || (i >= trangHienTai - 1 && i <= trangHienTai + 1)) {
+                html += `<li class="page-item ${i === trangHienTai ? 'active' : ''}">
+                            <button class="page-link" onclick="taiLichSuThayDoi(${i})">${i + 1}</button>
+                         </li>`;
+            } else if (i === trangHienTai - 2 || i === trangHienTai + 2) {
+                html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+            }
+        }
+
+        html += `<li class="page-item ${trangHienTai === tongSoTrang - 1 ? 'disabled' : ''}">
+                    <button class="page-link" onclick="taiLichSuThayDoi(${trangHienTai + 1})">Sau</button>
+                 </li>`;
+        ul.innerHTML = html;
+    }
+
+    // Khởi tạo ban đầu
+    document.addEventListener('DOMContentLoaded', function() {
+        capNhatLivePreview();
+    });
+</script>
+
+</body>
+</html>

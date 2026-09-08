@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Người Dùng & Phân Quyền Nội Bộ - FlexShop Admin</title>
+    <!-- Bootstrap 5 CSS & Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .navbar-custom {
+            background: #0f172a;
+            border-bottom: 1px solid #1e293b;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            transition: all 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.06);
+        }
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+        .badge-admin { background-color: #ef4444; color: white; }
+        .badge-nguoi-ban { background-color: #f59e0b; color: white; }
+        .badge-khach-hang { background-color: #3b82f6; color: white; }
+        .badge-tai-xe { background-color: #0284c7; color: white; }
+        .badge-cskh { background-color: #10b981; color: white; }
+        .badge-other { background-color: #64748b; color: white; }
+        .table-hover tbody tr:hover {
+            background-color: #f1f5f9;
+        }
+        .avatar-img {
+            width: 42px;
+            height: 42px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .loading-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark navbar-custom px-4 py-3 sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/admin/dashboard">
+            <div class="bg-primary text-white rounded-3 px-2 py-1 fs-5 fw-bold">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <div>
+                <span class="fw-bold tracking-tight">FlexShop</span>
+                <span class="badge bg-danger ms-1 text-white">QUẢN TRỊ VIÊN</span>
+            </div>
+        </a>
+
+        <div class="d-flex align-items-center gap-3">
+            <a href="/admin/dashboard" class="btn btn-sm btn-outline-light rounded-pill px-3 py-1 fw-semibold">
+                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+            </a>
+            <a href="/ho-so" class="d-flex align-items-center gap-2 text-white text-decoration-none" title="Xem & Chỉnh sửa hồ sơ cá nhân">
+                <img th:src="${user.anhDaiDien}" alt="Avatar" class="rounded-circle border border-2 border-primary" width="38" height="38">
+                <div class="d-none d-md-block text-start">
+                    <div class="fw-bold small" th:text="${user.hoVaTen}">Quản trị viên</div>
+                    <div class="text-white-50" style="font-size: 11px;" th:text="${user.email}">admin@flexshop.vn</div>
+                </div>
+            </a>
+            <a href="/logout" onclick="handleLogout(event)" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 fw-semibold">
+                <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Container -->
+<div class="container-fluid px-4 py-4">
+    <!-- Breadcrumb & Title -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small">
+                    <li class="breadcrumb-item"><a href="/admin/dashboard" class="text-decoration-none text-muted">Trang chủ</a></li>
+                    <li class="breadcrumb-item active text-primary fw-semibold" aria-current="page">Quản Lý Người Dùng & Phân Quyền</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold mb-1">Quản Lý Người Dùng & Phân Quyền Nội Bộ 👥</h3>
+            <p class="text-muted small mb-0">Tìm kiếm, lọc danh sách, kiểm soát khóa/mở khóa tài khoản và cấp tài khoản nhân viên Shipper & CSKH.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2 mt-3 mt-md-0">
+            <button type="button" class="btn btn-primary rounded-3 px-3 py-2 fw-semibold shadow-sm d-flex align-items-center gap-2" onclick="moModalTaoNhanVien()">
+                <i class="bi bi-person-plus-fill fs-5"></i> Cấp Tài Khoản Nhân Viên
+            </button>
+            <button type="button" class="btn btn-outline-secondary rounded-3 px-3 py-2 fw-semibold" onclick="taiLaiDuLieu()">
+                <i class="bi bi-arrow-clockwise fs-5"></i> Làm mới
+            </button>
+        </div>
+    </div>
+
+    <!-- KPI Statistics Grid -->
+    <div class="row g-3 mb-4" id="kpiContainer">
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="stat-card d-flex align-items-center gap-3">
+                <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-semibold">Tổng Người Dùng</div>
+                    <div class="fs-4 fw-bold" id="kpiTongSo" th:text="${thongKe != null ? thongKe.tongSoNguoiDung : 0}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="stat-card d-flex align-items-center gap-3">
+                <div class="stat-icon bg-info bg-opacity-10 text-info">
+                    <i class="bi bi-person-heart"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-semibold">Khách Hàng</div>
+                    <div class="fs-4 fw-bold text-info" id="kpiKhachHang" th:text="${thongKe != null ? thongKe.soKhachHang : 0}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="stat-card d-flex align-items-center gap-3">
+                <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                    <i class="bi bi-shop"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-semibold">Người Bán (Shop)</div>
+                    <div class="fs-4 fw-bold text-warning" id="kpiNguoiBan" th:text="${thongKe != null ? thongKe.soNguoiBan : 0}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="stat-card d-flex align-items-center gap-3">
+                <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-truck"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-semibold">Tài Xế / Shipper</div>
+                    <div class="fs-4 fw-bold text-primary" id="kpiTaiXe" th:text="${thongKe != null ? thongKe.soTaiXe : 0}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="stat-card d-flex align-items-center gap-3">
+                <div class="stat-icon bg-success bg-opacity-10 text-success">
+                    <i class="bi bi-headset"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-semibold">Nhân Viên CSKH</div>
+                    <div class="fs-4 fw-bold text-success" id="kpiCskh" th:text="${thongKe != null ? thongKe.soCskh : 0}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="stat-card d-flex align-items-center gap-3 border-danger border-opacity-25">
+                <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+                    <i class="bi bi-lock-fill"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-semibold">Tài Khoản Bị Khóa</div>
+                    <div class="fs-4 fw-bold text-danger" id="kpiBiKhoa" th:text="${thongKe != null ? thongKe.soBiKhoa : 0}">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter & Search Toolbar Card -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+            <div class="row g-3 align-items-center">
+                <!-- Search keyword -->
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="timKiemKeyword" class="form-control bg-light border-start-0 ps-0" placeholder="Tìm theo Họ tên, Email, Số điện thoại..." onkeydown="xuLyEnterTimKiem(event)">
+                    </div>
+                </div>
+                <!-- Filter Role -->
+                <div class="col-md-3">
+                    <select id="locVaiTro" class="form-select bg-light" onchange="timKiem(0)">
+                        <option value="ALL">-- Tất cả Vai Trò --</option>
+                        <option value="KHACH_HANG">Khách Hàng (KHACH_HANG)</option>
+                        <option value="NGUOI_BAN">Người Bán (NGUOI_BAN)</option>
+                        <option value="TAI_XE">Tài Xế / Shipper (TAI_XE)</option>
+                        <option value="CSKH">Chăm Sóc Khách Hàng (CSKH)</option>
+                        <option value="ADMIN">Quản Trị Viên (ADMIN)</option>
+                    </select>
+                </div>
+                <!-- Filter Status -->
+                <div class="col-md-3">
+                    <select id="locTrangThai" class="form-select bg-light" onchange="timKiem(0)">
+                        <option value="ALL">-- Tất cả Trạng Thái --</option>
+                        <option value="HOAT_DONG">🟢 Đang hoạt động (HOAT_DONG)</option>
+                        <option value="BI_KHOA">🔴 Đã bị khóa (BI_KHOA)</option>
+                    </select>
+                </div>
+                <!-- Action button -->
+                <div class="col-md-2 d-flex gap-2">
+                    <button class="btn btn-primary w-100 fw-semibold" onclick="timKiem(0)">
+                        <i class="bi bi-filter me-1"></i> Lọc dữ liệu
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="datLaiBoLoc()" title="Đặt lại bộ lọc">
+                        <i class="bi bi-x-circle"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table Card -->
+    <div class="card border-0 shadow-sm rounded-4 position-relative">
+        <div id="loadingTable" class="loading-overlay d-none rounded-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải dữ liệu...</span>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4" style="width: 70px;">ID</th>
+                            <th>Người Dùng</th>
+                            <th>Số Điện Thoại</th>
+                            <th>Vai Trò</th>
+                            <th>Trạng Thái</th>
+                            <th>Ngày Tham Gia</th>
+                            <th class="text-center pe-4" style="width: 220px;">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <div class="spinner-border spinner-border-sm text-primary me-2"></div> Đang tải danh sách người dùng...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Table Footer / Pagination -->
+        <div class="card-footer bg-white border-0 py-3 px-4 d-flex flex-wrap justify-content-between align-items-center">
+            <div class="text-muted small" id="paginationInfo">
+                Hiển thị 0 đến 0 trong tổng số 0 người dùng
+            </div>
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0 gap-1" id="paginationContainer">
+                    <!-- Dynamic pagination items -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 1: CẤP TÀI KHOẢN NHÂN VIÊN (SHIPPER / CSKH) -->
+<div class="modal fade" id="modalTaoNhanVien" tabindex="-1" aria-labelledby="modalTaoNhanVienLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="modalTaoNhanVienLabel">
+                    <i class="bi bi-person-plus-fill text-primary me-2"></i>Cấp Tài Khoản Nhân Viên Nội Bộ
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted small mb-3">Admin chỉ được phép cấp tài khoản nhân viên cho 2 vai trò nghiệp vụ: <b>Tài xế (Shipper)</b> hoặc <b>Chăm sóc khách hàng (CSKH)</b>.</p>
+                <form id="formTaoNhanVien" onsubmit="xuLyTaoNhanVien(event)">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Họ và Tên <span class="text-danger">*</span></label>
+                        <input type="text" id="taoHoVaTen" class="form-control" placeholder="Ví dụ: Nguyễn Văn An" required oninput="xoaLoiNhanVien('taoHoVaTen', 'errTaoHoVaTen')">
+                        <div class="invalid-feedback" id="errTaoHoVaTen" style="display: none;"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Địa Chỉ Email <span class="text-danger">*</span></label>
+                        <input type="email" id="taoEmail" class="form-control" placeholder="nhanvien@flexshop.vn" required oninput="xoaLoiNhanVien('taoEmail', 'errTaoEmail')">
+                        <div class="invalid-feedback" id="errTaoEmail" style="display: none;"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Số Điện Thoại (10 số VN) <span class="text-danger">*</span></label>
+                        <input type="tel" id="taoSoDienThoai" class="form-control" placeholder="0912345678" pattern="(0[3|5|7|8|9])[0-9]{8}" required oninput="xoaLoiNhanVien('taoSoDienThoai', 'errTaoSoDienThoai')">
+                        <div class="invalid-feedback" id="errTaoSoDienThoai" style="display: none;"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Mật Khẩu Khởi Tạo <span class="text-danger">*</span></label>
+                        <input type="password" id="taoMatKhau" class="form-control" placeholder="Tối thiểu 8 ký tự, có chữ và số" minlength="8" required oninput="xoaLoiNhanVien('taoMatKhau', 'errTaoMatKhau')">
+                        <div class="invalid-feedback" id="errTaoMatKhau" style="display: none;"></div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold">Vai Trò Phân Bổ <span class="text-danger">*</span></label>
+                        <select id="taoVaiTro" class="form-select" required onchange="xoaLoiNhanVien('taoVaiTro', 'errTaoVaiTro')">
+                            <option value="TAI_XE">🚚 Tài Xế Giao Hàng (SHIPPER / TAI_XE)</option>
+                            <option value="CSKH">🎧 Nhân Viên Chăm Sóc Khách Hàng (CSKH)</option>
+                        </select>
+                        <div class="invalid-feedback" id="errTaoVaiTro" style="display: none;"></div>
+                    </div>
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button type="button" class="btn btn-light px-4 rounded-3" data-bs-dismiss="modal">Hủy bỏ</button>
+                        <button type="submit" class="btn btn-primary px-4 rounded-3 fw-semibold" id="btnSubmitTaoNhanVien">
+                            <i class="bi bi-check-lg me-1"></i> Cấp Tài Khoản
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 2: PHÂN QUYỀN VAI TRÒ CHO NGƯỜI DÙNG -->
+<div class="modal fade" id="modalPhanQuyen" tabindex="-1" aria-labelledby="modalPhanQuyenLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="modalPhanQuyenLabel">
+                    <i class="bi bi-shield-check text-success me-2"></i>Phân Quyền Người Dùng
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 mb-3">
+                    <img id="pqAvatar" src="" alt="Avatar" class="avatar-img">
+                    <div>
+                        <div class="fw-bold" id="pqHoTen">Nguyễn Văn A</div>
+                        <div class="text-muted small" id="pqEmail">user@example.com</div>
+                    </div>
+                </div>
+                <input type="hidden" id="pqUserId">
+                <label class="form-label small fw-semibold mb-2">Chọn 1 vai trò duy nhất cho tài khoản này:</label>
+                <div class="d-flex flex-column gap-2 mb-4">
+                    <div class="form-check p-2 border rounded-3">
+                        <input class="form-check-input ms-1 me-2" type="radio" name="vaiTroChonRadio" value="ADMIN" id="role_admin">
+                        <label class="form-check-label fw-bold text-danger" for="role_admin">
+                            Quản Trị Viên (ADMIN)
+                        </label>
+                        <div class="text-muted small ms-4">Toàn quyền kiểm soát và vận hành hệ thống</div>
+                    </div>
+                    <div class="form-check p-2 border rounded-3">
+                        <input class="form-check-input ms-1 me-2" type="radio" name="vaiTroChonRadio" value="NGUOI_BAN" id="role_nguoi_ban">
+                        <label class="form-check-label fw-bold text-warning" for="role_nguoi_ban">
+                            Người Bán / Chủ Shop (NGUOI_BAN)
+                        </label>
+                        <div class="text-muted small ms-4">Quản lý gian hàng, đăng bán sản phẩm và xử lý đơn hàng</div>
+                    </div>
+                    <div class="form-check p-2 border rounded-3">
+                        <input class="form-check-input ms-1 me-2" type="radio" name="vaiTroChonRadio" value="KHACH_HANG" id="role_khach_hang">
+                        <label class="form-check-label fw-bold text-primary" for="role_khach_hang">
+                            Khách Hàng Mua Sắm (KHACH_HANG)
+                        </label>
+                        <div class="text-muted small ms-4">Tìm kiếm, đặt mua sản phẩm và thanh toán đơn hàng</div>
+                    </div>
+                    <div class="form-check p-2 border rounded-3">
+                        <input class="form-check-input ms-1 me-2" type="radio" name="vaiTroChonRadio" value="TAI_XE" id="role_tai_xe">
+                        <label class="form-check-label fw-bold text-info" for="role_tai_xe">
+                            Tài Xế Giao Hàng (TAI_XE / SHIPPER)
+                        </label>
+                        <div class="text-muted small ms-4">Nhận và giao đơn hàng, chụp ảnh POD xác thực giao hàng</div>
+                    </div>
+                    <div class="form-check p-2 border rounded-3">
+                        <input class="form-check-input ms-1 me-2" type="radio" name="vaiTroChonRadio" value="CSKH" id="role_cskh">
+                        <label class="form-check-label fw-bold text-success" for="role_cskh">
+                            Chăm Sóc Khách Hàng (CSKH)
+                        </label>
+                        <div class="text-muted small ms-4">Hỗ trợ khiếu nại, giải đáp thắc mắc và kiểm duyệt nội bộ</div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 justify-content-end">
+                    <button type="button" class="btn btn-light px-4 rounded-3" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="button" class="btn btn-primary px-4 rounded-3 fw-semibold" onclick="xuLyLuuPhanQuyen()">
+                        <i class="bi bi-save me-1"></i> Lưu Phân Quyền
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 3: XEM CHI TIẾT NGƯỜI DÙNG -->
+<div class="modal fade" id="modalChiTiet" tabindex="-1" aria-labelledby="modalChiTietLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="modalChiTietLabel">
+                    <i class="bi bi-info-circle-fill text-primary me-2"></i>Chi Tiết Tài Khoản Người Dùng
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" id="chiTietBody">
+                <!-- Injected via JavaScript -->
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary px-4 rounded-3" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Trạng thái phân trang và tìm kiếm hiện tại
+    let currentPage = 0;
+    let pageSize = 10;
+    let totalPages = 1;
+    let currentAdminId = [[${user.id}]];
+    let modalTaoNhanVienInstance = null;
+    let modalPhanQuyenInstance = null;
+    let modalChiTietInstance = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        modalTaoNhanVienInstance = new bootstrap.Modal(document.getElementById('modalTaoNhanVien'));
+        modalPhanQuyenInstance = new bootstrap.Modal(document.getElementById('modalPhanQuyen'));
+        modalChiTietInstance = new bootstrap.Modal(document.getElementById('modalChiTiet'));
+        timKiem(0);
+    });
+
+    function handleLogout(e) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('currentUser');
+        document.cookie = "ACCESS_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        document.cookie = "REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    }
+
+    function xuLyEnterTimKiem(e) {
+        if (e.key === 'Enter') {
+            timKiem(0);
+        }
+    }
+
+    function datLaiBoLoc() {
+        document.getElementById('timKiemKeyword').value = '';
+        document.getElementById('locVaiTro').value = 'ALL';
+        document.getElementById('locTrangThai').value = 'ALL';
+        timKiem(0);
+    }
+
+    function taiLaiDuLieu() {
+        capNhatThongKeKpi();
+        timKiem(currentPage);
+    }
+
+    async function capNhatThongKeKpi() {
+        try {
+            const token = localStorage.getItem('accessToken');
+            const res = await fetch('/api/v1/admin/nguoi-dung/thong-ke', {
+                headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+            });
+            const data = await res.json();
+            if (data.thanhCong || data.success) {
+                const s = data.duLieu || data.data;
+                document.getElementById('kpiTongSo').innerText = s.tongSoNguoiDung || 0;
+                document.getElementById('kpiKhachHang').innerText = s.soKhachHang || 0;
+                document.getElementById('kpiNguoiBan').innerText = s.soNguoiBan || 0;
+                document.getElementById('kpiTaiXe').innerText = s.soTaiXe || 0;
+                document.getElementById('kpiCskh').innerText = s.soCskh || 0;
+                document.getElementById('kpiBiKhoa').innerText = s.soBiKhoa || 0;
+            }
+        } catch (e) {
+            console.error("Lỗi khi tải thống kê KPI:", e);
+        }
+    }
+
+    async function timKiem(page = 0) {
+        currentPage = page;
+        const keyword = document.getElementById('timKiemKeyword').value.trim();
+        const vaiTro = document.getElementById('locVaiTro').value;
+        const trangThai = document.getElementById('locTrangThai').value;
+
+        const loading = document.getElementById('loadingTable');
+        loading.classList.remove('d-none');
+
+        let url = `/api/v1/admin/nguoi-dung?page=${page}&size=${pageSize}&sortBy=ngayTao&sortDir=desc`;
+        if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
+        if (vaiTro && vaiTro !== 'ALL') url += `&vaiTro=${encodeURIComponent(vaiTro)}`;
+        if (trangThai && trangThai !== 'ALL') url += `&trangThai=${encodeURIComponent(trangThai)}`;
+
+        try {
+            const token = localStorage.getItem('accessToken');
+            const res = await fetch(url, {
+                headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+            });
+            const data = await res.json();
+
+            if (data.thanhCong || data.success) {
+                const pageData = data.duLieu || data.data;
+                renderBangNguoiDung(pageData.content);
+                renderPhanTrang(pageData);
+            } else {
+                hienThiLoi(data.thongBao || data.message || 'Lỗi khi tải danh sách người dùng!');
+            }
+        } catch (e) {
+            console.error("Lỗi gọi API người dùng:", e);
+            hienThiLoi("Lỗi kết nối máy chủ: " + e.message);
+        } finally {
+            loading.classList.add('d-none');
+        }
+    }
+
+    function renderBangNguoiDung(users) {
+        const tbody = document.getElementById('userTableBody');
+        if (!users || users.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-5 text-muted">
+                        <i class="bi bi-people fs-1 d-block mb-2 text-secondary"></i>
+                        Không tìm thấy người dùng nào phù hợp với điều kiện tìm kiếm.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        let html = '';
+        users.forEach(u => {
+            const isSelf = (u.id === currentAdminId);
+            const isSuperAdmin = (u.email === 'admin@flexshop.vn');
+            const isLocked = (u.trangThai === 'BI_KHOA');
+
+            // Render 1 vai trò duy nhất cho mỗi người dùng
+            let r = u.vaiTro;
+            if (!r) {
+                if (u.danhSachVaiTro && u.danhSachVaiTro.length > 0) {
+                    if (u.danhSachVaiTro.includes('ADMIN')) r = 'ADMIN';
+                    else if (u.danhSachVaiTro.includes('CSKH')) r = 'CSKH';
+                    else if (u.danhSachVaiTro.includes('TAI_XE') || u.danhSachVaiTro.includes('SHIPPER')) r = 'TAI_XE';
+                    else if (u.danhSachVaiTro.includes('NGUOI_BAN')) r = 'NGUOI_BAN';
+                    else r = 'KHACH_HANG';
+                } else {
+                    r = 'KHACH_HANG';
+                }
+            }
+            let badgeClass = 'badge-other';
+            if (r === 'ADMIN') badgeClass = 'badge-admin';
+            else if (r === 'NGUOI_BAN') badgeClass = 'badge-nguoi-ban';
+            else if (r === 'KHACH_HANG') badgeClass = 'badge-khach-hang';
+            else if (r === 'TAI_XE' || r === 'SHIPPER') badgeClass = 'badge-tai-xe';
+            else if (r === 'CSKH') badgeClass = 'badge-cskh';
+            const rolesHtml = `<span class="badge ${badgeClass} px-2 py-1">${r}</span>`;
+
+            // Render trạng thái badge
+            const statusHtml = isLocked
+                ? `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1"><i class="bi bi-lock-fill me-1"></i>Bị Khóa</span>`
+                : `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1"><i class="bi bi-check-circle-fill me-1"></i>Hoạt Động</span>`;
+
+            // Ngày tạo
+            const ngayTaoFormatted = u.ngayTao ? u.ngayTao.replace('T', ' ').substring(0, 16) : '-';
+
+            // Nút Thao Tác
+            let lockBtnHtml = '';
+            if (isSelf) {
+                lockBtnHtml = `<button class="btn btn-sm btn-light text-muted" disabled title="Không thể tự khóa tài khoản của chính mình"><i class="bi bi-shield-slash"></i></button>`;
+            } else if (isSuperAdmin) {
+                lockBtnHtml = `<button class="btn btn-sm btn-light text-muted" disabled title="Tài khoản Quản trị tối cao không thể bị khóa"><i class="bi bi-shield-lock"></i></button>`;
+            } else if (isLocked) {
+                lockBtnHtml = `<button class="btn btn-sm btn-outline-success" onclick="xacNhanDoiTrangThai(${u.id}, 'HOAT_DONG', '${u.hoVaTen}')" title="Mở khóa tài khoản"><i class="bi bi-unlock-fill"></i> Mở khóa</button>`;
+            } else {
+                lockBtnHtml = `<button class="btn btn-sm btn-outline-danger" onclick="xacNhanDoiTrangThai(${u.id}, 'BI_KHOA', '${u.hoVaTen}')" title="Khóa tài khoản"><i class="bi bi-lock-fill"></i> Khóa</button>`;
+            }
+
+            html += `
+                <tr>
+                    <td class="ps-4 fw-semibold text-muted">#${u.id}</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="${u.anhDaiDien || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.hoVaTen)}" class="avatar-img border" alt="Avatar">
+                            <div>
+                                <div class="fw-bold">${u.hoVaTen} ${isSelf ? '<span class="badge bg-dark ms-1">Tôi</span>' : ''}</div>
+                                <div class="text-muted small">${u.email}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="text-secondary small fw-medium">${u.soDienThoai || 'Chưa cập nhật'}</span></td>
+                    <td>${rolesHtml}</td>
+                    <td>${statusHtml}</td>
+                    <td class="small text-muted">${ngayTaoFormatted}</td>
+                    <td class="text-center pe-4">
+                        <div class="btn-group gap-1" role="group">
+                            ${lockBtnHtml}
+                            <button class="btn btn-sm btn-outline-primary" onclick="moModalPhanQuyen(${u.id})" title="Phân quyền vai trò">
+                                <i class="bi bi-shield-check"></i> Phân quyền
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="moModalChiTiet(${u.id})" title="Xem chi tiết">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    }
+
+    function renderPhanTrang(pageData) {
+        totalPages = pageData.totalPages || 1;
+        const totalElements = pageData.totalElements || 0;
+        const from = totalElements === 0 ? 0 : (pageData.number * pageData.size + 1);
+        const to = Math.min((pageData.number + 1) * pageData.size, totalElements);
+
+        document.getElementById('paginationInfo').innerText =
+            `Hiển thị ${from} đến ${to} trong tổng số ${totalElements} người dùng`;
+
+        const container = document.getElementById('paginationContainer');
+        let html = '';
+
+        // Previous button
+        html += `
+            <li class="page-item ${pageData.first ? 'disabled' : ''}">
+                <button class="page-link" onclick="timKiem(${currentPage - 1})"><i class="bi bi-chevron-left"></i></button>
+            </li>
+        `;
+
+        // Page numbers
+        for (let i = 0; i < totalPages; i++) {
+            if (totalPages > 7) {
+                if (i !== 0 && i !== totalPages - 1 && Math.abs(i - currentPage) > 2) {
+                    if (i === 1 || i === totalPages - 2) {
+                        html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                    }
+                    continue;
+                }
+            }
+            html += `
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <button class="page-link" onclick="timKiem(${i})">${i + 1}</button>
+                </li>
+            `;
+        }
+
+        // Next button
+        html += `
+            <li class="page-item ${pageData.last ? 'disabled' : ''}">
+                <button class="page-link" onclick="timKiem(${currentPage + 1})"><i class="bi bi-chevron-right"></i></button>
+            </li>
+        `;
+
+        container.innerHTML = html;
+    }
+
+    // Xử lý tạo nhân viên mới
+    // Helper hiển thị và xóa lỗi cụ thể từng ô nhập trong modal tạo nhân viên
+    function hienThiLoiNhanVien(inputId, errId, thongBao) {
+        const input = document.getElementById(inputId);
+        const feedback = document.getElementById(errId);
+        if (input) {
+            input.classList.add('is-invalid');
+        }
+        if (feedback) {
+            feedback.innerText = thongBao;
+            feedback.style.display = 'block';
+        }
+    }
+
+    function xoaLoiNhanVien(inputId, errId) {
+        const input = document.getElementById(inputId);
+        const feedback = document.getElementById(errId);
+        if (input) {
+            input.classList.remove('is-invalid');
+        }
+        if (feedback) {
+            feedback.style.display = 'none';
+        }
+    }
+
+    function moModalTaoNhanVien() {
+        document.getElementById('formTaoNhanVien').reset();
+        xoaLoiNhanVien('taoHoVaTen', 'errTaoHoVaTen');
+        xoaLoiNhanVien('taoEmail', 'errTaoEmail');
+        xoaLoiNhanVien('taoSoDienThoai', 'errTaoSoDienThoai');
+        xoaLoiNhanVien('taoMatKhau', 'errTaoMatKhau');
+        xoaLoiNhanVien('taoVaiTro', 'errTaoVaiTro');
+        modalTaoNhanVienInstance.show();
+    }
+
+    async function xuLyTaoNhanVien(e) {
+        e.preventDefault();
+        xoaLoiNhanVien('taoHoVaTen', 'errTaoHoVaTen');
+        xoaLoiNhanVien('taoEmail', 'errTaoEmail');
+        xoaLoiNhanVien('taoSoDienThoai', 'errTaoSoDienThoai');
+        xoaLoiNhanVien('taoMatKhau', 'errTaoMatKhau');
+        xoaLoiNhanVien('taoVaiTro', 'errTaoVaiTro');
+
+        const hoVaTenInput = document.getElementById('taoHoVaTen');
+        const emailInput = document.getElementById('taoEmail');
+        const sdtInput = document.getElementById('taoSoDienThoai');
+        const matKhauInput = document.getElementById('taoMatKhau');
+        const vaiTroInput = document.getElementById('taoVaiTro');
+
+        const hoVaTen = hoVaTenInput.value.trim();
+        const email = emailInput.value.trim();
+        const soDienThoai = sdtInput.value.trim();
+        const matKhau = matKhauInput.value;
+        const vaiTro = vaiTroInput.value;
+
+        // 1. Validate Họ và tên
+        if (!hoVaTen || hoVaTen.length < 2 || hoVaTen.length > 100) {
+            hienThiLoiNhanVien('taoHoVaTen', 'errTaoHoVaTen', 'Họ và tên nhân viên từ 2 đến 100 ký tự!');
+            hoVaTenInput.focus();
+            return;
+        }
+
+        // 2. Validate Email
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!email) {
+            hienThiLoiNhanVien('taoEmail', 'errTaoEmail', 'Email không được để trống!');
+            emailInput.focus();
+            return;
+        }
+        if (!emailRegex.test(email)) {
+            hienThiLoiNhanVien('taoEmail', 'errTaoEmail', 'Email không đúng định dạng chuẩn quốc tế!');
+            emailInput.focus();
+            return;
+        }
+
+        // 3. Validate Số điện thoại
+        const sdtRegex = /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/;
+        if (!soDienThoai) {
+            hienThiLoiNhanVien('taoSoDienThoai', 'errTaoSoDienThoai', 'Số điện thoại không được để trống!');
+            sdtInput.focus();
+            return;
+        }
+        if (!sdtRegex.test(soDienThoai)) {
+            hienThiLoiNhanVien('taoSoDienThoai', 'errTaoSoDienThoai', 'Số điện thoại phải gồm 10 số di động Việt Nam (03x, 05x, 07x, 08x, 09x)!');
+            sdtInput.focus();
+            return;
+        }
+
+        // 4. Validate Mật khẩu
+        const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]).{8,}$/;
+        if (!matKhau) {
+            hienThiLoiNhanVien('taoMatKhau', 'errTaoMatKhau', 'Mật khẩu khởi tạo không được để trống!');
+            matKhauInput.focus();
+            return;
+        }
+        if (!pwdRegex.test(matKhau)) {
+            hienThiLoiNhanVien('taoMatKhau', 'errTaoMatKhau', 'Mật khẩu tối thiểu 8 ký tự, gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt!');
+            matKhauInput.focus();
+            return;
+        }
+
+        // 5. Validate Vai trò
+        if (!vaiTro || (vaiTro !== 'TAI_XE' && vaiTro !== 'CSKH')) {
+            hienThiLoiNhanVien('taoVaiTro', 'errTaoVaiTro', 'Vui lòng chọn vai trò TAI_XE hoặc CSKH!');
+            vaiTroInput.focus();
+            return;
+        }
+
+        const btn = document.getElementById('btnSubmitTaoNhanVien');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang tạo...';
+
+        try {
+            const token = localStorage.getItem('accessToken');
+            const res = await fetch('/api/v1/admin/nguoi-dung/tao-nhan-vien', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+                },
+                body: JSON.stringify({ hoVaTen, email, soDienThoai, matKhau, vaiTro })
+            });
+
+            const data = await res.json();
+            if (res.ok && (data.thanhCong || data.success)) {
+                modalTaoNhanVienInstance.hide();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành Công!',
+                    text: `Đã cấp tài khoản nhân viên cho ${hoVaTen} (${email}) thành công!`,
+                    confirmButtonColor: '#4f46e5'
+                });
+                taiLaiDuLieu();
+            } else {
+                let daHienThiLoi = false;
+                const fieldErrors = data.duLieu || data.data;
+                if (fieldErrors && typeof fieldErrors === 'object') {
+                    if (fieldErrors.hoVaTen) {
+                        hienThiLoiNhanVien('taoHoVaTen', 'errTaoHoVaTen', fieldErrors.hoVaTen);
+                        daHienThiLoi = true;
+                        hoVaTenInput.focus();
+                    }
+                    if (fieldErrors.email) {
+                        hienThiLoiNhanVien('taoEmail', 'errTaoEmail', fieldErrors.email);
+                        if (!daHienThiLoi) emailInput.focus();
+                        daHienThiLoi = true;
+                    }
+                    if (fieldErrors.soDienThoai) {
+                        hienThiLoiNhanVien('taoSoDienThoai', 'errTaoSoDienThoai', fieldErrors.soDienThoai);
+                        if (!daHienThiLoi) sdtInput.focus();
+                        daHienThiLoi = true;
+                    }
+                    if (fieldErrors.matKhau) {
+                        hienThiLoiNhanVien('taoMatKhau', 'errTaoMatKhau', fieldErrors.matKhau);
+                        if (!daHienThiLoi) matKhauInput.focus();
+                        daHienThiLoi = true;
+                    }
+                    if (fieldErrors.vaiTro) {
+                        hienThiLoiNhanVien('taoVaiTro', 'errTaoVaiTro', fieldErrors.vaiTro);
+                        if (!daHienThiLoi) vaiTroInput.focus();
+                        daHienThiLoi = true;
+                    }
+                }
+
+                if (!daHienThiLoi) {
+                    const msg = data.thongBao || data.message || 'Không thể tạo tài khoản nhân viên!';
+                    if (msg.toLowerCase().includes('email')) {
+                        hienThiLoiNhanVien('taoEmail', 'errTaoEmail', msg);
+                        emailInput.focus();
+                    } else if (msg.toLowerCase().includes('số điện thoại') || msg.toLowerCase().includes('sđt')) {
+                        hienThiLoiNhanVien('taoSoDienThoai', 'errTaoSoDienThoai', msg);
+                        sdtInput.focus();
+                    } else if (msg.toLowerCase().includes('mật khẩu')) {
+                        hienThiLoiNhanVien('taoMatKhau', 'errTaoMatKhau', msg);
+                        matKhauInput.focus();
+                    } else if (msg.toLowerCase().includes('vai trò')) {
+                        hienThiLoiNhanVien('taoVaiTro', 'errTaoVaiTro', msg);
+                        vaiTroInput.focus();
+                    } else {
+                        hienThiLoi(msg);
+                    }
+                }
+            }
+        } catch (err) {
+            hienThiLoi("Lỗi kết nối máy chủ: " + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Cấp Tài Khoản';
+        }
+    }
+
+    // Xử lý Khóa / Mở khóa tài khoản
+    function xacNhanDoiTrangThai(userId, trangThaiMoi, tenUser) {
+        const isLock = (trangThaiMoi === 'BI_KHOA');
+        const titleText = isLock ? 'Khóa Tài Khoản?' : 'Mở Khóa Tài Khoản?';
+        const confirmText = isLock ? 'Đúng, Khóa tài khoản' : 'Đúng, Mở khóa';
+        const color = isLock ? '#ef4444' : '#10b981';
+
+        Swal.fire({
+            icon: isLock ? 'warning' : 'question',
+            title: titleText,
+            html: `Bạn có chắc chắn muốn <b>${isLock ? 'KHÓA' : 'MỞ KHÓA'}</b> tài khoản của <b>${tenUser}</b>?<br><small class="text-muted">${isLock ? 'Người dùng sẽ ngay lập tức bị vô hiệu hóa quyền truy cập hệ thống.' : 'Người dùng có thể đăng nhập lại bình thường.'}</small>`,
+            input: isLock ? 'text' : null,
+            inputPlaceholder: isLock ? 'Nhập lý do khóa tài khoản (bắt buộc)...' : null,
+            inputValidator: isLock ? (value) => {
+                if (!value || !value.trim()) return 'Vui lòng nhập lý do khóa tài khoản!';
+            } : null,
+            showCancelButton: true,
+            confirmButtonText: confirmText,
+            cancelButtonText: 'Hủy bỏ',
+            confirmButtonColor: color,
+            cancelButtonColor: '#94a3b8'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const lyDo = isLock ? result.value : 'Admin mở khóa tài khoản';
+                try {
+                    const token = localStorage.getItem('accessToken');
+                    const res = await fetch(`/api/v1/admin/nguoi-dung/${userId}/trang-thai`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+                        },
+                        body: JSON.stringify({ trangThai: trangThaiMoi, lyDo })
+                    });
+                    const data = await res.json();
+                    if (res.ok && (data.thanhCong || data.success)) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Hoàn Tất!',
+                            text: isLock ? 'Đã khóa tài khoản thành công.' : 'Đã mở khóa tài khoản thành công.',
+                            confirmButtonColor: '#4f46e5',
+                            timer: 1800
+                        });
+                        taiLaiDuLieu();
+                    } else {
+                        hienThiLoi(data.thongBao || data.message || 'Không thể thay đổi trạng thái tài khoản!');
+                    }
+                } catch (e) {
+                    hienThiLoi("Lỗi kết nối máy chủ: " + e.message);
+                }
+            }
+        });
+    }
+
+    // Phân quyền vai trò
+    async function moModalPhanQuyen(userId) {
+        try {
+            const token = localStorage.getItem('accessToken');
+            const res = await fetch(`/api/v1/admin/nguoi-dung/${userId}`, {
+                headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+            });
+            const data = await res.json();
+            if (data.thanhCong || data.success) {
+                const u = data.duLieu || data.data;
+                document.getElementById('pqUserId').value = u.id;
+                document.getElementById('pqHoTen').innerText = u.hoVaTen;
+                document.getElementById('pqEmail').innerText = u.email;
+                document.getElementById('pqAvatar').src = u.anhDaiDien || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.hoVaTen);
+
+                // Chọn đúng 1 vai trò hiện tại vào radio button
+                let currentRole = u.vaiTro;
+                if (!currentRole && u.danhSachVaiTro && u.danhSachVaiTro.length > 0) {
+                    if (u.danhSachVaiTro.includes('ADMIN')) currentRole = 'ADMIN';
+                    else if (u.danhSachVaiTro.includes('CSKH')) currentRole = 'CSKH';
+                    else if (u.danhSachVaiTro.includes('TAI_XE') || u.danhSachVaiTro.includes('SHIPPER')) currentRole = 'TAI_XE';
+                    else if (u.danhSachVaiTro.includes('NGUOI_BAN')) currentRole = 'NGUOI_BAN';
+                    else currentRole = 'KHACH_HANG';
+                }
+                if (!currentRole) currentRole = 'KHACH_HANG';
+
+                const targetRadio = document.querySelector(`input[name="vaiTroChonRadio"][value="${currentRole}"]`);
+                if (targetRadio) {
+                    targetRadio.checked = true;
+                } else {
+                    document.getElementById('role_khach_hang').checked = true;
+                }
+
+                modalPhanQuyenInstance.show();
+            } else {
+                hienThiLoi(data.thongBao || data.message || 'Lỗi khi lấy thông tin người dùng!');
+            }
+        } catch (e) {
+            hienThiLoi("Lỗi kết nối: " + e.message);
+        }
+    }
+
+    async function xuLyLuuPhanQuyen() {
+        const userId = document.getElementById('pqUserId').value;
+        const selectedRadio = document.querySelector('input[name="vaiTroChonRadio"]:checked');
+        if (!selectedRadio) {
+            hienThiLoi('Vui lòng chọn 1 vai trò duy nhất cho người dùng!');
+            return;
+        }
+        const role = selectedRadio.value;
+
+        try {
+            const token = localStorage.getItem('accessToken');
+            const res = await fetch(`/api/v1/admin/nguoi-dung/${userId}/phan-quyen`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+                },
+                body: JSON.stringify({ vaiTro: role, danhSachVaiTro: [role] })
+            });
+            const data = await res.json();
+            if (res.ok && (data.thanhCong || data.success)) {
+                modalPhanQuyenInstance.hide();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành Công!',
+                    text: `Cập nhật phân quyền sang vai trò ${role} thành công!`,
+                    confirmButtonColor: '#4f46e5'
+                });
+                taiLaiDuLieu();
+            } else {
+                hienThiLoi(data.thongBao || data.message || 'Không thể cập nhật phân quyền!');
+            }
+        } catch (e) {
+            hienThiLoi("Lỗi kết nối máy chủ: " + e.message);
+        }
+    }
+
+    // Xem chi tiết người dùng
+    async function moModalChiTiet(userId) {
+        try {
+            const token = localStorage.getItem('accessToken');
+            const res = await fetch(`/api/v1/admin/nguoi-dung/${userId}`, {
+                headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+            });
+            const data = await res.json();
+            if (data.thanhCong || data.success) {
+                const u = data.duLieu || data.data;
+                let r = u.vaiTro;
+                if (!r) {
+                    if (u.danhSachVaiTro && u.danhSachVaiTro.length > 0) {
+                        if (u.danhSachVaiTro.includes('ADMIN')) r = 'ADMIN';
+                        else if (u.danhSachVaiTro.includes('CSKH')) r = 'CSKH';
+                        else if (u.danhSachVaiTro.includes('TAI_XE') || u.danhSachVaiTro.includes('SHIPPER')) r = 'TAI_XE';
+                        else if (u.danhSachVaiTro.includes('NGUOI_BAN')) r = 'NGUOI_BAN';
+                        else r = 'KHACH_HANG';
+                    } else {
+                        r = 'KHACH_HANG';
+                    }
+                }
+                let badgeClass = 'badge-other';
+                if (r === 'ADMIN') badgeClass = 'badge-admin';
+                else if (r === 'NGUOI_BAN') badgeClass = 'badge-nguoi-ban';
+                else if (r === 'KHACH_HANG') badgeClass = 'badge-khach-hang';
+                else if (r === 'TAI_XE' || r === 'SHIPPER') badgeClass = 'badge-tai-xe';
+                else if (r === 'CSKH') badgeClass = 'badge-cskh';
+                const roleBadge = `<span class="badge ${badgeClass} px-2 py-1">${r}</span>`;
+                const isLocked = (u.trangThai === 'BI_KHOA');
+
+                document.getElementById('chiTietBody').innerHTML = `
+                    <div class="text-center mb-4">
+                        <img src="${u.anhDaiDien || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.hoVaTen)}" class="rounded-circle border border-3 border-primary mb-2" width="80" height="80" alt="Avatar">
+                        <h5 class="fw-bold mb-0">${u.hoVaTen}</h5>
+                        <div class="text-muted small">${u.email}</div>
+                    </div>
+                    <ul class="list-group list-group-flush rounded-3 border">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Mã Người Dùng:</span>
+                            <span class="fw-semibold">#${u.id}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Số Điện Thoại:</span>
+                            <span class="fw-semibold">${u.soDienThoai || 'Chưa cập nhật'}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Trạng Thái:</span>
+                            <span class="fw-semibold ${isLocked ? 'text-danger' : 'text-success'}">
+                                ${isLocked ? '🔴 Đã Bị Khóa' : '🟢 Đang Hoạt Động'}
+                            </span>
+                        </li>
+                        ${isLocked && u.lyDoKhoa ? `
+                        <li class="list-group-item d-flex justify-content-between bg-danger bg-opacity-10 border-danger border-opacity-25 rounded-2">
+                            <span class="text-danger fw-semibold"><i class="bi bi-exclamation-circle-fill me-1"></i>Lý Do Khóa:</span>
+                            <span class="text-danger fw-bold text-end ms-3">${u.lyDoKhoa}</span>
+                        </li>
+                        ` : ''}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Vai Trò Duy Nhất:</span>
+                            <div>${roleBadge}</div>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Ngày Đăng Ký:</span>
+                            <span class="fw-semibold">${u.ngayTao ? u.ngayTao.replace('T', ' ').substring(0, 19) : '-'}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Cập Nhật Gần Nhất:</span>
+                            <span class="fw-semibold">${u.ngayCapNhat ? u.ngayCapNhat.replace('T', ' ').substring(0, 19) : '-'}</span>
+                        </li>
+                    </ul>
+                `;
+                modalChiTietInstance.show();
+            } else {
+                hienThiLoi(data.thongBao || data.message || 'Không thể xem chi tiết!');
+            }
+        } catch (e) {
+            hienThiLoi("Lỗi kết nối máy chủ: " + e.message);
+        }
+    }
+
+    function hienThiLoi(msg) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Thông Báo',
+            text: msg,
+            confirmButtonColor: '#ef4444'
+        });
+    }
+</script>
+</body>
+</html>

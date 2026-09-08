@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Ký Tài Khoản - Sàn Thương Mại Điện Tử FlexShop</title>
+    <!-- Bootstrap 5 CSS & Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            color: #1e293b;
+        }
+        .auth-card {
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            width: 100%;
+            max-width: 1050px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .auth-sidebar {
+            background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);
+            color: white;
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+        .auth-sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at bottom left, rgba(255,255,255,0.15), transparent 70%);
+        }
+        .auth-main {
+            padding: 40px 40px;
+        }
+        .form-control {
+            border-radius: 12px;
+            padding: 10px 14px;
+            border: 1.5px solid #e2e8f0;
+            font-size: 14.5px;
+            transition: all 0.2s;
+        }
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+        }
+        .input-group-text {
+            border-radius: 12px;
+            border: 1.5px solid #e2e8f0;
+            background-color: #f8fafc;
+        }
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            color: white;
+            border: none;
+            padding: 13px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            width: 100%;
+            transition: all 0.3s;
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+        }
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 20px -3px rgba(79, 70, 229, 0.4);
+            color: white;
+        }
+        .role-selector-btn {
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+        .role-selector-btn.active {
+            border-color: var(--primary);
+            background: #ede9fe;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .pwd-requirement {
+            font-size: 12.5px;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+        .pwd-requirement.valid {
+            color: #16a34a;
+            font-weight: 500;
+        }
+        .strength-bar {
+            height: 5px;
+            border-radius: 3px;
+            transition: all 0.3s;
+            background: #e2e8f0;
+        }
+        /* Modal thông báo nổi bật trước màn hình */
+        .custom-modal-backdrop {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: modalFadeIn 0.25s ease-out;
+        }
+        .custom-modal-dialog {
+            background: white;
+            border-radius: 24px;
+            padding: 36px 30px;
+            max-width: 440px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            animation: modalZoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .custom-modal-icon {
+            font-size: 64px;
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+        @keyframes modalZoomIn {
+            from { opacity: 0; transform: scale(0.85); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .letter-spacing-4 {
+            letter-spacing: 8px;
+            font-family: monospace;
+        }
+        .letter-spacing-4::placeholder {
+            letter-spacing: 4px;
+            color: #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-card row g-0">
+    <!-- Cột giới thiệu bên trái -->
+    <div class="col-lg-5 auth-sidebar d-none d-lg-flex">
+        <div style="position: relative; z-index: 2;">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="bg-white text-primary rounded-4 p-2 px-3 fw-bold fs-3 shadow-sm">
+                    <i class="bi bi-cart-check-fill"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0 text-white">FlexShop</h3>
+                    <span class="badge bg-white bg-opacity-25 text-white"></span>
+                </div>
+            </div>
+            <h3 class="fw-extrabold mb-3 text-white">Bắt đầu cùng FlexShop ngay hôm nay</h3>
+            <p class="text-white text-opacity-75 fs-6 mb-4">
+                Tạo tài khoản duy nhất để trải nghiệm hệ sinh thái thương mại điện tử đa kênh: Mua sắm tiện lợi, quản lý kho hàng linh hoạt, và giao vận thông minh.
+            </p>
+        </div>
+
+        <div style="position: relative; z-index: 2;" class="mt-4">
+            <div class="text-white text-opacity-75 small">
+            </div>
+        </div>
+    </div>
+
+    <!-- Cột Form Đăng ký bên phải -->
+    <div class="col-lg-7 auth-main">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h3 class="fw-bold text-dark mb-1">Đăng ký tài khoản 🚀</h3>
+            </div>
+            <a href="/login" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1">
+                Đăng nhập
+            </a>
+        </div>
+
+        <form id="registerForm" onsubmit="handleRegister(event)">
+            <input type="hidden" id="vaiTroMongMuon" value="KHACH_HANG">
+
+            <div class="row g-2 mb-2">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold small text-secondary">Họ và tên *</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person text-secondary"></i></span>
+                        <input type="text" id="hoVaTen" class="form-control" placeholder="Nguyễn Văn A" required minlength="2" oninput="xoaLoiDangKy('hoVaTen', 'errHoVaTen')">
+                    </div>
+                    <div class="invalid-feedback" id="errHoVaTen" style="display: none;"></div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold small text-secondary">Số điện thoại *</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-telephone text-secondary"></i></span>
+                        <input type="tel" id="soDienThoai" class="form-control" placeholder="0987654321" required pattern="^(0|\+84)(3|5|7|8|9)[0-9]{8}$" oninput="xoaLoiDangKy('soDienThoai', 'errSoDienThoai')">
+                    </div>
+                    <div class="invalid-feedback" id="errSoDienThoai" style="display: none;"></div>
+                    <small class="text-muted" style="font-size: 11px;">Định dạng chuẩn VN (VD: 0987654321)</small>
+                </div>
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label fw-semibold small text-secondary">Địa chỉ Email * (Duy nhất, không phân biệt hoa thường)</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-envelope text-secondary"></i></span>
+                    <input type="email" id="email" class="form-control" placeholder="name@example.com" required oninput="xoaLoiDangKy('email', 'errEmail')">
+                </div>
+                <div class="invalid-feedback" id="errEmail" style="display: none;"></div>
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label fw-semibold small text-secondary">Mật khẩu * (Tối thiểu 8 ký tự)</label>
+                <div class="input-group mb-1">
+                    <span class="input-group-text"><i class="bi bi-shield-lock text-secondary"></i></span>
+                    <input type="password" id="matKhau" class="form-control" placeholder="Mật khẩu bảo mật..." required oninput="validatePasswordRules(this.value); xoaLoiDangKy('matKhau', 'errMatKhau');">
+                    <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('matKhau', this)">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                <div class="invalid-feedback" id="errMatKhau" style="display: none;"></div>
+
+                <!-- Thanh đo độ mạnh mật khẩu -->
+                <div class="progress mb-2" style="height: 6px;">
+                    <div id="strengthBar" class="progress-bar bg-danger" role="progressbar" style="width: 0%;"></div>
+                </div>
+
+                <!-- Checklist quy tắc mật khẩu theo tiêu chí US-01 -->
+                <div class="bg-light p-2 rounded-3 border">
+                    <div class="row g-1">
+                        <div class="col-6 pwd-requirement" id="req-len">
+                            <i class="bi bi-circle me-1"></i> Tối thiểu 8 ký tự
+                        </div>
+                        <div class="col-6 pwd-requirement" id="req-upper">
+                            <i class="bi bi-circle me-1"></i> Ít nhất 1 chữ hoa (A-Z)
+                        </div>
+                        <div class="col-6 pwd-requirement" id="req-lower">
+                            <i class="bi bi-circle me-1"></i> Ít nhất 1 chữ thường (a-z)
+                        </div>
+                        <div class="col-6 pwd-requirement" id="req-digit">
+                            <i class="bi bi-circle me-1"></i> Ít nhất 1 số (0-9)
+                        </div>
+                        <div class="col-12 pwd-requirement" id="req-special">
+                            <i class="bi bi-circle me-1"></i> Ít nhất 1 ký tự đặc biệt (!@#$%^&*...)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn btn-primary-custom mb-3">
+                <span id="btnText"><i class="bi bi-person-plus-fill me-2"></i>Đăng Ký Tài Khoản</span>
+                <span id="btnLoading" class="spinner-border spinner-border-sm d-none" role="status"></span>
+            </button>
+        </form>
+
+        <div class="text-center">
+            <span class="text-muted small">Đã có tài khoản FlexShop?</span>
+            <a href="/login" class="fw-bold text-primary text-decoration-none ms-1">Đăng nhập ngay</a>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Xác Thực OTP Đăng Ký Tài Khoản -->
+<div class="modal fade" id="modalOtpDangKy" tabindex="-1" aria-labelledby="modalOtpDangKyLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg p-3 p-sm-4">
+            <div class="modal-header border-0 pb-0 justify-content-center position-relative">
+                <div class="text-center w-100">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3" style="width: 68px; height: 68px;">
+                        <i class="bi bi-shield-check fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-1" id="modalOtpDangKyLabel">Xác Thực Mã OTP</h4>
+                    <p class="text-muted small mb-0">Mã xác thực 6 chữ số đã được gửi đến hòm thư Gmail:</p>
+                    <p class="fw-bold text-primary mb-0" id="otpDisplayEmail">name@gmail.com</p>
+                </div>
+                <button type="button" class="btn-close position-absolute top-0 end-0 mt-2 me-2" data-bs-dismiss="modal" aria-label="Đóng" onclick="dongModalOtp()"></button>
+            </div>
+            <div class="modal-body pt-3">
+                <!-- Đồng hồ đếm ngược hiệu lực OTP -->
+                <div class="text-center mb-3">
+                    <div id="otpTimerWrapper" class="badge bg-warning bg-opacity-10 text-dark border border-warning px-3 py-2 rounded-pill fs-6 fw-semibold">
+                        <i class="bi bi-clock-history me-1 text-warning"></i>
+                        Hiệu lực còn lại: <span id="otpCountdown" class="text-danger fw-bold">05:00</span>
+                    </div>
+                </div>
+
+                <form id="formXacNhanOtp" onsubmit="handleXacNhanOtp(event)">
+                    <div class="mb-3 text-center">
+                        <label class="form-label fw-semibold small text-secondary mb-2" for="inputMaOtp">Nhập mã OTP gồm 6 chữ số</label>
+                        <input type="text" id="inputMaOtp" class="form-control text-center fw-bold fs-3 letter-spacing-4 py-2" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" placeholder="------" autocomplete="one-time-code" required oninput="xoaLoiDangKy('inputMaOtp', 'errMaOtp')">
+                        <div class="invalid-feedback text-center mt-2" id="errMaOtp" style="display: none;"></div>
+                        <div class="form-text small text-muted mt-2">
+                            <i class="bi bi-shield-exclamation text-warning me-1"></i>Nhập sai quá <strong>5 lần</strong> email này sẽ bị tạm khóa đăng ký 24 giờ.
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnXacNhanOtp" class="btn btn-primary-custom w-100 py-3 mb-3">
+                        <span id="btnXacNhanText"><i class="bi bi-check2-circle me-2"></i>Xác Nhận & Hoàn Tất Đăng Ký</span>
+                        <span id="btnXacNhanLoading" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                    </button>
+                </form>
+
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                    <button type="button" class="btn btn-sm btn-link text-secondary text-decoration-none px-0" onclick="dongModalOtp()">
+                        <i class="bi bi-arrow-left me-1"></i>Đổi thông tin / Email
+                    </button>
+                    <button type="button" id="btnGuiLaiOtp" class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="guiLaiOtpDangKy()" disabled>
+                        <i class="bi bi-arrow-clockwise me-1"></i>Gửi lại mã (<span id="cooldownSeconds">60</span>s)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal thông báo nổi bật trước màn hình (Fallback khi không có CDN) -->
+<div id="customModalOverlay" class="custom-modal-backdrop d-none">
+    <div class="custom-modal-dialog">
+        <div id="customModalIcon" class="custom-modal-icon text-success">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <h4 id="customModalTitle" class="fw-bold mb-2 text-dark">Thành Công!</h4>
+        <div id="customModalBody" class="text-secondary small mb-3">Thông báo</div>
+        <div class="progress mb-3" style="height: 5px;">
+            <div id="customModalProgress" class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 100%;"></div>
+        </div>
+        <button id="customModalActionBtn" type="button" class="btn btn-primary-custom w-100 py-2">
+            Đến Đăng Nhập <i class="bi bi-arrow-right ms-1"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function togglePasswordVisibility(inputId, button) {
+        const input = document.getElementById(inputId);
+        const icon = button.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    }
+
+    function validatePasswordRules(pwd) {
+        const hasLen = pwd.length >= 8;
+        const hasUpper = /[A-Z]/.test(pwd);
+        const hasLower = /[a-z]/.test(pwd);
+        const hasDigit = /[0-9]/.test(pwd);
+        const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(pwd);
+
+        updateCheck('req-len', hasLen);
+        updateCheck('req-upper', hasUpper);
+        updateCheck('req-lower', hasLower);
+        updateCheck('req-digit', hasDigit);
+        updateCheck('req-special', hasSpecial);
+
+        const score = [hasLen, hasUpper, hasLower, hasDigit, hasSpecial].filter(Boolean).length;
+        const bar = document.getElementById('strengthBar');
+        const percent = (score / 5) * 100;
+        bar.style.width = percent + '%';
+
+        if (score <= 2) {
+            bar.className = 'progress-bar bg-danger';
+        } else if (score <= 4) {
+            bar.className = 'progress-bar bg-warning';
+        } else {
+            bar.className = 'progress-bar bg-success';
+        }
+    }
+
+    function updateCheck(elementId, isValid) {
+        const el = document.getElementById(elementId);
+        const icon = el.querySelector('i');
+        if (isValid) {
+            el.classList.add('valid');
+            icon.className = 'bi bi-check-circle-fill me-1';
+        } else {
+            el.classList.remove('valid');
+            icon.className = 'bi bi-circle me-1';
+        }
+    }
+
+    // Hàm hiển thị thông báo thành công nổi bật ngay trước màn hình (không tự động chuyển hướng)
+    function hienThiThongBaoThanhCong(tieuDe, noiDungHtml, urlChuyenHuong) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'success',
+                title: `<span style="font-size: 22px; font-weight: 800; color: #1e1b4b;">${tieuDe}</span>`,
+                html: noiDungHtml,
+                showConfirmButton: true,
+                confirmButtonText: 'Đến Đăng Nhập <i class="bi bi-arrow-right ms-1"></i>',
+                confirmButtonColor: '#4f46e5',
+                allowOutsideClick: false,
+                customClass: {
+                    popup: 'rounded-4 shadow-lg border-0'
+                }
+            }).then((res) => {
+                if (res.isConfirmed && urlChuyenHuong) {
+                    window.location.href = urlChuyenHuong;
+                }
+            });
+        } else {
+            const overlay = document.getElementById('customModalOverlay');
+            const icon = document.getElementById('customModalIcon');
+            const title = document.getElementById('customModalTitle');
+            const body = document.getElementById('customModalBody');
+            const btn = document.getElementById('customModalActionBtn');
+
+            icon.className = 'custom-modal-icon text-success';
+            icon.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
+            title.textContent = tieuDe;
+            body.innerHTML = noiDungHtml;
+            btn.textContent = 'Đến Đăng Nhập';
+            overlay.classList.remove('d-none');
+
+            btn.onclick = () => {
+                if (urlChuyenHuong) window.location.href = urlChuyenHuong;
+            };
+        }
+    }
+
+    // Hàm hiển thị thông báo lỗi nổi bật
+    function hienThiThongBaoLoi(tieuDe, noiDung) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'error',
+                title: `<span style="font-size: 20px; font-weight: 700; color: #991b1b;">${tieuDe}</span>`,
+                text: noiDung,
+                confirmButtonText: 'Đóng',
+                confirmButtonColor: '#4f46e5',
+                customClass: {
+                    popup: 'rounded-4 shadow-lg border-0'
+                }
+            });
+        } else {
+            const overlay = document.getElementById('customModalOverlay');
+            const icon = document.getElementById('customModalIcon');
+            const title = document.getElementById('customModalTitle');
+            const body = document.getElementById('customModalBody');
+            const btn = document.getElementById('customModalActionBtn');
+
+            icon.className = 'custom-modal-icon text-danger';
+            icon.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i>';
+            title.textContent = tieuDe;
+            body.textContent = noiDung;
+            btn.textContent = 'Đóng';
+            overlay.classList.remove('d-none');
+
+            btn.onclick = () => {
+                overlay.classList.add('d-none');
+            };
+        }
+    }
+
+    let modalOtpInstance = null;
+    let countdownTimerInterval = null;
+    let cooldownInterval = null;
+    let tempRegisterData = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const modalEl = document.getElementById('modalOtpDangKy');
+        if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            modalOtpInstance = new bootstrap.Modal(modalEl);
+            modalEl.addEventListener('shown.bs.modal', () => {
+                const otpInput = document.getElementById('inputMaOtp');
+                if (otpInput) otpInput.focus();
+            });
+        }
+    });
+
+    // Helper hiển thị và xóa lỗi cụ thể từng ô nhập
+    function hienThiLoiDangKy(inputId, errId, thongBao) {
+        const input = document.getElementById(inputId);
+        const feedback = document.getElementById(errId);
+        if (input) {
+            input.classList.add('is-invalid');
+        }
+        if (feedback) {
+            feedback.innerText = thongBao;
+            feedback.style.display = 'block';
+        }
+    }
+
+    function xoaLoiDangKy(inputId, errId) {
+        const input = document.getElementById(inputId);
+        const feedback = document.getElementById(errId);
+        if (input) {
+            input.classList.remove('is-invalid');
+        }
+        if (feedback) {
+            feedback.style.display = 'none';
+        }
+    }
+
+    // BƯỚC 1: Xử lý khi bấm nút "Đăng Ký Tài Khoản" -> Validate & Gửi OTP qua Gmail
+    async function handleRegister(event) {
+        event.preventDefault();
+        xoaLoiDangKy('hoVaTen', 'errHoVaTen');
+        xoaLoiDangKy('soDienThoai', 'errSoDienThoai');
+        xoaLoiDangKy('email', 'errEmail');
+        xoaLoiDangKy('matKhau', 'errMatKhau');
+
+        const hoVaTenInput = document.getElementById('hoVaTen');
+        const sdtInput = document.getElementById('soDienThoai');
+        const emailInput = document.getElementById('email');
+        const matKhauInput = document.getElementById('matKhau');
+
+        const hoVaTen = hoVaTenInput.value.trim();
+        const soDienThoai = sdtInput.value.trim();
+        const email = emailInput.value.trim();
+        const matKhau = matKhauInput.value;
+        const vaiTroMongMuon = document.getElementById('vaiTroMongMuon').value;
+
+        // 1. Validate Họ và tên
+        if (!hoVaTen || hoVaTen.length < 2 || hoVaTen.length > 100) {
+            hienThiLoiDangKy('hoVaTen', 'errHoVaTen', 'Họ và tên phải có độ dài từ 2 đến 100 ký tự!');
+            hoVaTenInput.focus();
+            return;
+        }
+
+        // 2. Validate Số điện thoại
+        const sdtRegex = /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/;
+        if (!soDienThoai) {
+            hienThiLoiDangKy('soDienThoai', 'errSoDienThoai', 'Số điện thoại không được để trống!');
+            sdtInput.focus();
+            return;
+        }
+        if (!sdtRegex.test(soDienThoai)) {
+            hienThiLoiDangKy('soDienThoai', 'errSoDienThoai', 'Số điện thoại không hợp lệ. Vui lòng nhập 10 số di động VN (03x, 05x, 07x, 08x, 09x)!');
+            sdtInput.focus();
+            return;
+        }
+
+        // 3. Validate Email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email) {
+            hienThiLoiDangKy('email', 'errEmail', 'Email không được để trống!');
+            emailInput.focus();
+            return;
+        }
+        if (!emailRegex.test(email)) {
+            hienThiLoiDangKy('email', 'errEmail', 'Địa chỉ email không đúng định dạng chuẩn!');
+            emailInput.focus();
+            return;
+        }
+
+        // 4. Kiểm tra mật khẩu đạt chuẩn trước khi gửi
+        const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]).{8,}$/;
+        if (!matKhau) {
+            hienThiLoiDangKy('matKhau', 'errMatKhau', 'Mật khẩu không được để trống!');
+            matKhauInput.focus();
+            return;
+        }
+        if (!pwdRegex.test(matKhau)) {
+            hienThiLoiDangKy('matKhau', 'errMatKhau', 'Mật khẩu tối thiểu 8 ký tự, gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt!');
+            matKhauInput.focus();
+            return;
+        }
+
+        const btnText = document.getElementById('btnText');
+        const btnLoading = document.getElementById('btnLoading');
+        const submitBtn = document.getElementById('submitBtn');
+
+        btnText.classList.add('d-none');
+        btnLoading.classList.remove('d-none');
+        submitBtn.disabled = true;
+
+        try {
+            // Gọi API phát hành mã OTP gửi qua Gmail
+            const response = await fetch('/api/v1/auth/register/gui-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, hoVaTen, soDienThoai })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && (result.thanhCong || result.success)) {
+                // Lưu dữ liệu form vào bộ nhớ tạm
+                tempRegisterData = { hoVaTen, soDienThoai, email, matKhau, vaiTroMongMuon };
+
+                // Hiển thị email trong modal
+                document.getElementById('otpDisplayEmail').textContent = email;
+
+                // Reset ô nhập OTP
+                const inputMaOtp = document.getElementById('inputMaOtp');
+                inputMaOtp.value = '';
+                xoaLoiDangKy('inputMaOtp', 'errMaOtp');
+
+                // Bắt đầu đếm ngược 300 giây hiệu lực và 60 giây gửi lại
+                batDauDemNguocOtp(300);
+                batDauCooldownGuiLai(60);
+
+                // Mở Modal xác thực OTP
+                if (modalOtpInstance) {
+                    modalOtpInstance.show();
+                } else {
+                    const modalEl = document.getElementById('modalOtpDangKy');
+                    modalOtpInstance = new bootstrap.Modal(modalEl);
+                    modalOtpInstance.show();
+                }
+            } else {
+                let daHienThiLoi = false;
+                const fieldErrors = result.duLieu || result.data;
+                if (fieldErrors && typeof fieldErrors === 'object') {
+                    if (fieldErrors.email) {
+                        hienThiLoiDangKy('email', 'errEmail', fieldErrors.email);
+                        emailInput.focus();
+                        daHienThiLoi = true;
+                    }
+                    if (fieldErrors.soDienThoai) {
+                        hienThiLoiDangKy('soDienThoai', 'errSoDienThoai', fieldErrors.soDienThoai);
+                        if (!daHienThiLoi) sdtInput.focus();
+                        daHienThiLoi = true;
+                    }
+                    if (fieldErrors.hoVaTen) {
+                        hienThiLoiDangKy('hoVaTen', 'errHoVaTen', fieldErrors.hoVaTen);
+                        if (!daHienThiLoi) hoVaTenInput.focus();
+                        daHienThiLoi = true;
+                    }
+                }
+
+                if (!daHienThiLoi) {
+                    const msg = result.thongBao || result.message || 'Không thể gửi mã xác thực OTP!';
+                    if (msg.toLowerCase().includes('email')) {
+                        hienThiLoiDangKy('email', 'errEmail', msg);
+                        emailInput.focus();
+                    } else if (msg.toLowerCase().includes('số điện thoại') || msg.toLowerCase().includes('sđt')) {
+                        hienThiLoiDangKy('soDienThoai', 'errSoDienThoai', msg);
+                        sdtInput.focus();
+                    } else {
+                        hienThiThongBaoLoi('Không Thể Gửi OTP', msg);
+                    }
+                }
+            }
+        } catch (error) {
+            hienThiThongBaoLoi('Lỗi Kết Nối', 'Không thể kết nối đến máy chủ: ' + error.message);
+        } finally {
+            btnText.classList.remove('d-none');
+            btnLoading.classList.add('d-none');
+            submitBtn.disabled = false;
+        }
+    }
+
+    // BƯỚC 2: Xử lý khi người dùng nhập OTP và bấm "Xác Nhận & Hoàn Tất Đăng Ký"
+    async function handleXacNhanOtp(event) {
+        event.preventDefault();
+        xoaLoiDangKy('inputMaOtp', 'errMaOtp');
+
+        const inputMaOtp = document.getElementById('inputMaOtp');
+        const maOtp = inputMaOtp.value.trim();
+
+        if (!maOtp) {
+            hienThiLoiDangKy('inputMaOtp', 'errMaOtp', 'Vui lòng nhập mã OTP 6 số!');
+            inputMaOtp.focus();
+            return;
+        }
+
+        if (!/^[0-9]{6}$/.test(maOtp)) {
+            hienThiLoiDangKy('inputMaOtp', 'errMaOtp', 'Mã OTP phải gồm đúng 6 chữ số!');
+            inputMaOtp.focus();
+            return;
+        }
+
+        if (!tempRegisterData) {
+            hienThiLoiDangKy('inputMaOtp', 'errMaOtp', 'Thông tin đăng ký không hợp lệ. Vui lòng đóng modal và thử lại!');
+            return;
+        }
+
+        const btnText = document.getElementById('btnXacNhanText');
+        const btnLoading = document.getElementById('btnXacNhanLoading');
+        const btnSubmit = document.getElementById('btnXacNhanOtp');
+
+        btnText.classList.add('d-none');
+        btnLoading.classList.remove('d-none');
+        btnSubmit.disabled = true;
+
+        try {
+            const payload = {
+                ...tempRegisterData,
+                maOtp: maOtp
+            };
+
+            const response = await fetch('/api/v1/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && (result.thanhCong || result.success)) {
+                // Đóng modal OTP
+                dongModalOtp();
+
+                // Hiển thị thông báo thành công
+                hienThiThongBaoThanhCong(
+                    'Đăng Ký Thành Công! 🎉',
+                    `<div class="py-2">
+                        <p class="mb-2 text-secondary">Tài khoản <strong class="text-primary">${tempRegisterData.hoVaTen}</strong> (${tempRegisterData.email}) đã được kích hoạt thành công!</p>
+                        <p class="small text-muted mb-0">Quý khách vui lòng nhấn nút bên dưới để tiến hành đăng nhập vào hệ thống.</p>
+                    </div>`,
+                    '/login?registered=true'
+                );
+            } else {
+                let daHienThiLoi = false;
+                const fieldErrors = result.duLieu || result.data;
+                if (fieldErrors && typeof fieldErrors === 'object' && fieldErrors.maOtp) {
+                    hienThiLoiDangKy('inputMaOtp', 'errMaOtp', fieldErrors.maOtp);
+                    inputMaOtp.focus();
+                    daHienThiLoi = true;
+                }
+
+                if (!daHienThiLoi) {
+                    const msg = result.thongBao || result.message || 'Mã xác thực OTP không chính xác!';
+                    hienThiLoiDangKy('inputMaOtp', 'errMaOtp', msg);
+                    inputMaOtp.focus();
+                }
+            }
+        } catch (error) {
+            hienThiLoiDangKy('inputMaOtp', 'errMaOtp', 'Lỗi kết nối máy chủ: ' + error.message);
+        } finally {
+            btnText.classList.remove('d-none');
+            btnLoading.classList.add('d-none');
+            btnSubmit.disabled = false;
+        }
+    }
+
+    // Gửi lại mã OTP khi đang mở Modal
+    async function guiLaiOtpDangKy() {
+        if (!tempRegisterData || !tempRegisterData.email) return;
+
+        const btnGuiLai = document.getElementById('btnGuiLaiOtp');
+        btnGuiLai.disabled = true;
+
+        try {
+            const response = await fetch('/api/v1/auth/register/gui-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: tempRegisterData.email,
+                    hoVaTen: tempRegisterData.hoVaTen,
+                    soDienThoai: tempRegisterData.soDienThoai
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && (result.thanhCong || result.success)) {
+                // Reset lại đồng hồ đếm ngược và cooldown
+                batDauDemNguocOtp(300);
+                batDauCooldownGuiLai(60);
+
+                const inputMaOtp = document.getElementById('inputMaOtp');
+                inputMaOtp.value = '';
+                xoaLoiDangKy('inputMaOtp', 'errMaOtp');
+                inputMaOtp.focus();
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Đã gửi lại mã OTP mới vào Gmail của bạn!',
+                        showConfirmButton: false,
+                        timer: 2500
+                    });
+                }
+            } else {
+                const msg = result.thongBao || result.message || 'Không thể gửi lại mã OTP!';
+                hienThiLoiDangKy('inputMaOtp', 'errMaOtp', msg);
+            }
+        } catch (err) {
+            hienThiLoiDangKy('inputMaOtp', 'errMaOtp', 'Lỗi kết nối khi gửi lại mã: ' + err.message);
+        }
+    }
+
+    // Đóng modal OTP
+    function dongModalOtp() {
+        if (countdownTimerInterval) clearInterval(countdownTimerInterval);
+        if (cooldownInterval) clearInterval(cooldownInterval);
+        if (modalOtpInstance) {
+            modalOtpInstance.hide();
+        }
+    }
+
+    // Đếm ngược 300 giây hiệu lực OTP
+    function batDauDemNguocOtp(tongSoGiay) {
+        if (countdownTimerInterval) clearInterval(countdownTimerInterval);
+        let conLai = tongSoGiay;
+        const countdownEl = document.getElementById('otpCountdown');
+
+        const capNhatDongHo = () => {
+            const phut = Math.floor(conLai / 60);
+            const giay = conLai % 60;
+            countdownEl.textContent = `${String(phut).padStart(2, '0')}:${String(giay).padStart(2, '0')}`;
+
+            if (conLai <= 0) {
+                clearInterval(countdownTimerInterval);
+                countdownEl.textContent = '00:00 (Hết hạn)';
+                hienThiLoiDangKy('inputMaOtp', 'errMaOtp', 'Mã OTP đã hết hạn sau 5 phút. Vui lòng bấm "Gửi lại mã" để nhận mã mới!');
+            }
+            conLai--;
+        };
+
+        capNhatDongHo();
+        countdownTimerInterval = setInterval(capNhatDongHo, 1000);
+    }
+
+    // Đếm ngược 60 giây Cooldown gửi lại OTP
+    function batDauCooldownGuiLai(tongSoGiay) {
+        if (cooldownInterval) clearInterval(cooldownInterval);
+        let conLai = tongSoGiay;
+        const btnGuiLai = document.getElementById('btnGuiLaiOtp');
+        const cooldownSecs = document.getElementById('cooldownSeconds');
+
+        btnGuiLai.disabled = true;
+        btnGuiLai.innerHTML = `<i class="bi bi-arrow-clockwise me-1"></i>Gửi lại mã (<span id="cooldownSeconds">${conLai}</span>s)`;
+
+        cooldownInterval = setInterval(() => {
+            conLai--;
+            const span = document.getElementById('cooldownSeconds');
+            if (span) span.textContent = conLai;
+
+            if (conLai <= 0) {
+                clearInterval(cooldownInterval);
+                btnGuiLai.disabled = false;
+                btnGuiLai.innerHTML = `<i class="bi bi-arrow-clockwise me-1"></i>Gửi lại mã OTP`;
+            }
+        }, 1000);
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Hồ Sơ Gian Hàng & Chứng Chỉ Pháp Lý - FlexShop</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .navbar-seller {
+            background: linear-gradient(135deg, #4338ca 0%, #312e81 100%);
+            border-bottom: 1px solid #3730a3;
+        }
+        .card-custom {
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1px solid #edf2f7;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            transition: all 0.2s ease-in-out;
+        }
+        .card-custom:hover {
+            box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+        }
+        .stat-card {
+            border-radius: 14px;
+            border: none;
+            padding: 1.25rem;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card .stat-icon {
+            font-size: 2.5rem;
+            opacity: 0.25;
+            position: absolute;
+            right: 15px;
+            bottom: 10px;
+        }
+        .dropzone-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .dropzone-box:hover, .dropzone-box.dragover {
+            border-color: #0d6efd;
+            background: #eff6ff;
+        }
+        .preview-img-thumb {
+            width: 52px;
+            height: 52px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .preview-img-thumb:hover {
+            transform: scale(1.08);
+        }
+        .pdf-thumb-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 8px;
+            background: #fee2e2;
+            color: #dc2626;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            cursor: pointer;
+            border: 1px solid #fecaca;
+        }
+        .shop-avatar {
+            width: 88px;
+            height: 88px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .badge-status {
+            font-size: 0.8rem;
+            padding: 0.4em 0.75em;
+            border-radius: 30px;
+            font-weight: 600;
+        }
+        .table > :not(caption) > * > * {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-seller px-4 py-3 sticky-top shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/seller/dashboard">
+                <div class="bg-white text-primary rounded-3 px-2 py-1 fs-5 fw-bold shadow-sm">
+                    <i class="bi bi-shop"></i>
+                </div>
+                <div>
+                    <span class="fw-bold tracking-tight text-white fs-5">FlexShop</span>
+                    <span class="badge bg-warning text-dark ms-2 fw-bold">KÊNH NGƯỜI BÁN</span>
+                </div>
+            </a>
+
+            <div class="d-flex align-items-center gap-3 ms-auto">
+                <a href="/seller/dashboard" class="btn btn-sm btn-outline-light rounded-pill px-3 py-1 fw-semibold d-flex align-items-center gap-1">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="/ho-so" class="d-flex align-items-center gap-2 text-white text-decoration-none" title="Xem & Chỉnh sửa hồ sơ cá nhân">
+                    <img th:src="${user != null and user.anhDaiDien != null and !#strings.isEmpty(user.anhDaiDien) ? user.anhDaiDien : 'https://ui-avatars.com/api/?name=' + (user != null and user.hoVaTen != null ? user.hoVaTen : 'Seller') + '&background=random'}" 
+                         alt="Avatar" class="rounded-circle border border-2 border-warning" width="38" height="38">
+                    <div class="d-none d-md-block text-start">
+                        <div class="fw-bold small text-white" th:text="${user != null ? user.hoVaTen : 'Chủ Gian Hàng'}">Khánh Dung</div>
+                        <div class="text-white-50" style="font-size: 11px;" th:text="${user != null ? user.email : 'seller@flexshop.com'}">ruy53465@gmail.com</div>
+                    </div>
+                </a>
+                <a href="/ho-so" class="btn btn-sm btn-outline-warning rounded-pill px-3 py-1 fw-semibold text-white d-flex align-items-center gap-1">
+                    <i class="bi bi-person-gear"></i> Hồ Sơ
+                </a>
+                <a href="/logout" onclick="handleLogout(event)" class="btn btn-sm btn-outline-light rounded-pill px-3 py-1 fw-semibold d-flex align-items-center gap-1">
+                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container-fluid px-4 py-4">
+
+        <!-- Breadcrumbs -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb mb-0 small">
+                <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a href="/seller/dashboard" class="text-decoration-none">Kênh Người Bán</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Hồ Sơ Gian Hàng & Giấy Phép</li>
+            </ol>
+        </nav>
+
+        <!-- Alert Notification if Shop is Rejected -->
+        <div th:if="${hoSo != null and hoSo.trangThai == 'TU_CHOI'}" class="alert alert-danger d-flex align-items-center gap-3 rounded-4 shadow-sm mb-4">
+            <i class="bi bi-exclamation-octagon-fill fs-2"></i>
+            <div>
+                <h6 class="alert-heading fw-bold mb-1">Hồ sơ gian hàng bị Quản trị viên từ chối phê duyệt!</h6>
+                <p class="mb-0 small">Lý do: <strong th:text="${hoSo.lyDoTuChoi != null ? hoSo.lyDoTuChoi : 'Vui lòng kiểm tra lại giấy phép kinh doanh và thông tin đăng ký.'}">Thông tin chưa chính xác</strong>. Vui lòng cập nhật lại thông tin hoặc bổ sung chứng chỉ hợp lệ.</p>
+            </div>
+        </div>
+
+        <!-- Shop Profile Header Card -->
+        <div class="card-custom p-4 mb-4">
+            <div class="row align-items-center g-3">
+                <div class="col-auto">
+                    <img id="shopLogoImg" 
+                         th:src="${hoSo != null and hoSo.linkLogo != null ? hoSo.linkLogo : 'https://placehold.co/120x120/e2e8f0/475569?text=SHOP'}" 
+                         alt="Shop Logo" class="shop-avatar">
+                </div>
+                <div class="col">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                        <h3 class="fw-bold mb-0 text-dark" id="shopNameTitle" th:text="${hoSo != null ? hoSo.tenGianHang : 'Gian hàng của bạn'}">Flex Fashion Store</h3>
+                        <!-- Status Badge -->
+                        <span th:if="${hoSo != null and hoSo.trangThai == 'HOAT_DONG'}" class="badge bg-success badge-status"><i class="bi bi-check-circle-fill me-1"></i>Đang hoạt động</span>
+                        <span th:if="${hoSo != null and hoSo.trangThai == 'CHO_DUYET'}" class="badge bg-warning text-dark badge-status"><i class="bi bi-clock-fill me-1"></i>Chờ Admin duyệt</span>
+                        <span th:if="${hoSo != null and hoSo.trangThai == 'TU_CHOI'}" class="badge bg-danger badge-status"><i class="bi bi-x-circle-fill me-1"></i>Bị từ chối</span>
+                        <span th:if="${hoSo != null and hoSo.trangThai == 'TAM_KHOA'}" class="badge bg-secondary badge-status"><i class="bi bi-lock-fill me-1"></i>Tạm khóa</span>
+
+                        <!-- Tier Badge -->
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle badge-status">
+                            <i class="bi bi-award-fill me-1"></i><span th:text="${hoSo != null ? hoSo.tenHangGianHang : 'Shop Tiềm Năng'}">Shop Tiềm Năng</span>
+                        </span>
+                    </div>
+
+                    <div class="d-flex flex-wrap align-items-center gap-3 text-muted small mb-2">
+                        <span><i class="bi bi-hash text-secondary"></i> Mã Shop: <strong th:text="${hoSo != null ? hoSo.maGianHang : '--'}">1</strong></span>
+                        <span><i class="bi bi-link-45deg text-secondary"></i> Slug: <code class="text-primary" id="shopSlugText" th:text="${hoSo != null ? '/shop/' + hoSo.duongDanSlug : '/shop/slug'}">/shop/flex-fashion</code></span>
+                        <button class="btn btn-link btn-sm p-0 text-decoration-none" onclick="saoChepSlug()" title="Sao chép link Shop"><i class="bi bi-clipboard"></i></button>
+                        <span><i class="bi bi-calendar3 text-secondary"></i> Ngày tham gia: <span th:text="${hoSo != null and hoSo.ngayTao != null ? #temporals.format(hoSo.ngayTao, 'dd/MM/yyyy HH:mm') : '--'}">01/01/2026</span></span>
+                    </div>
+
+                    <p class="text-secondary small mb-0" id="shopDescText" th:text="${hoSo != null and hoSo.moTa != null ? hoSo.moTa : 'Chưa có thông tin giới thiệu gian hàng.'}">
+                        Chuyên cung cấp sản phẩm thời trang cao cấp chính hãng, cam kết chất lượng chuẩn ISO.
+                    </p>
+                </div>
+
+                <div class="col-12 col-md-auto d-flex flex-wrap gap-2">
+                    <a href="/seller/thiet-lap-shop" class="btn btn-primary fw-bold d-flex align-items-center gap-1">
+                        <i class="bi bi-sliders2-vertical"></i> Thiết lập Shop
+                    </a>
+                    <button type="button" class="btn btn-outline-primary d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalChinhSuaShop">
+                        <i class="bi bi-pencil-square"></i> Chỉnh sửa nhanh
+                    </button>
+                    <button type="button" class="btn btn-warning text-dark fw-bold d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalThemChungChi">
+                        <i class="bi bi-cloud-arrow-up-fill"></i> Nộp thêm chứng chỉ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4 Quick Stats Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="stat-card bg-primary shadow-sm">
+                    <div class="stat-icon"><i class="bi bi-file-earmark-medical"></i></div>
+                    <small class="text-white-50 text-uppercase fw-semibold">Tổng chứng chỉ / giấy tờ</small>
+                    <h2 class="fw-bold mb-0 mt-1" id="statTongCc" th:text="${hoSo != null ? hoSo.tongSoChungChi : 0}">0</h2>
+                    <small class="text-white-50">Hồ sơ pháp lý gian hàng</small>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card bg-success shadow-sm">
+                    <div class="stat-icon"><i class="bi bi-patch-check-fill"></i></div>
+                    <small class="text-white-50 text-uppercase fw-semibold">Đã được phê duyệt</small>
+                    <h2 class="fw-bold mb-0 mt-1" id="statDaDuyet" th:text="${hoSo != null ? hoSo.soChungChiDaDuyet : 0}">0</h2>
+                    <small class="text-white-50">Hợp lệ & có hiệu lực pháp lý</small>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card bg-warning shadow-sm">
+                    <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
+                    <small class="text-dark-50 text-uppercase fw-semibold text-dark">Đang chờ thẩm định</small>
+                    <h2 class="fw-bold mb-0 mt-1 text-dark" id="statChoDuyet" th:text="${hoSo != null ? hoSo.soChungChiChoDuyet : 0}">0</h2>
+                    <small class="text-dark">Ban Quản Trị đang duyệt</small>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card bg-danger shadow-sm">
+                    <div class="stat-icon"><i class="bi bi-shield-x"></i></div>
+                    <small class="text-white-50 text-uppercase fw-semibold">Bị từ chối / Cần nộp lại</small>
+                    <h2 class="fw-bold mb-0 mt-1" id="statTuChoi" th:text="${hoSo != null ? hoSo.soChungChiTuChoi : 0}">0</h2>
+                    <small class="text-white-50">Yêu cầu chỉnh sửa / nộp lại</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column: Legal Certificates & Documents List -->
+            <div class="col-lg-8">
+                <div class="card-custom p-4 mb-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                        <div>
+                            <h5 class="fw-bold mb-1"><i class="bi bi-file-earmark-check-fill text-warning me-2"></i>Giấy Phép Kinh Doanh & Chứng Chỉ Pháp Lý</h5>
+                            <p class="text-muted small mb-0">Quản lý các tài liệu pháp lý bắt buộc (Giấy phép ĐKKD, ATTP, ISO, Ủy quyền phân phối)</p>
+                        </div>
+                        <button class="btn btn-sm btn-primary d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalThemChungChi">
+                            <i class="bi bi-plus-circle"></i> Thêm giấy phép
+                        </button>
+                    </div>
+
+                    <!-- Filter & Search Toolbar -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-7">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" id="filterKeyword" class="form-control" placeholder="Tìm theo số giấy tờ / MST hoặc loại giấy tờ..." onkeyup="locDanhSachChungChi()">
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <select id="filterStatus" class="form-select form-select-sm" onchange="locDanhSachChungChi()">
+                                <option value="">-- Tất cả trạng thái --</option>
+                                <option value="DA_DUYET">Đã duyệt (Hợp lệ)</option>
+                                <option value="CHO_DUYET">Chờ thẩm định</option>
+                                <option value="TU_CHOI">Bị từ chối</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Certificates Table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped align-middle mb-0" id="tableChungChi">
+                            <thead class="table-light text-secondary small text-uppercase">
+                                <tr>
+                                    <th class="text-center" style="width: 50px;">STT</th>
+                                    <th>Loại Giấy Tờ</th>
+                                    <th>Số Giấy Tờ / MST</th>
+                                    <th>Tệp Đính Kèm</th>
+                                    <th>Ngày Tải Lên</th>
+                                    <th class="text-center">Trạng Thái</th>
+                                    <th class="text-center" style="width: 110px;">Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyChungChi">
+                                <tr th:if="${hoSo == null or hoSo.danhSachChungChi == null or #lists.isEmpty(hoSo.danhSachChungChi)}" id="emptyRow">
+                                    <td colspan="7" class="text-center py-5 text-muted">
+                                        <i class="bi bi-folder-x fs-1 d-block mb-2 text-secondary"></i>
+                                        Gian hàng chưa có chứng chỉ hoặc giấy phép nào được tải lên.<br>
+                                        <button class="btn btn-sm btn-outline-primary mt-2" data-bs-toggle="modal" data-bs-target="#modalThemChungChi">
+                                            <i class="bi bi-cloud-arrow-up"></i> Nộp giấy phép kinh doanh ngay
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr th:each="cc, iterStat : ${hoSo != null ? hoSo.danhSachChungChi : null}" 
+                                    th:data-status="${cc.trangThaiDuyet}" 
+                                    th:data-keyword="|${cc.tenLoaiGiayTo} ${cc.soGiayTo}|">
+                                    <td class="text-center fw-medium text-secondary" th:text="${iterStat.count}">1</td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border fw-medium" th:text="${cc.tenLoaiGiayTo}">Giấy phép kinh doanh</span>
+                                    </td>
+                                    <td>
+                                        <code class="fw-bold text-dark fs-6" th:text="${cc.soGiayTo}">0101234567</code>
+                                    </td>
+                                    <td>
+                                        <!-- PDF File Icon -->
+                                        <div th:if="${cc.laTepPdf}" class="d-flex align-items-center gap-2">
+                                            <div class="pdf-thumb-box" th:data-url="${cc.linkAnhGiayTo}" data-is-pdf="true" onclick="xemTruocTepTuElement(this)" title="Click để xem PDF">
+                                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                                            </div>
+                                            <div>
+                                                <small class="fw-semibold d-block text-truncate" style="max-width: 140px;">Tệp PDF</small>
+                                                <a th:href="${cc.linkAnhGiayTo}" target="_blank" class="text-decoration-none small text-primary">Mở xem <i class="bi bi-box-arrow-up-right"></i></a>
+                                            </div>
+                                        </div>
+                                        <!-- Image Thumbnail -->
+                                        <div th:unless="${cc.laTepPdf}" class="d-flex align-items-center gap-2">
+                                            <img th:src="${cc.linkAnhGiayTo}" alt="Giấy tờ" class="preview-img-thumb" th:data-url="${cc.linkAnhGiayTo}" data-is-pdf="false" onclick="xemTruocTepTuElement(this)" title="Click để xem ảnh lớn">
+                                            <div>
+                                                <small class="fw-semibold d-block text-truncate" style="max-width: 140px;">Ảnh giấy phép</small>
+                                                <a th:href="${cc.linkAnhGiayTo}" target="_blank" class="text-decoration-none small text-primary">Mở xem <i class="bi bi-box-arrow-up-right"></i></a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted" th:text="${cc.ngayTao != null ? #temporals.format(cc.ngayTao, 'dd/MM/yyyy HH:mm') : '--'}">01/01/2026</small>
+                                    </td>
+                                    <td class="text-center">
+                                        <span th:if="${cc.trangThaiDuyet == 'DA_DUYET'}" class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                            <i class="bi bi-check-circle me-1"></i>Đã duyệt
+                                        </span>
+                                        <span th:if="${cc.trangThaiDuyet == 'CHO_DUYET'}" class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">
+                                            <i class="bi bi-clock-history me-1"></i>Chờ duyệt
+                                        </span>
+                                        <span th:if="${cc.trangThaiDuyet == 'TU_CHOI'}" class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
+                                            <i class="bi bi-x-circle me-1"></i>Bị từ chối
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm">
+                                            <button type="button" class="btn btn-outline-primary" th:data-url="${cc.linkAnhGiayTo}" th:data-is-pdf="${cc.laTepPdf}" onclick="xemTruocTepTuElement(this)" title="Xem trước tài liệu">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <!-- Delete button only enabled if CHO_DUYET or TU_CHOI -->
+                                            <button th:if="${cc.trangThaiDuyet != 'DA_DUYET'}" type="button" class="btn btn-outline-danger" th:data-id="${cc.maChungChi}" onclick="xacNhanXoaChungChiTuElement(this)" title="Xóa chứng chỉ này">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                            <button th:if="${cc.trangThaiDuyet == 'DA_DUYET'}" type="button" class="btn btn-outline-secondary disabled" title="Không thể xóa giấy tờ đã được duyệt" disabled>
+                                                <i class="bi bi-lock"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Warehouse & Operational Metrics -->
+            <div class="col-lg-4">
+                <!-- Warehouse Info Card -->
+                <div class="card-custom p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Kho Hàng & Vận Hành</h6>
+                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalChinhSuaShop">
+                            <i class="bi bi-pencil"></i> Sửa
+                        </button>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 mb-3">
+                        <small class="text-muted d-block mb-1"><i class="bi bi-building me-1"></i>Địa chỉ kho lấy hàng:</small>
+                        <strong class="text-dark d-block" id="shopDiaChiKho" th:text="${hoSo != null ? hoSo.diaChiKho : 'Chưa thiết lập'}">Hà Nội</strong>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 mb-3">
+                        <small class="text-muted d-block mb-1"><i class="bi bi-telephone-fill me-1 text-success"></i>Hotline / SĐT kho lấy hàng:</small>
+                        <strong class="text-dark fs-6" id="shopSdtKho" th:text="${hoSo != null ? hoSo.sdtKho : 'Chưa thiết lập'}">0912345678</strong>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3">
+                        <small class="text-muted d-block mb-1"><i class="bi bi-person-badge me-1 text-primary"></i>Chủ sở hữu:</small>
+                        <strong class="text-dark d-block" th:text="${hoSo != null ? hoSo.tenChuSoHuu : '--'}">Chủ Shop</strong>
+                        <small class="text-muted" th:text="${hoSo != null ? hoSo.emailChuSoHuu : '--'}">seller@flexshop.vn</small>
+                    </div>
+                </div>
+
+                <!-- Operational Metrics Card -->
+                <div class="card-custom p-4">
+                    <h6 class="fw-bold mb-3 text-dark"><i class="bi bi-graph-up-arrow text-primary me-2"></i>Chỉ Số Vận Hành Shop</h6>
+
+                    <ul class="list-group list-group-flush small">
+                        <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-star-fill text-warning me-2"></i>Điểm đánh giá trung bình:</span>
+                            <span class="fw-bold text-dark fs-6" th:text="${hoSo != null and hoSo.diemDanhGiaTb != null ? hoSo.diemDanhGiaTb + ' / 5.0' : '5.0 / 5.0'}">5.0 / 5.0</span>
+                        </li>
+                        <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-chat-dots-fill text-info me-2"></i>Tỷ lệ phản hồi tin nhắn:</span>
+                            <span class="fw-bold text-success" th:text="${hoSo != null and hoSo.tyLePhanHoiChat != null ? hoSo.tyLePhanHoiChat + '%' : '100%'}">100%</span>
+                        </li>
+                        <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-shield-shaded text-danger me-2"></i>Điểm phạt Sao Quả Tạ:</span>
+                            <span class="badge bg-secondary-subtle text-dark" th:text="${hoSo != null ? hoSo.diemSaoQuaTa + ' điểm' : '0 điểm'}">0 điểm</span>
+                        </li>
+                        <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-bag-check-fill text-success me-2"></i>Tổng số đơn hoàn thành:</span>
+                            <strong class="text-dark" th:text="${hoSo != null ? hoSo.tongDonHang : 0}">0</strong>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal 1: Nộp Thêm Giấy Phép & Chứng Chỉ Mới -->
+    <div class="modal fade" id="modalThemChungChi" tabindex="-1" aria-labelledby="modalThemChungChiLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header border-bottom bg-light">
+                    <h5 class="modal-title fw-bold" id="modalThemChungChiLabel">
+                        <i class="bi bi-cloud-arrow-up-fill text-warning me-2"></i>Nộp Thêm Chứng Chỉ / Giấy Phép
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-toggle="modal"></button>
+                </div>
+                <form id="formThemChungChi" onsubmit="xuLyThemChungChi(event)">
+                    <div class="modal-body p-4">
+                        <div class="alert alert-info py-2 small d-flex align-items-center gap-2 mb-3">
+                            <i class="bi bi-info-circle-fill fs-5"></i>
+                            <span>Giấy tờ mới nộp sẽ ở trạng thái <strong>CHỜ DUYỆT</strong> và được Ban Quản Trị xem xét thẩm định trong 24h làm việc.</span>
+                        </div>
+
+                        <!-- Loại Giấy Tờ -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Loại Giấy Tờ / Chứng Chỉ <span class="text-danger">*</span></label>
+                            <select class="form-select" id="inputLoaiGiayTo" name="loaiGiayTo" required>
+                                <option value="GIAY_PHEP_KINH_DOANH" selected>Giấy phép đăng ký kinh doanh (ĐKKD)</option>
+                                <option value="AN_TOAN_THUC_PHAM">Chứng nhận Vệ sinh An toàn Thực phẩm (VSATTP)</option>
+                                <option value="CHUNG_NHAN_CHAT_LUONG">Chứng nhận Chất lượng Sản phẩm / ISO</option>
+                                <option value="UY_QUYEN_PHAN_PHOI">Ủy quyền Phân phối Chính hãng (Brand Authorized)</option>
+                                <option value="CAN_CUOC_CONG_DAN">Căn cước công dân người đại diện pháp luật</option>
+                                <option value="MA_SO_THUE">Mã số thuế doanh nghiệp / hộ kinh doanh</option>
+                                <option value="KHAC">Tài liệu pháp lý khác</option>
+                            </select>
+                        </div>
+
+                        <!-- Số Giấy Tờ / MST -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Số Giấy Tờ / Mã Số Thuế <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="inputSoGiayTo" name="soGiayTo" placeholder="Ví dụ: 0101234567 hoặc GPKD-2026/01" required minlength="3" maxlength="100">
+                            <div class="form-text">Ghi đúng mã số thuế hoặc số quyết định / số seri trên giấy chứng nhận.</div>
+                        </div>
+
+                        <!-- Tệp đính kèm Dropzone -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Tải Tệp Chứng Chỉ <span class="text-danger">*</span></label>
+                            <div class="dropzone-box" id="dropzoneGiayTo" onclick="document.getElementById('inputFileGiayTo').click()">
+                                <i class="bi bi-cloud-arrow-up fs-1 text-primary d-block mb-1"></i>
+                                <div class="fw-semibold text-dark">Kéo thả tệp hoặc <span class="text-primary text-decoration-underline">chọn từ máy tính</span></div>
+                                <div class="text-muted small mt-1">Chấp nhận: <strong>PDF, JPG, JPEG, PNG</strong> (Dung lượng &lt; 5MB)</div>
+                            </div>
+                            <input type="file" id="inputFileGiayTo" name="fileGiayTo" class="d-none" accept=".pdf,.jpg,.jpeg,.png" onchange="chonTepGiayTo(this)" required>
+
+                            <!-- Preview File Selected -->
+                            <div id="boxFilePreview" class="d-none mt-2 p-2 border rounded-3 bg-light d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2 text-truncate">
+                                    <i id="previewIconTep" class="bi bi-file-earmark-pdf-fill fs-3 text-danger"></i>
+                                    <div class="text-truncate">
+                                        <div id="previewTenTep" class="fw-medium text-truncate small">document.pdf</div>
+                                        <small id="previewDungLuong" class="text-muted">1.2 MB</small>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="huyChonTep()"><i class="bi bi-x"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                        <button type="submit" id="btnSubmitChungChi" class="btn btn-warning text-dark fw-bold">
+                            <i class="bi bi-cloud-arrow-up-fill me-1"></i>Gửi Thẩm Định
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Chỉnh Sửa Thông Tin Gian Hàng -->
+    <div class="modal fade" id="modalChinhSuaShop" tabindex="-1" aria-labelledby="modalChinhSuaShopLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header border-bottom bg-light">
+                    <h5 class="modal-title fw-bold" id="modalChinhSuaShopLabel">
+                        <i class="bi bi-pencil-square text-primary me-2"></i>Chỉnh Sửa Thông Tin Gian Hàng
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formChinhSuaShop" onsubmit="xuLyChinhSuaShop(event)">
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <!-- Logo Upload -->
+                            <div class="col-12 col-md-4 text-center border-end">
+                                <label class="form-label fw-semibold d-block">Ảnh Logo Shop</label>
+                                <img id="editLogoPreview" 
+                                     th:src="${hoSo != null and hoSo.linkLogo != null ? hoSo.linkLogo : 'https://placehold.co/120x120/e2e8f0/475569?text=SHOP'}" 
+                                     alt="Logo Shop" class="shop-avatar mb-3">
+                                <div>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="document.getElementById('inputEditLogo').click()">
+                                        <i class="bi bi-camera"></i> Đổi logo
+                                    </button>
+                                    <input type="file" id="inputEditLogo" name="fileLogo" class="d-none" accept=".jpg,.jpeg,.png,.webp" onchange="previewEditLogo(this)">
+                                </div>
+                                <small class="text-muted d-block mt-2">Định dạng JPG, PNG, WEBP &lt; 5MB</small>
+                            </div>
+
+                            <!-- Form Details -->
+                            <div class="col-12 col-md-8">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Tên Gian Hàng <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="editTenGianHang" name="tenGianHang" th:value="${hoSo != null ? hoSo.tenGianHang : ''}" required minlength="3" maxlength="100">
+                                    <div class="form-text">Khi đổi tên shop, hệ thống sẽ tự động cập nhật lại đường dẫn slug chuẩn SEO.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Số Điện Thoại Kho / Hotline <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="editSdtKho" name="sdtKho" th:value="${hoSo != null ? hoSo.sdtKho : ''}" required pattern="^(0|\+84)(3|5|7|8|9)[0-9]{8}$" placeholder="Ví dụ: 0912345678">
+                                    <div class="form-text">Số di động 10 số của Việt Nam để đơn vị vận chuyển liên hệ lấy hàng.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Địa Chỉ Kho Lấy Hàng <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="editDiaChiKho" name="diaChiKho" th:value="${hoSo != null ? hoSo.diaChiKho : ''}" required minlength="5" maxlength="255" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/TP">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Mô Tả / Giới Thiệu Shop</label>
+                                    <textarea class="form-control" id="editMoTa" name="moTa" rows="3" maxlength="2000" placeholder="Mô tả ngành hàng, cam kết nguồn gốc hàng hóa..." th:text="${hoSo != null ? hoSo.moTa : ''}"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                        <button type="submit" id="btnSubmitEditShop" class="btn btn-primary fw-bold">
+                            <i class="bi bi-check2-circle me-1"></i>Lưu Thay Đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Xem Trước Chứng Chỉ / Tài Liệu -->
+    <div class="modal fade" id="modalXemTruocTep" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header border-bottom bg-light">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-file-earmark-text text-primary me-2"></i>Xem Trước Chứng Chỉ / Tài Liệu
+                    </h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <a id="btnMoTabMoi" href="#" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-box-arrow-up-right me-1"></i>Mở tab mới
+                        </a>
+                        <a id="btnTaiTepVe" href="#" download class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-download me-1"></i>Tải về máy
+                        </a>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                </div>
+                <div class="modal-body p-3 text-center bg-dark" style="min-height: 500px; display: flex; align-items: center; justify-content: center;">
+                    <!-- Image Preview Viewport -->
+                    <img id="viewImagePreview" src="" alt="Chứng chỉ" class="img-fluid rounded shadow" style="max-height: 75vh; object-fit: contain; display: none;">
+                    <!-- PDF Preview Viewport -->
+                    <iframe id="viewPdfPreview" src="" style="width: 100%; height: 75vh; border: none; display: none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Copy Shop Link
+        function saoChepSlug() {
+            const slugText = document.getElementById('shopSlugText').innerText.trim();
+            const fullUrl = window.location.origin + slugText;
+            navigator.clipboard.writeText(fullUrl).then(() => {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Đã sao chép liên kết Shop vào clipboard!',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }).catch(err => {
+                prompt("Sao chép link shop:", fullUrl);
+            });
+        }
+
+        // Handle Logout safely
+        function handleLogout(event) {
+            event.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+            document.cookie = "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "JSESSIONID=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            window.location.href = '/logout';
+        }
+
+        // Preview File in Dropzone
+        function chonTepGiayTo(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                if (file.size > 5 * 1024 * 1024) {
+                    Swal.fire('Lỗi', 'Kích thước tệp vượt quá 5MB!', 'error');
+                    input.value = '';
+                    document.getElementById('boxFilePreview').classList.add('d-none');
+                    return;
+                }
+                document.getElementById('previewTenTep').innerText = file.name;
+                document.getElementById('previewDungLuong').innerText = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+                
+                const isPdf = file.name.toLowerCase().endsWith('.pdf');
+                const icon = document.getElementById('previewIconTep');
+                if (isPdf) {
+                    icon.className = 'bi bi-file-earmark-pdf-fill fs-3 text-danger';
+                } else {
+                    icon.className = 'bi bi-file-earmark-image-fill fs-3 text-primary';
+                }
+                document.getElementById('boxFilePreview').classList.remove('d-none');
+            }
+        }
+
+        function huyChonTep() {
+            document.getElementById('inputFileGiayTo').value = '';
+            document.getElementById('boxFilePreview').classList.add('d-none');
+        }
+
+        // Preview Edit Logo
+        function previewEditLogo(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('editLogoPreview').src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Helper đọc từ element data-* attributes
+        function xemTruocTepTuElement(el) {
+            const url = el.getAttribute('data-url');
+            const isPdf = el.getAttribute('data-is-pdf') === 'true' || (url && url.toLowerCase().endsWith('.pdf'));
+            xemTruocTep(url, isPdf);
+        }
+
+        function xacNhanXoaChungChiTuElement(el) {
+            const id = el.getAttribute('data-id');
+            xacNhanXoaChungChi(id);
+        }
+
+        // Preview Modal for documents
+        function xemTruocTep(url, isPdf) {
+            const imgPreview = document.getElementById('viewImagePreview');
+            const pdfPreview = document.getElementById('viewPdfPreview');
+            const btnMoTabMoi = document.getElementById('btnMoTabMoi');
+            const btnTaiTepVe = document.getElementById('btnTaiTepVe');
+
+            btnMoTabMoi.href = url;
+            btnTaiTepVe.href = url;
+
+            if (isPdf) {
+                imgPreview.style.display = 'none';
+                pdfPreview.style.display = 'block';
+                pdfPreview.src = url;
+            } else {
+                pdfPreview.style.display = 'none';
+                imgPreview.style.display = 'block';
+                imgPreview.src = url;
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('modalXemTruocTep'));
+            modal.show();
+        }
+
+        // Filter Certificates in Table
+        function locDanhSachChungChi() {
+            const keyword = document.getElementById('filterKeyword').value.toLowerCase().trim();
+            const status = document.getElementById('filterStatus').value.toUpperCase().trim();
+            const rows = document.querySelectorAll('#tbodyChungChi tr');
+
+            rows.forEach(row => {
+                if (row.id === 'emptyRow') return;
+                const rowStatus = (row.getAttribute('data-status') || '').toUpperCase();
+                const rowKeyword = (row.getAttribute('data-keyword') || '').toLowerCase();
+
+                const matchStatus = !status || rowStatus === status;
+                const matchKeyword = !keyword || rowKeyword.includes(keyword);
+
+                if (matchStatus && matchKeyword) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Submit Add Certificate
+        async function xuLyThemChungChi(event) {
+            event.preventDefault();
+            const fileInput = document.getElementById('inputFileGiayTo');
+            if (!fileInput.files || !fileInput.files[0]) {
+                Swal.fire('Lỗi', 'Vui lòng chọn tệp chứng chỉ để tải lên!', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('btnSubmitChungChi');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang tải lên...';
+
+            try {
+                const form = document.getElementById('formThemChungChi');
+                const formData = new FormData(form);
+
+                const token = localStorage.getItem('token');
+                const headers = {};
+                if (token) {
+                    headers['Authorization'] = 'Bearer ' + token;
+                }
+
+                const response = await fetch('/api/v1/seller/ho-so-shop/chung-chi', {
+                    method: 'POST',
+                    headers: headers,
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (response.ok && result.thanhCong) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Nộp tài liệu thành công!',
+                        text: (result.thongBao || result.message || result.thongDiep) || 'Chứng chỉ của bạn đã được chuyển vào hàng đợi CHỜ DUYỆT.',
+                        confirmButtonText: 'Đồng ý'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire('Lỗi', (result.thongBao || result.message || result.thongDiep) || 'Không thể nộp chứng chỉ, vui lòng thử lại!', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                Swal.fire('Lỗi', 'Có lỗi kết nối xảy ra trong quá trình nộp tài liệu!', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
+
+        // Submit Edit Shop Profile
+        async function xuLyChinhSuaShop(event) {
+            event.preventDefault();
+            const btn = document.getElementById('btnSubmitEditShop');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang lưu...';
+
+            try {
+                const form = document.getElementById('formChinhSuaShop');
+                const formData = new FormData(form);
+
+                const token = localStorage.getItem('token');
+                const headers = {};
+                if (token) {
+                    headers['Authorization'] = 'Bearer ' + token;
+                }
+
+                const response = await fetch('/api/v1/seller/ho-so-shop/thong-tin', {
+                    method: 'POST',
+                    headers: headers,
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (response.ok && result.thanhCong) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Cập nhật thành công!',
+                        text: 'Thông tin gian hàng đã được cập nhật đồng bộ vào hệ thống.',
+                        confirmButtonText: 'Đồng ý'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire('Lỗi', (result.thongBao || result.message || result.thongDiep) || 'Không thể cập nhật thông tin shop!', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                Swal.fire('Lỗi', 'Có lỗi kết nối xảy ra trong quá trình lưu thông tin!', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
+
+        // Confirm Delete Certificate
+        function xacNhanXoaChungChi(maChungChi) {
+            Swal.fire({
+                title: 'Xác nhận xóa tài liệu?',
+                text: 'Bạn có chắc chắn muốn xóa giấy tờ/chứng chỉ này khỏi hồ sơ gian hàng không?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Xóa ngay',
+                cancelButtonText: 'Hủy bỏ'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const token = localStorage.getItem('token');
+                        const headers = {};
+                        if (token) {
+                            headers['Authorization'] = 'Bearer ' + token;
+                        }
+
+                        const response = await fetch('/api/v1/seller/ho-so-shop/chung-chi/' + maChungChi, {
+                            method: 'DELETE',
+                            headers: headers
+                        });
+
+                        const resJson = await response.json();
+                        if (response.ok && resJson.thanhCong) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Đã xóa!',
+                                text: 'Chứng chỉ đã được xóa khỏi hồ sơ gian hàng.',
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire('Lỗi', (resJson.thongBao || resJson.message || resJson.thongDiep) || 'Không thể xóa chứng chỉ này!', 'error');
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        Swal.fire('Lỗi', 'Không thể kết nối đến máy chủ để xóa chứng chỉ!', 'error');
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
