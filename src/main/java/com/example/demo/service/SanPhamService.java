@@ -24,11 +24,11 @@ public class SanPhamService {
 
     @Autowired private SanPhamRepository sanPhamRepository;
     @Autowired private DanhMucRepository danhMucRepository;
-    // @Autowired private ThuongHieuRepository thuongHieuRepository; // Giả sử đã có
     @Autowired private BienTheSanPhamRepository bienTheRepository;
     @Autowired private LichSuGiaBienTheRepository lichSuGiaRepository;
     @Autowired private HinhAnhSanPhamRepository hinhAnhRepository;
     @Autowired private FileStorageService fileStorageService;
+    @Autowired private com.example.demo.repository.ThuocTinhSanPhamRepository thuocTinhSanPhamRepository;
 
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
@@ -169,5 +169,19 @@ public class SanPhamService {
         ha.setThuTuHienThi(count + 1);
 
         hinhAnhRepository.save(ha);
+    }
+
+    public SanPham timTheoId(Long id) {
+        return sanPhamRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
+    }
+
+    public java.util.List<com.example.demo.entity.BienTheSanPham> layDanhSachBienThe(Long maSanPham) {
+        return bienTheRepository.findBySanPham_MaSanPhamAndDaXoaFalse(maSanPham);
+    }
+
+    public java.util.List<com.example.demo.entity.ThuocTinhSanPham> layDanhSachThuocTinh(Long maSanPham) {
+        // Trả về danh sách thuộc tính động của sản phẩm
+        return thuocTinhSanPhamRepository.findBySanPham_MaSanPham(maSanPham);
     }
 }

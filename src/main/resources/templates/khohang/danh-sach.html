@@ -1,70 +1,275 @@
 <!DOCTYPE html>
-<html th:replace="~{layout/main :: layout(title='Kho Hàng', content=~{::content})}">
-<head><title>Quản lý Kho Hàng</title></head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kho Hàng WMS - FlexShop Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --sidebar-bg:#1e2a3a; --sidebar-hover:#2d3f54; --accent:#3b82f6; }
+        body { background:#f1f5f9; font-family:'Segoe UI',sans-serif; }
+        .sidebar { width:240px; min-height:100vh; background:var(--sidebar-bg); position:fixed; top:0; left:0; z-index:100; }
+        .sidebar .brand { padding:20px 16px 16px; border-bottom:1px solid rgba(255,255,255,.1); }
+        .sidebar .brand h5 { color:#fff; font-weight:700; margin:0; font-size:1.1rem; }
+        .sidebar .brand span { color:#64748b; font-size:.75rem; }
+        .nav-section { padding:12px 16px 4px; color:#64748b; font-size:.7rem; font-weight:600; letter-spacing:1px; text-transform:uppercase; }
+        .sidebar .nav-link { color:#94a3b8; padding:9px 16px; border-radius:6px; margin:1px 8px; font-size:.875rem; display:flex; align-items:center; gap:10px; }
+        .sidebar .nav-link:hover { color:#fff; background:var(--sidebar-hover); }
+        .sidebar .nav-link.active { color:#fff; background:var(--accent); }
+        .sidebar .nav-link i { width:18px; text-align:center; }
+        .main-content { margin-left:240px; padding:24px; }
+        .card { border:none; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.1); margin-bottom:20px; }
+        .card-header-custom { background:#fff; border-bottom:2px solid #f1f5f9; padding:14px 20px; border-radius:12px 12px 0 0; display:flex; align-items:center; justify-content:space-between; }
+        .table th { font-size:.78rem; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:.5px; }
+        .table td { vertical-align:middle; font-size:.875rem; }
+        .us-badge { font-size:.65rem; padding:2px 6px; border-radius:4px; background:#dbeafe; color:#1d4ed8; font-weight:600; }
+    </style>
+</head>
 <body>
-<div th:fragment="content">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Quản lý Kho Hàng (WMS)</h2>
-        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#addModal">
-            <i class="fas fa-truck-loading me-1"></i> Tạo Phiếu Nhập/Xuất
-        </button>
+<div class="sidebar">
+    <div class="brand"><h5><i class="fas fa-store me-2" style="color:var(--accent)"></i>FlexShop</h5><span>Admin Dashboard</span></div>
+    <div class="nav-section">Quản trị</div>
+    <a href="/admin/danh-muc" class="nav-link"><i class="fas fa-th-large"></i> Danh mục</a>
+    <a href="/admin/thuong-hieu" class="nav-link"><i class="far fa-copyright"></i> Thương hiệu</a>
+    <a href="/admin/sao-qua-ta/danh-sach" class="nav-link"><i class="fas fa-gavel"></i> Sao Quả Tạ</a>
+    <div class="nav-section">Gian hàng</div>
+    <a href="/seller/san-pham" class="nav-link"><i class="fas fa-box-open"></i> Sản phẩm</a>
+    <a href="/seller/kho-hang" class="nav-link active"><i class="fas fa-warehouse"></i> Kho hàng</a>
+</div>
+
+<div class="main-content">
+    <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4">
+        <i class="fas fa-check-circle"></i><span th:text="${thongBaoThanhCong}"></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 mb-4">
+        <i class="fas fa-exclamation-circle"></i><span th:text="${thongBaoLoi}"></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
     </div>
 
-    <div class="card">
-        <div class="card-body text-center py-5">
-            <i class="fas fa-boxes fa-4x text-muted mb-3"></i>
-            <h5>Hệ thống Quản lý Kho Hàng FlexShop</h5>
-            <p class="text-muted">Bấm nút "Tạo Phiếu Nhập/Xuất" để test tính năng xuất kho âm (US-15) và lưu log tự động.</p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold text-dark mb-0">Quản lý Kho Hàng (WMS)</h4>
+            <small class="text-muted">US-15 (Nhập kho), US-16 (Chặn xuất âm), US-17 (Vị trí kệ), US-21 (Lô hàng HSD)</small>
         </div>
     </div>
 
-    <!-- Modal Tạo phiếu -->
-    <div class="modal fade" id="addModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
+    <!-- ========== US-15/16: TẠO PHIẾU NHẬP XUẤT KHO ========== -->
+    <div class="card">
+        <div class="card-header-custom">
+            <div>
+                <h6 class="fw-bold mb-0"><i class="fas fa-file-alt me-2 text-primary"></i>Tạo Phiếu Nhập / Xuất Kho <span class="us-badge ms-2">US-15</span> <span class="us-badge">US-16</span></h6>
+                <small class="text-muted">Xuất kho vượt tồn kho → hệ thống TỰ ĐỘNG chặn và báo lỗi</small>
+            </div>
+            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalPhieu">
+                <i class="fas fa-plus me-1"></i> Tạo phiếu
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <div class="p-4 border rounded-3">
+                        <i class="fas fa-truck-loading fa-2x text-success mb-2"></i>
+                        <h6 class="fw-semibold">Nhập Kho</h6>
+                        <small class="text-muted">Ghi nhận hàng về, tăng tồn kho</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-4 border rounded-3">
+                        <i class="fas fa-dolly fa-2x text-warning mb-2"></i>
+                        <h6 class="fw-semibold">Xuất Kho</h6>
+                        <small class="text-muted">Xuất hàng đi, giảm tồn kho</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-4 border rounded-3 border-danger">
+                        <i class="fas fa-shield-alt fa-2x text-danger mb-2"></i>
+                        <h6 class="fw-semibold text-danger">Tính năng chặn xuất âm (US-16)</h6>
+                        <small class="text-muted">Thử tạo phiếu xuất kho với số lượng <strong>lớn hơn tồn kho</strong> → hệ thống sẽ báo lỗi đỏ ngay lập tức!</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== US-17: VỊ TRÍ KỆ KHO ========== -->
+    <div class="card">
+        <div class="card-header-custom">
+            <div>
+                <h6 class="fw-bold mb-0"><i class="fas fa-map-marker-alt me-2 text-info"></i>Vị trí Kệ Kho <span class="us-badge ms-2">US-17</span></h6>
+                <small class="text-muted">Quản lý vị trí kệ trong kho (Hàng A - Cột 1 - Tầng 2...)</small>
+            </div>
+            <button class="btn btn-sm btn-info text-white" data-bs-toggle="modal" data-bs-target="#modalViTri">
+                <i class="fas fa-plus me-1"></i> Thêm vị trí
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info border-0 d-flex align-items-center gap-2 mb-0">
+                <i class="fas fa-info-circle"></i>
+                <span>Tạo vị trí kệ kho để quản lý tồn kho theo vị trí vật lý. Ví dụ: Kho A - Hàng 3 - Kệ 2 - Tầng 1</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== US-21: LÔ HÀNG VÀ HSD ========== -->
+    <div class="card">
+        <div class="card-header-custom">
+            <div>
+                <h6 class="fw-bold mb-0"><i class="fas fa-calendar-check me-2 text-warning"></i>Lô Hàng & Hạn Sử Dụng <span class="us-badge ms-2">US-21</span></h6>
+                <small class="text-muted">Ghi nhận lô sản xuất, quản lý ngày hết hạn</small>
+            </div>
+            <button class="btn btn-sm btn-warning text-white" data-bs-toggle="modal" data-bs-target="#modalLoHang">
+                <i class="fas fa-plus me-1"></i> Thêm lô hàng
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning border-0 d-flex align-items-center gap-2 mb-0">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Quản lý HSD giúp tránh xuất hàng đã quá hạn. Nhấn "Thêm lô hàng" để nhập thông tin lô và ngày hết hạn.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODALS ===== -->
+
+    <!-- Modal Tạo phiếu Nhập/Xuất -->
+    <div class="modal fade" id="modalPhieu" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow">
                 <form th:action="@{/seller/kho-hang/phieu/tao-moi}" method="post" th:object="${formPhieuKho}">
                     <div class="modal-header">
-                        <h5 class="modal-title">Tạo Phiếu Kho Mới</h5>
+                        <h5 class="modal-title fw-semibold"><i class="fas fa-file-alt me-2 text-primary"></i>Tạo Phiếu Nhập/Xuất Kho</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Kho hàng ID (*)</label>
-                            <input type="number" name="maKho" value="1" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Loại phiếu (*)</label>
-                            <select name="loaiPhieu" class="form-select">
-                                <option value="NHAP_KHO">Nhập Kho</option>
-                                <option value="XUAT_KHO">Xuất Kho</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Ghi chú</label>
-                            <textarea name="ghiChu" class="form-control" rows="2"></textarea>
-                        </div>
-                        <hr>
-                        <h6>Chi tiết phiếu</h6>
-                        <div class="row mb-2">
-                            <div class="col-6">
-                                <label class="form-label">Biến thể ID</label>
-                                <input type="number" name="chiTietList[0].maBienThe" value="1" class="form-control" required>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Mã Kho <span class="text-danger">*</span></label>
+                                <input type="number" name="maKho" class="form-control" value="1" required>
                             </div>
-                            <div class="col-6">
-                                <label class="form-label">Số lượng</label>
-                                <input type="number" name="chiTietList[0].soLuong" value="100" class="form-control" required>
+                            <div class="col-md-4">
+                                <label class="form-label">Loại phiếu <span class="text-danger">*</span></label>
+                                <select name="loaiPhieu" class="form-select" required>
+                                    <option value="NHAP_KHO">📥 Nhập Kho</option>
+                                    <option value="XUAT_KHO">📤 Xuất Kho</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Ghi chú</label>
+                                <input type="text" name="ghiChu" class="form-control" placeholder="Lý do nhập/xuất...">
                             </div>
                         </div>
-                        <small class="text-muted">Mẹo: Thử nhập số lượng > tồn kho để test tính năng chặn xuất âm.</small>
+                        <hr class="my-3">
+                        <h6 class="fw-semibold mb-3">Chi tiết hàng hoá</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Mã biến thể (ID) <span class="text-danger">*</span></label>
+                                <input type="number" name="chiTietList[0].maBienThe" class="form-control" value="1" required placeholder="ID biến thể SKU">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Số lượng <span class="text-danger">*</span></label>
+                                <input type="number" name="chiTietList[0].soLuong" class="form-control" value="10" required min="1">
+                            </div>
+                        </div>
+                        <div class="alert alert-warning d-flex align-items-center gap-2 mt-3 mb-0">
+                            <i class="fas fa-lightbulb"></i>
+                            <span><strong>Tip demo US-16:</strong> Chọn "Xuất Kho" và nhập số lượng lớn hơn tồn kho → hệ thống sẽ chặn và hiện thông báo lỗi đỏ!</span>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="submit" class="btn btn-primary">Xác nhận</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Xác nhận tạo phiếu</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
+    <!-- Modal Vị trí kệ kho (US-17) -->
+    <div class="modal fade" id="modalViTri" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow">
+                <form th:action="@{/seller/vi-tri-kho/them}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-semibold"><i class="fas fa-map-marker-alt me-2 text-info"></i>Thêm Vị Trí Kệ Kho</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Mã Kho <span class="text-danger">*</span></label>
+                                <input type="number" name="maKho" class="form-control" value="1" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Mã vị trí <span class="text-danger">*</span></label>
+                                <input type="text" name="maViTri" class="form-control" required placeholder="VD: A-03-02-01">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Mô tả vị trí</label>
+                                <input type="text" name="moTa" class="form-control" placeholder="Hàng A - Cột 3 - Kệ 2 - Tầng 1">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Sức chứa tối đa (kg)</label>
+                                <input type="number" name="sucChuaToiDaKg" class="form-control" min="0" placeholder="500">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-info text-white"><i class="fas fa-save me-1"></i>Lưu vị trí</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Lô hàng (US-21) -->
+    <div class="modal fade" id="modalLoHang" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow">
+                <form th:action="@{/seller/lo-hang/them}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-semibold"><i class="fas fa-calendar-check me-2 text-warning"></i>Thêm Lô Hàng</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Mã biến thể SKU <span class="text-danger">*</span></label>
+                                <input type="number" name="maBienThe" class="form-control" value="1" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Mã Kho <span class="text-danger">*</span></label>
+                                <input type="number" name="maKho" class="form-control" value="1" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Số lô sản xuất</label>
+                                <input type="text" name="soLoSanXuat" class="form-control" placeholder="LOT-2026-001">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Số lượng <span class="text-danger">*</span></label>
+                                <input type="number" name="soLuong" class="form-control" required min="1">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Ngày sản xuất</label>
+                                <input type="date" name="ngaySanXuat" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Hạn sử dụng</label>
+                                <input type="date" name="ngayHetHan" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-warning text-white"><i class="fas fa-save me-1"></i>Lưu lô hàng</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

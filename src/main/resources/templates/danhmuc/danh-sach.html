@@ -1,79 +1,238 @@
 <!DOCTYPE html>
-<html th:replace="~{layout/main :: layout(title='Danh mục', content=~{::content})}">
-<head><title>Quản lý Danh mục</title></head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(activePage='danhmuc', pageTitle='Danh mục')}">
+<th:block th:fragment="layout(activePage, pageTitle)">
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh mục - FlexShop Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --sidebar-bg:#1e2a3a; --sidebar-hover:#2d3f54; --accent:#3b82f6; }
+        body { background:#f1f5f9; font-family:'Segoe UI',sans-serif; }
+        .sidebar { width:240px; min-height:100vh; background:var(--sidebar-bg); position:fixed; top:0; left:0; z-index:100; }
+        .sidebar .brand { padding:20px 16px 16px; border-bottom:1px solid rgba(255,255,255,.1); }
+        .sidebar .brand h5 { color:#fff; font-weight:700; margin:0; font-size:1.1rem; }
+        .sidebar .brand span { color:#64748b; font-size:.75rem; }
+        .nav-section { padding:12px 16px 4px; color:#64748b; font-size:.7rem; font-weight:600; letter-spacing:1px; text-transform:uppercase; }
+        .sidebar .nav-link { color:#94a3b8; padding:9px 16px; border-radius:6px; margin:1px 8px; font-size:.875rem; display:flex; align-items:center; gap:10px; }
+        .sidebar .nav-link:hover { color:#fff; background:var(--sidebar-hover); }
+        .sidebar .nav-link.active { color:#fff; background:var(--accent); }
+        .sidebar .nav-link i { width:18px; text-align:center; }
+        .main-content { margin-left:240px; padding:24px; }
+        .card { border:none; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+        .table th { font-size:.8rem; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:.5px; }
+        .table td { vertical-align:middle; font-size:.875rem; }
+        .btn-action { width:30px; height:30px; padding:0; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:.75rem; }
+        .cap-badge { font-size:.7rem; padding:3px 8px; border-radius:20px; }
+    </style>
+</head>
 <body>
-<div th:fragment="content">
+<div class="sidebar">
+    <div class="brand"><h5><i class="fas fa-store me-2" style="color:var(--accent)"></i>FlexShop</h5><span>Admin Dashboard</span></div>
+    <div class="nav-section">Quản trị</div>
+    <a href="/admin/danh-muc" class="nav-link active"><i class="fas fa-th-large"></i> Danh mục</a>
+    <a href="/admin/thuong-hieu" class="nav-link"><i class="far fa-copyright"></i> Thương hiệu</a>
+    <a href="/admin/sao-qua-ta/danh-sach" class="nav-link"><i class="fas fa-gavel"></i> Sao Quả Tạ</a>
+    <div class="nav-section">Gian hàng</div>
+    <a href="/seller/san-pham" class="nav-link"><i class="fas fa-box-open"></i> Sản phẩm</a>
+    <a href="/seller/kho-hang" class="nav-link"><i class="fas fa-warehouse"></i> Kho hàng</a>
+</div>
+
+<div class="main-content">
+    <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4">
+        <i class="fas fa-check-circle"></i><span th:text="${thongBaoThanhCong}"></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 mb-4">
+        <i class="fas fa-exclamation-circle"></i><span th:text="${thongBaoLoi}"></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+    </div>
+
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Quản lý Danh mục</h2>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
-            <i class="fas fa-plus me-1"></i> Thêm mới
+        <div>
+            <h4 class="fw-bold text-dark mb-0">Quản lý Danh mục</h4>
+            <small class="text-muted">Hệ thống danh mục sản phẩm 3 cấp</small>
+        </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalThem">
+            <i class="fas fa-plus me-1"></i> Thêm danh mục
         </button>
     </div>
 
+    <!-- Tìm kiếm -->
+    <div class="card mb-4">
+        <div class="card-body py-3">
+            <form method="get" th:action="@{/admin/danh-muc}" class="d-flex gap-2">
+                <input type="text" name="tuKhoa" class="form-control" placeholder="Tìm kiếm tên danh mục..." th:value="${tuKhoa}" style="max-width:320px">
+                <button type="submit" class="btn btn-outline-primary px-4"><i class="fas fa-search"></i></button>
+                <a href="/admin/danh-muc" class="btn btn-outline-secondary">Xóa lọc</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bảng danh sách -->
     <div class="card">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>ID</th>
-                            <th>Tên danh mục</th>
-                            <th>Danh mục cha</th>
-                            <th>Trạng thái</th>
-                            <th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="dm : ${danhMucList}">
-                            <td th:text="${dm.maDanhMuc}">1</td>
-                            <td th:text="${dm.tenDanhMuc}">Áo</td>
-                            <td th:text="${dm.danhMucCha != null ? dm.danhMucCha.tenDanhMuc : '---'}">---</td>
-                            <td>
-                                <span class="badge" th:classappend="${dm.dangHoatDong ? 'bg-success' : 'bg-danger'}" 
-                                      th:text="${dm.dangHoatDong ? 'Hoạt động' : 'Tạm khóa'}">Trạng thái</span>
-                            </td>
-                            <td>
-                                <form th:action="@{/admin/danh-muc/xoa/{id}(id=${dm.maDanhMuc})}" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa?');">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
-                                </form>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <span class="fw-semibold">Danh sách danh mục</span>
+            <span class="badge bg-secondary" th:text="${pageDanhMuc.totalElements} + ' danh mục'">0 danh mục</span>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4" style="width:60px">ID</th>
+                        <th>Tên danh mục</th>
+                        <th>Danh mục cha</th>
+                        <th style="width:80px">Cấp</th>
+                        <th>Trạng thái</th>
+                        <th style="width:120px" class="text-center">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${pageDanhMuc.empty}">
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            <i class="fas fa-inbox fa-2x mb-2 d-block"></i>Chưa có danh mục nào
+                        </td>
+                    </tr>
+                    <tr th:each="dm : ${pageDanhMuc.content}">
+                        <td class="ps-4 text-muted" th:text="${dm.maDanhMuc}">1</td>
+                        <td>
+                            <span th:text="${dm.capDo == 2 ? '↳ ' : (dm.capDo == 3 ? '    ↳ ' : '')}"></span>
+                            <strong th:text="${dm.tenDanhMuc}">Áo</strong>
+                        </td>
+                        <td class="text-muted" th:text="${dm.danhMucCha != null ? dm.danhMucCha.tenDanhMuc : '—'}">—</td>
+                        <td>
+                            <span class="cap-badge" th:classappend="${dm.capDo == 1 ? 'bg-primary text-white' : (dm.capDo == 2 ? 'bg-info text-white' : 'bg-light text-dark border')}"
+                                  th:text="'Cấp ' + ${dm.capDo}">Cấp 1</span>
+                        </td>
+                        <td>
+                            <span th:if="${dm.dangHoatDong}" class="badge bg-success">Hoạt động</span>
+                            <span th:unless="${dm.dangHoatDong}" class="badge bg-warning text-dark">Tạm ẩn</span>
+                        </td>
+                        <td class="text-center">
+                            <!-- Nút Sửa -->
+                            <button type="button" class="btn btn-sm btn-outline-primary btn-action me-1"
+                                    data-bs-toggle="modal" th:data-bs-target="'#modalSua' + ${dm.maDanhMuc}">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <!-- Nút Xóa -->
+                            <form th:action="@{/admin/danh-muc/xoa/{id}(id=${dm.maDanhMuc})}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger btn-action"
+                                        onclick="return confirm('Xóa danh mục này?')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- Pagination -->
+        <div class="card-footer bg-white d-flex align-items-center justify-content-between" th:if="${pageDanhMuc.totalPages > 1}">
+            <small class="text-muted" th:text="'Trang ' + (${pageDanhMuc.number}+1) + ' / ' + ${pageDanhMuc.totalPages}"></small>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item" th:classappend="${pageDanhMuc.first ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/admin/danh-muc(page=${pageDanhMuc.number - 1}, tuKhoa=${tuKhoa})}">‹</a>
+                    </li>
+                    <li class="page-item" th:classappend="${pageDanhMuc.last ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/admin/danh-muc(page=${pageDanhMuc.number + 1}, tuKhoa=${tuKhoa})}">›</a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </div>
 
     <!-- Modal Thêm -->
-    <div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal fade" id="modalThem" tabindex="-1">
         <div class="modal-dialog">
-            <div class="modal-content">
+            <div class="modal-content border-0 shadow">
                 <form th:action="@{/admin/danh-muc/them}" method="post" th:object="${formDanhMuc}">
                     <div class="modal-header">
-                        <h5 class="modal-title">Thêm Danh Mục</h5>
+                        <h5 class="modal-title fw-semibold"><i class="fas fa-plus-circle me-2 text-primary"></i>Thêm Danh Mục</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label class="form-label">Tên danh mục (*)</label>
-                            <input type="text" th:field="*{tenDanhMuc}" class="form-control" required maxlength="100">
+                            <label class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{tenDanhMuc}" class="form-control" required maxlength="100" placeholder="Ví dụ: Áo thun, Quần jeans...">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Danh mục cha</label>
                             <select th:field="*{maDanhMucCha}" class="form-select">
-                                <option value="">-- Không có (Danh mục gốc) --</option>
-                                <option th:each="dm : ${danhMucList}" th:value="${dm.maDanhMuc}" th:text="${dm.tenDanhMuc}"></option>
+                                <option value="">-- Danh mục gốc (Cấp 1) --</option>
+                                <option th:each="dm : ${danhSachCha}"
+                                        th:value="${dm.maDanhMuc}"
+                                        th:text="${(dm.capDo == 2 ? '↳ ' : '') + dm.tenDanhMuc}"></option>
                             </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Thứ tự hiển thị</label>
+                                <input type="number" th:field="*{thuTuHienThi}" class="form-control" value="0" min="0">
+                            </div>
+                            <div class="col-md-6 mb-3 pt-4">
+                                <div class="form-check mt-2">
+                                    <input type="checkbox" class="form-check-input" th:field="*{dangHoatDong}" id="hoatDongThem" checked>
+                                    <label class="form-check-label" for="hoatDongThem">Đang hoạt động</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="submit" class="btn btn-primary">Lưu lại</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Lưu lại</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
+    <!-- Modal Sửa (một modal per item) -->
+    <div th:each="dm : ${pageDanhMuc.content}">
+        <div class="modal fade" th:id="'modalSua' + ${dm.maDanhMuc}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content border-0 shadow">
+                    <form th:action="@{/admin/danh-muc/sua/{id}(id=${dm.maDanhMuc})}" method="post">
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-semibold"><i class="fas fa-pen me-2 text-warning"></i>Sửa danh mục #<span th:text="${dm.maDanhMuc}"></span></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+                                <input type="text" name="tenDanhMuc" class="form-control" th:value="${dm.tenDanhMuc}" required maxlength="100">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Danh mục cha</label>
+                                <select name="maDanhMucCha" class="form-select">
+                                    <option value="">-- Danh mục gốc (Cấp 1) --</option>
+                                    <option th:each="dmCha : ${danhSachCha}"
+                                            th:value="${dmCha.maDanhMuc}"
+                                            th:text="${(dmCha.capDo == 2 ? '↳ ' : '') + dmCha.tenDanhMuc}"
+                                            th:selected="${dm.danhMucCha != null && dm.danhMucCha.maDanhMuc == dmCha.maDanhMuc}"></option>
+                                </select>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="dangHoatDong" value="true" th:checked="${dm.dangHoatDong}" id="'hoatDong' + ${dm.maDanhMuc}">
+                                <label class="form-check-label">Đang hoạt động</label>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-warning text-white"><i class="fas fa-save me-1"></i>Cập nhật</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+</th:block>

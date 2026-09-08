@@ -1,24 +1,122 @@
 <!DOCTYPE html>
-<html th:replace="~{layout/main :: layout(title='Sao Quả Tạ', content=~{::content})}">
-<head><title>Sao Quả Tạ</title></head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sao Quả Tạ - FlexShop Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --sidebar-bg:#1e2a3a; --sidebar-hover:#2d3f54; --accent:#3b82f6; }
+        body { background:#f1f5f9; font-family:'Segoe UI',sans-serif; }
+        .sidebar { width:240px; min-height:100vh; background:var(--sidebar-bg); position:fixed; top:0; left:0; z-index:100; }
+        .sidebar .brand { padding:20px 16px 16px; border-bottom:1px solid rgba(255,255,255,.1); }
+        .sidebar .brand h5 { color:#fff; font-weight:700; margin:0; font-size:1.1rem; }
+        .sidebar .brand span { color:#64748b; font-size:.75rem; }
+        .nav-section { padding:12px 16px 4px; color:#64748b; font-size:.7rem; font-weight:600; letter-spacing:1px; text-transform:uppercase; }
+        .sidebar .nav-link { color:#94a3b8; padding:9px 16px; border-radius:6px; margin:1px 8px; font-size:.875rem; display:flex; align-items:center; gap:10px; }
+        .sidebar .nav-link:hover { color:#fff; background:var(--sidebar-hover); }
+        .sidebar .nav-link.active { color:#fff; background:var(--accent); }
+        .sidebar .nav-link i { width:18px; text-align:center; }
+        .main-content { margin-left:240px; padding:24px; }
+        .card { border:none; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+        .penalty-card { border-left:4px solid #ef4444; }
+    </style>
+</head>
 <body>
-<div th:fragment="content">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Hệ thống Điểm phạt Sao Quả Tạ</h2>
+<div class="sidebar">
+    <div class="brand"><h5><i class="fas fa-store me-2" style="color:var(--accent)"></i>FlexShop</h5><span>Admin Dashboard</span></div>
+    <div class="nav-section">Quản trị</div>
+    <a href="/admin/danh-muc" class="nav-link"><i class="fas fa-th-large"></i> Danh mục</a>
+    <a href="/admin/thuong-hieu" class="nav-link"><i class="far fa-copyright"></i> Thương hiệu</a>
+    <a href="/admin/sao-qua-ta/danh-sach" class="nav-link active"><i class="fas fa-gavel"></i> Sao Quả Tạ</a>
+    <div class="nav-section">Gian hàng</div>
+    <a href="/seller/san-pham" class="nav-link"><i class="fas fa-box-open"></i> Sản phẩm</a>
+    <a href="/seller/kho-hang" class="nav-link"><i class="fas fa-warehouse"></i> Kho hàng</a>
+</div>
+
+<div class="main-content">
+    <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4">
+        <i class="fas fa-check-circle"></i><span th:text="${thongBaoThanhCong}"></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
     </div>
-    <div class="card">
-        <div class="card-body">
+    <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 mb-4">
+        <i class="fas fa-exclamation-circle"></i><span th:text="${thongBaoLoi}"></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold text-dark mb-0">Hệ thống Điểm Phạt Sao Quả Tạ</h4>
+            <small class="text-muted">US-56 — Admin phạt điểm gian hàng vi phạm chính sách</small>
+        </div>
+    </div>
+
+    <div class="card penalty-card mb-4">
+        <div class="card-body p-4">
+            <h6 class="fw-bold text-danger mb-3"><i class="fas fa-gavel me-2"></i>Phạt điểm gian hàng (US-56)</h6>
             <form th:action="@{/admin/sao-qua-ta/phat}" method="post">
-                <div class="row">
-                    <div class="col-md-2 mb-3"><label>Gian Hàng ID</label><input type="number" name="maGianHang" value="1" class="form-control" required></div>
-                    <div class="col-md-2 mb-3"><label>Điểm Phạt</label><input type="number" name="soDiemPhat" value="10" class="form-control" required></div>
-                    <div class="col-md-4 mb-3"><label>Lý Do</label><input type="text" name="lyDo" class="form-control" value="Giao hàng chậm trễ" required></div>
-                    <div class="col-md-3 mb-3"><label>Loại Vi Phạm</label><input type="text" name="loaiViPham" class="form-control" value="GIAO_HANG" required></div>
-                    <div class="col-md-1 mb-3"><label>&nbsp;</label><button type="submit" class="btn btn-danger d-block w-100">Phạt</button></div>
+                <div class="row g-3">
+                    <div class="col-md-2">
+                        <label class="form-label">ID Gian Hàng <span class="text-danger">*</span></label>
+                        <input type="number" name="maGianHang" class="form-control" value="1" required min="1">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Điểm phạt <span class="text-danger">*</span></label>
+                        <input type="number" name="soDiemPhat" class="form-control" value="10" required min="1" max="100">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Loại vi phạm <span class="text-danger">*</span></label>
+                        <select name="loaiViPham" class="form-select" required>
+                            <option value="GIAO_HANG_CHAM">🕐 Giao hàng chậm</option>
+                            <option value="TU_CHOI_DON">❌ Từ chối đơn hàng</option>
+                            <option value="HANG_GIA_MAO">⚠️ Hàng giả/nhái</option>
+                            <option value="MO_TA_SAI">📝 Mô tả sai lệch</option>
+                            <option value="VI_PHAM_KHAC">🔴 Vi phạm khác</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Lý do chi tiết <span class="text-danger">*</span></label>
+                        <input type="text" name="lyDo" class="form-control" required placeholder="Mô tả vi phạm cụ thể...">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-danger w-100" onclick="return confirm('Xác nhận phạt điểm gian hàng này?')">
+                            <i class="fas fa-gavel me-1"></i>Phạt ngay
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
+
+    <div class="card">
+        <div class="card-body p-4">
+            <h6 class="fw-semibold mb-3"><i class="fas fa-info-circle text-info me-2"></i>Hướng dẫn hệ thống Sao Quả Tạ</h6>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded-3 text-center">
+                        <div class="fs-3 mb-1">⭐</div>
+                        <div class="fw-semibold">0 điểm</div>
+                        <div class="text-success small">Gian hàng hoạt động bình thường</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-warning bg-opacity-10 rounded-3 text-center border border-warning">
+                        <div class="fs-3 mb-1">⚠️</div>
+                        <div class="fw-semibold">50-79 điểm</div>
+                        <div class="text-warning small">Cảnh báo vi phạm</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-danger bg-opacity-10 rounded-3 text-center border border-danger">
+                        <div class="fs-3 mb-1">🚫</div>
+                        <div class="fw-semibold">≥ 80 điểm</div>
+                        <div class="text-danger small">Tự động khóa gian hàng</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

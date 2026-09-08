@@ -42,6 +42,17 @@ public class SanPhamController {
         return "sanpham/danh-sach";
     }
 
+    @GetMapping("/{id}")
+    public String chiTiet(@PathVariable("id") Long id, Model model) {
+        SanPham sp = sanPhamService.timTheoId(id);
+        model.addAttribute("sanPham", sp);
+        model.addAttribute("danhSachBienThe", sanPhamService.layDanhSachBienThe(id));
+        model.addAttribute("danhSachThuocTinh", sanPhamService.layDanhSachThuocTinh(id));
+        model.addAttribute("formBienThe", new BienTheForm());
+        model.addAttribute("formSanPham", new SanPhamForm());
+        return "sanpham/chi-tiet";
+    }
+
     @PostMapping("/them")
     public String themSanPham(
             @Valid @ModelAttribute("formSanPham") SanPhamForm form,
