@@ -39,6 +39,9 @@ public class ShipperService {
     @Autowired
     private FileStorageService fileStorageService;
 
+    @Autowired
+    private com.example.demo.repository.YeuCauChuyenHoanRepository chuyenHoanRepository;
+
     public List<TaiXeGiaoHang> layTatCaShipper() {
         return taiXeRepository.findAll();
     }
@@ -252,7 +255,9 @@ public class ShipperService {
         }
         int lan = nv.getSoLanGiao() != null ? nv.getSoLanGiao() : 1;
         if (lan >= 3) {
-            throw new IllegalStateException("Đơn đã giao thất bại 3 lần. Chờ chuyển hoàn về Shop (US-40).");
+            // US-40: that bai lan 3 -> tu dong kich hoat chuyen hoan thay vi chan
+            taoChuyenHoan(maTaiXe, maNhiemVu);
+            return nhiemVuRepository.findById(maNhiemVu).orElse(nv);
         }
         if ("HEN_LAI".equals(form.getLyDoThatBai())) {
             if (form.getThoiGianHenGiaoLai() == null) {
@@ -280,6 +285,48 @@ public class ShipperService {
         moc.setThoiGian(java.time.LocalDateTime.now());
         hanhTrinhRepository.save(moc);
         return nv;
+    }
+
+    // ================= US-40: Chuyen hoan khi that bai 3 lan =================
+
+    @Transactional
+    public com.example.demo.entity.YeuCauChuyenHoan taoChuyenHoan(Long maTaiXe, Long maNhiemVu) {
+        NhiemVuGiaoHang nv = nhiemVuRepository.findById(maNhiemVu)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy nhiệm vụ " + maNhiemVu));
+        if (!nv.getTaiXe().getMaTaiXe().equals(maTaiXe)) {
+            throw new IllegalStateException("Cuốc này không phải của bạn.");
+        }
+        DonHangShop don = nv.getDonHangShop();
+        if (chuyenHoanRepository.existsByDonHangShop_MaDonHangShop(don.getMaDonHangShop())) {
+            return chuyenHoanRepository.findByDonHangShop_MaDonHangShop(don.getMaDonHangShop()).orElseThrow();
+        }
+        int lan = nv.getSoLanGiao() != null ? nv.getSoLanGiao() : 1;
+        String lyDo = "Giao thất bại " + Math.min(lan, 3) + "/3 lần"
+                + (nv.getLyDoThatBai() != null ? " (" + nv.getLyDoThatBai() + ")" : "");
+        com.example.demo.entity.YeuCauChuyenHoan yc = new com.example.demo.entity.YeuCauChuyenHoan();
+        yc.setDonHangShop(don);
+        yc.setLyDoChuyenHoan(lyDo);
+        yc.setMaVanDonTraHang("TH-" + java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE)
+                + "-" + String.format("%06d", don.getMaDonHangShop()));
+        yc.setTrangThai("DANG_CHUYEN_HOAN");
+        yc = chuyenHoanRepository.save(yc);
+        nv.setTrangThai("CHUYEN_HOAN");
+        nhiemVuRepository.save(nv);
+        don.setTrangThai("GIAO_THAT_BAI");
+        donHangShopRepository.save(don);
+        // Auto-ghi hanh trinh US-33
+        LichSuHanhTrinhDon moc = new LichSuHanhTrinhDon();
+        moc.setDonHangShop(don);
+        moc.setHub(null);
+        moc.setTieuDeMoc("Chuyển hoàn về Shop");
+        moc.setViTriHienTai(yc.getMaVanDonTraHang());
+        moc.setThoiGian(java.time.LocalDateTime.now());
+        hanhTrinhRepository.save(moc);
+        return yc;
+    }
+
+    public java.util.Optional<com.example.demo.entity.YeuCauChuyenHoan> layChuyenHoan(Long maDonHangShop) {
+        return chuyenHoanRepository.findByDonHangShop_MaDonHangShop(maDonHangShop);
     }
 
     // ================= US-39: Lich su + thong ke COD THEO NGAY =================

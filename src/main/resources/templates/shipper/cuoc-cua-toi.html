@@ -66,6 +66,11 @@
                 Đã giao thành công<span th:if="${n.daThuCod}"> · Đã thu COD</span>.
                 <span th:if="${n.linkAnhBangChungPod != null}">· <a th:href="${n.linkAnhBangChungPod}" target="_blank">Xem ảnh POD</a></span>
             </div>
+            <div th:if="${n.trangThai == 'CHUYEN_HOAN'}" class="alert alert-dark mt-2 mb-0">
+                Đang chuyển hoàn về Shop.
+                <span th:if="${mapChuyenHoan[n.maNhiemVu] != null}"
+                      th:text="'· Vận đơn trả: ' + ${mapChuyenHoan[n.maNhiemVu].maVanDonTraHang}"></span>
+            </div>
         </div>
         <div th:if="${cuocCuaToi == null || #lists.isEmpty(cuocCuaToi)}" class="alert alert-info">
             Bạn chưa nhận cuốc nào. <a href="/shipper/don-cho-nhan">Qua màn Đơn chờ nhận</a>.
