@@ -247,4 +247,26 @@ public class ShipperController {
         }
         return "redirect:/shipper/cuoc-cua-toi?thatbai=ok";
     }
+
+    /** US-39: Dashboard lich su + thong ke COD theo ngay (mobile). */
+    @GetMapping("/cod")
+    public String dashboardCod(
+            Model model,
+            @RequestParam(value = "ngay", required = false)
+            @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
+            java.time.LocalDate ngay) {
+        try {
+            if (ngay == null) ngay = java.time.LocalDate.now();
+            TaiXeGiaoHang tx = shipperService.layShipperHienTai();
+            model.addAttribute("shipper", tx);
+            model.addAttribute("ngayXem",
+                    ngay.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            model.addAttribute("ngayValue", ngay.toString());
+            model.addAttribute("thongKe", shipperService.thongKeShipper(tx.getMaTaiXe(), ngay));
+            model.addAttribute("lichSu", shipperService.layCuocTrongNgay(tx.getMaTaiXe(), ngay));
+        } catch (IllegalStateException ex) {
+            model.addAttribute("loiNghiepVu", ex.getMessage());
+        }
+        return "shipper/cod";
+    }
 }

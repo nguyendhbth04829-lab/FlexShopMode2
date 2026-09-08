@@ -281,4 +281,37 @@ public class ShipperService {
         hanhTrinhRepository.save(moc);
         return nv;
     }
+
+    // ================= US-39: Lich su + thong ke COD THEO NGAY =================
+
+    public com.example.demo.dto.ThongKeShipperDTO thongKeShipper(Long maTaiXe, java.time.LocalDate ngay) {
+        if (ngay == null) ngay = java.time.LocalDate.now();
+        final java.time.LocalDate locNgay = ngay;
+        List<NhiemVuGiaoHang> list = layCuocCuaToi(maTaiXe).stream()
+                .filter(n -> n.getNgayTao() != null && n.getNgayTao().toLocalDate().equals(locNgay))
+                .collect(java.util.stream.Collectors.toList());
+        long thanhCong = list.stream().filter(n -> "THANH_CONG".equals(n.getTrangThai())).count();
+        long dangGiao = list.stream().filter(n -> "DANG_GIAO".equals(n.getTrangThai())).count();
+        long choLay = list.stream().filter(n -> "DA_PHAN_CONG".equals(n.getTrangThai())).count();
+        long luotFail = list.stream().filter(n -> n.getLyDoThatBai() != null && !n.getLyDoThatBai().isBlank()).count();
+        BigDecimal daThu = list.stream()
+                .filter(n -> Boolean.TRUE.equals(n.getDaThuCod()) && n.getTienCodCanThu() != null)
+                .map(NhiemVuGiaoHang::getTienCodCanThu)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        TaiXeGiaoHang tx = taiXeRepository.findById(maTaiXe)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy shipper " + maTaiXe));
+        BigDecimal du = tx.getSoDuCodDangGiu() != null ? tx.getSoDuCodDangGiu() : BigDecimal.ZERO;
+        return new com.example.demo.dto.ThongKeShipperDTO(
+                list.size(), thanhCong, dangGiao, choLay, luotFail, du, daThu,
+                thanhCong, daThu);
+    }
+
+    /** Lich su cuoc trong 1 ngay (US-39). */
+    public List<NhiemVuGiaoHang> layCuocTrongNgay(Long maTaiXe, java.time.LocalDate ngay) {
+        if (ngay == null) ngay = java.time.LocalDate.now();
+        final java.time.LocalDate locNgay = ngay;
+        return layCuocCuaToi(maTaiXe).stream()
+                .filter(n -> n.getNgayTao() != null && n.getNgayTao().toLocalDate().equals(locNgay))
+                .collect(java.util.stream.Collectors.toList());
+    }
 }
