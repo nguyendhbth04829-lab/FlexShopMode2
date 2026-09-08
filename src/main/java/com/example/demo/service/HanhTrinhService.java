@@ -41,11 +41,11 @@ public class HanhTrinhService {
     @Transactional
     public LichSuHanhTrinhDon ghiMoc(GhiHanhTrinhForm form) {
         DonHangShop don = donHangShopRepository.findById(form.getMaDonHangShop())
-                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay don shop " + form.getMaDonHangShop()));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn shop " + form.getMaDonHangShop()));
         TramTrungChuyenHub hub = null;
         if (form.getMaHub() != null) {
             hub = hubRepository.findById(form.getMaHub())
-                    .orElseThrow(() -> new IllegalArgumentException("Khong tim thay Hub " + form.getMaHub()));
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Hub " + form.getMaHub()));
         }
         LichSuHanhTrinhDon moc = new LichSuHanhTrinhDon();
         moc.setDonHangShop(don);

@@ -162,9 +162,9 @@ public class ShipperController {
             com.example.demo.entity.NhiemVuGiaoHang nv =
                     shipperService.layCuocCuaToi(tx.getMaTaiXe()).stream()
                             .filter(n -> n.getMaNhiemVu().equals(maNhiemVu)).findFirst()
-                            .orElseThrow(() -> new IllegalArgumentException("Khong tim thay cuoc " + maNhiemVu));
+                            .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy cuốc " + maNhiemVu));
             if (!"DANG_GIAO".equals(nv.getTrangThai())) {
-                model.addAttribute("loiNghiepVu", "Cuoc dang " + nv.getTrangThaiDisplay() + ", khong the POD.");
+                model.addAttribute("loiNghiepVu", "Cuốc đang " + nv.getTrangThaiDisplay() + ", không thể POD.");
             }
             model.addAttribute("nhiemVu", nv);
             if (!model.containsAttribute("form")) {
@@ -191,7 +191,7 @@ public class ShipperController {
             return "shipper/pod";
         }
         if (anhPod == null || anhPod.isEmpty()) {
-            model.addAttribute("loiNghiepVu", "Bat buoc chup/upload anh bang chung giao hang (POD)!");
+            model.addAttribute("loiNghiepVu", "Bắt buộc chụp/upload ảnh bằng chứng giao hàng (POD)!");
             return "shipper/pod";
         }
         try {
@@ -202,5 +202,49 @@ public class ShipperController {
             return "shipper/pod";
         }
         return "redirect:/shipper/cuoc-cua-toi?pod=ok";
+    }
+
+    /** US-38: Form bao giao that bai + hen giao lai (mobile). */
+    @GetMapping("/that-bai/{maNhiemVu}")
+    public String hienThiThatBai(@PathVariable("maNhiemVu") Long maNhiemVu, Model model) {
+        try {
+            TaiXeGiaoHang tx = shipperService.layShipperHienTai();
+            com.example.demo.entity.NhiemVuGiaoHang nv =
+                    shipperService.layCuocCuaToi(tx.getMaTaiXe()).stream()
+                            .filter(n -> n.getMaNhiemVu().equals(maNhiemVu)).findFirst()
+                            .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy cuốc " + maNhiemVu));
+            if (!"DANG_GIAO".equals(nv.getTrangThai())) {
+                model.addAttribute("loiNghiepVu", "Cuốc đang " + nv.getTrangThaiDisplay() + ", không thể báo thất bại.");
+            }
+            model.addAttribute("nhiemVu", nv);
+            if (!model.containsAttribute("form")) {
+                model.addAttribute("form", new com.example.demo.dto.BaoThatBaiForm());
+            }
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            model.addAttribute("loiNghiepVu", ex.getMessage());
+        }
+        return "shipper/that-bai";
+    }
+
+    @PostMapping("/that-bai/{maNhiemVu}")
+    public String xuLyThatBai(
+            @PathVariable("maNhiemVu") Long maNhiemVu,
+            @Valid @ModelAttribute("form") com.example.demo.dto.BaoThatBaiForm form,
+            BindingResult bindingResult,
+            Model model) {
+        TaiXeGiaoHang tx = shipperService.layShipperHienTai();
+        com.example.demo.entity.NhiemVuGiaoHang nv = shipperService.layCuocCuaToi(tx.getMaTaiXe()).stream()
+                .filter(n -> n.getMaNhiemVu().equals(maNhiemVu)).findFirst().orElse(null);
+        model.addAttribute("nhiemVu", nv);
+        if (bindingResult.hasErrors()) {
+            return "shipper/that-bai";
+        }
+        try {
+            shipperService.baoThatBai(tx.getMaTaiXe(), maNhiemVu, form);
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            model.addAttribute("loiNghiepVu", ex.getMessage());
+            return "shipper/that-bai";
+        }
+        return "redirect:/shipper/cuoc-cua-toi?thatbai=ok";
     }
 }

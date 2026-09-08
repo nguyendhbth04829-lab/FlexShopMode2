@@ -46,7 +46,7 @@ public class ShipperService {
     /** Tam: chua co login nen lay shipper dau tien de test tren mobile. */
     public TaiXeGiaoHang layShipperHienTai() {
         return taiXeRepository.findAll().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("Chua co tai khoan shipper. Hay chay SQL US34."));
+                .orElseThrow(() -> new IllegalStateException("Chưa có tài khoản shipper. Hãy chạy SQL US34."));
     }
 
     public boolean duocNhanNhiemVu(TaiXeGiaoHang tx) {
@@ -63,12 +63,12 @@ public class ShipperService {
     @Transactional
     public TaiXeGiaoHang doiTrangThai(Long maTaiXe, CapNhatTrangThaiForm form) {
         TaiXeGiaoHang tx = taiXeRepository.findById(maTaiXe)
-                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay shipper " + maTaiXe));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy shipper " + maTaiXe));
         kiemTraGps(form.getViDoHienTai(), form.getKinhDoHienTai());
         if (Boolean.TRUE.equals(form.getDangTrucTuyen())
                 && !"DANG_HOAT_DONG".equals(tx.getTrangThai())) {
-            throw new IllegalStateException("Tai khoan dang " + tx.getTrangThai()
-                    + ", khong duoc phep Online. Lien he dieu phoi.");
+            throw new IllegalStateException("Tài khoản đang " + tx.getTrangThai()
+                    + ", không được phép Online. Liên hệ điều phối.");
         }
         tx.setDangTrucTuyen(form.getDangTrucTuyen());
         tx.setViDoHienTai(form.getViDoHienTai());
@@ -79,11 +79,11 @@ public class ShipperService {
     private void kiemTraGps(BigDecimal viDo, BigDecimal kinhDo) {
         if (viDo == null || viDo.compareTo(new BigDecimal("-90")) < 0
                 || viDo.compareTo(new BigDecimal("90")) > 0) {
-            throw new IllegalArgumentException("Vi do GPS phai trong [-90, 90].");
+            throw new IllegalArgumentException("Vĩ độ GPS phải trong [-90, 90].");
         }
         if (kinhDo == null || kinhDo.compareTo(new BigDecimal("-180")) < 0
                 || kinhDo.compareTo(new BigDecimal("180")) > 0) {
-            throw new IllegalArgumentException("Kinh do GPS phai trong [-180, 180].");
+            throw new IllegalArgumentException("Kinh độ GPS phải trong [-180, 180].");
         }
     }
 
@@ -115,17 +115,17 @@ public class ShipperService {
     @Transactional
     public NhiemVuGiaoHang nhanCuoc(Long maTaiXe, Long maDonHangShop) {
         TaiXeGiaoHang tx = taiXeRepository.findById(maTaiXe)
-                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay shipper " + maTaiXe));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy shipper " + maTaiXe));
         if (!duocNhanNhiemVu(tx)) {
-            throw new IllegalStateException("Ban dang Offline hoac tai khoan khong DANG_HOAT_DONG nen khong duoc nhan don.");
+            throw new IllegalStateException("Bạn đang Offline hoặc tài khoản không DANG_HOAT_DONG nên không được nhận đơn.");
         }
         DonHangShop don = donHangShopRepository.findById(maDonHangShop)
-                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay don " + maDonHangShop));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn " + maDonHangShop));
         if (!"DA_XAC_NHAN".equals(don.getTrangThai())) {
-            throw new IllegalStateException("Don " + don.getMaCodeDonShop() + " dang " + don.getTrangThai() + ", khong the nhan.");
+            throw new IllegalStateException("Đơn " + don.getMaCodeDonShop() + " đang " + don.getTrangThai() + ", không thể nhận.");
         }
         if (nhiemVuRepository.existsByDonHangShop_MaDonHangShop(maDonHangShop)) {
-            throw new IllegalStateException("Don nay da co shipper khac nhan truoc.");
+            throw new IllegalStateException("Đơn này đã có shipper khác nhận trước.");
         }
         NhiemVuGiaoHang nv = new NhiemVuGiaoHang();
         nv.setDonHangShop(don);
@@ -140,7 +140,7 @@ public class ShipperService {
         LichSuHanhTrinhDon moc = new LichSuHanhTrinhDon();
         moc.setDonHangShop(don);
         moc.setHub(null);
-        moc.setTieuDeMoc("Shipper nhan don - cho lay hang");
+        moc.setTieuDeMoc("Shipper nhận đơn - chờ lấy hàng");
         moc.setViTriHienTai(tx.getBienSoXe());
         moc.setThoiGian(java.time.LocalDateTime.now());
         hanhTrinhRepository.save(moc);
@@ -160,16 +160,16 @@ public class ShipperService {
     @Transactional
     public NhiemVuGiaoHang xacNhanLayHang(Long maTaiXe, Long maNhiemVu) {
         NhiemVuGiaoHang nv = nhiemVuRepository.findById(maNhiemVu)
-                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay nhiem vu " + maNhiemVu));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy nhiệm vụ " + maNhiemVu));
         if (!nv.getTaiXe().getMaTaiXe().equals(maTaiXe)) {
-            throw new IllegalStateException("Cuoc nay khong phai cua ban.");
+            throw new IllegalStateException("Cuốc này không phải của bạn.");
         }
         if (!"DA_PHAN_CONG".equals(nv.getTrangThai())) {
-            throw new IllegalStateException("Cuoc dang " + nv.getTrangThaiDisplay() + ", khong the xac nhan lay hang.");
+            throw new IllegalStateException("Cuốc đang " + nv.getTrangThaiDisplay() + ", không thể xác nhận lấy hàng.");
         }
         DonHangShop don = nv.getDonHangShop();
         if (!"DA_XAC_NHAN".equals(don.getTrangThai())) {
-            throw new IllegalStateException("Don " + don.getMaCodeDonShop() + " dang " + don.getTrangThai() + ", khong the lay hang.");
+            throw new IllegalStateException("Đơn " + don.getMaCodeDonShop() + " đang " + don.getTrangThai() + ", không thể lấy hàng.");
         }
         nv.setTrangThai("DANG_GIAO");
         nv.setThoiGianLayHang(java.time.LocalDateTime.now());
@@ -180,7 +180,7 @@ public class ShipperService {
         LichSuHanhTrinhDon moc = new LichSuHanhTrinhDon();
         moc.setDonHangShop(don);
         moc.setHub(null);
-        moc.setTieuDeMoc("Da lay hang tu Shop - dang giao");
+        moc.setTieuDeMoc("Đã lấy hàng từ Shop - đang giao");
         moc.setViTriHienTai(don.getGianHang() != null ? don.getGianHang().getDiaChiKho() : null);
         moc.setThoiGian(java.time.LocalDateTime.now());
         hanhTrinhRepository.save(moc);
@@ -194,19 +194,19 @@ public class ShipperService {
                                                 org.springframework.web.multipart.MultipartFile anhPod,
                                                 java.math.BigDecimal viDo, java.math.BigDecimal kinhDo) {
         NhiemVuGiaoHang nv = nhiemVuRepository.findById(maNhiemVu)
-                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay nhiem vu " + maNhiemVu));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy nhiệm vụ " + maNhiemVu));
         if (!nv.getTaiXe().getMaTaiXe().equals(maTaiXe)) {
-            throw new IllegalStateException("Cuoc nay khong phai cua ban.");
+            throw new IllegalStateException("Cuốc này không phải của bạn.");
         }
         if (!"DANG_GIAO".equals(nv.getTrangThai())) {
-            throw new IllegalStateException("Cuoc dang " + nv.getTrangThaiDisplay() + ", khong the xac nhan giao thanh cong.");
+            throw new IllegalStateException("Cuốc đang " + nv.getTrangThaiDisplay() + ", không thể xác nhận giao thành công.");
         }
         kiemTraGps(viDo, kinhDo);
         String linkAnh;
         try {
             linkAnh = fileStorageService.luuAnhPod(anhPod);
         } catch (java.io.IOException e) {
-            throw new IllegalStateException("Luu anh POD that bai: " + e.getMessage());
+            throw new IllegalStateException("Lưu ảnh POD thất bại: " + e.getMessage());
         }
         TaiXeGiaoHang tx = nv.getTaiXe();
         nv.setLinkAnhBangChungPod(linkAnh);
@@ -230,8 +230,53 @@ public class ShipperService {
         LichSuHanhTrinhDon moc = new LichSuHanhTrinhDon();
         moc.setDonHangShop(don);
         moc.setHub(null);
-        moc.setTieuDeMoc("Giao hang thanh cong");
+        moc.setTieuDeMoc("Giao hàng thành công");
         moc.setViTriHienTai(viDo + ", " + kinhDo);
+        moc.setThoiGian(java.time.LocalDateTime.now());
+        hanhTrinhRepository.save(moc);
+        return nv;
+    }
+
+    // ================= US-38: Bao giao that bai + hen giao lai =================
+
+    @Transactional
+    public NhiemVuGiaoHang baoThatBai(Long maTaiXe, Long maNhiemVu,
+                                      com.example.demo.dto.BaoThatBaiForm form) {
+        NhiemVuGiaoHang nv = nhiemVuRepository.findById(maNhiemVu)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy nhiệm vụ " + maNhiemVu));
+        if (!nv.getTaiXe().getMaTaiXe().equals(maTaiXe)) {
+            throw new IllegalStateException("Cuốc này không phải của bạn.");
+        }
+        if (!"DANG_GIAO".equals(nv.getTrangThai())) {
+            throw new IllegalStateException("Cuốc đang " + nv.getTrangThaiDisplay() + ", không thể báo thất bại.");
+        }
+        int lan = nv.getSoLanGiao() != null ? nv.getSoLanGiao() : 1;
+        if (lan >= 3) {
+            throw new IllegalStateException("Đơn đã giao thất bại 3 lần. Chờ chuyển hoàn về Shop (US-40).");
+        }
+        if ("HEN_LAI".equals(form.getLyDoThatBai())) {
+            if (form.getThoiGianHenGiaoLai() == null) {
+                throw new IllegalArgumentException("Hẹn giao lại thì bắt buộc chọn thời gian hẹn.");
+            }
+            if (!form.getThoiGianHenGiaoLai().isAfter(java.time.LocalDateTime.now())) {
+                throw new IllegalArgumentException("Thời gian hẹn phải trong tương lai.");
+            }
+            nv.setThoiGianHenGiaoLai(form.getThoiGianHenGiaoLai());
+        } else {
+            nv.setThoiGianHenGiaoLai(null);
+        }
+        nv.setLyDoThatBai(form.getLyDoThatBai());
+        nv.setSoLanGiao(lan + 1);
+        nv = nhiemVuRepository.save(nv);
+        // Auto-ghi hanh trinh US-33 (don van DANG_GIAO, cho giao lai)
+        DonHangShop don = nv.getDonHangShop();
+        LichSuHanhTrinhDon moc = new LichSuHanhTrinhDon();
+        moc.setDonHangShop(don);
+        moc.setHub(null);
+        moc.setTieuDeMoc("Giao thất bại lần " + lan + ": " + form.getLyDoThatBai());
+        moc.setViTriHienTai(form.getThoiGianHenGiaoLai() != null
+                && "HEN_LAI".equals(form.getLyDoThatBai())
+                ? "Hẹn giao lại: " + form.getThoiGianHenGiaoLai() : null);
         moc.setThoiGian(java.time.LocalDateTime.now());
         hanhTrinhRepository.save(moc);
         return nv;

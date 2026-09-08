@@ -16,16 +16,16 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class CapNhatTrangThaiForm {
 
-    @NotNull(message = "Vui long chon trang thai lam viec.")
+    @NotNull(message = "Vui lòng chọn trạng thái làm việc.")
     private Boolean dangTrucTuyen;
 
-    @NotNull(message = "Vui long lay toa do GPS hien tai.")
-    @DecimalMin(value = "-90.0", message = "Vi do phai trong [-90, 90].")
-    @DecimalMax(value = "90.0", message = "Vi do phai trong [-90, 90].")
+    @NotNull(message = "Vui lòng lấy tọa độ GPS hiện tại.")
+    @DecimalMin(value = "-90.0", message = "Vĩ độ phải trong [-90, 90].")
+    @DecimalMax(value = "90.0", message = "Vĩ độ phải trong [-90, 90].")
     private BigDecimal viDoHienTai;
 
-    @NotNull(message = "Vui long lay toa do GPS hien tai.")
-    @DecimalMin(value = "-180.0", message = "Kinh do phai trong [-180, 180].")
-    @DecimalMax(value = "180.0", message = "Kinh do phai trong [-180, 180].")
+    @NotNull(message = "Vui lòng lấy tọa độ GPS hiện tại.")
+    @DecimalMin(value = "-180.0", message = "Kinh độ phải trong [-180, 180].")
+    @DecimalMax(value = "180.0", message = "Kinh độ phải trong [-180, 180].")
     private BigDecimal kinhDoHienTai;
 }

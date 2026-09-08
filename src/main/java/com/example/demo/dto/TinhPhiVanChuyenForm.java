@@ -14,29 +14,29 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TinhPhiVanChuyenForm {
 
-    @NotNull(message = "Vui long nhap can nang thuc te (gram).")
-    @Min(value = 1, message = "Can nang phai > 0 gram.")
-    @Max(value = 500000, message = "Can nang toi da 500kg.")
+    @NotNull(message = "Vui lòng nhập cân nặng thực tế (gram).")
+    @Min(value = 1, message = "Cân nặng phải > 0 gram.")
+    @Max(value = 500000, message = "Cân nặng tối đa 500kg.")
     private Integer canNangGram;
 
-    @NotNull(message = "Vui long nhap chieu dai (cm).")
-    @Min(value = 1, message = "Chieu dai phai > 0 cm.")
-    @Max(value = 300, message = "Chieu dai toi da 300cm.")
+    @NotNull(message = "Vui lòng nhập chiều dài (cm).")
+    @Min(value = 1, message = "Chiều dài phải > 0 cm.")
+    @Max(value = 300, message = "Chiều dài tối đa 300cm.")
     private Integer chieuDaiCm;
 
-    @NotNull(message = "Vui long nhap chieu rong (cm).")
-    @Min(value = 1, message = "Chieu rong phai > 0 cm.")
-    @Max(value = 300, message = "Chieu rong toi da 300cm.")
+    @NotNull(message = "Vui lòng nhập chiều rộng (cm).")
+    @Min(value = 1, message = "Chiều rộng phải > 0 cm.")
+    @Max(value = 300, message = "Chiều rộng tối đa 300cm.")
     private Integer chieuRongCm;
 
-    @NotNull(message = "Vui long nhap chieu cao (cm).")
-    @Min(value = 1, message = "Chieu cao phai > 0 cm.")
-    @Max(value = 300, message = "Chieu cao toi da 300cm.")
+    @NotNull(message = "Vui lòng nhập chiều cao (cm).")
+    @Min(value = 1, message = "Chiều cao phải > 0 cm.")
+    @Max(value = 300, message = "Chiều cao tối đa 300cm.")
     private Integer chieuCaoCm;
 
-    @NotBlank(message = "Vui long chon tuyen van chuyen.")
+    @NotBlank(message = "Vui lòng chọn tuyến vận chuyển.")
     @Pattern(regexp = "^(NOI_THANH|TINH|BAN_SO_DIA)$",
-            message = "Tuyen van chuyen chi chap nhan NOI_THANH, TINH hoac BAN_SO_DIA.")
+            message = "Tuyến vận chuyển chỉ chấp nhận NOI_THANH, TINH hoặc BAN_SO_DIA.")
     private String tuyenVanChuyen = "NOI_THANH";
 
     private Integer maDoiTac;

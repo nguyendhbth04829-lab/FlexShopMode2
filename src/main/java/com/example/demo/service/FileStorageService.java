@@ -135,29 +135,29 @@ public class FileStorageService {
      */
     public String luuAnhPod(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("Bat buoc chup/upload anh bang chung giao hang (POD)!");
+            throw new IllegalArgumentException("Bắt buộc chụp/upload ảnh bằng chứng giao hàng (POD)!");
         }
         if (file.getSize() > 10 * 1024 * 1024) {
-            throw new IllegalArgumentException("Anh POD vuot qua 10MB!");
+            throw new IllegalArgumentException("Ảnh POD vượt quá 10MB!");
         }
         String originalFilename = file.getOriginalFilename();
         if (originalFilename == null || originalFilename.isBlank()
                 || originalFilename.contains("..") || originalFilename.contains("/") || originalFilename.contains("\\")) {
-            throw new IllegalArgumentException("Ten file anh POD khong hop le!");
+            throw new IllegalArgumentException("Tên file ảnh POD không hợp lệ!");
         }
         int dot = originalFilename.lastIndexOf(".");
         if (dot == -1) {
-            throw new IllegalArgumentException("Anh POD thieu phan mo rong (.jpg, .png...)!");
+            throw new IllegalArgumentException("Ảnh POD thiếu phần mở rộng (.jpg, .png...)!");
         }
         String extension = originalFilename.substring(dot).toLowerCase();
         if (!Arrays.asList(".jpg", ".jpeg", ".png", ".webp", ".gif").contains(extension)) {
-            throw new IllegalArgumentException("Anh POD chi chap nhan JPG, PNG, WEBP, GIF!");
+            throw new IllegalArgumentException("Ảnh POD chỉ chấp nhận JPG, PNG, WEBP, GIF!");
         }
         String contentType = file.getContentType();
         if (contentType != null && !contentType.isBlank()
                 && !contentType.toLowerCase().startsWith("image/")
                 && !contentType.equalsIgnoreCase("application/octet-stream")) {
-            throw new IllegalArgumentException("File POD phai la anh!");
+            throw new IllegalArgumentException("File POD phải là ảnh!");
         }
         Path podPath = Paths.get("uploads", "pod");
         if (!Files.exists(podPath)) {

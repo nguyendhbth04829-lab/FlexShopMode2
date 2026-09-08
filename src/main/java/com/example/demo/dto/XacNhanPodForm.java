@@ -17,13 +17,13 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class XacNhanPodForm {
 
-    @NotNull(message = "Vui long lay toa do GPS noi giao hang.")
-    @DecimalMin(value = "-90.0", message = "Vi do phai trong [-90, 90].")
-    @DecimalMax(value = "90.0", message = "Vi do phai trong [-90, 90].")
+    @NotNull(message = "Vui lòng lấy tọa độ GPS nơi giao hàng.")
+    @DecimalMin(value = "-90.0", message = "Vĩ độ phải trong [-90, 90].")
+    @DecimalMax(value = "90.0", message = "Vĩ độ phải trong [-90, 90].")
     private BigDecimal viDoGiaoHang;
 
-    @NotNull(message = "Vui long lay toa do GPS noi giao hang.")
-    @DecimalMin(value = "-180.0", message = "Kinh do phai trong [-180, 180].")
-    @DecimalMax(value = "180.0", message = "Kinh do phai trong [-180, 180].")
+    @NotNull(message = "Vui lòng lấy tọa độ GPS nơi giao hàng.")
+    @DecimalMin(value = "-180.0", message = "Kinh độ phải trong [-180, 180].")
+    @DecimalMax(value = "180.0", message = "Kinh độ phải trong [-180, 180].")
     private BigDecimal kinhDoGiaoHang;
 }

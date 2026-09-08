@@ -26,7 +26,7 @@ public class PhiVanChuyenService {
 
     public long tinhKhoiLuongQuyDoiGram(int daiCm, int rongCm, int caoCm) {
         if (daiCm <= 0 || rongCm <= 0 || caoCm <= 0) {
-            throw new IllegalArgumentException("Kich thuoc phai > 0");
+            throw new IllegalArgumentException("Kích thước phải > 0");
         }
         return (long) Math.ceil(daiCm * rongCm * caoCm / 5.0);
     }
@@ -53,11 +53,11 @@ public class PhiVanChuyenService {
             return bangGiaVanChuyenRepository
                     .findFirstByDoiTac_MaDoiTacAndTuyenVanChuyen(maDoiTac, tuyen)
                     .orElseThrow(() -> new IllegalArgumentException(
-                            "Khong co bang gia cho doi tac " + maDoiTac + " tuyen " + tuyen));
+                            "Không có bảng giá cho đối tác " + maDoiTac + " tuyen " + tuyen));
         }
         List<BangGiaVanChuyen> list = bangGiaVanChuyenRepository.findByTuyenVanChuyen(tuyen);
         if (list == null || list.isEmpty()) {
-            throw new IllegalArgumentException("Khong co bang gia cho tuyen " + tuyen + ". Hay chay SQL US32.");
+            throw new IllegalArgumentException("Không có bảng giá cho tuyến " + tuyen + ". Hãy chạy SQL US32.");
         }
         return list.stream()
                 .min(Comparator.comparing(BangGiaVanChuyen::getCuocPhiChuan))

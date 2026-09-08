@@ -36,6 +36,7 @@
 
     <div class="content">
         <div th:if="${param.lay}" class="alert alert-success">Đã xác nhận lấy hàng — đơn chuyển sang Đang giao!</div>
+        <div th:if="${param.thatbai}" class="alert alert-warning">Đã ghi nhận giao thất bại — đơn chờ giao lại.</div>
         <div th:if="${loiNghiepVu}" class="alert alert-danger" th:text="${loiNghiepVu}"></div>
 
         <div th:each="n : ${cuocCuaToi}" class="cuoc" th:classappend="${n.trangThai == 'DANG_GIAO'} ? 'dang-giao' : ''">
@@ -58,7 +59,8 @@
             </form>
             <div th:if="${n.trangThai == 'DANG_GIAO'}" class="mt-2">
                 <a class="btn btn-blue btn-big w-100" th:href="@{'/shipper/pod/' + ${n.maNhiemVu}}">📷 Giao thành công (POD)</a>
-                <div class="alert alert-warning mt-2 mb-0">Báo giao thất bại ở US-38.</div>
+                <a class="btn btn-outline-danger btn-big w-100 mt-2" th:href="@{'/shipper/that-bai/' + ${n.maNhiemVu}}">⚠️ Báo giao thất bại</a>
+                <div class="small text-muted mt-1" th:text="'Đang giao lần ' + ${n.soLanGiao} + '/3'"></div>
             </div>
             <div th:if="${n.trangThai == 'THANH_CONG'}" class="alert alert-success mt-2 mb-0">
                 Đã giao thành công<span th:if="${n.daThuCod}"> · Đã thu COD</span>.

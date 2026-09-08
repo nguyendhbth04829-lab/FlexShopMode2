@@ -14,16 +14,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GhiHanhTrinhForm {
 
-    @NotNull(message = "Vui long chon don hang shop.")
-    @Min(value = 1, message = "Ma don hang shop khong hop le.")
+    @NotNull(message = "Vui lòng chọn đơn hàng shop.")
+    @Min(value = 1, message = "Mã đơn hàng shop không hợp lệ.")
     private Long maDonHangShop;
 
     private Long maHub;
 
-    @NotBlank(message = "Vui long nhap tieu de moc (vd Da roi Hub, Dang nhap Hub).")
-    @Size(max = 150, message = "Tieu de moc toi da 150 ky tu.")
+    @NotBlank(message = "Vui lòng nhập tiêu đề mốc (vd Đã rời Hub, Đang nhập Hub).")
+    @Size(max = 150, message = "Tiêu đề mốc tối đa 150 ký tự.")
     private String tieuDeMoc;
 
-    @Size(max = 255, message = "Vi tri hien tai toi da 255 ky tu.")
+    @Size(max = 255, message = "Vị trí hiện tại tối đa 255 ký tự.")
     private String viTriHienTai;
 }
