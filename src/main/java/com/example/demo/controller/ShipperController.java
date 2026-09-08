@@ -27,7 +27,14 @@ public class ShipperController {
             TaiXeGiaoHang tx = shipperService.layShipperHienTai();
             model.addAttribute("shipper", tx);
             model.addAttribute("duocNhanDon", shipperService.duocNhanNhiemVu(tx));
-            model.addAttribute("soCuocDangLam", shipperService.demCuocDangLam(tx.getMaTaiXe()));
+            long dangLam = shipperService.demCuocDangLam(tx.getMaTaiXe());
+            model.addAttribute("soCuocDangLam", dangLam);
+            // Canh bao thuong truc: Offline ma van con cuoc do -> refresh van con
+            if (!model.containsAttribute("canhBao")
+                    && !Boolean.TRUE.equals(tx.getDangTrucTuyen()) && dangLam > 0) {
+                model.addAttribute("canhBao",
+                        "Bạn đang Offline nhưng vẫn còn " + dangLam + " cuốc đang làm dở.");
+            }
             if (!model.containsAttribute("form")) {
                 CapNhatTrangThaiForm form = new CapNhatTrangThaiForm();
                 form.setDangTrucTuyen(!Boolean.TRUE.equals(tx.getDangTrucTuyen()));
@@ -145,5 +152,55 @@ public class ShipperController {
             return "shipper/cuoc-cua-toi";
         }
         return "redirect:/shipper/cuoc-cua-toi?lay=ok";
+    }
+
+    /** US-37: Form xac nhan giao thanh cong POD (mobile). */
+    @GetMapping("/pod/{maNhiemVu}")
+    public String hienThiPod(@PathVariable("maNhiemVu") Long maNhiemVu, Model model) {
+        try {
+            TaiXeGiaoHang tx = shipperService.layShipperHienTai();
+            com.example.demo.entity.NhiemVuGiaoHang nv =
+                    shipperService.layCuocCuaToi(tx.getMaTaiXe()).stream()
+                            .filter(n -> n.getMaNhiemVu().equals(maNhiemVu)).findFirst()
+                            .orElseThrow(() -> new IllegalArgumentException("Khong tim thay cuoc " + maNhiemVu));
+            if (!"DANG_GIAO".equals(nv.getTrangThai())) {
+                model.addAttribute("loiNghiepVu", "Cuoc dang " + nv.getTrangThaiDisplay() + ", khong the POD.");
+            }
+            model.addAttribute("nhiemVu", nv);
+            if (!model.containsAttribute("form")) {
+                model.addAttribute("form", new com.example.demo.dto.XacNhanPodForm());
+            }
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            model.addAttribute("loiNghiepVu", ex.getMessage());
+        }
+        return "shipper/pod";
+    }
+
+    @PostMapping("/pod/{maNhiemVu}")
+    public String xuLyPod(
+            @PathVariable("maNhiemVu") Long maNhiemVu,
+            @Valid @ModelAttribute("form") com.example.demo.dto.XacNhanPodForm form,
+            BindingResult bindingResult,
+            @RequestParam(value = "anhPod", required = false) org.springframework.web.multipart.MultipartFile anhPod,
+            Model model) {
+        TaiXeGiaoHang tx = shipperService.layShipperHienTai();
+        com.example.demo.entity.NhiemVuGiaoHang nv = shipperService.layCuocCuaToi(tx.getMaTaiXe()).stream()
+                .filter(n -> n.getMaNhiemVu().equals(maNhiemVu)).findFirst().orElse(null);
+        model.addAttribute("nhiemVu", nv);
+        if (bindingResult.hasErrors()) {
+            return "shipper/pod";
+        }
+        if (anhPod == null || anhPod.isEmpty()) {
+            model.addAttribute("loiNghiepVu", "Bat buoc chup/upload anh bang chung giao hang (POD)!");
+            return "shipper/pod";
+        }
+        try {
+            shipperService.xacNhanGiaoThanhCong(tx.getMaTaiXe(), maNhiemVu, anhPod,
+                    form.getViDoGiaoHang(), form.getKinhDoGiaoHang());
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            model.addAttribute("loiNghiepVu", ex.getMessage());
+            return "shipper/pod";
+        }
+        return "redirect:/shipper/cuoc-cua-toi?pod=ok";
     }
 }

@@ -130,6 +130,45 @@ public class FileStorageService {
     }
 
     /**
+     * US-37: Luu anh bang chung POD cua shipper (chi nhan anh, toi da 10MB).
+     * Thu muc: uploads/pod/ - URL: /uploads/pod/
+     */
+    public String luuAnhPod(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("Bat buoc chup/upload anh bang chung giao hang (POD)!");
+        }
+        if (file.getSize() > 10 * 1024 * 1024) {
+            throw new IllegalArgumentException("Anh POD vuot qua 10MB!");
+        }
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || originalFilename.isBlank()
+                || originalFilename.contains("..") || originalFilename.contains("/") || originalFilename.contains("\\")) {
+            throw new IllegalArgumentException("Ten file anh POD khong hop le!");
+        }
+        int dot = originalFilename.lastIndexOf(".");
+        if (dot == -1) {
+            throw new IllegalArgumentException("Anh POD thieu phan mo rong (.jpg, .png...)!");
+        }
+        String extension = originalFilename.substring(dot).toLowerCase();
+        if (!Arrays.asList(".jpg", ".jpeg", ".png", ".webp", ".gif").contains(extension)) {
+            throw new IllegalArgumentException("Anh POD chi chap nhan JPG, PNG, WEBP, GIF!");
+        }
+        String contentType = file.getContentType();
+        if (contentType != null && !contentType.isBlank()
+                && !contentType.toLowerCase().startsWith("image/")
+                && !contentType.equalsIgnoreCase("application/octet-stream")) {
+            throw new IllegalArgumentException("File POD phai la anh!");
+        }
+        Path podPath = Paths.get("uploads", "pod");
+        if (!Files.exists(podPath)) {
+            Files.createDirectories(podPath);
+        }
+        String uniqueFileName = "pod_" + UUID.randomUUID().toString().substring(0, 8) + "_" + System.currentTimeMillis() + extension;
+        Files.copy(file.getInputStream(), podPath.resolve(uniqueFileName), StandardCopyOption.REPLACE_EXISTING);
+        return "/uploads/pod/" + uniqueFileName;
+    }
+
+    /**
      * Lưu tệp tin ảnh banner cho chương trình Flash Sale từ máy tính
      */
     public String luuAnhBannerFlashSale(MultipartFile file) throws IOException {

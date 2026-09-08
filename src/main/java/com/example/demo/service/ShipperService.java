@@ -36,6 +36,9 @@ public class ShipperService {
     @Autowired
     private LichSuHanhTrinhDonRepository hanhTrinhRepository;
 
+    @Autowired
+    private FileStorageService fileStorageService;
+
     public List<TaiXeGiaoHang> layTatCaShipper() {
         return taiXeRepository.findAll();
     }
@@ -179,6 +182,56 @@ public class ShipperService {
         moc.setHub(null);
         moc.setTieuDeMoc("Da lay hang tu Shop - dang giao");
         moc.setViTriHienTai(don.getGianHang() != null ? don.getGianHang().getDiaChiKho() : null);
+        moc.setThoiGian(java.time.LocalDateTime.now());
+        hanhTrinhRepository.save(moc);
+        return nv;
+    }
+
+    // ================= US-37: Xac nhan giao thanh cong (POD + COD) =================
+
+    @Transactional
+    public NhiemVuGiaoHang xacNhanGiaoThanhCong(Long maTaiXe, Long maNhiemVu,
+                                                org.springframework.web.multipart.MultipartFile anhPod,
+                                                java.math.BigDecimal viDo, java.math.BigDecimal kinhDo) {
+        NhiemVuGiaoHang nv = nhiemVuRepository.findById(maNhiemVu)
+                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay nhiem vu " + maNhiemVu));
+        if (!nv.getTaiXe().getMaTaiXe().equals(maTaiXe)) {
+            throw new IllegalStateException("Cuoc nay khong phai cua ban.");
+        }
+        if (!"DANG_GIAO".equals(nv.getTrangThai())) {
+            throw new IllegalStateException("Cuoc dang " + nv.getTrangThaiDisplay() + ", khong the xac nhan giao thanh cong.");
+        }
+        kiemTraGps(viDo, kinhDo);
+        String linkAnh;
+        try {
+            linkAnh = fileStorageService.luuAnhPod(anhPod);
+        } catch (java.io.IOException e) {
+            throw new IllegalStateException("Luu anh POD that bai: " + e.getMessage());
+        }
+        TaiXeGiaoHang tx = nv.getTaiXe();
+        nv.setLinkAnhBangChungPod(linkAnh);
+        nv.setViDoGiaoHang(viDo);
+        nv.setKinhDoGiaoHang(kinhDo);
+        nv.setThoiGianGiaoThanhCong(java.time.LocalDateTime.now());
+        nv.setTrangThai("THANH_CONG");
+        // Tien COD: neu don COD thi bat buoc da_thu_cod=1 + cong don so_du_cod_dang_giu
+        BigDecimal cod = nv.getTienCodCanThu() != null ? nv.getTienCodCanThu() : BigDecimal.ZERO;
+        if (cod.compareTo(BigDecimal.ZERO) > 0) {
+            nv.setDaThuCod(true);
+            BigDecimal du = tx.getSoDuCodDangGiu() != null ? tx.getSoDuCodDangGiu() : BigDecimal.ZERO;
+            tx.setSoDuCodDangGiu(du.add(cod));
+            taiXeRepository.save(tx);
+        }
+        nv = nhiemVuRepository.save(nv);
+        DonHangShop don = nv.getDonHangShop();
+        don.setTrangThai("DA_GIAO");
+        donHangShopRepository.save(don);
+        // Auto-ghi hanh trinh US-33
+        LichSuHanhTrinhDon moc = new LichSuHanhTrinhDon();
+        moc.setDonHangShop(don);
+        moc.setHub(null);
+        moc.setTieuDeMoc("Giao hang thanh cong");
+        moc.setViTriHienTai(viDo + ", " + kinhDo);
         moc.setThoiGian(java.time.LocalDateTime.now());
         hanhTrinhRepository.save(moc);
         return nv;
