@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/main :: layout(title='Sản phẩm', content=~{::content})}">
+<head><title>Quản lý Sản phẩm</title></head>
+<body>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Quản lý Sản phẩm</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+            <i class="fas fa-plus me-1"></i> Thêm sản phẩm
+        </button>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Danh mục</th>
+                            <th>Giá cơ bản</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="sp : ${pageData.content}">
+                            <td th:text="${sp.maSanPham}">1</td>
+                            <td th:text="${sp.tenSanPham}">Sản phẩm A</td>
+                            <td th:text="${sp.danhMuc != null ? sp.danhMuc.tenDanhMuc : '---'}">Danh mục</td>
+                            <td th:text="${#numbers.formatDecimal(sp.giaCoBan, 0, 'COMMA', 0, 'POINT')} + ' đ'">100,000 đ</td>
+                            <td>
+                                <span class="badge" th:classappend="${sp.trangThaiHienThi == 'HIEN_THI' ? 'bg-success' : 'bg-warning'}" 
+                                      th:text="${sp.trangThaiHienThi}">Trạng thái</span>
+                            </td>
+                            <td>
+                                <form th:action="@{/seller/san-pham/xoa/{id}(id=${sp.maSanPham})}" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Thêm Sản Phẩm -->
+    <div class="modal fade" id="addModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form th:action="@{/seller/san-pham/them}" method="post" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Thêm Sản Phẩm Mới</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Giả lập Gian Hàng ID = 1 cho việc test -->
+                        <input type="hidden" name="maGianHang" value="1">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label class="form-label">Tên sản phẩm (*)</label>
+                                <input type="text" name="tenSanPham" class="form-control" required minlength="10" maxlength="255">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">ID Danh mục (*)</label>
+                                <input type="number" name="maDanhMuc" class="form-control" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Giá cơ bản (VNĐ) (*)</label>
+                                <input type="number" name="giaCoBan" class="form-control" required min="0">
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">Ảnh sản phẩm (Tối đa 9 ảnh)</label>
+                                <input type="file" name="fileAnhList" class="form-control" accept="image/*" multiple>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Cân nặng (g) (*)</label>
+                                <input type="number" name="canNangGram" class="form-control" required min="1">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Dài (cm) (*)</label>
+                                <input type="number" name="chieuDaiCm" class="form-control" required min="1">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Rộng (cm) (*)</label>
+                                <input type="number" name="chieuRongCm" class="form-control" required min="1">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Cao (cm) (*)</label>
+                                <input type="number" name="chieuCaoCm" class="form-control" required min="1">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Mô tả ngắn</label>
+                            <textarea name="moTaNgan" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Lưu sản phẩm</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -16,6 +16,13 @@ public class KhoHangController {
     @Autowired
     private KhoHangService khoHangService;
 
+    @GetMapping
+    public String hienThiKhoHang(org.springframework.ui.Model model) {
+        // Chỉ là giao diện demo để test
+        model.addAttribute("formPhieuKho", new PhieuNhapXuatKhoForm());
+        return "khohang/danh-sach";
+    }
+
     // Các method xem danh sách kho, view giao diện... (bỏ qua để tập trung nghiệp vụ chính)
 
     @PostMapping("/phieu/tao-moi")

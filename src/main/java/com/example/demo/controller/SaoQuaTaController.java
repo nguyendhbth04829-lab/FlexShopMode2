@@ -15,6 +15,11 @@ public class SaoQuaTaController {
     @Autowired
     private SaoQuaTaService saoQuaTaService;
 
+    @GetMapping("/danh-sach")
+    public String hienThi() {
+        return "saoquata/danh-sach";
+    }
+
     @PostMapping("/phat")
     public String phatSaoQuaTa(@RequestParam Long maGianHang, 
                                @RequestParam int soDiemPhat, 

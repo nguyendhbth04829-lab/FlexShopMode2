@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/main :: layout(title='Thương hiệu', content=~{::content})}">
+<head><title>Quản lý Thương hiệu</title></head>
+<body>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Quản lý Thương hiệu</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+            <i class="fas fa-plus me-1"></i> Thêm mới
+        </button>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <!-- Table -->
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Logo</th>
+                            <th>Tên thương hiệu</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="th : ${pageData.content}">
+                            <td th:text="${th.maThuongHieu}">1</td>
+                            <td>
+                                <img th:if="${th.linkLogo != null}" th:src="${th.linkLogo}" alt="Logo" class="img-thumbnail" style="height:50px">
+                                <span th:unless="${th.linkLogo != null}" class="badge bg-secondary">No Logo</span>
+                            </td>
+                            <td th:text="${th.tenThuongHieu}">Nike</td>
+                            <td>
+                                <span class="badge" th:classappend="${th.dangHoatDong ? 'bg-success' : 'bg-danger'}" 
+                                      th:text="${th.dangHoatDong ? 'Hoạt động' : 'Tạm khóa'}">Trạng thái</span>
+                            </td>
+                            <td>
+                                <form th:action="@{/admin/thuong-hieu/xoa/{id}(id=${th.maThuongHieu})}" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination (if needed) -->
+        </div>
+    </div>
+
+    <!-- Modal Thêm -->
+    <div class="modal fade" id="addModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/admin/thuong-hieu/them}" method="post" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Thêm Thương Hiệu</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Tên thương hiệu (*)</label>
+                            <input type="text" name="tenThuongHieu" class="form-control" required maxlength="100">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">File Logo (Ảnh)</label>
+                            <input type="file" name="fileLogo" class="form-control" accept="image/*">
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" name="dangHoatDong" value="true" checked>
+                            <label class="form-check-label">Đang hoạt động</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Lưu lại</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/main :: layout(title='Sao Quả Tạ', content=~{::content})}">
+<head><title>Sao Quả Tạ</title></head>
+<body>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Hệ thống Điểm phạt Sao Quả Tạ</h2>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <form th:action="@{/admin/sao-qua-ta/phat}" method="post">
+                <div class="row">
+                    <div class="col-md-2 mb-3"><label>Gian Hàng ID</label><input type="number" name="maGianHang" value="1" class="form-control" required></div>
+                    <div class="col-md-2 mb-3"><label>Điểm Phạt</label><input type="number" name="soDiemPhat" value="10" class="form-control" required></div>
+                    <div class="col-md-4 mb-3"><label>Lý Do</label><input type="text" name="lyDo" class="form-control" value="Giao hàng chậm trễ" required></div>
+                    <div class="col-md-3 mb-3"><label>Loại Vi Phạm</label><input type="text" name="loaiViPham" class="form-control" value="GIAO_HANG" required></div>
+                    <div class="col-md-1 mb-3"><label>&nbsp;</label><button type="submit" class="btn btn-danger d-block w-100">Phạt</button></div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/main :: layout(title='Danh mục', content=~{::content})}">
+<head><title>Quản lý Danh mục</title></head>
+<body>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Quản lý Danh mục</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+            <i class="fas fa-plus me-1"></i> Thêm mới
+        </button>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên danh mục</th>
+                            <th>Danh mục cha</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="dm : ${danhMucList}">
+                            <td th:text="${dm.maDanhMuc}">1</td>
+                            <td th:text="${dm.tenDanhMuc}">Áo</td>
+                            <td th:text="${dm.danhMucCha != null ? dm.danhMucCha.tenDanhMuc : '---'}">---</td>
+                            <td>
+                                <span class="badge" th:classappend="${dm.dangHoatDong ? 'bg-success' : 'bg-danger'}" 
+                                      th:text="${dm.dangHoatDong ? 'Hoạt động' : 'Tạm khóa'}">Trạng thái</span>
+                            </td>
+                            <td>
+                                <form th:action="@{/admin/danh-muc/xoa/{id}(id=${dm.maDanhMuc})}" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Thêm -->
+    <div class="modal fade" id="addModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/admin/danh-muc/them}" method="post" th:object="${formDanhMuc}">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Thêm Danh Mục</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Tên danh mục (*)</label>
+                            <input type="text" th:field="*{tenDanhMuc}" class="form-control" required maxlength="100">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Danh mục cha</label>
+                            <select th:field="*{maDanhMucCha}" class="form-select">
+                                <option value="">-- Không có (Danh mục gốc) --</option>
+                                <option th:each="dm : ${danhMucList}" th:value="${dm.maDanhMuc}" th:text="${dm.tenDanhMuc}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Lưu lại</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

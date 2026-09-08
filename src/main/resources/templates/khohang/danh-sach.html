@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/main :: layout(title='Kho Hàng', content=~{::content})}">
+<head><title>Quản lý Kho Hàng</title></head>
+<body>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Quản lý Kho Hàng (WMS)</h2>
+        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#addModal">
+            <i class="fas fa-truck-loading me-1"></i> Tạo Phiếu Nhập/Xuất
+        </button>
+    </div>
+
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-boxes fa-4x text-muted mb-3"></i>
+            <h5>Hệ thống Quản lý Kho Hàng FlexShop</h5>
+            <p class="text-muted">Bấm nút "Tạo Phiếu Nhập/Xuất" để test tính năng xuất kho âm (US-15) và lưu log tự động.</p>
+        </div>
+    </div>
+
+    <!-- Modal Tạo phiếu -->
+    <div class="modal fade" id="addModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/seller/kho-hang/phieu/tao-moi}" method="post" th:object="${formPhieuKho}">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Tạo Phiếu Kho Mới</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Kho hàng ID (*)</label>
+                            <input type="number" name="maKho" value="1" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Loại phiếu (*)</label>
+                            <select name="loaiPhieu" class="form-select">
+                                <option value="NHAP_KHO">Nhập Kho</option>
+                                <option value="XUAT_KHO">Xuất Kho</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ghi chú</label>
+                            <textarea name="ghiChu" class="form-control" rows="2"></textarea>
+                        </div>
+                        <hr>
+                        <h6>Chi tiết phiếu</h6>
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <label class="form-label">Biến thể ID</label>
+                                <input type="number" name="chiTietList[0].maBienThe" value="1" class="form-control" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Số lượng</label>
+                                <input type="number" name="chiTietList[0].soLuong" value="100" class="form-control" required>
+                            </div>
+                        </div>
+                        <small class="text-muted">Mẹo: Thử nhập số lượng > tồn kho để test tính năng chặn xuất âm.</small>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Xác nhận</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
