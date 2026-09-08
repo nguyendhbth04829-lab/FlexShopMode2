@@ -58,16 +58,34 @@ public class ThanhToanController {
      * US-26: Màn hình chọn phương thức thanh toán (COD hoặc Mock Online Payment)
      */
     @GetMapping("/chon-phuong-thuc")
-    public String chonPhuongThuc(Model model, @RequestParam("id") Long id) {
-        DonHangTong donHang = thanhToanService.getDonHangTong(id);
-        model.addAttribute("donHang", donHang);
+    public String chonPhuongThuc(
+            Model model,
+            @RequestParam(value = "id", required = false) Long id,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (id == null) {
+            DonHangTong donHangMoiNhat = thanhToanService.getDonHangMoiNhat();
+            if (donHangMoiNhat == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy đơn hàng nào trong hệ thống để thanh toán!");
+                return "redirect:/thanh-toan/danh-sach";
+            }
+            id = donHangMoiNhat.getMaDonHangTong();
+        }
 
-        ThanhToanRequestDTO dto = new ThanhToanRequestDTO();
-        dto.setMaDonHangTong(id);
-        dto.setPhuongThuc("COD");
-        model.addAttribute("thanhToanDTO", dto);
+        try {
+            DonHangTong donHang = thanhToanService.getDonHangTong(id);
+            model.addAttribute("donHang", donHang);
 
-        return "thanh-toan/chon-phuong-thuc";
+            ThanhToanRequestDTO dto = new ThanhToanRequestDTO();
+            dto.setMaDonHangTong(id);
+            dto.setPhuongThuc("COD");
+            model.addAttribute("thanhToanDTO", dto);
+
+            return "thanh-toan/chon-phuong-thuc";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/thanh-toan/danh-sach";
+        }
     }
 
     /**
@@ -104,10 +122,27 @@ public class ThanhToanController {
      * US-26: Cổng thanh toán trực tuyến giả lập (Mock Online Payment Gateway)
      */
     @GetMapping("/mock-gateway")
-    public String mockGateway(Model model, @RequestParam("id") Long id) {
-        DonHangTong donHang = thanhToanService.getDonHangTong(id);
-        model.addAttribute("donHang", donHang);
-        return "thanh-toan/mock-gateway";
+    public String mockGateway(
+            Model model,
+            @RequestParam(value = "id", required = false) Long id,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (id == null) {
+            DonHangTong donHangMoiNhat = thanhToanService.getDonHangMoiNhat();
+            if (donHangMoiNhat == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng chọn đơn hàng cần thanh toán!");
+                return "redirect:/thanh-toan/danh-sach";
+            }
+            id = donHangMoiNhat.getMaDonHangTong();
+        }
+        try {
+            DonHangTong donHang = thanhToanService.getDonHangTong(id);
+            model.addAttribute("donHang", donHang);
+            return "thanh-toan/mock-gateway";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/thanh-toan/danh-sach";
+        }
     }
 
     /**
@@ -115,12 +150,16 @@ public class ThanhToanController {
      */
     @PostMapping("/mock-process")
     public String mockProcess(
-            @RequestParam("id") Long id,
+            @RequestParam(value = "id", required = false) Long id,
             @RequestParam("status") String status,
             @RequestParam(value = "maNganHang", defaultValue = "FLEXPAY_BANK") String maNganHang,
             @RequestParam(value = "soThe", defaultValue = "9704-8888-9999-0001") String soThe,
             RedirectAttributes redirectAttributes
     ) {
+        if (id == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Mã đơn hàng không hợp lệ!");
+            return "redirect:/thanh-toan/danh-sach";
+        }
         try {
             if ("SUCCESS".equalsIgnoreCase(status)) {
                 thanhToanService.xuLyMockOnlineThanhCong(id, maNganHang, soThe);
@@ -142,9 +181,26 @@ public class ThanhToanController {
      * US-26: Màn hình kết quả thanh toán / Hóa đơn điện tử
      */
     @GetMapping("/ket-qua")
-    public String ketQua(Model model, @RequestParam("id") Long id) {
-        DonHangTong donHang = thanhToanService.getDonHangTong(id);
-        model.addAttribute("donHang", donHang);
-        return "thanh-toan/ket-qua";
+    public String ketQua(
+            Model model,
+            @RequestParam(value = "id", required = false) Long id,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (id == null) {
+            DonHangTong donHangMoiNhat = thanhToanService.getDonHangMoiNhat();
+            if (donHangMoiNhat == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Chưa có đơn hàng nào trong hệ thống để xem hóa đơn!");
+                return "redirect:/thanh-toan/danh-sach";
+            }
+            id = donHangMoiNhat.getMaDonHangTong();
+        }
+        try {
+            DonHangTong donHang = thanhToanService.getDonHangTong(id);
+            model.addAttribute("donHang", donHang);
+            return "thanh-toan/ket-qua";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy hóa đơn cho đơn hàng #" + id);
+            return "redirect:/thanh-toan/danh-sach";
+        }
     }
 }

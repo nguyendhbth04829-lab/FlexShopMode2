@@ -51,9 +51,9 @@
                         <input type="hidden" th:field="*{maDonHangTong}">
 
                         <!-- Lựa chọn 1: COD -->
-                        <div class="payment-option-card p-3 mb-3 selected" onclick="selectMethod('COD', this)">
+                        <div class="payment-option-card p-3 mb-3 selected" id="cardCOD" onclick="selectMethod('COD')">
                             <div class="form-check d-flex align-items-center">
-                                <input class="form-check-input me-3 fs-5" type="radio" th:field="*{phuongThuc}" value="COD" id="radioCOD" checked>
+                                <input class="form-check-input me-3 fs-5" type="radio" th:field="*{phuongThuc}" value="COD" id="radioCOD" onchange="selectMethod('COD')">
                                 <label class="form-check-label flex-grow-1" for="radioCOD" style="cursor: pointer;">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span class="fw-bold text-dark fs-6">
@@ -69,9 +69,9 @@
                         </div>
 
                         <!-- Lựa chọn 2: Mock Online Payment Gateway -->
-                        <div class="payment-option-card p-3 mb-3" onclick="selectMethod('MOCK_ONLINE', this)">
+                        <div class="payment-option-card p-3 mb-3" id="cardOnline" onclick="selectMethod('MOCK_ONLINE')">
                             <div class="form-check d-flex align-items-center">
-                                <input class="form-check-input me-3 fs-5" type="radio" th:field="*{phuongThuc}" value="MOCK_ONLINE" id="radioOnline">
+                                <input class="form-check-input me-3 fs-5" type="radio" th:field="*{phuongThuc}" value="MOCK_ONLINE" id="radioOnline" onchange="selectMethod('MOCK_ONLINE')">
                                 <label class="form-check-label flex-grow-1" for="radioOnline" style="cursor: pointer;">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span class="fw-bold text-dark fs-6">
@@ -87,13 +87,13 @@
                         </div>
 
                         <!-- Lựa chọn 3: SPayLater (Mua Trước Trả Sau - BNPL) -->
-                        <div class="payment-option-card p-3 mb-4" onclick="selectMethod('SPAYLATER', this)">
+                        <div class="payment-option-card p-3 mb-4" id="cardSPayLater" onclick="selectMethod('SPAYLATER')">
                             <div class="form-check d-flex align-items-center">
-                                <input class="form-check-input me-3 fs-5" type="radio" th:field="*{phuongThuc}" value="SPAYLATER" id="radioSPayLater">
+                                <input class="form-check-input me-3 fs-5" type="radio" th:field="*{phuongThuc}" value="SPAYLATER" id="radioSPayLater" onchange="selectMethod('SPAYLATER')">
                                 <label class="form-check-label flex-grow-1" for="radioSPayLater" style="cursor: pointer;">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span class="fw-bold text-dark fs-6">
-                                            <i class="bi bi-clock-history text-warning fs-4 me-2 align-middle"></i>Mua Trước Trả Sau (SPayLater - US-63)
+                                             <i class="bi bi-clock-history text-warning fs-4 me-2 align-middle"></i>Mua Trước Trả Sau (SPayLater - US-63)
                                         </span>
                                         <span class="badge bg-warning text-dark fw-bold">Trả góp 0% Lãi</span>
                                     </div>
@@ -176,13 +176,17 @@
 </div>
 
 <script>
-    function selectMethod(method, cardElement) {
+    function selectMethod(method) {
         document.querySelectorAll('.payment-option-card').forEach(c => c.classList.remove('selected'));
-        cardElement.classList.add('selected');
         if (method === 'COD') {
             document.getElementById('radioCOD').checked = true;
-        } else {
+            document.getElementById('cardCOD').classList.add('selected');
+        } else if (method === 'SPAYLATER') {
+            document.getElementById('radioSPayLater').checked = true;
+            document.getElementById('cardSPayLater').classList.add('selected');
+        } else if (method === 'MOCK_ONLINE') {
             document.getElementById('radioOnline').checked = true;
+            document.getElementById('cardOnline').classList.add('selected');
         }
     }
 </script>

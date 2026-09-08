@@ -88,9 +88,18 @@ public class TraSauController {
     @GetMapping("/xac-nhan-vay")
     public String xacNhanVay(
             Model model,
-            @RequestParam("maDonHangTong") Long maDonHangTong,
+            @RequestParam(value = "maDonHangTong", required = false) Long maDonHangTong,
             RedirectAttributes redirectAttributes
     ) {
+        if (maDonHangTong == null) {
+            List<DonHangTong> all = donHangTongRepository.findAll();
+            if (all.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy đơn hàng nào để thanh toán SPayLater!");
+                return "redirect:/thanh-toan/danh-sach";
+            }
+            maDonHangTong = all.get(all.size() - 1).getMaDonHangTong();
+        }
+
         DonHangTong donHang = donHangTongRepository.findById(maDonHangTong).orElse(null);
         if (donHang == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy đơn hàng tổng #" + maDonHangTong);

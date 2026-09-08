@@ -49,6 +49,20 @@ public class ThanhToanService {
     }
 
     /**
+     * Lấy đơn hàng mới nhất đang chờ thanh toán hoặc đơn hàng bất kỳ mới nhất
+     */
+    public DonHangTong getDonHangMoiNhat() {
+        List<DonHangTong> all = donHangTongRepository.findAll();
+        if (all.isEmpty()) {
+            return null;
+        }
+        return all.stream()
+                .filter(dh -> "CHUA_THANH_TOAN".equalsIgnoreCase(dh.getTrangThaiThanhToan()) || "THANH_TOAN_THAT_BAI".equalsIgnoreCase(dh.getTrangThaiThanhToan()))
+                .reduce((first, second) -> second)
+                .orElse(all.get(all.size() - 1));
+    }
+
+    /**
      * US-26: Khách hàng chọn phương thức COD (Thanh toán khi nhận hàng)
      */
     @Transactional
