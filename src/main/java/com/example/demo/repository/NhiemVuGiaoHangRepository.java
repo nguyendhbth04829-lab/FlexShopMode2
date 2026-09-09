@@ -18,4 +18,10 @@ public interface NhiemVuGiaoHangRepository extends JpaRepository<NhiemVuGiaoHang
     List<NhiemVuGiaoHang> timNhiemVuTheoDonHangSapXepMoiNhat(@Param("maDonHangShop") Long maDonHangShop);
 
     Optional<NhiemVuGiaoHang> findFirstByDonHangShop_MaDonHangShopAndLinkAnhBangChungPodIsNotNullOrderByNgayTaoDesc(Long maDonHangShop);
+
+    List<NhiemVuGiaoHang> findAllByTaiXe_MaTaiXeOrderByNgayTaoDesc(Long maTaiXe);
+
+    boolean existsByDonHangShop_MaDonHangShop(Long maDonHangShop);
+
+    long countByTaiXe_MaTaiXeAndTrangThaiIn(Long maTaiXe, java.util.Collection<String> trangThais);
 }

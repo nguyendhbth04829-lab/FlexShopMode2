@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Shipper · Đối soát COD</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --blue:#1565C0; --blue-dark:#0D47A1; --blue-light:#E3F2FD; }
+        body { background:#B0BEC5; }
+        .phone { max-width:480px; margin:0 auto; background:#F4F7FC; min-height:100vh;
+                 display:flex; flex-direction:column; box-shadow:0 0 24px rgba(0,0,0,.3); }
+        .appbar { background:linear-gradient(135deg,var(--blue-dark),var(--blue)); color:#fff;
+                  padding:16px; position:sticky; top:0; z-index:10; }
+        .content { flex:1; padding:16px; padding-bottom:90px; }
+        .cod-hero { background:linear-gradient(135deg,var(--blue-dark),var(--blue)); color:#fff;
+                    border-radius:16px; padding:18px; box-shadow:0 4px 16px rgba(21,101,192,.3); }
+        .stat { background:#fff; border-radius:14px; padding:12px 6px; text-align:center;
+                box-shadow:0 2px 10px rgba(21,101,192,.10); }
+        .stat b { display:block; font-size:1.4rem; color:var(--blue-dark); }
+        .stat span { font-size:.75rem; color:#78909C; }
+        .row-m { background:#fff; border-radius:12px; padding:10px 12px; margin-bottom:8px;
+                 box-shadow:0 2px 8px rgba(21,101,192,.08); }
+        .tabbar { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px;
+                  background:#fff; border-top:1px solid #CFD8DC; display:flex; z-index:10; }
+        .tabbar a { flex:1; text-align:center; padding:10px 4px 12px; font-size:.75rem; color:#78909C; text-decoration:none; }
+        .tabbar a.active { color:var(--blue); font-weight:700; }
+        .tabbar .ico { font-size:1.4rem; display:block; }
+    </style>
+</head>
+<body>
+<div class="phone">
+    <div class="appbar">
+        <div class="small opacity-75">US-39 · APP SHIPPER</div>
+        <h5 class="mb-0">Đối soát COD</h5>
+    </div>
+
+    <div class="content">
+        <div th:if="${loiNghiepVu}" class="alert alert-danger" th:text="${loiNghiepVu}"></div>
+
+        <form method="get" th:action="@{/shipper/cod}" class="d-flex gap-2 mb-3">
+            <input class="form-control" type="date" name="ngay" th:value="${ngayValue}">
+            <button class="btn btn-blue" type="submit">Xem</button>
+        </form>
+
+        <div th:if="${thongKe != null}">
+            <div class="cod-hero mb-3">
+                <div class="small opacity-75">TIỀN COD ĐANG GIỮ (CẦN NỘP)</div>
+                <h3 class="fw-bold mb-1" th:text="${#numbers.formatDecimal(thongKe.soDuCodDangGiu,0,'COMMA',0,'POINT')} + ' đ'">0 đ</h3>
+                <div class="small opacity-75">Hôm nay thu: <b th:text="${#numbers.formatDecimal(thongKe.codThuHomNay,0,'COMMA',0,'POINT')}">0</b> đ
+                    · <span th:text="${thongKe.tongThanhCongHomNay}">0</span> đơn thành công</div>
+                <div class="small opacity-50">Đã thu tổng: <span th:text="${#numbers.formatDecimal(thongKe.tongCodDaThu,0,'COMMA',0,'POINT')}">0</span> đ</div>
+            </div>
+
+            <div class="row g-2 mb-3">
+                <div class="col-3"><div class="stat"><b th:text="${thongKe.tongThanhCong}">0</b><span>Thành công</span></div></div>
+                <div class="col-3"><div class="stat"><b th:text="${thongKe.tongDangGiao}">0</b><span>Đang giao</span></div></div>
+                <div class="col-3"><div class="stat"><b th:text="${thongKe.tongChoLayHang}">0</b><span>Chờ lấy</span></div></div>
+                <div class="col-3"><div class="stat"><b th:text="${thongKe.tongLuotThatBai}">0</b><span>Lượt fail</span></div></div>
+            </div>
+
+            <h6 class="text-primary fw-bold mb-2" th:text="'LỊCH SỬ HÔM NAY (' + ${thongKe.tongCuoc} + ' CUỐC)'">LỊCH SỬ</h6>
+            <div th:each="n : ${lichSu}" class="row-m d-flex justify-content-between align-items-center">
+                <div>
+                    <b class="text-primary" th:text="${n.donHangShop != null ? n.donHangShop.maCodeDonShop : ''}"></b>
+                    <div class="small text-muted" th:text="${n.trangThaiDisplay}"></div>
+                </div>
+                <div class="text-end">
+                    <div class="fw-bold" th:text="${#numbers.formatDecimal(n.tienCodCanThu,0,'COMMA',0,'POINT')}"></div>
+                    <span class="badge bg-success" th:if="${n.daThuCod}">Đã thu</span>
+                </div>
+            </div>
+            <div th:if="${#lists.isEmpty(lichSu)}" class="alert alert-info">Chưa có cuốc nào.</div>
+        </div>
+    </div>
+
+    <nav class="tabbar">
+        <a href="/shipper/trang-thai"><span class="ico">🟢</span>Trạng thái</a>
+        <a href="/shipper/don-cho-nhan"><span class="ico">📦</span>Đơn</a>
+        <a href="/shipper/cod" class="active"><span class="ico">💵</span>COD</a>
+        <a href="/shipper/cuoc-cua-toi"><span class="ico">👤</span>Tôi</a>
+    </nav>
+</div>
+</body>
+</html>

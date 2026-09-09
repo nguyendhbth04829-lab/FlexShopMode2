@@ -45,5 +45,5 @@ public class TaiXeGiaoHang {
     private BigDecimal diemDanhGiaTb = new BigDecimal("5.0");
 
     @Column(name = "trang_thai", length = 30)
-    private String trangThai = "HOAT_DONG";
+    private String trangThai = "DANG_HOAT_DONG";
 }
