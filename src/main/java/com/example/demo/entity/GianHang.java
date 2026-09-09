@@ -34,6 +34,8 @@ public class GianHang {
     @Column(name = "ma_gian_hang")
     private Long maGianHang;
 
+    @Column(name = "ma_chu_so_huu", nullable = false)
+    private Long maChuSoHuu;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ma_chu_so_huu", referencedColumnName = "ma_nguoi_dung", nullable = false)
     @JoinColumn(name = "ma_chu_so_huu", nullable = false)
@@ -42,6 +44,7 @@ public class GianHang {
 
     @Column(name = "ten_gian_hang", nullable = false, unique = true, length = 100)
 
+    @Column(name = "ten_gian_hang", nullable = false, length = 100, unique = true)
     private String tenGianHang;
 
     @Column(name = "duong_dan_slug", nullable = false, unique = true, length = 120)
@@ -81,24 +84,37 @@ public class GianHang {
     @Column(name = "diem_sao_qua_ta")
     private Integer diemSaoQuaTa = 0;
 
+    @Column(name = "hang_gian_hang", length = 30)
+    private String hangGianHang = "CHUAN";
     @Column(name = "diem_danh_gia_tb", precision = 3, scale = 2)
     private BigDecimal diemDanhGiaTb = BigDecimal.ZERO;
 
     private BigDecimal diemDanhGiaTb = BigDecimal.valueOf(5.0);
 
+    // ... other fields omitted for brevity
     @Column(name = "tong_danh_gia")
     private Integer tongDanhGia = 0;
 
+    public Long getMaGianHang() { return maGianHang; }
+    public void setMaGianHang(Long maGianHang) { this.maGianHang = maGianHang; }
     @Column(name = "tong_don_hang")
     private Integer tongDonHang = 0;
 
+    public Long getMaChuSoHuu() { return maChuSoHuu; }
+    public void setMaChuSoHuu(Long maChuSoHuu) { this.maChuSoHuu = maChuSoHuu; }
     @Column(name = "ty_le_phan_hoi_chat", precision = 5, scale = 2)
     private BigDecimal tyLePhanHoiChat = new BigDecimal("100.00");
 
+    public String getTenGianHang() { return tenGianHang; }
+    public void setTenGianHang(String tenGianHang) { this.tenGianHang = tenGianHang; }
 
+    public Integer getDiemSaoQuaTa() { return diemSaoQuaTa; }
+    public void setDiemSaoQuaTa(Integer diemSaoQuaTa) { this.diemSaoQuaTa = diemSaoQuaTa; }
     @Column(name = "da_xoa")
     private Boolean daXoa = false;
 
+    public String getHangGianHang() { return hangGianHang; }
+    public void setHangGianHang(String hangGianHang) { this.hangGianHang = hangGianHang; }
     @Column(name = "ngay_xoa")
     private LocalDateTime ngayXoa;
 
