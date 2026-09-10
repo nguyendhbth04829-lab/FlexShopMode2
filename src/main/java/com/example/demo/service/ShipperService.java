@@ -99,20 +99,40 @@ public class ShipperService {
 
     /** Don cho nhan co phan trang (US-35: 10 cuoc/trang). */
     public org.springframework.data.domain.Page<DonHangShop> layDonChoNhan(int page, int size) {
+        return layDonChoNhan(page, size, false);
+    }
+
+    /** Don cho nhan co phan trang + sap xep theo thoi gian (cuNhat=true: cu nhat truoc). */
+    public org.springframework.data.domain.Page<DonHangShop> layDonChoNhan(int page, int size, boolean cuNhat) {
+        java.util.Comparator<DonHangShop> ss = java.util.Comparator.comparing(DonHangShop::getNgayTao);
+        if (!cuNhat) ss = ss.reversed();
         List<DonHangShop> loc = donHangShopRepository.findAll().stream()
                 .filter(d -> "DA_XAC_NHAN".equals(d.getTrangThai()))
                 .filter(d -> !nhiemVuRepository.existsByDonHangShop_MaDonHangShop(d.getMaDonHangShop()))
-                .sorted((a, b) -> b.getNgayTao().compareTo(a.getNgayTao()))
+                .sorted(ss)
                 .collect(java.util.stream.Collectors.toList());
+        return catTrang(loc, page, size);
+    }
+
+    private <T> org.springframework.data.domain.Page<T> catTrang(List<T> loc, int page, int size) {
         int tong = loc.size();
-        int tu = Math.min(page * size, tong);
+        int tu = Math.min(Math.max(page, 0) * size, tong);
         int den = Math.min(tu + size, tong);
         return new org.springframework.data.domain.PageImpl<>(loc.subList(tu, den),
-                org.springframework.data.domain.PageRequest.of(page, size), tong);
+                org.springframework.data.domain.PageRequest.of(Math.max(page, 0), size), tong);
     }
 
     public List<NhiemVuGiaoHang> layCuocCuaToi(Long maTaiXe) {
         return nhiemVuRepository.findAllByTaiXe_MaTaiXeOrderByNgayTaoDesc(maTaiXe);
+    }
+
+    /** Cuoc cua toi co phan trang + sap xep theo thoi gian. */
+    public org.springframework.data.domain.Page<NhiemVuGiaoHang> layCuocCuaToi(Long maTaiXe, int page, int size, boolean cuNhat) {
+        List<NhiemVuGiaoHang> loc = new java.util.ArrayList<>(layCuocCuaToi(maTaiXe));
+        loc.sort((a, b) -> cuNhat
+                ? a.getNgayTao().compareTo(b.getNgayTao())
+                : b.getNgayTao().compareTo(a.getNgayTao()));
+        return catTrang(loc, page, size);
     }
 
     @Transactional

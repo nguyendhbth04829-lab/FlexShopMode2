@@ -40,12 +40,17 @@
         <div th:if="${loiNghiepVu}" class="alert alert-danger" th:text="${loiNghiepVu}"></div>
 
         <div th:each="n : ${cuocCuaToi}" class="cuoc" th:classappend="${n.trangThai == 'DANG_GIAO'} ? 'dang-giao' : ''">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center gap-2">
                 <a th:href="@{/logistics/hanh-trinh(maDon=${n.donHangShop.maDonHangShop})}" th:if="${n.donHangShop != null}"
                    class="text-primary" style="text-decoration:none" th:text="${n.donHangShop != null ? n.donHangShop.maCodeDonShop : ''}">SHOP-001</a>
                 <b class="text-primary" th:if="${n.donHangShop == null}">—</b>
-                <span class="badge" th:classappend="${n.trangThai == 'DANG_GIAO'} ? 'bg-warning text-dark' : 'bg-primary'"
-                      th:text="${n.trangThaiDisplay}">Trạng thái</span>
+                <span class="d-flex align-items-center gap-2 ms-auto">
+                    <a th:if="${n.donHangShop != null && n.donHangShop.maVanDon != null}"
+                       th:href="@{/logistics/tra-cuu(maVanDon=${n.donHangShop.maVanDon})}"
+                       class="text-decoration-none small">🔍 Tra cứu</a>
+                    <span class="badge" th:classappend="${n.trangThai == 'DANG_GIAO'} ? 'bg-warning text-dark' : 'bg-primary'"
+                          th:text="${n.trangThaiDisplay}">Trạng thái</span>
+                </span>
             </div>
             <div class="mt-2"><b>🏠 Lấy hàng:</b>
                 <span th:text="${n.donHangShop != null && n.donHangShop.gianHang != null ? n.donHangShop.gianHang.diaChiKho : ''}"></span>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Shipper · Đơn chờ nhận</title>
+    <title>Shipper · Đơn</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root { --blue:#1565C0; --blue-dark:#0D47A1; --blue-light:#E3F2FD; }
@@ -19,6 +19,12 @@
         .btn-blue { background:var(--blue); border-color:var(--blue); color:#fff; }
         .btn-blue:hover { background:var(--blue-dark); color:#fff; }
         .cod { background:var(--blue-light); border:1px dashed var(--blue); border-radius:10px; }
+        .apptab { display:flex; background:#fff; border-radius:12px; padding:4px; margin-bottom:12px;
+                  box-shadow:0 2px 10px rgba(21,101,192,.10); }
+        .apptab a { flex:1; text-align:center; padding:10px; border-radius:9px; text-decoration:none;
+                    color:#78909C; font-weight:700; }
+        .apptab a.active { background:var(--blue); color:#fff; }
+        .pager { display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
         .tabbar { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px;
                   background:#fff; border-top:1px solid #CFD8DC; display:flex; z-index:10; }
         .tabbar a { flex:1; text-align:center; padding:10px 4px 12px; font-size:.75rem; color:#78909C; text-decoration:none; }
@@ -30,7 +36,7 @@
 <div class="phone">
     <div class="appbar">
         <div class="small opacity-75">US-35 · APP SHIPPER</div>
-        <h5 class="mb-0">Đơn chờ nhận</h5>
+        <h5 class="mb-0">Đơn</h5>
     </div>
 
     <div class="content">
@@ -41,48 +47,85 @@
             Bạn đang Offline — <a href="/shipper/trang-thai">bật làm việc</a> mới nhận được đơn.
         </div>
 
-        <div th:each="d : ${listDon}" class="cuoc">
-            <div class="d-flex justify-content-between">
-                <b class="text-primary" th:text="${d.maCodeDonShop}">SHOP-001</b>
-                <span class="badge bg-primary" th:text="${d.trangThai}">DA_XAC_NHAN</span>
-            </div>
-            <div class="mt-2"><b>🏠 Lấy hàng:</b>
-                <span th:text="${d.gianHang != null ? d.gianHang.diaChiKho : ''}"></span>
-                (<span th:text="${d.gianHang != null ? d.gianHang.sdtKho : ''}"></span>)
-            </div>
-            <div><b>📍 Giao tới:</b>
-                <span th:text="${d.donHangTong != null && d.donHangTong.diaChiGiao != null
-                    ? d.donHangTong.diaChiGiao.diaChiChiTiet + ', ' + d.donHangTong.diaChiGiao.quanHuyen + ', ' + d.donHangTong.diaChiGiao.tinhThanh : ''}"></span>
-            </div>
-            <div class="cod p-2 mt-2 d-flex justify-content-between">
-                <span>Vận đơn: <b th:text="${d.maVanDon != null ? d.maVanDon : '(chưa có)'}"></b></span>
-                <span>COD: <b th:text="${#numbers.formatDecimal(d.tongTienShopNhan,0,'COMMA',0,'POINT')}"></b></span>
-            </div>
-            <form method="post" th:action="@{'/shipper/nhan-don/' + ${d.maDonHangShop}}" class="mt-2">
-                <button class="btn btn-blue btn-big w-100" type="submit"
-                        th:disabled="${!duocNhanDon}">Nhận cuốc này</button>
-            </form>
+        <div class="apptab">
+            <a th:href="@{/shipper/don-cho-nhan(tab='cho-nhan',sort=${sort})}"
+               th:classappend="${tab != 'da-nhan'} ? 'active' : ''">Chưa nhận</a>
+            <a th:href="@{/shipper/don-cho-nhan(tab='da-nhan',sort=${sort})}"
+               th:classappend="${tab == 'da-nhan'} ? 'active' : ''">Đã nhận</a>
         </div>
-        <div th:if="${#lists.isEmpty(listDon)}" class="alert alert-info">Không còn đơn chờ nhận.</div>
 
-        <nav th:if="${tongTrang != null && tongTrang > 1}" class="d-flex justify-content-between align-items-center mt-2">
-            <a class="btn btn-outline-primary" th:if="${trangHienTai > 0}"
-               th:href="@{/shipper/don-cho-nhan(page=${trangHienTai - 1})}">← Trước</a>
-            <span th:unless="${trangHienTai > 0}"></span>
-            <span class="text-muted" th:text="'Trang ' + (${trangHienTai + 1}) + '/' + ${tongTrang}">Trang 1/1</span>
-            <a class="btn btn-outline-primary" th:if="${trangHienTai + 1 < tongTrang}"
-               th:href="@{/shipper/don-cho-nhan(page=${trangHienTai + 1})}">Sau →</a>
-            <span th:unless="${trangHienTai + 1 < tongTrang}"></span>
-        </nav>
+        <form method="get" th:action="@{/shipper/don-cho-nhan}" class="d-flex gap-2 mb-3">
+            <input type="hidden" name="tab" th:value="${tab}">
+            <select class="form-select" name="sort" onchange="this.form.submit()">
+                <option value="moi-nhat" th:selected="${sort != 'cu-nhat'}">Mới nhất trước</option>
+                <option value="cu-nhat" th:selected="${sort == 'cu-nhat'}">Cũ nhất trước</option>
+            </select>
+        </form>
 
-        <h6 class="text-primary fw-bold mt-4 mb-2">CUỐC CỦA TÔI</h6>
-        <div th:each="n : ${cuocCuaToi}" class="cuoc" style="border-left-color:#2E7D32">
-            <div class="d-flex justify-content-between">
-                <b th:text="${n.donHangShop != null ? n.donHangShop.maCodeDonShop : ''}"></b>
-                <span class="badge bg-success" th:text="${n.trangThaiDisplay}"></span>
+        <!-- TAB CHUA NHAN -->
+        <div th:if="${tab != 'da-nhan'}">
+            <div th:each="d : ${listDon}" class="cuoc">
+                <div class="d-flex justify-content-between align-items-center">
+                    <b class="text-primary" th:text="${d.maCodeDonShop}">SHOP-001</b>
+                    <span class="d-flex gap-2 align-items-center">
+                        <a th:if="${d.maVanDon != null}" th:href="@{/logistics/tra-cuu(maVanDon=${d.maVanDon})}"
+                           class="text-decoration-none small">🔍 Tra cứu</a>
+                        <span class="badge bg-primary" th:text="${d.trangThai}">DA_XAC_NHAN</span>
+                    </span>
+                </div>
+                <div class="mt-2"><b>🏠 Lấy hàng:</b>
+                    <span th:text="${d.gianHang != null ? d.gianHang.diaChiKho : ''}"></span>
+                    (<span th:text="${d.gianHang != null ? d.gianHang.sdtKho : ''}"></span>)
+                </div>
+                <div><b>📍 Giao tới:</b>
+                    <span th:text="${d.donHangTong != null && d.donHangTong.diaChiGiao != null
+                        ? d.donHangTong.diaChiGiao.diaChiChiTiet + ', ' + d.donHangTong.diaChiGiao.quanHuyen + ', ' + d.donHangTong.diaChiGiao.tinhThanh : ''}"></span>
+                </div>
+                <div class="cod p-2 mt-2 d-flex justify-content-between">
+                    <span>Vận đơn: <b th:text="${d.maVanDon != null ? d.maVanDon : '(chưa có)'}"></b></span>
+                    <span>COD: <b th:text="${#numbers.formatDecimal(d.tongTienShopNhan,0,'COMMA',0,'POINT')}"></b></span>
+                </div>
+                <form method="post" th:action="@{'/shipper/nhan-don/' + ${d.maDonHangShop}}" class="mt-2">
+                    <button class="btn btn-blue btn-big w-100" type="submit"
+                            th:disabled="${!duocNhanDon}">Nhận cuốc này</button>
+                </form>
             </div>
+            <div th:if="${#lists.isEmpty(listDon)}" class="alert alert-info">Không còn đơn chờ nhận.</div>
+
+            <nav th:if="${tongTrangCN != null && tongTrangCN > 1}" class="pager">
+                <a class="btn btn-outline-primary" th:if="${pageCN > 0}"
+                   th:href="@{/shipper/don-cho-nhan(tab='cho-nhan',sort=${sort},pageCN=${pageCN - 1})}">← Trước</a>
+                <span th:unless="${pageCN > 0}"></span>
+                <span class="text-muted" th:text="'Trang ' + (${pageCN + 1}) + '/' + ${tongTrangCN}">Trang 1/1</span>
+                <a class="btn btn-outline-primary" th:if="${pageCN + 1 < tongTrangCN}"
+                   th:href="@{/shipper/don-cho-nhan(tab='cho-nhan',sort=${sort},pageCN=${pageCN + 1})}">Sau →</a>
+                <span th:unless="${pageCN + 1 < tongTrangCN}"></span>
+            </nav>
         </div>
-        <div th:if="${cuocCuaToi != null && #lists.isEmpty(cuocCuaToi)}" class="text-muted small">Bạn chưa nhận cuốc nào.</div>
+
+        <!-- TAB DA NHAN -->
+        <div th:if="${tab == 'da-nhan'}">
+            <div th:each="n : ${cuocCuaToi}" class="cuoc" style="border-left-color:#2E7D32">
+                <div class="d-flex justify-content-between align-items-center gap-2">
+                    <b th:text="${n.donHangShop != null ? n.donHangShop.maCodeDonShop : ''}"></b>
+                    <span class="d-flex align-items-center gap-2 ms-auto">
+                        <span class="badge bg-success" th:text="${n.trangThaiDisplay}"></span>
+                    </span>
+                </div>
+                <div class="small text-muted" th:text="'Nhận lúc ' + ${#temporals.format(n.ngayTao,'dd/MM HH:mm')}"></div>
+            </div>
+            <div th:if="${cuocCuaToi != null && #lists.isEmpty(cuocCuaToi)}" class="text-muted small">Bạn chưa nhận cuốc nào.</div>
+
+            <nav th:if="${tongTrangDN != null && tongTrangDN > 1}" class="pager">
+                <a class="btn btn-outline-primary" th:if="${pageDN > 0}"
+                   th:href="@{/shipper/don-cho-nhan(tab='da-nhan',sort=${sort},pageDN=${pageDN - 1})}">← Trước</a>
+                <span th:unless="${pageDN > 0}"></span>
+                <span class="text-muted" th:text="'Trang ' + (${pageDN + 1}) + '/' + ${tongTrangDN}">Trang 1/1</span>
+                <a class="btn btn-outline-primary" th:if="${pageDN + 1 < tongTrangDN}"
+                   th:href="@{/shipper/don-cho-nhan(tab='da-nhan',sort=${sort},pageDN=${pageDN + 1})}">Sau →</a>
+                <span th:unless="${pageDN + 1 < tongTrangDN}"></span>
+            </nav>
+        </div>
     </div>
 
     <nav class="tabbar">

@@ -20,6 +20,8 @@ public interface DonHangShopRepository extends JpaRepository<DonHangShop, Long> 
 
     Optional<DonHangShop> findByMaCodeDonShop(String maCodeDonShop);
 
+    Optional<DonHangShop> findByMaVanDon(String maVanDon);
+
     List<DonHangShop> findAllByGianHang_MaGianHang(Long maGianHang);
 
     List<DonHangShop> findByDonHangTongMaDonHangTong(Long maDonHangTong);
