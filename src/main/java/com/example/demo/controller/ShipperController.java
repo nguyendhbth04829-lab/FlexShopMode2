@@ -81,26 +81,42 @@ public class ShipperController {
         return "redirect:/shipper/trang-thai";
     }
 
-    /** US-35: Danh sach cuoc cho nhan (mobile), 10 cuoc/trang. */
+    /** US-35: Danh sach cuoc cho nhan (mobile), 2 tab + phan trang + sap xep. */
     @GetMapping("/don-cho-nhan")
     public String donChoNhan(
             Model model,
-            @RequestParam(value = "page", defaultValue = "0") int page) {
+            @RequestParam(value = "tab", defaultValue = "cho-nhan") String tab,
+            @RequestParam(value = "sort", defaultValue = "moi-nhat") String sort,
+            @RequestParam(value = "pageCN", defaultValue = "0") int pageCN,
+            @RequestParam(value = "pageDN", defaultValue = "0") int pageDN) {
         try {
             TaiXeGiaoHang tx = shipperService.layShipperHienTai();
-            model.addAttribute("shipper", tx);
-            model.addAttribute("duocNhanDon", shipperService.duocNhanNhiemVu(tx));
-            org.springframework.data.domain.Page<com.example.demo.entity.DonHangShop> trang =
-                    shipperService.layDonChoNhan(page, 10);
-            model.addAttribute("trangDon", trang);
-            model.addAttribute("listDon", trang.getContent());
-            model.addAttribute("trangHienTai", page);
-            model.addAttribute("tongTrang", trang.getTotalPages());
-            model.addAttribute("cuocCuaToi", shipperService.layCuocCuaToi(tx.getMaTaiXe()));
+            napModelDonChoNhan(model, tx, tab, sort, pageCN, pageDN);
         } catch (IllegalStateException ex) {
             model.addAttribute("loiNghiepVu", ex.getMessage());
         }
         return "shipper/don-cho-nhan";
+    }
+
+    private void napModelDonChoNhan(Model model, TaiXeGiaoHang tx,
+                                    String tab, String sort, int pageCN, int pageDN) {
+        boolean cuNhat = "cu-nhat".equals(sort);
+        model.addAttribute("shipper", tx);
+        model.addAttribute("duocNhanDon", shipperService.duocNhanNhiemVu(tx));
+        model.addAttribute("tab", tab);
+        model.addAttribute("sort", sort);
+        org.springframework.data.domain.Page<com.example.demo.entity.DonHangShop> trangChoNhan =
+                shipperService.layDonChoNhan(pageCN, 10, cuNhat);
+        model.addAttribute("trangChoNhan", trangChoNhan);
+        model.addAttribute("listDon", trangChoNhan.getContent());
+        model.addAttribute("pageCN", pageCN);
+        model.addAttribute("tongTrangCN", trangChoNhan.getTotalPages());
+        org.springframework.data.domain.Page<com.example.demo.entity.NhiemVuGiaoHang> trangDaNhan =
+                shipperService.layCuocCuaToi(tx.getMaTaiXe(), pageDN, 10, cuNhat);
+        model.addAttribute("trangDaNhan", trangDaNhan);
+        model.addAttribute("cuocCuaToi", trangDaNhan.getContent());
+        model.addAttribute("pageDN", pageDN);
+        model.addAttribute("tongTrangDN", trangDaNhan.getTotalPages());
     }
 
     @PostMapping("/nhan-don/{maDon}")
@@ -112,10 +128,7 @@ public class ShipperController {
             model.addAttribute("loiNghiepVu", ex.getMessage());
             try {
                 TaiXeGiaoHang tx = shipperService.layShipperHienTai();
-                model.addAttribute("shipper", tx);
-                model.addAttribute("duocNhanDon", shipperService.duocNhanNhiemVu(tx));
-                model.addAttribute("listDon", shipperService.layDonChoNhan());
-                model.addAttribute("cuocCuaToi", shipperService.layCuocCuaToi(tx.getMaTaiXe()));
+                napModelDonChoNhan(model, tx, "cho-nhan", "moi-nhat", 0, 0);
             } catch (IllegalStateException ignored) {
             }
             return "shipper/don-cho-nhan";
@@ -129,7 +142,19 @@ public class ShipperController {
         try {
             TaiXeGiaoHang tx = shipperService.layShipperHienTai();
             model.addAttribute("shipper", tx);
-            model.addAttribute("cuocCuaToi", shipperService.layCuocCuaToi(tx.getMaTaiXe()));
+            java.util.List<com.example.demo.entity.NhiemVuGiaoHang> cuoc =
+                    shipperService.layCuocCuaToi(tx.getMaTaiXe());
+            model.addAttribute("cuocCuaToi", cuoc);
+            // US-40: map maDon -> yeu cau chuyen hoan (neu co)
+            java.util.Map<Long, com.example.demo.entity.YeuCauChuyenHoan> mapChuyenHoan =
+                    new java.util.HashMap<>();
+            for (com.example.demo.entity.NhiemVuGiaoHang n : cuoc) {
+                if (n.getDonHangShop() != null) {
+                    shipperService.layChuyenHoan(n.getDonHangShop().getMaDonHangShop())
+                            .ifPresent(yc -> mapChuyenHoan.put(n.getMaNhiemVu(), yc));
+                }
+            }
+            model.addAttribute("mapChuyenHoan", mapChuyenHoan);
         } catch (IllegalStateException ex) {
             model.addAttribute("loiNghiepVu", ex.getMessage());
         }
