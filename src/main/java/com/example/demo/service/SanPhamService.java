@@ -24,10 +24,11 @@ public class SanPhamService {
 
     @Autowired private SanPhamRepository sanPhamRepository;
     @Autowired private DanhMucRepository danhMucRepository;
-    // @Autowired private ThuongHieuRepository thuongHieuRepository; // Giả sử đã có
     @Autowired private BienTheSanPhamRepository bienTheRepository;
     @Autowired private LichSuGiaBienTheRepository lichSuGiaRepository;
     @Autowired private HinhAnhSanPhamRepository hinhAnhRepository;
+    @Autowired private FileStorageService fileStorageService;
+    @Autowired private com.example.demo.repository.ThuocTinhSanPhamRepository thuocTinhSanPhamRepository;
 
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
@@ -68,7 +69,29 @@ public class SanPhamService {
         sp.setChieuRongCm(form.getChieuRongCm());
         sp.setChieuCaoCm(form.getChieuCaoCm());
 
-        return sanPhamRepository.save(sp);
+        SanPham savedSp = sanPhamRepository.save(sp);
+
+        // Xử lý upload danh sách ảnh (US-13: Max 9 ảnh)
+        if (form.getFileAnhList() != null && !form.getFileAnhList().isEmpty()) {
+            int thuTu = 1;
+            for (MultipartFile file : form.getFileAnhList()) {
+                if (file != null && !file.isEmpty()) {
+                    if (thuTu > 9) {
+                        break; // Chỉ cho phép tối đa 9 ảnh
+                    }
+                    String fileName = fileStorageService.luuFile(file);
+                    HinhAnhSanPham hinhAnh = new HinhAnhSanPham();
+                    hinhAnh.setSanPham(savedSp);
+                    hinhAnh.setLinkAnh(fileName);
+                    hinhAnh.setLaAnhChinh(thuTu == 1);
+                    hinhAnh.setThuTuHienThi(thuTu);
+                    hinhAnhRepository.save(hinhAnh);
+                    thuTu++;
+                }
+            }
+        }
+
+        return savedSp;
     }
 
     @Transactional
@@ -146,5 +169,26 @@ public class SanPhamService {
         ha.setThuTuHienThi(count + 1);
 
         hinhAnhRepository.save(ha);
+    }
+
+    public SanPham timTheoId(Long id) {
+        return sanPhamRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
+    }
+
+    public java.util.List<com.example.demo.entity.BienTheSanPham> layDanhSachBienThe(Long maSanPham) {
+        return bienTheRepository.findBySanPham_MaSanPhamAndDaXoaFalse(maSanPham);
+    }
+
+    public java.util.List<com.example.demo.entity.ThuocTinhSanPham> layDanhSachThuocTinh(Long maSanPham) {
+        // Trả về danh sách thuộc tính động của sản phẩm
+        return thuocTinhSanPhamRepository.findBySanPham_MaSanPham(maSanPham);
+    }
+
+    @Transactional
+    public void xoaSanPham(Long id) {
+        SanPham sp = timTheoId(id);
+        sp.setDaXoa(true);
+        sanPhamRepository.save(sp);
     }
 }

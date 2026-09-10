@@ -19,7 +19,7 @@ public class FileStorageService {
     @Value("${app.upload.dir:uploads/khieu-nai/}")
     private String uploadDir;
 
-    public static final long MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+    public static final long MAX_FILE_SIZE = 50 * 1024 * 1024;
     public static final int MAX_FILE_COUNT = 5;
 
     private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList(
@@ -34,7 +34,7 @@ public class FileStorageService {
 
     public static class FileUploadResult {
         private final String fileUrl;
-        private final String fileType; // HINH_ANH or VIDEO
+        private final String fileType;
 
         public FileUploadResult(String fileUrl, String fileType) {
             this.fileUrl = fileUrl;
@@ -50,15 +50,11 @@ public class FileStorageService {
         }
     }
 
-    /**
-     * Kiểm tra tính hợp lệ nghiêm ngặt của tệp tin đính kèm
-     */
     public void kiemTraTepTinHopLe(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             return;
         }
 
-        // 1. Kiểm tra dung lượng
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new IllegalArgumentException("Tệp tin '" + file.getOriginalFilename() + "' vượt quá dung lượng cho phép (Tối đa 50MB)!");
         }
@@ -68,12 +64,10 @@ public class FileStorageService {
             throw new IllegalArgumentException("Tên tệp tin không hợp lệ hoặc bị rỗng!");
         }
 
-        // 2. Chống Directory Traversal attack
         if (originalFilename.contains("..") || originalFilename.contains("/") || originalFilename.contains("\\")) {
             throw new SecurityException("Phát hiện đường dẫn tệp tin không an toàn: " + originalFilename);
         }
 
-        // 3. Kiểm tra phần mở rộng tệp tin
         int lastDotIndex = originalFilename.lastIndexOf(".");
         if (lastDotIndex == -1) {
             throw new IllegalArgumentException("Tệp tin '" + originalFilename + "' thiếu phần mở rộng (.jpg, .png, .mp4...)!");
@@ -81,23 +75,19 @@ public class FileStorageService {
 
         String extension = originalFilename.substring(lastDotIndex).toLowerCase();
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
-            throw new IllegalArgumentException("Tệp tin '" + originalFilename + "' không thuộc định dạng được hỗ trợ (Chỉ chấp nhận: JPG, PNG, WEBP, GIF, MP4, MOV, AVI, WEBM, MKV)!");
+            throw new IllegalArgumentException("Tệp tin '" + originalFilename + "' không thuộc định dạng được hỗ trợ!");
         }
 
-        // 4. Kiểm tra MIME Content-Type
         String contentType = file.getContentType();
         if (contentType != null && !contentType.isBlank()) {
             String lowerContentType = contentType.toLowerCase();
             boolean isAllowedMime = ALLOWED_MIME_TYPES.stream().anyMatch(lowerContentType::startsWith);
             if (!isAllowedMime && !lowerContentType.equals("application/octet-stream")) {
-                throw new IllegalArgumentException("Kiểu nội dung MIME '" + contentType + "' của tệp '" + originalFilename + "' không hợp lệ cho ảnh hoặc video bằng chứng!");
+                throw new IllegalArgumentException("Kiểu nội dung MIME '" + contentType + "' không hợp lệ!");
             }
         }
     }
 
-    /**
-     * Lưu tệp tin an toàn vào thư mục lưu trữ
-     */
     public FileUploadResult luuTepTin(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
             return null;
@@ -129,10 +119,33 @@ public class FileStorageService {
         return new FileUploadResult(fileUrl, fileType);
     }
 
-    /**
-     * US-37: Luu anh bang chung POD cua shipper (chi nhan anh, toi da 10MB).
-     * Thu muc: uploads/pod/ - URL: /uploads/pod/
-     */
+    public String luuFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+
+        try {
+            String originalFileName = file.getOriginalFilename();
+            String fileExtension = "";
+            if (originalFileName != null && originalFileName.contains(".")) {
+                fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+            }
+            String newFileName = UUID.randomUUID().toString() + "_" + System.currentTimeMillis() + fileExtension;
+
+            Path uploadPath = Paths.get("uploads");
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            Path targetLocation = uploadPath.resolve(newFileName);
+            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+
+            return "/uploads/" + newFileName;
+        } catch (IOException ex) {
+            throw new RuntimeException("Không thể lưu file. Vui lòng thử lại!", ex);
+        }
+    }
+
     public String luuAnhPod(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Bắt buộc chụp/upload ảnh bằng chứng giao hàng (POD)!");
@@ -147,7 +160,7 @@ public class FileStorageService {
         }
         int dot = originalFilename.lastIndexOf(".");
         if (dot == -1) {
-            throw new IllegalArgumentException("Ảnh POD thiếu phần mở rộng (.jpg, .png...)!");
+            throw new IllegalArgumentException("Ảnh POD thiếu phần mở rộng!");
         }
         String extension = originalFilename.substring(dot).toLowerCase();
         if (!Arrays.asList(".jpg", ".jpeg", ".png", ".webp", ".gif").contains(extension)) {
@@ -168,15 +181,11 @@ public class FileStorageService {
         return "/uploads/pod/" + uniqueFileName;
     }
 
-    /**
-     * Lưu tệp tin ảnh banner cho chương trình Flash Sale từ máy tính
-     */
     public String luuAnhBannerFlashSale(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
             return null;
         }
 
-        // 1. Kiểm tra dung lượng tối đa 15MB cho banner
         if (file.getSize() > 15 * 1024 * 1024) {
             throw new IllegalArgumentException("Ảnh banner vượt quá dung lượng cho phép (Tối đa 15MB)!");
         }
@@ -186,23 +195,21 @@ public class FileStorageService {
             throw new IllegalArgumentException("Tên tệp tin ảnh banner không hợp lệ!");
         }
 
-        // 2. Chống Directory Traversal
         if (originalFilename.contains("..") || originalFilename.contains("/") || originalFilename.contains("\\")) {
             throw new SecurityException("Phát hiện tên tệp tin không an toàn: " + originalFilename);
         }
 
         int lastDotIndex = originalFilename.lastIndexOf(".");
         if (lastDotIndex == -1) {
-            throw new IllegalArgumentException("Tệp tin ảnh thiếu phần mở rộng (.jpg, .png, .webp...)!");
+            throw new IllegalArgumentException("Tệp tin ảnh thiếu phần mở rộng!");
         }
 
         String extension = originalFilename.substring(lastDotIndex).toLowerCase();
         List<String> validExtensions = Arrays.asList(".jpg", ".jpeg", ".png", ".webp", ".gif");
         if (!validExtensions.contains(extension)) {
-            throw new IllegalArgumentException("Định dạng ảnh không hợp lệ (Chỉ chấp nhận: JPG, PNG, WEBP, GIF)!");
+            throw new IllegalArgumentException("Định dạng ảnh không hợp lệ!");
         }
 
-        // 3. Thư mục lưu trữ: uploads/flash-sale/
         Path flashSaleUploadPath = Paths.get("uploads", "flash-sale");
         if (!Files.exists(flashSaleUploadPath)) {
             Files.createDirectories(flashSaleUploadPath);

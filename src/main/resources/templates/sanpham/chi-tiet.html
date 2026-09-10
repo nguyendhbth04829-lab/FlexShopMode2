@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết Sản phẩm - FlexShop Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --sidebar-bg:#1e2a3a; --sidebar-hover:#2d3f54; --accent:#3b82f6; }
+        body { background:#f1f5f9; font-family:'Segoe UI',sans-serif; }
+        .sidebar { width:240px; min-height:100vh; background:var(--sidebar-bg); position:fixed; top:0; left:0; z-index:100; }
+        .sidebar .brand { padding:20px 16px 16px; border-bottom:1px solid rgba(255,255,255,.1); }
+        .sidebar .brand h5 { color:#fff; font-weight:700; margin:0; font-size:1.1rem; }
+        .sidebar .brand span { color:#64748b; font-size:.75rem; }
+        .nav-section { padding:12px 16px 4px; color:#64748b; font-size:.7rem; font-weight:600; letter-spacing:1px; text-transform:uppercase; }
+        .sidebar .nav-link { color:#94a3b8; padding:9px 16px; border-radius:6px; margin:1px 8px; font-size:.875rem; display:flex; align-items:center; gap:10px; }
+        .sidebar .nav-link:hover { color:#fff; background:var(--sidebar-hover); }
+        .sidebar .nav-link.active { color:#fff; background:var(--accent); }
+        .sidebar .nav-link i { width:18px; text-align:center; }
+        .main-content { margin-left:240px; padding:24px; }
+        .card { border:none; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.1); margin-bottom:20px; }
+        .card-header-custom { background:#fff; border-bottom:2px solid #f1f5f9; padding:14px 20px; border-radius:12px 12px 0 0; display:flex; align-items:center; justify-content:space-between; }
+        .table th { font-size:.78rem; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:.5px; }
+        .table td { vertical-align:middle; font-size:.875rem; }
+        .btn-action { width:28px; height:28px; padding:0; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:.72rem; }
+        .price-tag { font-weight:600; color:#16a34a; }
+        .info-label { font-size:.75rem; color:#94a3b8; text-transform:uppercase; font-weight:600; }
+        .info-value { font-size:.95rem; color:#1e293b; font-weight:500; }
+        .sku-badge { font-family:monospace; background:#f1f5f9; padding:2px 8px; border-radius:4px; font-size:.8rem; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="brand"><h5><i class="fas fa-store me-2" style="color:var(--accent)"></i>FlexShop</h5><span>Admin Dashboard</span></div>
+    <div class="nav-section">Quản trị</div>
+    <a href="/admin/danh-muc" class="nav-link"><i class="fas fa-th-large"></i> Danh mục</a>
+    <a href="/admin/thuong-hieu" class="nav-link"><i class="far fa-copyright"></i> Thương hiệu</a>
+    <a href="/admin/sao-qua-ta/danh-sach" class="nav-link"><i class="fas fa-gavel"></i> Sao Quả Tạ</a>
+    <div class="nav-section">Gian hàng</div>
+    <a href="/seller/san-pham" class="nav-link active"><i class="fas fa-box-open"></i> Sản phẩm</a>
+    <a href="/seller/kho-hang" class="nav-link"><i class="fas fa-warehouse"></i> Kho hàng</a>
+</div>
+
+<div class="main-content">
+    <!-- Alerts -->
+    <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4">
+        <i class="fas fa-check-circle"></i><span th:text="${thongBaoThanhCong}"></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 mb-4">
+        <i class="fas fa-exclamation-circle"></i><span th:text="${thongBaoLoi}"></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/seller/san-pham">Sản phẩm</a></li>
+            <li class="breadcrumb-item active" th:text="${sanPham.tenSanPham}">Chi tiết</li>
+        </ol>
+    </nav>
+
+    <!-- Thông tin cơ bản SP -->
+    <div class="card">
+        <div class="card-header-custom">
+            <div>
+                <h5 class="fw-bold mb-0" th:text="${sanPham.tenSanPham}">Tên sản phẩm</h5>
+                <small class="text-muted" th:text="'ID: ' + ${sanPham.maSanPham} + ' | Slug: ' + ${sanPham.duongDanSlug}">info</small>
+            </div>
+            <span th:if="${sanPham.trangThai == 'HOAT_DONG'}" class="badge bg-success fs-6">Hoạt động</span>
+            <span th:unless="${sanPham.trangThai == 'HOAT_DONG'}" class="badge bg-warning text-dark fs-6" th:text="${sanPham.trangThai}">Trạng thái</span>
+        </div>
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="info-label">Danh mục</div>
+                    <div class="info-value" th:text="${sanPham.danhMuc != null ? sanPham.danhMuc.tenDanhMuc : '—'}">—</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-label">Giá cơ bản</div>
+                    <div class="info-value price-tag" th:text="${#numbers.formatDecimal(sanPham.giaCoBan, 0, 'COMMA', 0, 'POINT') + ' đ'}">—</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-label">Cân nặng</div>
+                    <div class="info-value" th:text="${sanPham.canNangGram} + ' gram'">—</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-label">Kích thước (D × R × C)</div>
+                    <div class="info-value" th:text="${sanPham.chieuDaiCm} + ' × ' + ${sanPham.chieuRongCm} + ' × ' + ${sanPham.chieuCaoCm} + ' cm'">—</div>
+                </div>
+                <div class="col-12" th:if="${sanPham.moTaNgan != null}">
+                    <div class="info-label">Mô tả ngắn</div>
+                    <div class="info-value" th:text="${sanPham.moTaNgan}">—</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== US-12: BIẾN THỂ SKU ========== -->
+    <div class="card">
+        <div class="card-header-custom">
+            <div>
+                <h6 class="fw-bold mb-0"><i class="fas fa-cubes me-2 text-primary"></i>Biến thể / SKU <span class="badge bg-primary ms-1" th:text="${danhSachBienThe.size()}">0</span></h6>
+                <small class="text-muted">US-12 — Quản lý biến thể màu/size + giá bán</small>
+            </div>
+            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalThemBienThe">
+                <i class="fas fa-plus me-1"></i> Thêm biến thể
+            </button>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Mã SKU</th>
+                        <th>Tên biến thể</th>
+                        <th>Giá bán</th>
+                        <th>Giá gốc</th>
+                        <th class="text-center" style="width:120px">Đổi giá (US-14)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${danhSachBienThe.isEmpty()}">
+                        <td colspan="5" class="text-center py-4 text-muted"><i class="fas fa-cubes fa-2x d-block mb-2 opacity-25"></i>Chưa có biến thể nào</td>
+                    </tr>
+                    <tr th:each="bt : ${danhSachBienThe}">
+                        <td class="ps-4"><span class="sku-badge" th:text="${bt.maSku}">SKU-001</span></td>
+                        <td th:text="${bt.tenBienThe}">Màu đỏ - Size M</td>
+                        <td class="price-tag" th:text="${#numbers.formatDecimal(bt.giaBan, 0, 'COMMA', 0, 'POINT') + ' đ'}">0 đ</td>
+                        <td class="text-muted" th:text="${bt.giaGoc != null ? #numbers.formatDecimal(bt.giaGoc, 0, 'COMMA', 0, 'POINT') + ' đ' : '—'}">—</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-warning btn-action"
+                                    data-bs-toggle="modal" th:data-bs-target="'#modalDoiGia' + ${bt.maBienThe}"
+                                    title="Đổi giá & ghi lịch sử">
+                                <i class="fas fa-tag"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Thêm biến thể -->
+    <div class="modal fade" id="modalThemBienThe" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow">
+                <form th:action="@{/seller/san-pham/bien-the/them}" method="post" th:object="${formBienThe}">
+                    <input type="hidden" name="maSanPham" th:value="${sanPham.maSanPham}">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-semibold"><i class="fas fa-plus-circle me-2 text-primary"></i>Thêm Biến Thể SKU</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label">Mã SKU <span class="text-danger">*</span></label>
+                                <input type="text" th:field="*{maSku}" class="form-control" required placeholder="VD: NIKE-RED-M">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Tên biến thể <span class="text-danger">*</span></label>
+                                <input type="text" th:field="*{tenBienThe}" class="form-control" required placeholder="VD: Đỏ - Size M">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Giá bán (đ) <span class="text-danger">*</span></label>
+                                <input type="number" th:field="*{giaBan}" class="form-control" required min="0">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Giá gốc (đ)</label>
+                                <input type="number" th:field="*{giaGoc}" class="form-control" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Lưu biến thể</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Đổi giá (US-14 — Tự động ghi Lịch sử) -->
+    <div th:each="bt : ${danhSachBienThe}">
+        <div class="modal fade" th:id="'modalDoiGia' + ${bt.maBienThe}" tabindex="-1">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content border-0 shadow">
+                    <form th:action="@{/seller/san-pham/bien-the/{id}/cap-nhat-gia(id=${bt.maBienThe})}" method="post">
+                        <div class="modal-header">
+                            <h6 class="modal-title fw-semibold"><i class="fas fa-tag me-2 text-warning"></i>Đổi giá biến thể</h6>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-2 p-3 bg-light rounded">
+                                <small class="text-muted d-block">Biến thể</small>
+                                <strong th:text="${bt.tenBienThe}">Tên biến thể</strong>
+                                <br><small class="text-muted">Giá hiện tại: <span class="price-tag" th:text="${#numbers.formatDecimal(bt.giaBan, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span></small>
+                            </div>
+                            <div class="mb-0">
+                                <label class="form-label">Giá mới (đ) <span class="text-danger">*</span></label>
+                                <input type="number" name="giaMoi" class="form-control" required min="0" th:placeholder="'Giá hiện tại: ' + ${bt.giaBan}">
+                                <div class="form-text text-info"><i class="fas fa-info-circle me-1"></i>Hệ thống tự động lưu lịch sử giá (US-14)</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-warning btn-sm text-white"><i class="fas fa-check me-1"></i>Xác nhận đổi giá</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== US-57: THUỘC TÍNH ĐỘNG ========== -->
+    <div class="card">
+        <div class="card-header-custom">
+            <div>
+                <h6 class="fw-bold mb-0"><i class="fas fa-tags me-2 text-success"></i>Thuộc tính Động <span class="badge bg-success ms-1" th:text="${danhSachThuocTinh.size()}">0</span></h6>
+                <small class="text-muted">US-57 — Màu sắc, chất liệu, kích thước... linh hoạt theo từng SP</small>
+            </div>
+            <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#modalThemThuocTinh">
+                <i class="fas fa-plus me-1"></i> Thêm thuộc tính
+            </button>
+        </div>
+        <div class="card-body">
+            <div th:if="${danhSachThuocTinh.isEmpty()}" class="text-center py-3 text-muted">
+                <i class="fas fa-tags fa-2x d-block mb-2 opacity-25"></i>Chưa có thuộc tính nào. Thêm để mô tả chi tiết sản phẩm!
+            </div>
+            <div class="row g-3" th:unless="${danhSachThuocTinh.isEmpty()}">
+                <div class="col-md-4" th:each="tt : ${danhSachThuocTinh}">
+                    <div class="border rounded-3 p-3">
+                        <div class="fw-semibold mb-2" th:text="${tt.tenThuocTinh}">Màu sắc</div>
+                        <div class="d-flex flex-wrap gap-1">
+                            <span th:each="giatri : ${tt.danhSachGiaTri}"
+                                  class="badge bg-light text-dark border"
+                                  th:text="${giatri.giaTri}">Đỏ</span>
+                        </div>
+                        <div th:if="${tt.danhSachGiaTri == null or tt.danhSachGiaTri.isEmpty()}" class="text-muted small">Chưa có giá trị</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Thêm Thuộc Tính (US-57) -->
+    <div class="modal fade" id="modalThemThuocTinh" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow">
+                <form th:action="@{/seller/thuoc-tinh/them}" method="post">
+                    <input type="hidden" name="maSanPham" th:value="${sanPham.maSanPham}">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-semibold"><i class="fas fa-tags me-2 text-success"></i>Thêm Thuộc Tính Động</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Tên thuộc tính <span class="text-danger">*</span></label>
+                            <input type="text" name="tenThuocTinh" class="form-control" required placeholder="VD: Màu sắc, Chất liệu, Kiểu dáng...">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Các giá trị (mỗi dòng một giá trị)</label>
+                            <textarea class="form-control" id="giaTriInput" rows="4" placeholder="Đỏ&#10;Xanh&#10;Vàng&#10;Trắng"></textarea>
+                            <div id="hiddenGiaTri"></div>
+                            <div class="form-text">Mỗi dòng là một giá trị, hệ thống sẽ tự lưu từng cái vào bảng con</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-success" onclick="prepareGiaTri()"><i class="fas fa-save me-1"></i>Lưu thuộc tính</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Chuyển textarea mỗi dòng thành hidden inputs dạng mảng
+function prepareGiaTri() {
+    const textarea = document.getElementById('giaTriInput');
+    const container = document.getElementById('hiddenGiaTri');
+    container.innerHTML = '';
+    const lines = textarea.value.split('\n').filter(l => l.trim() !== '');
+    lines.forEach((line, i) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = `danhSachGiaTri[${i}]`;
+        input.value = line.trim();
+        container.appendChild(input);
+    });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sản phẩm - FlexShop Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --sidebar-bg:#1e2a3a; --sidebar-hover:#2d3f54; --accent:#3b82f6; }
+        body { background:#f1f5f9; font-family:'Segoe UI',sans-serif; }
+        .sidebar { width:240px; min-height:100vh; background:var(--sidebar-bg); position:fixed; top:0; left:0; z-index:100; }
+        .sidebar .brand { padding:20px 16px 16px; border-bottom:1px solid rgba(255,255,255,.1); }
+        .sidebar .brand h5 { color:#fff; font-weight:700; margin:0; font-size:1.1rem; }
+        .sidebar .brand span { color:#64748b; font-size:.75rem; }
+        .nav-section { padding:12px 16px 4px; color:#64748b; font-size:.7rem; font-weight:600; letter-spacing:1px; text-transform:uppercase; }
+        .sidebar .nav-link { color:#94a3b8; padding:9px 16px; border-radius:6px; margin:1px 8px; font-size:.875rem; display:flex; align-items:center; gap:10px; }
+        .sidebar .nav-link:hover { color:#fff; background:var(--sidebar-hover); }
+        .sidebar .nav-link.active { color:#fff; background:var(--accent); }
+        .sidebar .nav-link i { width:18px; text-align:center; }
+        .main-content { margin-left:240px; padding:24px; }
+        .card { border:none; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+        .table th { font-size:.8rem; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:.5px; }
+        .table td { vertical-align:middle; font-size:.875rem; }
+        .btn-action { width:30px; height:30px; padding:0; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:.75rem; }
+        .price-tag { font-weight:600; color:#16a34a; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="brand"><h5><i class="fas fa-store me-2" style="color:var(--accent)"></i>FlexShop</h5><span>Admin Dashboard</span></div>
+    <div class="nav-section">Quản trị</div>
+    <a href="/admin/danh-muc" class="nav-link"><i class="fas fa-th-large"></i> Danh mục</a>
+    <a href="/admin/thuong-hieu" class="nav-link"><i class="far fa-copyright"></i> Thương hiệu</a>
+    <a href="/admin/sao-qua-ta/danh-sach" class="nav-link"><i class="fas fa-gavel"></i> Sao Quả Tạ</a>
+    <div class="nav-section">Gian hàng</div>
+    <a href="/seller/san-pham" class="nav-link active"><i class="fas fa-box-open"></i> Sản phẩm</a>
+    <a href="/seller/kho-hang" class="nav-link"><i class="fas fa-warehouse"></i> Kho hàng</a>
+</div>
+
+<div class="main-content">
+    <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4">
+        <i class="fas fa-check-circle"></i><span th:text="${thongBaoThanhCong}"></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 mb-4">
+        <i class="fas fa-exclamation-circle"></i><span th:text="${thongBaoLoi}"></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold text-dark mb-0">Quản lý Sản phẩm</h4>
+            <small class="text-muted">US-12, US-13 (Ảnh), US-14 (Lịch sử giá)</small>
+        </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalThemSP">
+            <i class="fas fa-plus me-1"></i> Thêm sản phẩm
+        </button>
+    </div>
+
+    <!-- Tìm kiếm -->
+    <div class="card mb-4">
+        <div class="card-body py-3">
+            <form method="get" th:action="@{/seller/san-pham}" class="d-flex gap-2">
+                <input type="text" name="tuKhoa" class="form-control" placeholder="Tìm tên sản phẩm..." th:value="${tuKhoa}" style="max-width:360px">
+                <button type="submit" class="btn btn-outline-primary px-4"><i class="fas fa-search"></i></button>
+                <a href="/seller/san-pham" class="btn btn-outline-secondary">Xóa lọc</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bảng danh sách -->
+    <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <span class="fw-semibold">Danh sách sản phẩm</span>
+            <span class="badge bg-secondary" th:text="${pageSanPham.totalElements} + ' sản phẩm'">0 sản phẩm</span>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4" style="width:60px">ID</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Danh mục</th>
+                        <th>Giá cơ bản</th>
+                        <th>Trạng thái</th>
+                        <th class="text-center" style="width:150px">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${pageSanPham.empty}">
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="fas fa-box-open fa-3x mb-3 d-block opacity-25"></i>
+                            Chưa có sản phẩm nào. Bấm "Thêm sản phẩm" để bắt đầu!
+                        </td>
+                    </tr>
+                    <tr th:each="sp : ${pageSanPham.content}">
+                        <td class="ps-4 text-muted" th:text="${sp.maSanPham}">1</td>
+                        <td>
+                            <div class="fw-semibold" th:text="${sp.tenSanPham}">Tên sản phẩm</div>
+                            <small class="text-muted" th:text="${sp.duongDanSlug}">slug</small>
+                        </td>
+                        <td class="text-muted" th:text="${sp.danhMuc != null ? sp.danhMuc.tenDanhMuc : '—'}">Danh mục</td>
+                        <td class="price-tag" th:text="${#numbers.formatDecimal(sp.giaCoBan, 0, 'COMMA', 0, 'POINT') + ' đ'}">100,000 đ</td>
+                        <td>
+                            <span th:if="${sp.trangThai == 'HOAT_DONG'}" class="badge bg-success">Hoạt động</span>
+                            <span th:unless="${sp.trangThai == 'HOAT_DONG'}" class="badge bg-warning text-dark" th:text="${sp.trangThai}">Khác</span>
+                        </td>
+                        <td class="text-center">
+                            <!-- Xem chi tiết / Quản lý biến thể, ảnh, giá, thuộc tính -->
+                            <a th:href="@{/seller/san-pham/{id}(id=${sp.maSanPham})}" class="btn btn-sm btn-outline-info btn-action me-1" title="Chi tiết">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <form th:action="@{/seller/san-pham/xoa/{id}(id=${sp.maSanPham})}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger btn-action"
+                                        onclick="return confirm('Xóa sản phẩm này?')" title="Xóa">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- Pagination -->
+        <div class="card-footer bg-white d-flex align-items-center justify-content-between" th:if="${pageSanPham.totalPages > 1}">
+            <small class="text-muted" th:text="'Trang ' + (${pageSanPham.number}+1) + ' / ' + ${pageSanPham.totalPages}"></small>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item" th:classappend="${pageSanPham.first ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/seller/san-pham(page=${pageSanPham.number - 1})}">‹</a>
+                    </li>
+                    <li class="page-item" th:classappend="${pageSanPham.last ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/seller/san-pham(page=${pageSanPham.number + 1})}">›</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Modal Thêm Sản Phẩm -->
+    <div class="modal fade" id="modalThemSP" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow">
+                <form th:action="@{/seller/san-pham/them}" method="post" enctype="multipart/form-data" th:object="${formSanPham}">
+                    <input type="hidden" name="maGianHang" value="1">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-semibold"><i class="fas fa-box me-2 text-primary"></i>Thêm Sản Phẩm Mới</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
+                                <input type="text" th:field="*{tenSanPham}" class="form-control" required minlength="10" maxlength="255" placeholder="Tối thiểu 10 ký tự">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Danh mục <span class="text-danger">*</span></label>
+                                <select th:field="*{maDanhMuc}" class="form-select" required>
+                                    <option value="">-- Chọn danh mục --</option>
+                                    <option th:each="dm : ${danhSachDanhMuc}"
+                                            th:value="${dm.maDanhMuc}"
+                                            th:text="${(dm.capDo == 2 ? '↳ ' : (dm.capDo == 3 ? '    ↳ ' : '')) + dm.tenDanhMuc}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Mô tả ngắn</label>
+                                <textarea th:field="*{moTaNgan}" class="form-control" rows="2" maxlength="500" placeholder="Tối đa 500 ký tự"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Ảnh sản phẩm <span class="text-muted">(US-13, tối đa 9 ảnh)</span></label>
+                                <input type="file" name="fileAnhList" class="form-control" accept="image/*" multiple>
+                                <div class="form-text">Ảnh đầu tiên sẽ là ảnh chính</div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Giá cơ bản (đ) <span class="text-danger">*</span></label>
+                                <input type="number" th:field="*{giaCoBan}" class="form-control" required min="0">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Cân nặng (gram) <span class="text-danger">*</span></label>
+                                <input type="number" th:field="*{canNangGram}" class="form-control" required min="1">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Dài (cm) <span class="text-danger">*</span></label>
+                                <input type="number" th:field="*{chieuDaiCm}" class="form-control" required min="1">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Rộng (cm) <span class="text-danger">*</span></label>
+                                <input type="number" th:field="*{chieuRongCm}" class="form-control" required min="1">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Cao (cm) <span class="text-danger">*</span></label>
+                                <input type="number" th:field="*{chieuCaoCm}" class="form-control" required min="1">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Tạo sản phẩm</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

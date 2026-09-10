@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thương hiệu - FlexShop Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --sidebar-bg:#1e2a3a; --sidebar-hover:#2d3f54; --accent:#3b82f6; }
+        body { background:#f1f5f9; font-family:'Segoe UI',sans-serif; }
+        .sidebar { width:240px; min-height:100vh; background:var(--sidebar-bg); position:fixed; top:0; left:0; z-index:100; }
+        .sidebar .brand { padding:20px 16px 16px; border-bottom:1px solid rgba(255,255,255,.1); }
+        .sidebar .brand h5 { color:#fff; font-weight:700; margin:0; font-size:1.1rem; }
+        .sidebar .brand span { color:#64748b; font-size:.75rem; }
+        .nav-section { padding:12px 16px 4px; color:#64748b; font-size:.7rem; font-weight:600; letter-spacing:1px; text-transform:uppercase; }
+        .sidebar .nav-link { color:#94a3b8; padding:9px 16px; border-radius:6px; margin:1px 8px; font-size:.875rem; display:flex; align-items:center; gap:10px; }
+        .sidebar .nav-link:hover { color:#fff; background:var(--sidebar-hover); }
+        .sidebar .nav-link.active { color:#fff; background:var(--accent); }
+        .sidebar .nav-link i { width:18px; text-align:center; }
+        .main-content { margin-left:240px; padding:24px; }
+        .card { border:none; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+        .table th { font-size:.8rem; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:.5px; }
+        .table td { vertical-align:middle; font-size:.875rem; }
+        .btn-action { width:30px; height:30px; padding:0; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:.75rem; }
+        .logo-thumb { width:44px; height:44px; object-fit:contain; border-radius:8px; background:#f8fafc; border:1px solid #e2e8f0; padding:4px; }
+        .logo-placeholder { width:44px; height:44px; border-radius:8px; background:#f1f5f9; display:inline-flex; align-items:center; justify-content:center; color:#cbd5e1; font-size:1.2rem; }
+        .preview-img { max-height:120px; border-radius:8px; border:1px dashed #e2e8f0; display:none; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="brand"><h5><i class="fas fa-store me-2" style="color:var(--accent)"></i>FlexShop</h5><span>Admin Dashboard</span></div>
+    <div class="nav-section">Quản trị</div>
+    <a href="/admin/danh-muc" class="nav-link"><i class="fas fa-th-large"></i> Danh mục</a>
+    <a href="/admin/thuong-hieu" class="nav-link active"><i class="far fa-copyright"></i> Thương hiệu</a>
+    <a href="/admin/sao-qua-ta/danh-sach" class="nav-link"><i class="fas fa-gavel"></i> Sao Quả Tạ</a>
+    <div class="nav-section">Gian hàng</div>
+    <a href="/seller/san-pham" class="nav-link"><i class="fas fa-box-open"></i> Sản phẩm</a>
+    <a href="/seller/kho-hang" class="nav-link"><i class="fas fa-warehouse"></i> Kho hàng</a>
+</div>
+
+<div class="main-content">
+    <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4">
+        <i class="fas fa-check-circle"></i><span th:text="${thongBaoThanhCong}"></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 mb-4">
+        <i class="fas fa-exclamation-circle"></i><span th:text="${thongBaoLoi}"></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold text-dark mb-0">Quản lý Thương hiệu</h4>
+            <small class="text-muted">CRUD đầy đủ + Upload logo vật lý</small>
+        </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalThem">
+            <i class="fas fa-plus me-1"></i> Thêm thương hiệu
+        </button>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <span class="fw-semibold">Danh sách thương hiệu</span>
+            <span class="badge bg-secondary" th:text="${pageData.totalElements} + ' thương hiệu'">0 thương hiệu</span>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4" style="width:60px">ID</th>
+                        <th style="width:70px">Logo</th>
+                        <th>Tên thương hiệu</th>
+                        <th>Trạng thái</th>
+                        <th class="text-center" style="width:120px">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${pageData.empty}">
+                        <td colspan="5" class="text-center py-4 text-muted">
+                            <i class="fas fa-inbox fa-2x mb-2 d-block"></i>Chưa có thương hiệu nào
+                        </td>
+                    </tr>
+                    <tr th:each="th : ${pageData.content}">
+                        <td class="ps-4 text-muted" th:text="${th.maThuongHieu}">1</td>
+                        <td>
+                            <!-- Nếu có file upload → dùng /uploads/, nếu chỉ là text URL → dùng trực tiếp -->
+                            <img th:if="${th.linkLogo != null and !th.linkLogo.isEmpty()}"
+                                 th:src="${th.linkLogo.startsWith('http') ? th.linkLogo : '/uploads/' + th.linkLogo}"
+                                 class="logo-thumb"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex'">
+                            <span th:if="${th.linkLogo != null and !th.linkLogo.isEmpty()}"
+                                  class="logo-placeholder" style="display:none">
+                                <i class="fas fa-image"></i>
+                            </span>
+                            <span th:if="${th.linkLogo == null or th.linkLogo.isEmpty()}" class="logo-placeholder">
+                                <i class="fas fa-image"></i>
+                            </span>
+                        </td>
+                        <td><strong th:text="${th.tenThuongHieu}">Nike</strong></td>
+                        <td>
+                            <span th:if="${th.dangHoatDong}" class="badge bg-success">Hoạt động</span>
+                            <span th:unless="${th.dangHoatDong}" class="badge bg-warning text-dark">Tạm ẩn</span>
+                        </td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-outline-primary btn-action me-1"
+                                    data-bs-toggle="modal" th:data-bs-target="'#modalSua' + ${th.maThuongHieu}">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <form th:action="@{/admin/thuong-hieu/xoa/{id}(id=${th.maThuongHieu})}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger btn-action"
+                                        onclick="return confirm('Xóa thương hiệu này?')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Thêm -->
+    <div class="modal fade" id="modalThem" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow">
+                <form th:action="@{/admin/thuong-hieu/them}" method="post" enctype="multipart/form-data" th:object="${formThuongHieu}">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-semibold"><i class="fas fa-plus-circle me-2 text-primary"></i>Thêm Thương Hiệu</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Tên thương hiệu <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{tenThuongHieu}" class="form-control" required maxlength="100" placeholder="Ví dụ: Nike, Adidas...">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Upload logo (file ảnh)</label>
+                            <input type="file" name="fileLogo" class="form-control" accept="image/*" onchange="previewLogo(this, 'previewThem')">
+                            <img id="previewThem" class="preview-img mt-2" alt="Preview logo">
+                            <div class="form-text">Hỗ trợ: JPG, PNG, SVG, WEBP</div>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" th:field="*{dangHoatDong}" id="hoatDongThem" checked>
+                            <label class="form-check-label" for="hoatDongThem">Đang hoạt động</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Lưu lại</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Sửa cho từng item -->
+    <div th:each="th : ${pageData.content}">
+        <div class="modal fade" th:id="'modalSua' + ${th.maThuongHieu}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content border-0 shadow">
+                    <form th:action="@{/admin/thuong-hieu/sua/{id}(id=${th.maThuongHieu})}" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-semibold"><i class="fas fa-pen me-2 text-warning"></i>Sửa: <span th:text="${th.tenThuongHieu}"></span></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Tên thương hiệu <span class="text-danger">*</span></label>
+                                <input type="text" name="tenThuongHieu" class="form-control" th:value="${th.tenThuongHieu}" required maxlength="100">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Logo hiện tại</label>
+                                <div class="mb-2" th:if="${th.linkLogo != null and !th.linkLogo.isEmpty()}">
+                                    <img th:src="${th.linkLogo.startsWith('http') ? th.linkLogo : '/uploads/' + th.linkLogo}"
+                                         style="height:50px; border-radius:6px; border:1px solid #e2e8f0;"
+                                         onerror="this.style.display='none'">
+                                    <small class="text-muted ms-2" th:text="${th.linkLogo}"></small>
+                                </div>
+                                <input type="file" name="fileLogo" class="form-control" accept="image/*">
+                                <div class="form-text">Để trống nếu không muốn đổi logo</div>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="dangHoatDong" value="true" th:checked="${th.dangHoatDong}">
+                                <label class="form-check-label">Đang hoạt động</label>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-warning text-white"><i class="fas fa-save me-1"></i>Cập nhật</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function previewLogo(input, previewId) {
+    const preview = document.getElementById(previewId);
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+</body>
+</html>

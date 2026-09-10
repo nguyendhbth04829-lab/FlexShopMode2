@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle != null ? pageTitle + ' - FlexShop Admin' : 'FlexShop Admin'}">FlexShop Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-bg: #1e2a3a;
+            --sidebar-hover: #2d3f54;
+            --accent: #3b82f6;
+        }
+        body { background: #f1f5f9; font-family: 'Segoe UI', sans-serif; }
+        .sidebar {
+            width: 240px; min-height: 100vh;
+            background: var(--sidebar-bg);
+            position: fixed; top: 0; left: 0; z-index: 100;
+            overflow-y: auto;
+        }
+        .sidebar .brand {
+            padding: 20px 16px 16px;
+            border-bottom: 1px solid rgba(255,255,255,.1);
+        }
+        .sidebar .brand h5 { color: #fff; font-weight: 700; margin: 0; font-size: 1.1rem; }
+        .sidebar .brand span { color: #64748b; font-size: 0.75rem; }
+        .nav-section { padding: 12px 16px 4px; color: #64748b; font-size: 0.7rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+        .sidebar .nav-link {
+            color: #94a3b8; padding: 9px 16px; border-radius: 6px; margin: 1px 8px;
+            font-size: 0.875rem; display: flex; align-items: center; gap: 10px;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: #fff; background: var(--sidebar-hover);
+        }
+        .sidebar .nav-link.active { color: #fff; background: var(--accent); }
+        .sidebar .nav-link i { width: 18px; text-align: center; }
+        .main-content { margin-left: 240px; padding: 24px; min-height: 100vh; }
+        .page-header { margin-bottom: 20px; }
+        .page-header h4 { font-weight: 700; color: #1e293b; margin: 0; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+        .card-header { background: #fff; border-bottom: 1px solid #f1f5f9; border-radius: 12px 12px 0 0 !important; padding: 16px 20px; }
+        .table th { font-size: 0.8rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #f1f5f9; }
+        .table td { vertical-align: middle; font-size: 0.875rem; }
+        .badge { font-size: 0.72rem; font-weight: 500; }
+        .btn-action { width: 30px; height: 30px; padding: 0; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; }
+        .alert { border-radius: 10px; border: none; }
+        .modal-header { border-bottom: 1px solid #f1f5f9; }
+        .modal-footer { border-top: 1px solid #f1f5f9; }
+        .form-label { font-size: 0.8rem; font-weight: 600; color: #374151; }
+        .form-control, .form-select { font-size: 0.875rem; border-radius: 8px; }
+        .img-logo { width: 40px; height: 40px; object-fit: contain; border-radius: 6px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 3px; }
+        .avatar-placeholder { width: 40px; height: 40px; border-radius: 6px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.75rem; }
+    </style>
+</head>
+<body>
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <div class="brand">
+        <h5><i class="fas fa-store me-2" style="color: var(--accent)"></i>FlexShop</h5>
+        <span>Admin Dashboard</span>
+    </div>
+    <div class="nav-section">Quản trị</div>
+    <a href="/admin/danh-muc" class="nav-link" th:classappend="${activePage == 'danhmuc'} ? ' active'"><i class="fas fa-th-large"></i> Danh mục</a>
+    <a href="/admin/thuong-hieu" class="nav-link" th:classappend="${activePage == 'thuonghieu'} ? ' active'"><i class="far fa-copyright"></i> Thương hiệu</a>
+    <a href="/admin/sao-qua-ta/danh-sach" class="nav-link" th:classappend="${activePage == 'saoquata'} ? ' active'"><i class="fas fa-gavel"></i> Sao Quả Tạ</a>
+    <div class="nav-section">Gian hàng</div>
+    <a href="/seller/san-pham" class="nav-link" th:classappend="${activePage == 'sanpham'} ? ' active'"><i class="fas fa-box-open"></i> Sản phẩm</a>
+    <a href="/seller/kho-hang" class="nav-link" th:classappend="${activePage == 'khohang'} ? ' active'"><i class="fas fa-warehouse"></i> Kho hàng</a>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+    <!-- Thông báo flash -->
+    <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4" role="alert">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${thongBaoThanhCong}"></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 mb-4" role="alert">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${thongBaoLoi}"></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- NỘI DUNG TRANG (sẽ được inject vào đây) -->
+    <th:block th:fragment="content"></th:block>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
