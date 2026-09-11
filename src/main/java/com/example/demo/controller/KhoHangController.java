@@ -16,12 +16,23 @@ public class KhoHangController {
     @Autowired
     private KhoHangService khoHangService;
 
+    @Autowired
+    private com.example.demo.repository.ViTriKeKhoRepository viTriKeKhoRepository;
+
     @GetMapping
     public String hienThiKhoHang(org.springframework.ui.Model model) {
         Long maGianHang = 1L; // Giả lập user hiện tại
-        model.addAttribute("danhSachKho", khoHangService.layDanhSachKho(maGianHang));
+        java.util.List<com.example.demo.entity.KhoHang> khoHangs = khoHangService.layDanhSachKho(maGianHang);
+        model.addAttribute("danhSachKho", khoHangs);
+        
+        java.util.List<com.example.demo.entity.ViTriKeKho> tatCaKeKho = new java.util.ArrayList<>();
+        for (com.example.demo.entity.KhoHang kho : khoHangs) {
+            tatCaKeKho.addAll(viTriKeKhoRepository.findByKhoHang_MaKho(kho.getMaKho()));
+        }
+        model.addAttribute("danhSachKeKho", tatCaKeKho);
         model.addAttribute("formKhoHang", new com.example.demo.dto.KhoHangForm());
         model.addAttribute("formPhieuKho", new PhieuNhapXuatKhoForm());
+        model.addAttribute("formViTri", new com.example.demo.dto.ViTriKeKhoForm());
         return "khohang/danh-sach";
     }
 
