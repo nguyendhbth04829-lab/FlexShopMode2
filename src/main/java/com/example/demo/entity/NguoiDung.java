@@ -2,10 +2,13 @@ package com.example.demo.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * =====================================================================
@@ -15,6 +18,7 @@ import java.time.LocalDateTime;
  * =====================================================================
  */
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -29,7 +33,6 @@ public class NguoiDung {
     @Column(name = "email", nullable = false, unique = true, length = 150)
     private String email;
 
-    @Column(name = "so_dien_thoai", length = 20)
     @Column(name = "so_dien_thoai", unique = true, length = 20)
     private String soDienThoai;
 
@@ -61,6 +64,17 @@ public class NguoiDung {
 
     @Column(name = "ngay_tao")
     private LocalDateTime ngayTao = LocalDateTime.now();
+
+    @Column(name = "ly_do_khoa", length = 255)
+    private String lyDoKhoa;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "nguoi_dung_vai_tro",
+        joinColumns = @JoinColumn(name = "ma_nguoi_dung"),
+        inverseJoinColumns = @JoinColumn(name = "ma_vai_tro")
+    )
+    private Set<VaiTro> danhSachVaiTro = new HashSet<>();
 
     @Column(name = "ngay_cap_nhat")
     private LocalDateTime ngayCapNhat = LocalDateTime.now();

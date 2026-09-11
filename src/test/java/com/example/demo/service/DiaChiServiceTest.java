@@ -133,7 +133,7 @@ class DiaChiServiceTest {
         Long maDiaChi = 15L;
         DiaChiNguoiDung diaChiHienTai = DiaChiNguoiDung.builder()
                 .maDiaChi(maDiaChi)
-                .maNguoiDung(userId)
+                .nguoiDung(null)
                 .tenNguoiNhan("Người nhận")
                 .soDienThoai("0987654321")
                 .laMacDinh(false)
@@ -158,7 +158,7 @@ class DiaChiServiceTest {
         Long maDiaChi = 15L;
         DiaChiNguoiDung diaChiHienTai = DiaChiNguoiDung.builder()
                 .maDiaChi(maDiaChi)
-                .maNguoiDung(userId)
+                .nguoiDung(null)
                 .laMacDinh(true)
                 .daXoa(false)
                 .build();
@@ -180,14 +180,14 @@ class DiaChiServiceTest {
         Long maDiaChiXoa = 10L;
         DiaChiNguoiDung diaChiXoa = DiaChiNguoiDung.builder()
                 .maDiaChi(maDiaChiXoa)
-                .maNguoiDung(userId)
+                .nguoiDung(null)
                 .laMacDinh(true)
                 .daXoa(false)
                 .build();
 
         DiaChiNguoiDung diaChiThayThe = DiaChiNguoiDung.builder()
                 .maDiaChi(11L)
-                .maNguoiDung(userId)
+                .nguoiDung(null)
                 .laMacDinh(false)
                 .daXoa(false)
                 .build();

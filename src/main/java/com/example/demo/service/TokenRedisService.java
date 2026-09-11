@@ -15,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class TokenRedisService {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TokenRedisService.class);
+
     private final RedisTemplate<String, String> redisTemplate;
 
     private static final String REFRESH_TOKEN_PREFIX = "flexshop:refresh_token:";

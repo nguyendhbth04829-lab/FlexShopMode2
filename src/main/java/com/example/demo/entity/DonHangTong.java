@@ -33,15 +33,12 @@ public class DonHangTong {
     @Column(name = "ma_code_don_tong", nullable = false, unique = true, length = 50)
     private String maCodeDonTong;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "ma_khach_hang", referencedColumnName = "ma_nguoi_dung", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ma_khach_hang", nullable = false)
+    @JoinColumn(name = "ma_khach_hang", referencedColumnName = "ma_nguoi_dung", nullable = false)
     private NguoiDung khachHang;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ma_dia_chi_giao", referencedColumnName = "ma_dia_chi", nullable = false)
-    @JoinColumn(name = "ma_dia_chi_giao", nullable = false)
     private DiaChiNguoiDung diaChiGiao;
 
     @Column(name = "tong_tien_hang", nullable = false, precision = 18, scale = 2)
@@ -63,11 +60,9 @@ public class DonHangTong {
     private BigDecimal tongThanhToanCuoi;
 
     @Column(name = "phuong_thuc_thanh_toan", nullable = false, length = 50)
-    private String phuongThucThanhToan = "CHUA_CHON"; // COD, MOCK_ONLINE, CHUA_CHON
-    private String phuongThucThanhToan;
+    private String phuongThucThanhToan = "CHUA_CHON";
 
     @Column(name = "trang_thai_thanh_toan", length = 30)
-    private String trangThaiThanhToan = "CHUA_THANH_TOAN"; // CHUA_THANH_TOAN, DA_THANH_TOAN, THANH_TOAN_THAT_BAI
     private String trangThaiThanhToan = "CHUA_THANH_TOAN";
 
     @Column(name = "trang_thai_don_hang", length = 30)

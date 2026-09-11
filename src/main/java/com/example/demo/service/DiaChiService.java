@@ -5,8 +5,10 @@ import com.example.demo.dto.request.TaoDiaChiRequest;
 import com.example.demo.dto.response.DiaChiResponse;
 import com.example.demo.dto.response.ThongKeDiaChiResponse;
 import com.example.demo.entity.DiaChiNguoiDung;
+import com.example.demo.entity.NguoiDung;
 import com.example.demo.exception.NgoaiLeUngDung;
 import com.example.demo.repository.DiaChiNguoiDungRepository;
+import com.example.demo.repository.NguoiDungRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -27,6 +29,7 @@ public class DiaChiService {
     public static final int GIOI_HAN_DIA_CHI_TOI_DA = 20;
 
     private final DiaChiNguoiDungRepository diaChiRepository;
+    private final NguoiDungRepository nguoiDungRepository;
 
     /**
      * US-05: Thêm mới địa chỉ nhận hàng
@@ -49,7 +52,7 @@ public class DiaChiService {
         boolean datLamMacDinh = (soLuongHienTai == 0) || Boolean.TRUE.equals(yeuCau.getLaMacDinh());
 
         DiaChiNguoiDung diaChi = DiaChiNguoiDung.builder()
-                .maNguoiDung(maNguoiDung)
+                .nguoiDung(nguoiDungRepository.findById(maNguoiDung).orElseThrow(() -> new NgoaiLeUngDung("Không tìm thấy người dùng!", HttpStatus.NOT_FOUND)))
                 .tenNguoiNhan(yeuCau.getTenNguoiNhan().trim())
                 .soDienThoai(yeuCau.getSoDienThoai().trim())
                 .tinhThanh(yeuCau.getTinhThanh().trim())

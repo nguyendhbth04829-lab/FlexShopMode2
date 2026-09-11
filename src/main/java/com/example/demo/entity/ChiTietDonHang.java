@@ -28,7 +28,6 @@ public class ChiTietDonHang {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ma_don_hang_shop", referencedColumnName = "ma_don_hang_shop", nullable = false)
-    @JoinColumn(name = "ma_don_hang_shop", nullable = false)
     private DonHangShop donHangShop;
 
     @Column(name = "ma_bien_the", nullable = false)

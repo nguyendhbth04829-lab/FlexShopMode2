@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenProvider {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JwtTokenProvider.class);
+
     @Value("${flexshop.jwt.secret:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970337336763979244226452948404D6351}")
     private String jwtSecret;
 

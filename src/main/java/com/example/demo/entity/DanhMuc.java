@@ -22,7 +22,6 @@ public class DanhMuc {
     @Column(name = "ten_danh_muc", nullable = false, length = 100)
     private String tenDanhMuc;
 
-    @Column(name = "duong_dan_slug", nullable = false, length = 120, unique = true)
     @Column(name = "duong_dan_slug", nullable = false, unique = true, length = 120)
     private String duongDanSlug;
 

@@ -33,16 +33,12 @@ public class DonHangShop {
     @Column(name = "ma_code_don_shop", nullable = false, unique = true, length = 60)
     private String maCodeDonShop;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "ma_don_hang_tong", referencedColumnName = "ma_don_hang_tong", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ma_don_hang_tong", nullable = false)
+    @JoinColumn(name = "ma_don_hang_tong", referencedColumnName = "ma_don_hang_tong", nullable = false)
     private DonHangTong donHangTong;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "ma_gian_hang", referencedColumnName = "ma_gian_hang", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ma_gian_hang", nullable = false)
+    @JoinColumn(name = "ma_gian_hang", referencedColumnName = "ma_gian_hang", nullable = false)
     private GianHang gianHang;
 
     @Column(name = "tien_hang_shop", nullable = false, precision = 18, scale = 2)
@@ -65,7 +61,6 @@ public class DonHangShop {
 
     @Column(name = "trang_thai", length = 30)
     private String trangThai = "CHO_XAC_NHAN";
-    private String trangThai = "DA_GIAO";
 
     @Column(name = "ly_do_huy", length = 255)
     private String lyDoHuy;

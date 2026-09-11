@@ -2,6 +2,7 @@ package com.example.demo.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
  * =====================================================================
  */
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -25,6 +27,9 @@ public class DiaChiNguoiDung {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ma_dia_chi")
     private Long maDiaChi;
+
+    @Column(name = "ma_nguoi_dung", nullable = false, insertable = false, updatable = false)
+    private Long maNguoiDung;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ma_nguoi_dung", nullable = false)
@@ -49,7 +54,6 @@ public class DiaChiNguoiDung {
     private String diaChiChiTiet;
 
     @Column(name = "la_mac_dinh")
-    private Boolean laMacDinh = false;
     private Boolean laMacDinh = true;
 
     @Column(name = "da_xoa")
@@ -57,6 +61,11 @@ public class DiaChiNguoiDung {
 
     @Column(name = "ngay_tao")
     private LocalDateTime ngayTao = LocalDateTime.now();
+
+    @Transient
+    public Long getMaNguoiDung() {
+        return nguoiDung != null ? nguoiDung.getMaNguoiDung() : null;
+    }
 
     @Transient
     public String getDiaChiDayDu() {

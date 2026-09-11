@@ -28,7 +28,6 @@ public interface GianHangRepository extends JpaRepository<GianHang, Long> {
      */
     Optional<GianHang> findByMaChuSoHuuAndDaXoaFalse(Long maChuSoHuu);
 
-    Optional<GianHang> findByDuongDanSlug(String slug);
     /**
      * Tìm gian hàng mới nhất theo mã chủ sở hữu (cho trường hợp hồ sơ đăng ký)
      */

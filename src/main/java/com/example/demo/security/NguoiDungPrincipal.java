@@ -59,6 +59,22 @@ public class NguoiDungPrincipal implements UserDetails {
         return maNguoiDung;
     }
 
+    public Long getMaNguoiDung() {
+        return maNguoiDung;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getSoDienThoai() {
+        return soDienThoai;
+    }
+
+    public String getHoVaTen() {
+        return hoVaTen;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return danhSachQuyen;

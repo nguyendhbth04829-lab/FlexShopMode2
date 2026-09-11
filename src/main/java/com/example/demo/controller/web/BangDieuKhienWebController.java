@@ -14,9 +14,6 @@ public class BangDieuKhienWebController {
 
     private final NguoiDungService nguoiDungService;
 
-    /**
-     * 1. Dashboard Quản trị viên hệ thống (Role: ADMIN)
-     */
     @GetMapping("/admin/dashboard")
     @PreAuthorize("hasRole('ADMIN')")
     public String bangDieuKhienAdmin(Model model) {
@@ -27,9 +24,6 @@ public class BangDieuKhienWebController {
         return "dashboard/admin";
     }
 
-    /**
-     * 2. Dashboard Kênh người bán / Shop (Role: NGUOI_BAN hoặc ADMIN)
-     */
     @GetMapping("/seller/dashboard")
     @PreAuthorize("hasAnyRole('NGUOI_BAN', 'ADMIN')")
     public String bangDieuKhienNguoiBan(Model model) {
@@ -40,9 +34,6 @@ public class BangDieuKhienWebController {
         return "dashboard/seller";
     }
 
-    /**
-     * 3. Dashboard Khách hàng mua sắm (Role: KHACH_HANG hoặc ADMIN)
-     */
     @GetMapping("/customer/dashboard")
     @PreAuthorize("hasAnyRole('KHACH_HANG', 'ADMIN')")
     public String bangDieuKhienKhachHang(Model model) {
@@ -53,9 +44,6 @@ public class BangDieuKhienWebController {
         return "dashboard/customer";
     }
 
-    /**
-     * 4. Dashboard Tài xế giao hàng POD (Role: TAI_XE, SHIPPER hoặc ADMIN)
-     */
     @GetMapping("/shipper/dashboard")
     @PreAuthorize("hasAnyRole('TAI_XE', 'SHIPPER', 'ADMIN')")
     public String bangDieuKhienTaiXe(Model model) {
@@ -64,18 +52,5 @@ public class BangDieuKhienWebController {
         model.addAttribute("pageTitle", "Cổng Vận Chuyển Tài Xế Giao Hàng");
         model.addAttribute("currentRole", "TAI_XE");
         return "dashboard/shipper";
-    }
-
-    /**
-     * 5. Dashboard Nhân viên Chăm sóc khách hàng (Role: CSKH hoặc ADMIN)
-     */
-    @GetMapping("/cskh/dashboard")
-    @PreAuthorize("hasAnyRole('CSKH', 'ADMIN')")
-    public String bangDieuKhienCskh(Model model) {
-        NguoiDungResponse nguoiDung = nguoiDungService.layNguoiDungHienTai();
-        model.addAttribute("user", nguoiDung);
-        model.addAttribute("pageTitle", "Hệ Thống Chăm Sóc & Khiếu Nại CSKH");
-        model.addAttribute("currentRole", "CSKH");
-        return "dashboard/cskh";
     }
 }

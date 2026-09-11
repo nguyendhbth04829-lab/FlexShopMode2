@@ -2,9 +2,6 @@ package com.example.demo.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,14 +14,9 @@ import java.time.LocalDateTime;
  * =====================================================================
  */
 @Data
-
-@Entity
-@Table(name = "gian_hang")
-@Getter
-@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "gian_hang")
 public class GianHang {
@@ -34,25 +26,20 @@ public class GianHang {
     @Column(name = "ma_gian_hang")
     private Long maGianHang;
 
-    @Column(name = "ma_chu_so_huu", nullable = false)
+    @Column(name = "ma_chu_so_huu", nullable = false, insertable = false, updatable = false)
     private Long maChuSoHuu;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ma_chu_so_huu", referencedColumnName = "ma_nguoi_dung", nullable = false)
-    @JoinColumn(name = "ma_chu_so_huu", nullable = false)
     private NguoiDung chuSoHuu;
-
-
-    @Column(name = "ten_gian_hang", nullable = false, unique = true, length = 100)
 
     @Column(name = "ten_gian_hang", nullable = false, length = 100, unique = true)
     private String tenGianHang;
 
     @Column(name = "duong_dan_slug", nullable = false, unique = true, length = 120)
-
     private String duongDanSlug;
 
     @Column(name = "mo_ta", columnDefinition = "NVARCHAR(MAX)")
-
     private String moTa;
 
     @Column(name = "link_logo", length = 500)
@@ -62,17 +49,13 @@ public class GianHang {
     private String linkBanner;
 
     @Column(name = "dia_chi_kho", nullable = false, length = 255)
-
     private String diaChiKho;
 
     @Column(name = "sdt_kho", nullable = false, length = 20)
-
     private String sdtKho;
 
     @Column(name = "trang_thai", length = 30)
-    private String trangThai = "HOAT_DONG";
     private String trangThai = "CHO_DUYET";
-
 
     @Column(name = "ly_do_tu_choi", length = 255)
     private String lyDoTuChoi;
@@ -80,45 +63,42 @@ public class GianHang {
     @Column(name = "hang_gian_hang", length = 30)
     private String hangGianHang = "CHUAN";
 
-
     @Column(name = "diem_sao_qua_ta")
     private Integer diemSaoQuaTa = 0;
 
-    @Column(name = "hang_gian_hang", length = 30)
-    private String hangGianHang = "CHUAN";
     @Column(name = "diem_danh_gia_tb", precision = 3, scale = 2)
     private BigDecimal diemDanhGiaTb = BigDecimal.ZERO;
 
-    private BigDecimal diemDanhGiaTb = BigDecimal.valueOf(5.0);
-
-    // ... other fields omitted for brevity
     @Column(name = "tong_danh_gia")
     private Integer tongDanhGia = 0;
 
-    public Long getMaGianHang() { return maGianHang; }
-    public void setMaGianHang(Long maGianHang) { this.maGianHang = maGianHang; }
     @Column(name = "tong_don_hang")
     private Integer tongDonHang = 0;
 
-    public Long getMaChuSoHuu() { return maChuSoHuu; }
-    public void setMaChuSoHuu(Long maChuSoHuu) { this.maChuSoHuu = maChuSoHuu; }
     @Column(name = "ty_le_phan_hoi_chat", precision = 5, scale = 2)
     private BigDecimal tyLePhanHoiChat = new BigDecimal("100.00");
 
-    public String getTenGianHang() { return tenGianHang; }
-    public void setTenGianHang(String tenGianHang) { this.tenGianHang = tenGianHang; }
-
-    public Integer getDiemSaoQuaTa() { return diemSaoQuaTa; }
-    public void setDiemSaoQuaTa(Integer diemSaoQuaTa) { this.diemSaoQuaTa = diemSaoQuaTa; }
     @Column(name = "da_xoa")
     private Boolean daXoa = false;
 
-    public String getHangGianHang() { return hangGianHang; }
-    public void setHangGianHang(String hangGianHang) { this.hangGianHang = hangGianHang; }
     @Column(name = "ngay_xoa")
     private LocalDateTime ngayXoa;
 
     @Column(name = "ngay_tao")
-
     private LocalDateTime ngayTao = LocalDateTime.now();
+
+    @Column(name = "gio_mo_cua", length = 10)
+    private String gioMoCua;
+
+    @Column(name = "gio_dong_cua", length = 10)
+    private String gioDongCua;
+
+    @Column(name = "dang_mo_cua")
+    private Boolean dangMoCua = false;
+
+    @Column(name = "ghi_chu_kho", columnDefinition = "NVARCHAR(MAX)")
+    private String ghiChuKho;
+
+    @Column(name = "nguoi_lien_he_kho", length = 100)
+    private String nguoiLienHeKho;
 }

@@ -13,7 +13,6 @@ public interface BienTheSanPhamRepository extends JpaRepository<BienTheSanPham, 
     boolean existsByMaSku(String sku);
     boolean existsByMaSkuAndMaBienTheNot(String sku, Long maBienThe);
     Optional<BienTheSanPham> findByMaSku(String maSku);
-    java.util.List<BienTheSanPham> findBySanPham_MaSanPham(Long maSanPham);
-    java.util.List<BienTheSanPham> findBySanPham_MaSanPhamAndDaXoaFalse(Long maSanPham);
-    java.util.List<BienTheSanPham> findBySanPham_GianHang_MaGianHangAndDaXoaFalse(Long maGianHang);
+    List<BienTheSanPham> findBySanPham_MaSanPham(Long maSanPham);
+    List<BienTheSanPham> findBySanPham_GianHang_MaGianHangAndDaXoaFalse(Long maGianHang);
 }
