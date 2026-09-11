@@ -53,6 +53,8 @@ public class CauHinhBaoMat {
                                 "/logout",
                                 "/dang-xuat",
                                 "/forgot-password",
+                                "/demo",
+                                "/backlog",
                                 "/api/v1/auth/**",
                                 "/css/**",
                                 "/js/**",
