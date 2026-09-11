@@ -29,37 +29,14 @@ public class AdminGianHangController {
         return "admin/gianhang/danh-hieu";
     }
 
+    @Autowired
+    private com.example.demo.service.DanhHieuScheduler danhHieuScheduler;
+
     @PostMapping("/quet-danh-hieu")
     public String quetDanhHieu(RedirectAttributes redirectAttributes) {
         try {
-            List<GianHang> shops = gianHangRepository.findAll();
-            List<SanPham> tatCaSanPham = sanPhamRepository.findAll();
-            
-            int count = 0;
-
-            for (GianHang shop : shops) {
-                // Tính tổng đã bán của tất cả sản phẩm thuộc shop
-                long tongDaBan = tatCaSanPham.stream()
-                        .filter(sp -> sp.getMaGianHang() != null && sp.getMaGianHang().equals(shop.getMaGianHang()))
-                        .mapToLong(sp -> sp.getTongDaBan() != null ? sp.getTongDaBan() : 0)
-                        .sum();
-                
-                String hangCu = shop.getHangGianHang();
-                String hangMoi = "CHUAN";
-
-                if (tongDaBan >= 50) {
-                    hangMoi = "MALL";
-                } else if (tongDaBan >= 10) {
-                    hangMoi = "YEU_THICH";
-                }
-
-                if (!hangMoi.equals(hangCu)) {
-                    shop.setHangGianHang(hangMoi);
-                    gianHangRepository.save(shop);
-                    count++;
-                }
-            }
-            redirectAttributes.addFlashAttribute("thongBaoThanhCong", "Quét thành công! Cập nhật danh hiệu cho " + count + " gian hàng.");
+            danhHieuScheduler.quetVaCapDanhHieuTuDong();
+            redirectAttributes.addFlashAttribute("thongBaoThanhCong", "Quét thành công! Đã chạy kịch bản đánh giá toàn bộ gian hàng.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("thongBaoLoi", "Lỗi: " + e.getMessage());
         }
