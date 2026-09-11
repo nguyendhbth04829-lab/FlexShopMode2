@@ -80,7 +80,10 @@
             <h3 class="fw-bold mb-1">Cổng Quản Lý Nhiệm Vụ Giao Hàng POD 📦</h3>
             <p class="text-muted small mb-0">Xác thực giao hàng bằng OTP, chụp ảnh bằng chứng POD và nộp tiền thu hộ COD.</p>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="/backlog" class="btn btn-sm btn-info text-white fw-bold px-3 py-2 rounded-pill shadow-sm">
+                <i class="bi bi-clipboard-list me-1"></i> Product Backlog
+            </a>
             <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 d-flex align-items-center gap-1">
                 <i class="bi bi-geo-alt-fill"></i> Đang Trực Tuyến
             </span>
@@ -134,6 +137,49 @@
                     <div class="text-muted small fw-semibold">Yêu Cầu Chuyển Hoàn</div>
                     <div class="fs-4 fw-bold">1 Đơn</div>
                     <small class="text-muted">Khách hẹn giao lại</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Backlog Test Links -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 p-4" style="border-left: 4px solid #0ea5e9 !important;">
+                <h5 class="fw-bold mb-3"><i class="bi bi-clipboard-list text-info me-2"></i>Product Backlog · Links Test Theo Vai Trò SHIPPER</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3">
+                            <h6 class="fw-bold text-success small mb-2"><i class="bi bi-truck me-1"></i>GIAO VẬN (US-46→49)</h6>
+                            <div class="d-flex flex-column gap-1">
+                                <a href="/shipper/trang-thai" class="text-decoration-none small">US-46 Bật/tắt online</a>
+                                <a href="/shipper/don-cho-nhan" class="text-decoration-none small">US-47 Đơn chờ nhận</a>
+                                <a href="/shipper/cuoc-cua-toi" class="text-decoration-none small">US-47 Cuốc của tôi</a>
+                                <a href="/shipper/pod" class="text-decoration-none small">US-47 POD chụp ảnh</a>
+                                <a href="/shipper/cod" class="text-decoration-none small">US-48 Đối soát COD</a>
+                                <a href="/shipper/that-bai" class="text-decoration-none small">US-49 Báo thất bại</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3">
+                            <h6 class="fw-bold text-warning small mb-2"><i class="bi bi-geo-alt me-1"></i>LOGISTICS & TRACKING</h6>
+                            <div class="d-flex flex-column gap-1">
+                                <a href="/logistics/tra-cuu" class="text-decoration-none small">US-50 Tra cứu barcode</a>
+                                <a href="/logistics/hanh-trinh" class="text-decoration-none small">US-33 Hành trình Hub</a>
+                                <a href="/logistics/phi-van-chuyen" class="text-decoration-none small">US-32 Tính phí VC</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3">
+                            <h6 class="fw-bold text-primary small mb-2"><i class="bi bi-person me-1"></i>HỒ SƠ</h6>
+                            <div class="d-flex flex-column gap-1">
+                                <a href="/ho-so" class="text-decoration-none small">US-04 Hồ sơ cá nhân</a>
+                                <a href="/login" class="text-decoration-none small">US-01 Đăng nhập</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

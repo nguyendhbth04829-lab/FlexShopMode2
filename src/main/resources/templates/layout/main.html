@@ -61,6 +61,7 @@
         <span>Admin Dashboard</span>
     </div>
     <div class="nav-section">Quản trị</div>
+    <a href="/backlog" class="nav-link" th:classappend="${activePage == 'backlog'} ? ' active'"><i class="fas fa-clipboard-list"></i> Product Backlog</a>
     <a href="/admin/danh-muc" class="nav-link" th:classappend="${activePage == 'danhmuc'} ? ' active'"><i class="fas fa-th-large"></i> Danh mục</a>
     <a href="/admin/thuong-hieu" class="nav-link" th:classappend="${activePage == 'thuonghieu'} ? ' active'"><i class="far fa-copyright"></i> Thương hiệu</a>
     <a href="/admin/sao-qua-ta/danh-sach" class="nav-link" th:classappend="${activePage == 'saoquata'} ? ' active'"><i class="fas fa-gavel"></i> Sao Quả Tạ</a>

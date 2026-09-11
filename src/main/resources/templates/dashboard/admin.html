@@ -94,6 +94,9 @@
             <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 d-flex align-items-center gap-1">
                 <i class="bi bi-check-circle-fill"></i> Phiên Đăng Nhập Đang Kích Hoạt
             </span>
+            <a href="/backlog" class="btn btn-sm btn-info text-white fw-bold px-3 py-2 rounded-pill shadow-sm">
+                <i class="bi bi-clipboard-list me-1"></i> Product Backlog
+            </a>
             <a href="/admin/kiem-duyet-shop" class="btn btn-sm btn-warning text-dark fw-bold px-3 py-2 rounded-pill shadow-sm">
                 <i class="bi bi-patch-check-fill me-1"></i> Duyệt Shop
             </a>
@@ -147,6 +150,83 @@
                     <div class="text-muted small fw-semibold">Cảnh Báo Gian Lận</div>
                     <div class="fs-4 fw-bold text-danger">3</div>
                     <small class="text-danger fw-medium">Cần điều tra</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Backlog Test Links -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 p-4" style="border-left: 4px solid #0ea5e9 !important;">
+                <h5 class="fw-bold mb-3"><i class="bi bi-clipboard-list text-info me-2"></i>Product Backlog · Links Test Theo Vai Trò ADMIN</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3">
+                            <h6 class="fw-bold text-danger small mb-2"><i class="bi bi-shield-lock me-1"></i>AUTH (US-01→03)</h6>
+                            <div class="d-flex flex-column gap-1">
+                                <a href="/login" class="text-decoration-none small">US-01 Đăng nhập</a>
+                                <a href="/register" class="text-decoration-none small">US-02 Đăng ký</a>
+                                <a href="/forgot-password" class="text-decoration-none small">US-03 Quên mật khẩu</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3">
+                            <h6 class="fw-bold text-primary small mb-2"><i class="bi bi-gear me-1"></i>USER & SELLER (US-04→10)</h6>
+                            <div class="d-flex flex-column gap-1">
+                                <a href="/admin/nguoi-dung" class="text-decoration-none small">US-06 Quản lý người dùng</a>
+                                <a href="/admin/kiem-duyet-shop" class="text-decoration-none small">US-09 Duyệt gian hàng</a>
+                                <a href="/admin/danh-muc" class="text-decoration-none small">US-11 Quản lý danh mục</a>
+                                <a href="/admin/thuong-hieu" class="text-decoration-none small">US-12 Quản lý thương hiệu</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3">
+                            <h6 class="fw-bold text-success small mb-2"><i class="bi bi-cash-stack me-1"></i>FINANCE & TRUST</h6>
+                            <div class="d-flex flex-column gap-1">
+                                <a href="/admin/ky-quy" class="text-decoration-none small">US-43 Ký quỹ escrow</a>
+                                <a href="/admin/rut-tien" class="text-decoration-none small">US-44 Rút tiền người bán</a>
+                                <a href="/admin/sao-qua-ta" class="text-decoration-none small">US-57 Star penalty</a>
+                                <a href="/thong-ke" class="text-decoration-none small">US-58 Thống kê & báo cáo</a>
+                                <a href="/canh-bao-gian-lan" class="text-decoration-none small">US-68 Cảnh báo gian lận</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3">
+                            <h6 class="fw-bold text-warning small mb-2"><i class="bi bi-truck me-1"></i>LOGISTICS & SHIPPER</h6>
+                            <div class="d-flex flex-column gap-1">
+                                <a href="/logistics/tra-cuu" class="text-decoration-none small">US-50 Tracking barcode</a>
+                                <a href="/logistics/phi-van-chuyen" class="text-decoration-none small">US-32 Tính phí VC</a>
+                                <a href="/logistics/hanh-trinh" class="text-decoration-none small">US-33 Hành trình Hub</a>
+                                <a href="/shipper/trang-thai" class="text-decoration-none small">US-46 Shipper online</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3">
+                            <h6 class="fw-bold text-purple small mb-2"><i class="bi bi-bullhorn me-1"></i>MARKETING & ADS</h6>
+                            <div class="d-flex flex-column gap-1">
+                                <a href="/voucher" class="text-decoration-none small">US-51 Quản lý voucher</a>
+                                <a href="/flash-sale" class="text-decoration-none small">US-53 Flash sale</a>
+                                <a href="/quang-cao" class="text-decoration-none small">US-64 Quảng cáo CPC</a>
+                                <a href="/tiep-thi-lien-ket" class="text-decoration-none small">US-65 Affiliate</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3">
+                            <h6 class="fw-bold text-info small mb-2"><i class="bi bi-headset me-1"></i>CSKH & DISPUTE</h6>
+                            <div class="d-flex flex-column gap-1">
+                                <a href="/cskh" class="text-decoration-none small">US-CSKH Dashboard</a>
+                                <a href="/cskh/danh-sach-phan-quyet" class="text-decoration-none small">US-CSKH Phân quyết</a>
+                                <a href="/khieu-nai" class="text-decoration-none small">US-67 Khiếu nại</a>
+                                <a href="/canh-bao-gian-lan" class="text-decoration-none small">US-68 Gian lận</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
