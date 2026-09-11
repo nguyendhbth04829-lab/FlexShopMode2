@@ -213,6 +213,10 @@
                                             th:selected="${dm.danhMucCha != null && dm.danhMucCha.maDanhMuc == dmCha.maDanhMuc}"></option>
                                 </select>
                             </div>
+                            <div class="mb-3">
+                                <label class="form-label">Thứ tự hiển thị</label>
+                                <input type="number" name="thuTuHienThi" class="form-control" th:value="${dm.thuTuHienThi != null ? dm.thuTuHienThi : 0}" min="0">
+                            </div>
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input" name="dangHoatDong" value="true" th:checked="${dm.dangHoatDong}" id="'hoatDong' + ${dm.maDanhMuc}">
                                 <label class="form-check-label">Đang hoạt động</label>

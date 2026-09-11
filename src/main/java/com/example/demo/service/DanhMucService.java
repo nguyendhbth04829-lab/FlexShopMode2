@@ -36,15 +36,49 @@ public class DanhMucService {
     }
 
     public Page<DanhMuc> layDanhSach(String tuKhoa, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        List<DanhMuc> tatCa = danhMucRepository.findByDaXoaFalseOrderByThuTuHienThiAscMaDanhMucDesc();
+        
         if (tuKhoa != null && !tuKhoa.isEmpty()) {
-            return danhMucRepository.timKiemDanhSach(tuKhoa, pageable);
+            String kw = tuKhoa.toLowerCase();
+            List<DanhMuc> filtered = tatCa.stream()
+                .filter(d -> d.getTenDanhMuc().toLowerCase().contains(kw))
+                .collect(java.util.stream.Collectors.toList());
+            return phanTrangList(filtered, page, size);
         }
-        return danhMucRepository.findByDaXoaFalse(pageable);
+
+        List<DanhMuc> kq = new java.util.ArrayList<>();
+        // Lấy cấp 1
+        for (DanhMuc d1 : tatCa) {
+            if (d1.getDanhMucCha() == null) {
+                kq.add(d1);
+                // Lấy cấp 2 của d1
+                for (DanhMuc d2 : tatCa) {
+                    if (d2.getDanhMucCha() != null && d2.getDanhMucCha().getMaDanhMuc().equals(d1.getMaDanhMuc())) {
+                        kq.add(d2);
+                        // Lấy cấp 3 của d2
+                        for (DanhMuc d3 : tatCa) {
+                            if (d3.getDanhMucCha() != null && d3.getDanhMucCha().getMaDanhMuc().equals(d2.getMaDanhMuc())) {
+                                kq.add(d3);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return phanTrangList(kq, page, size);
+    }
+
+    private Page<DanhMuc> phanTrangList(List<DanhMuc> list, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        int start = Math.min((int)pageable.getOffset(), list.size());
+        int end = Math.min((start + size), list.size());
+        return new org.springframework.data.domain.PageImpl<>(list.subList(start, end), pageable, list.size());
     }
     
     public List<DanhMuc> layTatCaKhongPhanTrang() {
-        return danhMucRepository.findByDaXoaFalse();
+        org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.ASC, "thuTuHienThi")
+                .and(org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "maDanhMuc"));
+        return danhMucRepository.findByDaXoaFalseOrderByThuTuHienThiAscMaDanhMucDesc();
     }
 
     @Transactional

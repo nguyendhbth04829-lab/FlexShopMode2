@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexShop Product Backlog · US-01 → US-68</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --admin: #dc2626;  --admin-bg: #fef2f2;
+            --seller: #2563eb; --seller-bg: #eff6ff;
+            --customer: #16a34a; --customer-bg: #f0fdf4;
+            --shipper: #d97706; --shipper-bg: #fffbeb;
+            --cskh: #7c3aed;   --cskh-bg: #f5f3ff;
+            --system: #64748b; --system-bg: #f8fafc;
+        }
+        body { background: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; }
+        .hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+            color: #fff; border-radius: 16px; margin-bottom: 24px;
+        }
+        .hero h1 { font-weight: 800; font-size: 1.6rem; }
+        .hero p { opacity: .7; font-size: .9rem; }
+        .filter-bar {
+            background: #fff; border-radius: 12px; padding: 12px 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.08); margin-bottom: 20px;
+            display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+        }
+        .filter-bar .badge { cursor: pointer; padding: 6px 12px; font-size: .78rem; border: 2px solid transparent; transition: all .15s; }
+        .filter-bar .badge:hover { opacity: .85; }
+        .filter-bar .badge.active { border-color: #0f172a; box-shadow: 0 0 0 2px rgba(15,23,42,.15); }
+        .module-card {
+            background: #fff; border-radius: 12px; overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,.06); margin-bottom: 16px;
+            border-left: 4px solid #334155;
+        }
+        .module-card .module-header {
+            padding: 12px 16px; cursor: pointer; display: flex;
+            justify-content: space-between; align-items: center;
+            background: #f8fafc; border-bottom: 1px solid #e2e8f0;
+        }
+        .module-card .module-header h6 { margin: 0; font-weight: 700; font-size: .9rem; }
+        .module-card .module-header .us-count {
+            font-size: .72rem; background: #e2e8f0; border-radius: 20px; padding: 2px 10px;
+        }
+        .module-body { padding: 12px 16px; }
+        .us-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 10px; border-radius: 8px; margin-bottom: 4px;
+            text-decoration: none; color: #1e293b; transition: background .1s;
+            border: 1px solid transparent;
+        }
+        .us-item:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        .us-item .us-id {
+            min-width: 56px; font-weight: 700; font-size: .78rem;
+            padding: 3px 8px; border-radius: 6px; text-align: center;
+        }
+        .us-item .us-title { font-size: .84rem; flex: 1; }
+        .us-item .us-arrow { color: #94a3b8; font-size: .75rem; }
+        .role-admin .us-id    { background: var(--admin-bg);    color: var(--admin); }
+        .role-seller .us-id   { background: var(--seller-bg);   color: var(--seller); }
+        .role-customer .us-id { background: var(--customer-bg); color: var(--customer); }
+        .role-shipper .us-id  { background: var(--shipper-bg);  color: var(--shipper); }
+        .role-cskh .us-id     { background: var(--cskh-bg);     color: var(--cskh); }
+        .role-system .us-id   { background: var(--system-bg);   color: var(--system); }
+        .summary-grid .card { border: none; border-radius: 10px; text-align: center; }
+        .summary-grid .card .number { font-size: 1.6rem; font-weight: 800; }
+        .summary-grid .card .label  { font-size: .72rem; color: #64748b; text-transform: uppercase; letter-spacing: .5px; }
+        .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+        .legend span { display: flex; align-items: center; gap: 5px; font-size: .78rem; }
+        .legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+        .collapse-icon { transition: transform .2s; }
+        .collapsed .collapse-icon { transform: rotate(-90deg); }
+        .login-hint {
+            background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px;
+            padding: 12px 16px; font-size: .84rem; margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+<div class="container py-4" style="max-width:1100px">
+
+    <!-- HERO -->
+    <div class="hero p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <h1><i class="fas fa-clipboard-list me-2"></i>Product Backlog</h1>
+                <p>FlexShop E-Commerce · 68 User Stories · 13 Modules · 5 Roles</p>
+            </div>
+            <div class="text-end">
+                <div class="opacity-75" style="font-size:.78rem">Click a US to open its test page</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIN HINT -->
+    <div class="login-hint" id="loginHint">
+        <i class="fas fa-info-circle text-warning me-1"></i>
+        <strong>Tip:</strong> Đăng nhập trước để test. Mỗi vai trò cần tài khoản riêng.
+        <a href="/login" class="ms-2 fw-bold">Đăng nhập →</a>
+        <button class="btn btn-sm btn-outline-secondary ms-2" onclick="this.parentElement.style.display='none'">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- LEGEND -->
+    <div class="legend">
+        <span><span class="dot" style="background:var(--admin)"></span>ADMIN</span>
+        <span><span class="dot" style="background:var(--seller)"></span>NGƯỜI BÁN</span>
+        <span><span class="dot" style="background:var(--customer)"></span>KHÁCH HÀNG</span>
+        <span><span class="dot" style="background:var(--shipper)"></span>SHIPPER</span>
+        <span><span class="dot" style="background:var(--cskh)"></span>CSKH</span>
+        <span><span class="dot" style="background:var(--system)"></span>HỆ THỐNG</span>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="row g-2 summary-grid mb-4">
+        <div class="col"><div class="card p-3"><div class="number text-primary">68</div><div class="label">User Stories</div></div></div>
+        <div class="col"><div class="card p-3"><div class="number" style="color:var(--admin)">6</div><div class="label">Modules</div></div></div>
+        <div class="col"><div class="card p-3"><div class="number" style="color:var(--seller)">14</div><div class="label">Seller US</div></div></div>
+        <div class="col"><div class="card p-3"><div class="number" style="color:var(--customer)">13</div><div class="label">Customer US</div></div></div>
+        <div class="col"><div class="card p-3"><div class="number" style="color:var(--shipper)">8</div><div class="label">Shipper US</div></div></div>
+        <div class="col"><div class="card p-3"><div class="number" style="color:var(--cskh)">5</div><div class="label">CSKH US</div></div></div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar" id="filterBar">
+        <i class="fas fa-filter text-muted me-1" style="font-size:.8rem"></i>
+        <span class="badge bg-dark active" onclick="filterRole('all')">Tất cả</span>
+        <span class="badge" style="background:var(--admin);color:#fff" onclick="filterRole('admin')">ADMIN</span>
+        <span class="badge" style="background:var(--seller);color:#fff" onclick="filterRole('seller')">NGƯỜI BÁN</span>
+        <span class="badge" style="background:var(--customer);color:#fff" onclick="filterRole('customer')">KHÁCH HÀNG</span>
+        <span class="badge" style="background:var(--shipper);color:#fff" onclick="filterRole('shipper')">SHIPPER</span>
+        <span class="badge" style="background:var(--cskh);color:#fff" onclick="filterRole('cskh')">CSKH</span>
+        <span class="badge" style="background:var(--system);color:#fff" onclick="filterRole('system')">HỆ THỐNG</span>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: AUTH (US-01 → US-03)   -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="customer,seller,admin,shipper,cskh,system">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-shield-halved me-2 text-danger"></i>AUTH — Xác thực & Đăng ký</h6>
+            <span class="us-count">3 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-system" href="/login" data-role="system">
+                <span class="us-id">US-01</span>
+                <span class="us-title">Đăng nhập tài khoản (email + mật khẩu)</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-customer" href="/register" data-role="customer,seller">
+                <span class="us-id">US-02</span>
+                <span class="us-title">Đăng ký tài khoản mới</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-customer" href="/forgot-password" data-role="customer,seller">
+                <span class="us-id">US-03</span>
+                <span class="us-title">Quên mật khẩu · OTP email</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: USER PROFILE (US-04 → US-07) -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="customer,seller,admin">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-user-circle me-2 text-primary"></i>USER — Hồ sơ & Quản lý người dùng</h6>
+            <span class="us-count">4 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-customer" href="/ho-so" data-role="customer,seller">
+                <span class="us-id">US-04</span>
+                <span class="us-title">Xem / cập nhật hồ sơ cá nhân</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-customer" href="/customer/dia-chi" data-role="customer,seller">
+                <span class="us-id">US-05</span>
+                <span class="us-title">Quản lý sổ địa chỉ</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-admin" href="/admin/nguoi-dung" data-role="admin">
+                <span class="us-id">US-06</span>
+                <span class="us-title">Quản lý người dùng · phân quyền vai trò</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-customer" href="/ho-so" data-role="customer,seller">
+                <span class="us-id">US-07</span>
+                <span class="us-title">Đổi mật khẩu</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: SELLER (US-08 → US-10) -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="seller,admin">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-store me-2 text-blue"></i>SELLER — Đăng ký & Thiết lập gian hàng</h6>
+            <span class="us-count">3 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-seller" href="/seller/dang-ky" data-role="seller">
+                <span class="us-id">US-08</span>
+                <span class="us-title">Đăng ký gian hàng · upload giấy phép</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-admin" href="/admin/kiem-duyet-shop" data-role="admin">
+                <span class="us-id">US-09</span>
+                <span class="us-title">Duyệt / từ chối gian hàng</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-seller" href="/seller/ho-so-shop" data-role="seller">
+                <span class="us-id">US-10</span>
+                <span class="us-title">Thiết lập hồ sơ gian hàng · banner · logo · giờ mở cửa</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: CATALOG (US-11 → US-19) -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="admin,seller">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-tags me-2 text-purple"></i>CATALOG — Danh mục · Thương hiệu · Thuộc tính</h6>
+            <span class="us-count">9 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-admin" href="/admin/danh-muc" data-role="admin">
+                <span class="us-id">US-11</span>
+                <span class="us-title">Quản lý danh mục (CRUD ·树形 · multi-language)</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-admin" href="/admin/thuong-hieu" data-role="admin">
+                <span class="us-id">US-12</span>
+                <span class="us-title">Quản lý thương hiệu</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-admin" href="/admin/danh-muc" data-role="admin">
+                <span class="us-id">US-13</span>
+                <span class="us-title">Áp dụng attribute template cho danh mục</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-seller" href="/seller/thuoc-tinh" data-role="seller">
+                <span class="us-id">US-14</span>
+                <span class="us-title">Tạo thuộc tính sản phẩm tùy chỉnh</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-seller" href="/seller/san-pham" data-role="seller">
+                <span class="us-id">US-15</span>
+                <span class="us-title">Thêm sản phẩm · SEO meta · nhiều ảnh · varians</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-seller" href="/seller/san-pham" data-role="seller">
+                <span class="us-id">US-16</span>
+                <span class="us-title">Phân loại hàng (biến thể: size · màu · material)</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-admin" href="/admin/danh-muc" data-role="admin">
+                <span class="us-id">US-17</span>
+                <span class="us-title">Mapping danh mục · AttributeSet</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-seller" href="/seller/san-pham" data-role="seller">
+                <span class="us-id">US-18</span>
+                <span class="us-title">Upload ảnh · gallery · cover · video URL</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-admin" href="/admin/danh-muc" data-role="admin">
+                <span class="us-id">US-19</span>
+                <span class="us-title">Attribute template CRUD · picklist · validation</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: PRODUCT (US-20 → US-24) -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="admin,seller">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-box-open me-2 text-teal"></i>PRODUCT — Quản lý sản phẩm · Kho hàng</h6>
+            <span class="us-count">5 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-admin" href="/admin/danh-muc" data-role="admin">
+                <span class="us-id">US-20</span>
+                <span class="us-title">Mapping danh mục · AttributeSet</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-seller" href="/seller/san-pham" data-role="seller">
+                <span class="us-id">US-21</span>
+                <span class="us-title">Quản lý tồn kho · cập nhật số lượng theo varians</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-seller" href="/seller/kho-hang" data-role="seller">
+                <span class="us-id">US-22</span>
+                <span class="us-title">Quản lý kho hàng · vị trí kệ · shelf</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-seller" href="/seller/lo-hang" data-role="seller">
+                <span class="us-id">US-23</span>
+                <span class="us-title">Nhập xuất kho · tồn hệ thống vs vật lý</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-admin" href="/admin/danh-muc" data-role="admin">
+                <span class="us-id">US-24</span>
+                <span class="us-title">Phân loại sản phẩm · audit log thay đổi giá</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: DISCOVERY (US-25 → US-27) -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="customer">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-search me-2 text-indigo"></i>DISCOVERY — Tìm kiếm · Phân trang · Yêu thích</h6>
+            <span class="us-count">3 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-customer" href="/" data-role="customer">
+                <span class="us-id">US-25</span>
+                <span class="us-title">Tìm kiếm sản phẩm · filter · sort · pagination</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-customer" href="/" data-role="customer">
+                <span class="us-id">US-26</span>
+                <span class="us-title">Xem chi tiết sản phẩm · variants · gallery · Q&A</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-customer" href="/khach-hang/san-pham-yeu-thich" data-role="customer">
+                <span class="us-id">US-27</span>
+                <span class="us-title">Yêu thích · wishlist · theo dõi gian hàng</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: CART (US-28 → US-30)   -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="customer">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-cart-shopping me-2 text-green"></i>CART — Giỏ hàng · Combo · Flash add-on</h6>
+            <span class="us-count">3 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-customer" href="/" data-role="customer">
+                <span class="us-id">US-28</span>
+                <span class="us-title">Thêm / cập nhật / xóa giỏ hàng</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-customer" href="/khach-hang/combo" data-role="customer">
+                <span class="us-id">US-29</span>
+                <span class="us-title">Mua kèm combo · deal sốc · flash add-on</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-customer" href="/flash-sale" data-role="customer">
+                <span class="us-id">US-30</span>
+                <span class="us-title">Flash sale · đặt hàng trong khung giờ</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: CHECKOUT (US-31 → US-33) -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="customer">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-credit-card me-2 text-orange"></i>CHECKOUT — Thanh toán · Voucher · Phương thức</h6>
+            <span class="us-count">3 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-customer" href="/thanh-toan" data-role="customer">
+                <span class="us-id">US-31</span>
+                <span class="us-title">Thanh toán · chọn phương thức · COD / online / BNPL</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-customer" href="/voucher" data-role="customer">
+                <span class="us-id">US-32</span>
+                <span class="us-title">Áp dụng voucher · mã giảm giá · coins</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-customer" href="/thanh-toan" data-role="customer">
+                <span class="us-id">US-33</span>
+                <span class="us-title">Xác nhận đơn hàng · tách đơn theo shop</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: PAYMENT (US-34 → US-36) -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="system,customer">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-money-check-dollar me-2 text-emerald"></i>PAYMENT — Xử lý thanh toán · COD · VietQR</h6>
+            <span class="us-count">3 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-system" href="/thanh-toan/mock-gateway" data-role="system,customer">
+                <span class="us-id">US-34</span>
+                <span class="us-title">Mock payment gateway · xác nhận thanh toán online</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-system" href="/thanh-toan/ket-qua" data-role="system,customer">
+                <span class="us-id">US-35</span>
+                <span class="us-title">COD · xác nhận thanh toán khi nhận hàng</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-customer" href="/thanh-toan" data-role="customer">
+                <span class="us-id">US-36</span>
+                <span class="us-title">VietQR · chuyển khoản ngân hàng</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: ORDER (US-37 → US-41) -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="customer,seller,admin">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-box me-2 text-red"></i>ORDER — Đơn hàng · Trạng thái · Hủy · Hoàn</h6>
+            <span class="us-count">5 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-customer" href="/khach-hang/don-hang" data-role="customer">
+                <span class="us-id">US-37</span>
+                <span class="us-title">Danh sách đơn hàng · filter theo trạng thái</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-customer" href="/khach-hang/don-hang" data-role="customer">
+                <span class="us-id">US-38</span>
+                <span class="us-title">Xem chi tiết đơn · lịch sử trạng thái · tracking</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-customer" href="/khach-hang/don-hang" data-role="customer">
+                <span class="us-id">US-39</span>
+                <span class="us-title">Hủy đơn · hoàn tiền · auto-refund khi giao fail</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-customer" href="/khach-hang/don-hang" data-role="customer">
+                <span class="us-id">US-40</span>
+                <span class="us-title">Yêu cầu hoàn · khiếu nại · 3-party dispute</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-customer" href="/khach-hang/don-hang" data-role="customer">
+                <span class="us-id">US-41</span>
+                <span class="us-title">Xác nhận nhận hàng · đánh giá sản phẩm</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: FULFILL (US-42 → US-45) -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="seller,admin">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-truck me-2 text-sky"></i>FULFILL — Vận đơn · Đóng gói · COD</h6>
+            <span class="us-count">4 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-seller" href="/seller/van-don" data-role="seller">
+                <span class="us-id">US-42</span>
+                <span class="us-title">Tạo vận đơn · in hàng loạt · barcode A6</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-admin" href="/admin/ky-quy" data-role="admin">
+                <span class="us-id">US-43</span>
+                <span class="us-title">Quản lý ký quỹ · escrow · release tiền</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-admin" href="/admin/rut-tien" data-role="admin">
+                <span class="us-id">US-44</span>
+                <span class="us-title">Rút tiền người bán · bank transfer</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-admin" href="/admin/ky-quy" data-role="admin">
+                <span class="us-id">US-45</span>
+                <span class="us-title">Auto-refund khi ship fail · release escrow</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: LOGISTICS (US-46 → US-50) -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="shipper,admin,customer">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-shipping-fast me-2 text-amber"></i>LOGISTICS — Shipper · Hành trình · POD · COD</h6>
+            <span class="us-count">5 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-shipper" href="/shipper/trang-thai" data-role="shipper">
+                <span class="us-id">US-46</span>
+                <span class="us-title">Shipper: bật/tắt online · toggle trạng thái</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-shipper" href="/shipper/don-cho-nhan" data-role="shipper">
+                <span class="us-id">US-47</span>
+                <span class="us-title">Shipper: nhận đơn · lấy hàng · POD · giao hàng</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-shipper" href="/shipper/cod" data-role="shipper">
+                <span class="us-id">US-48</span>
+                <span class="us-title">Shipper: đối soát COD · thu tiền</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-shipper" href="/shipper/that-bai" data-role="shipper">
+                <span class="us-id">US-49</span>
+                <span class="us-title">Shipper: báo giao thất bại · retry · chuyển hoàn</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-admin" href="/logistics/tra-cuu" data-role="admin,customer">
+                <span class="us-id">US-50</span>
+                <span class="us-title">Tracking · tra cứu hành trình · barcode scan</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: VOUCHER (US-51 → US-52) -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="admin,customer">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-ticket me-2 text-pink"></i>VOUCHER — Mã giảm giá · Kho voucher</h6>
+            <span class="us-count">2 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-admin" href="/voucher" data-role="admin">
+                <span class="us-id">US-51</span>
+                <span class="us-title">Tạo / quản lý voucher · % · fixed · shipping</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-customer" href="/khach-hang/kho-voucher" data-role="customer">
+                <span class="us-id">US-52</span>
+                <span class="us-title">Kho voucher · lưu · sử dụng · lịch sử</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: FLASH SALE (US-53 → US-54) -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="admin,customer,seller">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-bolt me-2 text-yellow"></i>FLASH SALE — Khung giờ · Đăng ký · Combo</h6>
+            <span class="us-count">2 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-admin" href="/flash-sale/quan-ly" data-role="admin">
+                <span class="us-id">US-53</span>
+                <span class="us-title">Quản lý flash sale · khung giờ · đăng ký shop</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-customer" href="/khach-hang/combo" data-role="customer">
+                <span class="us-id">US-54</span>
+                <span class="us-title">Combo deal sốc · flash add-on · mua kèm</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: COIN / WALLET (US-55)  -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="customer">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-coins me-2 text-amber"></i>COIN — Ví xu · Check-in · Sử dụng</h6>
+            <span class="us-count">1 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-customer" href="/vi-xu" data-role="customer">
+                <span class="us-id">US-55</span>
+                <span class="us-title">Ví xu · daily check-in · lịch sử giao dịch</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: TRUST (US-56 → US-57) -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="admin,customer">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-shield-halved me-2 text-red"></i>TRUST — Đánh giá · Phản hồi · Star Penalty</h6>
+            <span class="us-count">2 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-customer" href="/danh-gia" data-role="customer">
+                <span class="us-id">US-56</span>
+                <span class="us-title">Viết đánh giá · rating · ảnh · video</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-admin" href="/admin/sao-qua-ta" data-role="admin">
+                <span class="us-id">US-57</span>
+                <span class="us-title">Star penalty · sao quả tạ · phạt shop</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: ANALYTICS (US-58)      -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="admin,seller">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-chart-line me-2 text-teal"></i>ANALYTICS — Thống kê · Báo cáo · GMV</h6>
+            <span class="us-count">1 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-admin" href="/thong-ke" data-role="admin">
+                <span class="us-id">US-58</span>
+                <span class="us-title">Dashboard thống kê · GMV · revenue · analytics</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: CHAT (US-59 → US-60)   -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="customer,seller">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-comments me-2 text-blue"></i>CHAT — Trò chuyện · Thương lượng giá · Auto-reply</h6>
+            <span class="us-count">2 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-customer" href="/khach-hang/chat" data-role="customer">
+                <span class="us-id">US-59</span>
+                <span class="us-title">Chat customer ↔ seller · product card · price negotiate</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-seller" href="/seller/tin-nhan-tu-dong" data-role="seller">
+                <span class="us-id">US-60</span>
+                <span class="us-title">Auto-reply · tin nhắn tự động · cấu hình</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: LIVE + VIDEO (US-61 → US-63) -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="seller,customer">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-video me-2 text-purple"></i>LIVE + VIDEO — Livestream · Video ngắn · KOC</h6>
+            <span class="us-count">3 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-seller" href="/seller/livestream" data-role="seller">
+                <span class="us-id">US-61</span>
+                <span class="us-title">Seller: tạo phòng live · studio · sản phẩm live</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-customer" href="/khach-hang/livestream" data-role="customer">
+                <span class="us-id">US-62</span>
+                <span class="us-title">Customer: xem livestream · mua hàng live · chat</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-customer" href="/video" data-role="customer">
+                <span class="us-id">US-63</span>
+                <span class="us-title">Video ngắn TikTok-style · like · comment · shopable</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: ADS + AFFILIATE (US-64 → US-65) -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="admin,seller">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-bullhorn me-2 text-orange"></i>ADS + AFFILIATE — Quảng cáo · Tiếp thị liên kết</h6>
+            <span class="us-count">2 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-admin" href="/quang-cao" data-role="admin">
+                <span class="us-id">US-64</span>
+                <span class="us-title">Quảng cáo CPC · keyword · dashboard · budget</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-admin" href="/tiep-thi-lien-ket" data-role="admin">
+                <span class="us-id">US-65</span>
+                <span class="us-title">Affiliate marketing · referral link · commission</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: GAME (US-66)            -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="customer">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-dice me-2 text-yellow"></i>GAME — Vòng quay may mắn</h6>
+            <span class="us-count">1 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-customer" href="/vong-quay" data-role="customer">
+                <span class="us-id">US-66</span>
+                <span class="us-title">Vòng quay may mắn · daily spin · prizes · history</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODULE: NOTI + SECURITY (US-67 → US-68) -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="admin,seller,customer,shipper,cskh">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-bell me-2 text-slate"></i>NOTI + SECURITY — Thông báo · Fraud · Gian lận</h6>
+            <span class="us-count">2 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-admin" href="/khieu-nai" data-role="admin,cskh">
+                <span class="us-id">US-67</span>
+                <span class="us-title">Kháng nghị · khiếu nại · CSKH resolution · 3-party</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-admin" href="/canh-bao-gian-lan" data-role="admin">
+                <span class="us-id">US-68</span>
+                <span class="us-title">Fraud detection · mô phỏng quét gian lận · cảnh báo</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- CSKH DASHBOARD                  -->
+    <!-- ============================== -->
+    <div class="module-card" data-roles="cskh">
+        <div class="module-header" onclick="toggleModule(this)">
+            <h6><i class="fas fa-headset me-2 text-purple"></i>CSKH — Dashboard · Phân quyết khiếu nại</h6>
+            <span class="us-count">3 US</span>
+            <i class="fas fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="module-body">
+            <a class="us-item role-cskh" href="/cskh" data-role="cskh">
+                <span class="us-id">US-CSKH-1</span>
+                <span class="us-title">Dashboard CSKH · ticket · khiếu nại pending</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-cskh" href="/khieu-nai/chi-tiet" data-role="cskh">
+                <span class="us-id">US-CSKH-2</span>
+                <span class="us-title">Phân quyết tranh chấp · 3-party · yêu cầu bằng chứng</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+            <a class="us-item role-cskh" href="/cskh/danh-sach-phan-quyet" data-role="cskh">
+                <span class="us-id">US-CSKH-3</span>
+                <span class="us-title">Lịch sử phân quyết · audit log</span>
+                <i class="fas fa-arrow-right us-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- QUICK ACCESS -->
+    <div class="mt-4 p-4 bg-white rounded-3">
+        <h6 class="fw-bold mb-3"><i class="fas fa-bolt me-2 text-warning"></i>Quick Access — Trang theo vai trò</h6>
+        <div class="row g-2">
+            <div class="col-md-4">
+                <div class="p-3 rounded-3" style="background:var(--admin-bg)">
+                    <div class="fw-bold mb-2" style="color:var(--admin);font-size:.82rem"><i class="fas fa-user-shield me-1"></i>ADMIN</div>
+                    <div class="d-flex flex-column gap-1">
+                        <a href="/admin/dashboard" class="text-decoration-none" style="font-size:.8rem">Dashboard</a>
+                        <a href="/admin/nguoi-dung" class="text-decoration-none" style="font-size:.8rem">Quản lý người dùng</a>
+                        <a href="/admin/kiem-duyet-shop" class="text-decoration-none" style="font-size:.8rem">Duyệt gian hàng</a>
+                        <a href="/admin/danh-muc" class="text-decoration-none" style="font-size:.8rem">Danh mục</a>
+                        <a href="/admin/thuong-hieu" class="text-decoration-none" style="font-size:.8rem">Thương hiệu</a>
+                        <a href="/admin/ky-quy" class="text-decoration-none" style="font-size:.8rem">Ký quỹ</a>
+                        <a href="/admin/rut-tien" class="text-decoration-none" style="font-size:.8rem">Rút tiền</a>
+                        <a href="/admin/sao-qua-ta" class="text-decoration-none" style="font-size:.8rem">Sao Quả Tạ</a>
+                        <a href="/thong-ke" class="text-decoration-none" style="font-size:.8rem">Thống kê</a>
+                        <a href="/canh-bao-gian-lan" class="text-decoration-none" style="font-size:.8rem">Cảnh báo gian lận</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 rounded-3" style="background:var(--seller-bg)">
+                    <div class="fw-bold mb-2" style="color:var(--seller);font-size:.82rem"><i class="fas fa-store me-1"></i>NGƯỜI BÁN</div>
+                    <div class="d-flex flex-column gap-1">
+                        <a href="/seller/dashboard" class="text-decoration-none" style="font-size:.8rem">Dashboard</a>
+                        <a href="/seller/dang-ky" class="text-decoration-none" style="font-size:.8rem">Đăng ký gian hàng</a>
+                        <a href="/seller/ho-so-shop" class="text-decoration-none" style="font-size:.8rem">Hồ sơ gian hàng</a>
+                        <a href="/seller/san-pham" class="text-decoration-none" style="font-size:.8rem">Sản phẩm</a>
+                        <a href="/seller/kho-hang" class="text-decoration-none" style="font-size:.8rem">Kho hàng</a>
+                        <a href="/seller/lo-hang" class="text-decoration-none" style="font-size:.8rem">Lô hàng</a>
+                        <a href="/seller/thuoc-tinh" class="text-decoration-none" style="font-size:.8rem">Thuộc tính</a>
+                        <a href="/seller/van-don" class="text-decoration-none" style="font-size:.8rem">Vận đơn</a>
+                        <a href="/seller/danh-gia" class="text-decoration-none" style="font-size:.8rem">Đánh giá</a>
+                        <a href="/seller/chat" class="text-decoration-none" style="font-size:.8rem">Chat</a>
+                        <a href="/seller/livestream" class="text-decoration-none" style="font-size:.8rem">Livestream</a>
+                        <a href="/seller/tin-nhan-tu-dong" class="text-decoration-none" style="font-size:.8rem">Auto-reply</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 rounded-3" style="background:var(--customer-bg)">
+                    <div class="fw-bold mb-2" style="color:var(--customer);font-size:.82rem"><i class="fas fa-user me-1"></i>KHÁCH HÀNG</div>
+                    <div class="d-flex flex-column gap-1">
+                        <a href="/customer/dashboard" class="text-decoration-none" style="font-size:.8rem">Dashboard</a>
+                        <a href="/ho-so" class="text-decoration-none" style="font-size:.8rem">Hồ sơ</a>
+                        <a href="/customer/dia-chi" class="text-decoration-none" style="font-size:.8rem">Sổ địa chỉ</a>
+                        <a href="/khach-hang/don-hang" class="text-decoration-none" style="font-size:.8rem">Đơn hàng</a>
+                        <a href="/khach-hang/san-pham-yeu-thich" class="text-decoration-none" style="font-size:.8rem">Yêu thích</a>
+                        <a href="/khach-hang/combo" class="text-decoration-none" style="font-size:.8rem">Combo deal</a>
+                        <a href="/flash-sale" class="text-decoration-none" style="font-size:.8rem">Flash sale</a>
+                        <a href="/khach-hang/kho-voucher" class="text-decoration-none" style="font-size:.8rem">Kho voucher</a>
+                        <a href="/vi-xu" class="text-decoration-none" style="font-size:.8rem">Ví xu</a>
+                        <a href="/vong-quay" class="text-decoration-none" style="font-size:.8rem">Vòng quay</a>
+                        <a href="/danh-gia" class="text-decoration-none" style="font-size:.8rem">Đánh giá</a>
+                        <a href="/khach-hang/chat" class="text-decoration-none" style="font-size:.8rem">Chat</a>
+                        <a href="/video" class="text-decoration-none" style="font-size:.8rem">Video ngắn</a>
+                        <a href="/khach-hang/livestream" class="text-decoration-none" style="font-size:.8rem">Livestream</a>
+                        <a href="/khieu-nai" class="text-decoration-none" style="font-size:.8rem">Khiếu nại</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 rounded-3" style="background:var(--shipper-bg)">
+                    <div class="fw-bold mb-2" style="color:var(--shipper);font-size:.82rem"><i class="fas fa-truck me-1"></i>SHIPPER</div>
+                    <div class="d-flex flex-column gap-1">
+                        <a href="/shipper/dashboard" class="text-decoration-none" style="font-size:.8rem">Dashboard</a>
+                        <a href="/shipper/trang-thai" class="text-decoration-none" style="font-size:.8rem">Bật/tắt Online</a>
+                        <a href="/shipper/don-cho-nhan" class="text-decoration-none" style="font-size:.8rem">Đơn chờ nhận</a>
+                        <a href="/shipper/cuoc-cua-toi" class="text-decoration-none" style="font-size:.8rem">Cuốc của tôi</a>
+                        <a href="/shipper/pod" class="text-decoration-none" style="font-size:.8rem">POD (chụp ảnh)</a>
+                        <a href="/shipper/cod" class="text-decoration-none" style="font-size:.8rem">Đối soát COD</a>
+                        <a href="/shipper/that-bai" class="text-decoration-none" style="font-size:.8rem">Báo thất bại</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 rounded-3" style="background:var(--cskh-bg)">
+                    <div class="fw-bold mb-2" style="color:var(--cskh);font-size:.82rem"><i class="fas fa-headset me-1"></i>CSKH</div>
+                    <div class="d-flex flex-column gap-1">
+                        <a href="/cskh" class="text-decoration-none" style="font-size:.8rem">Dashboard</a>
+                        <a href="/cskh/danh-sach-phan-quyet" class="text-decoration-none" style="font-size:.8rem">Phân quyết tranh chấp</a>
+                        <a href="/khieu-nai" class="text-decoration-none" style="font-size:.8rem">Khiếu nại</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 rounded-3" style="background:var(--system-bg)">
+                    <div class="fw-bold mb-2" style="color:var(--system);font-size:.82rem"><i class="fas fa-globe me-1"></i>HỆ THỐNG</div>
+                    <div class="d-flex flex-column gap-1">
+                        <a href="/logistics/phi-van-chuyen" class="text-decoration-none" style="font-size:.8rem">Tính phí vận chuyển</a>
+                        <a href="/logistics/hanh-trinh" class="text-decoration-none" style="font-size:.8rem">Hành trình Hub</a>
+                        <a href="/logistics/tra-cuu" class="text-decoration-none" style="font-size:.8rem">Tra cứu barcode</a>
+                        <a href="/thanh-toan/mock-gateway" class="text-decoration-none" style="font-size:.8rem">Mock gateway</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4 mb-4 text-muted" style="font-size:.78rem">
+        FlexShop Product Backlog v2.0 · 68 US · Generated by OpenCode
+    </div>
+</div>
+
+<script>
+// Toggle module collapse
+function toggleModule(header) {
+    const body = header.nextElementSibling;
+    const icon = header.querySelector('.collapse-icon');
+    if (body.style.display === 'none') {
+        body.style.display = 'block';
+        icon.classList.remove('fa-rotate-270');
+    } else {
+        body.style.display = 'none';
+        icon.classList.add('fa-rotate-270');
+    }
+}
+
+// Filter by role
+function filterRole(role) {
+    // Update active badge
+    document.querySelectorAll('.filter-bar .badge').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+
+    // Show/hide modules and items
+    document.querySelectorAll('.module-card').forEach(card => {
+        const cardRoles = card.getAttribute('data-roles') || '';
+        if (role === 'all' || cardRoles.includes(role)) {
+            card.style.display = '';
+            // Also filter individual items within the module
+            card.querySelectorAll('.us-item').forEach(item => {
+                const itemRole = item.getAttribute('data-role') || '';
+                if (role === 'all' || itemRole.includes(role)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// Search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Add keyboard shortcut: Ctrl+K to focus search
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) searchInput.focus();
+        }
+    });
+});
+</script>
+</body>
+</html>

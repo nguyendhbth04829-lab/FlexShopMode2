@@ -92,4 +92,21 @@ public class KhoHangService {
 
         return phieuDaLuu;
     }
+
+    public java.util.List<KhoHang> layDanhSachKho(Long maGianHang) {
+        return khoHangRepository.findByMaGianHangAndDaXoaFalse(maGianHang);
+    }
+
+    @Transactional
+    public KhoHang themKho(com.example.demo.dto.KhoHangForm form, Long maGianHang) {
+        KhoHang kho = new KhoHang();
+        kho.setMaGianHang(maGianHang);
+        kho.setTenKho(form.getTenKho());
+        kho.setDiaChi(form.getDiaChi());
+        kho.setTinhThanh(form.getTinhThanh());
+        kho.setSdtLienHe(form.getSdtLienHe());
+        kho.setLaKhoChinh(form.getLaKhoChinh() != null ? form.getLaKhoChinh() : false);
+        kho.setDangHoatDong(form.getDangHoatDong() != null ? form.getDangHoatDong() : true);
+        return khoHangRepository.save(kho);
+    }
 }

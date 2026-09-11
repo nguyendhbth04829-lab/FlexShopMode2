@@ -16,11 +16,44 @@ public class KhoHangController {
     @Autowired
     private KhoHangService khoHangService;
 
+    @Autowired
+    private com.example.demo.repository.ViTriKeKhoRepository viTriKeKhoRepository;
+
     @GetMapping
     public String hienThiKhoHang(org.springframework.ui.Model model) {
-        // Chỉ là giao diện demo để test
+        Long maGianHang = 1L; // Giả lập user hiện tại
+        java.util.List<com.example.demo.entity.KhoHang> khoHangs = khoHangService.layDanhSachKho(maGianHang);
+        model.addAttribute("danhSachKho", khoHangs);
+        
+        java.util.List<com.example.demo.entity.ViTriKeKho> tatCaKeKho = new java.util.ArrayList<>();
+        for (com.example.demo.entity.KhoHang kho : khoHangs) {
+            tatCaKeKho.addAll(viTriKeKhoRepository.findByKhoHang_MaKho(kho.getMaKho()));
+        }
+        model.addAttribute("danhSachKeKho", tatCaKeKho);
+        model.addAttribute("formKhoHang", new com.example.demo.dto.KhoHangForm());
         model.addAttribute("formPhieuKho", new PhieuNhapXuatKhoForm());
+        model.addAttribute("formViTri", new com.example.demo.dto.ViTriKeKhoForm());
         return "khohang/danh-sach";
+    }
+
+    @PostMapping("/them")
+    public String themKho(
+            @Valid @ModelAttribute("formKhoHang") com.example.demo.dto.KhoHangForm form,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("thongBaoLoi", "Dữ liệu kho hàng không hợp lệ.");
+            return "redirect:/seller/kho-hang";
+        }
+        try {
+            Long maGianHang = 1L;
+            khoHangService.themKho(form, maGianHang);
+            redirectAttributes.addFlashAttribute("thongBaoThanhCong", "Thêm kho hàng thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("thongBaoLoi", "Lỗi: " + e.getMessage());
+        }
+        return "redirect:/seller/kho-hang";
     }
 
     // Các method xem danh sách kho, view giao diện... (bỏ qua để tập trung nghiệp vụ chính)

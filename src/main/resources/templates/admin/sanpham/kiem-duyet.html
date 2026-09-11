@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Kiểm duyệt Sản Phẩm</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .sidebar { background: #212529; min-height: 100vh; padding-top: 20px; color: #fff; }
+        .sidebar a { color: #adb5bd; text-decoration: none; padding: 12px 20px; display: block; border-left: 3px solid transparent; }
+        .sidebar a:hover, .sidebar a.active { color: #fff; background: #343a40; border-left-color: #0d6efd; }
+        .main-content { padding: 30px; }
+        .us-badge { background: #e0e7ff; color: #4338ca; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; font-weight: 600; }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Copy -->
+        <div class="col-md-2 sidebar p-0">
+            <h4 class="text-center mb-4"><i class="fas fa-shopping-cart text-primary me-2"></i>FlexShop</h4>
+            <div class="px-3 mb-2 text-uppercase text-muted small fw-bold">Admin</div>
+            <a href="/admin/danh-muc"><i class="fas fa-folder me-2"></i>Danh mục</a>
+            <a href="/admin/thuong-hieu"><i class="fas fa-tags me-2"></i>Thương hiệu</a>
+            <a href="/admin/san-pham/kiem-duyet" class="active"><i class="fas fa-shield-alt me-2"></i>Kiểm duyệt SP</a>
+            <a href="/admin/gian-hang/danh-hieu"><i class="fas fa-award me-2"></i>Danh hiệu Shop</a>
+            <a href="/admin/sao-qua-ta/danh-sach"><i class="fas fa-gavel me-2"></i>Sao Quả Tạ</a>
+            
+            <div class="px-3 mt-4 mb-2 text-uppercase text-muted small fw-bold">Seller (Gian hàng)</div>
+            <a href="/seller/san-pham"><i class="fas fa-box me-2"></i>Sản phẩm</a>
+            <a href="/seller/kho-hang"><i class="fas fa-warehouse me-2"></i>Kho hàng</a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10 main-content">
+            <div th:if="${thongBaoThanhCong}" class="alert alert-success alert-dismissible fade show">
+                <i class="fas fa-check-circle me-2"></i><span th:text="${thongBaoThanhCong}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${thongBaoLoi}" class="alert alert-danger alert-dismissible fade show">
+                <i class="fas fa-exclamation-circle me-2"></i><span th:text="${thongBaoLoi}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <h4 class="mb-4">Kiểm duyệt Sản phẩm (Admin) <span class="us-badge ms-2">US-17</span></h4>
+            
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">ID</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Gian hàng (ID)</th>
+                                <th>Trạng thái</th>
+                                <th>Lý do khóa</th>
+                                <th class="text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${danhSach.isEmpty()}">
+                                <td colspan="6" class="text-center py-4 text-muted">Chưa có sản phẩm nào trong hệ thống</td>
+                            </tr>
+                            <tr th:each="sp : ${danhSach}">
+                                <td class="ps-4" th:text="${sp.maSanPham}">1</td>
+                                <td><strong th:text="${sp.tenSanPham}">Tên SP</strong></td>
+                                <td th:text="${sp.maGianHang}">1</td>
+                                <td>
+                                    <span th:if="${!sp.biKhoa}" class="badge bg-success">Hợp lệ</span>
+                                    <span th:if="${sp.biKhoa}" class="badge bg-danger">Bị khóa</span>
+                                </td>
+                                <td class="text-danger small" th:text="${sp.lyDoKhoa != null ? sp.lyDoKhoa : '—'}"></td>
+                                <td class="text-center">
+                                    <button th:if="${!sp.biKhoa}" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" th:data-bs-target="'#modalKhoa' + ${sp.maSanPham}">
+                                        <i class="fas fa-ban me-1"></i>Khóa
+                                    </button>
+                                    <form th:if="${sp.biKhoa}" th:action="@{/admin/san-pham/{id}/mo-khoa(id=${sp.maSanPham})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-success" onclick="return confirm('Mở khóa sản phẩm này?')">
+                                            <i class="fas fa-unlock me-1"></i>Mở khóa
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Modals Khóa SP -->
+            <div th:each="sp : ${danhSach}">
+                <div th:if="${!sp.biKhoa}" class="modal fade" th:id="'modalKhoa' + ${sp.maSanPham}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content border-0 shadow">
+                            <form th:action="@{/admin/san-pham/{id}/khoa(id=${sp.maSanPham})}" method="post">
+                                <div class="modal-header">
+                                    <h5 class="modal-title fw-semibold text-danger"><i class="fas fa-ban me-2"></i>Khóa Sản Phẩm</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Sản phẩm: <strong th:text="${sp.tenSanPham}"></strong></p>
+                                    <div class="mb-3">
+                                        <label class="form-label">Lý do khóa / Vi phạm chính sách <span class="text-danger">*</span></label>
+                                        <textarea name="lyDoKhoa" class="form-control" rows="3" required placeholder="Ví dụ: Hàng giả, hàng nhái, hình ảnh phản cảm..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-danger"><i class="fas fa-lock me-1"></i>Khóa ngay</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface DanhMucRepository extends JpaRepository<DanhMuc, Long> {
 
     List<DanhMuc> findByDaXoaFalse();
+    List<DanhMuc> findByDaXoaFalseOrderByThuTuHienThiAscMaDanhMucDesc();
 
     Page<DanhMuc> findByDaXoaFalse(Pageable pageable);
 
