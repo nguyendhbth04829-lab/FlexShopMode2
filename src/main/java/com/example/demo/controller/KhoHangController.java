@@ -18,9 +18,31 @@ public class KhoHangController {
 
     @GetMapping
     public String hienThiKhoHang(org.springframework.ui.Model model) {
-        // Chỉ là giao diện demo để test
+        Long maGianHang = 1L; // Giả lập user hiện tại
+        model.addAttribute("danhSachKho", khoHangService.layDanhSachKho(maGianHang));
+        model.addAttribute("formKhoHang", new com.example.demo.dto.KhoHangForm());
         model.addAttribute("formPhieuKho", new PhieuNhapXuatKhoForm());
         return "khohang/danh-sach";
+    }
+
+    @PostMapping("/them")
+    public String themKho(
+            @Valid @ModelAttribute("formKhoHang") com.example.demo.dto.KhoHangForm form,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("thongBaoLoi", "Dữ liệu kho hàng không hợp lệ.");
+            return "redirect:/seller/kho-hang";
+        }
+        try {
+            Long maGianHang = 1L;
+            khoHangService.themKho(form, maGianHang);
+            redirectAttributes.addFlashAttribute("thongBaoThanhCong", "Thêm kho hàng thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("thongBaoLoi", "Lỗi: " + e.getMessage());
+        }
+        return "redirect:/seller/kho-hang";
     }
 
     // Các method xem danh sách kho, view giao diện... (bỏ qua để tập trung nghiệp vụ chính)

@@ -54,7 +54,48 @@
         </div>
     </div>
 
-    <!-- ========== US-15/16: TẠO PHIẾU NHẬP XUẤT KHO ========== -->
+    <!-- ========== US-11: QUẢN LÝ ĐA KHO HÀNG ========== -->
+    <div class="card">
+        <div class="card-header-custom">
+            <div>
+                <h6 class="fw-bold mb-0"><i class="fas fa-warehouse me-2 text-primary"></i>Quản lý Đa Kho Hàng <span class="us-badge ms-2">US-11</span></h6>
+                <small class="text-muted">Thiết lập hệ thống Kho Hà Nội, Kho TP.HCM...</small>
+            </div>
+            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalKhoHang">
+                <i class="fas fa-plus me-1"></i> Thêm Kho
+            </button>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Mã Kho</th>
+                        <th>Tên Kho</th>
+                        <th>Khu vực</th>
+                        <th>SĐT</th>
+                        <th>Loại Kho</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${danhSachKho == null or danhSachKho.isEmpty()}">
+                        <td colspan="5" class="text-center py-4 text-muted"><i class="fas fa-warehouse fa-2x d-block mb-2 opacity-25"></i>Chưa có kho hàng nào</td>
+                    </tr>
+                    <tr th:each="kho : ${danhSachKho}">
+                        <td class="ps-4" th:text="${kho.maKho}">1</td>
+                        <td class="fw-semibold" th:text="${kho.tenKho}">Kho Hà Nội</td>
+                        <td th:text="${kho.tinhThanh}">Hà Nội</td>
+                        <td th:text="${kho.sdtLienHe}">09000000</td>
+                        <td>
+                            <span th:if="${kho.laKhoChinh}" class="badge bg-danger">Kho Chính</span>
+                            <span th:unless="${kho.laKhoChinh}" class="badge bg-secondary">Kho Phụ</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ========== US-15 & US-16: TẠO PHIẾU NHẬP XUẤT KHO ========== -->
     <div class="card">
         <div class="card-header-custom">
             <div>
@@ -263,6 +304,50 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                         <button type="submit" class="btn btn-warning text-white"><i class="fas fa-save me-1"></i>Lưu lô hàng</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Thêm Kho Hàng (US-11) -->
+    <div class="modal fade" id="modalKhoHang" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow">
+                <form th:action="@{/seller/kho-hang/them}" method="post" th:object="${formKhoHang}">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-semibold"><i class="fas fa-warehouse me-2 text-primary"></i>Thêm Kho Hàng Mới</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Tên Kho <span class="text-danger">*</span></label>
+                                <input type="text" th:field="*{tenKho}" class="form-control" required placeholder="Kho Hà Nội">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                                <input type="text" th:field="*{diaChi}" class="form-control" required placeholder="Số 1 Đại Cồ Việt">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tỉnh / Thành phố <span class="text-danger">*</span></label>
+                                <input type="text" th:field="*{tinhThanh}" class="form-control" required placeholder="Hà Nội">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                <input type="text" th:field="*{sdtLienHe}" class="form-control" required placeholder="0988...">
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input type="checkbox" th:field="*{laKhoChinh}" class="form-check-input" id="laKhoChinh">
+                                    <label class="form-check-label fw-bold text-danger" for="laKhoChinh">Đặt làm Kho Chính</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Lưu kho hàng</button>
                     </div>
                 </form>
             </div>

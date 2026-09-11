@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${shop.tenGianHang} + ' - FlexShop'">Hồ Sơ Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f4f4; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .shop-header { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .product-card { background: #fff; border-radius: 8px; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .product-img { height: 200px; object-fit: cover; width: 100%; border-top-left-radius: 8px; border-top-right-radius: 8px; }
+        .mall-badge { background: #d32f2f; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .favorite-badge { background: #ff5722; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .us-badge { background: #e0e7ff; color: #4338ca; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="#"><i class="fas fa-shopping-cart me-2"></i>FlexShop Customer</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="mb-3 text-end">
+        <span class="us-badge">US-21: Hồ Sơ Shop</span>
+    </div>
+
+    <!-- Shop Profile Header -->
+    <div class="shop-header d-flex align-items-center">
+        <img src="https://ui-avatars.com/api/?name=Shop&background=random" class="rounded-circle me-4" width="80" height="80" alt="Shop Logo">
+        <div>
+            <h4 class="mb-1 fw-bold">
+                <span th:text="${shop.tenGianHang}">Tên Shop</span>
+                <span th:if="${shop.hangGianHang == 'MALL'}" class="mall-badge ms-2"><i class="fas fa-gem me-1"></i>MALL</span>
+                <span th:if="${shop.hangGianHang == 'YEU_THICH'}" class="favorite-badge ms-2"><i class="fas fa-thumbs-up me-1"></i>YÊU THÍCH</span>
+            </h4>
+            <div class="text-muted small">
+                <span class="me-3"><i class="fas fa-box me-1"></i> Sản phẩm: <strong th:text="${sanPhams.size()}">0</strong></span>
+                <span class="me-3"><i class="fas fa-star text-warning me-1"></i> Điểm phạt: <strong th:text="${shop.diemSaoQuaTa}">0</strong> / 12</span>
+                <span><i class="fas fa-map-marker-alt me-1"></i> Tham gia: 2026</span>
+            </div>
+        </div>
+        <div class="ms-auto text-end">
+            <button class="btn btn-outline-primary"><i class="fas fa-plus me-1"></i>Theo dõi</button>
+            <button class="btn btn-primary ms-2"><i class="fas fa-comment me-1"></i>Chat</button>
+        </div>
+    </div>
+
+    <!-- Shop Products -->
+    <h5 class="fw-bold mb-3">Sản phẩm của Shop</h5>
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+        <div th:if="${sanPhams.isEmpty()}" class="col-12 text-center text-muted py-5">
+            <i class="fas fa-box-open fa-3x mb-3 opacity-25"></i>
+            <p>Shop chưa có sản phẩm nào hoặc các sản phẩm đang bị ẩn/kiểm duyệt.</p>
+        </div>
+
+        <div class="col" th:each="sp : ${sanPhams}">
+            <div class="product-card h-100">
+                <img src="https://via.placeholder.com/200" class="product-img" alt="Product Image">
+                <div class="p-3">
+                    <h6 class="text-truncate mb-2" th:text="${sp.tenSanPham}">Tên Sản Phẩm</h6>
+                    <div class="text-danger fw-bold mb-2">₫<span th:text="${sp.giaGoc != null ? sp.giaGoc : 'Liên hệ'}"></span></div>
+                    <div class="d-flex justify-content-between align-items-center small text-muted">
+                        <span><i class="fas fa-star text-warning"></i> 5.0</span>
+                        <span>Đã bán <span th:text="${sp.tongDaBan != null ? sp.tongDaBan : 0}"></span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

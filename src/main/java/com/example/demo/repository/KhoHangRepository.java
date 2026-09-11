@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface KhoHangRepository extends JpaRepository<KhoHang, Long> {
+    java.util.List<KhoHang> findByMaGianHangAndDaXoaFalse(Long maGianHang);
 }
